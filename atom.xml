@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-04-24T16:29:39.992Z</updated>
+    <updated>2020-05-10T01:08:46.116Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -11,40 +11,49 @@
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
     <entry>
+        <title type="html"><![CDATA[开源跨平台软件]]></title>
+        <id>https://jwangkun.github.io/post/kai-yuan-kua-ping-tai-ruan-jian/</id>
+        <link href="https://jwangkun.github.io/post/kai-yuan-kua-ping-tai-ruan-jian/">
+        </link>
+        <updated>2020-04-24T16:31:41.000Z</updated>
+        <content type="html"><![CDATA[<p>由于我本人经常在Windws10 、Mac OS 、Ubuntu 等系统间来回切换，所以收藏常用软件，保持统一操作习惯，毕竟学习新东西需要花费时间和经历，为了以后查找方便，在此收藏。</p>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[前端技术选型]]></title>
         <id>https://jwangkun.github.io/post/qian-duan-ji-zhu-xuan-xing/</id>
         <link href="https://jwangkun.github.io/post/qian-duan-ji-zhu-xuan-xing/">
         </link>
         <updated>2020-04-24T15:26:06.000Z</updated>
-        <summary type="html"><![CDATA[<h1 id="引言">引言</h1>
+        <summary type="html"><![CDATA[<h2 id="引言">引言</h2>
 <p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
 ]]></summary>
-        <content type="html"><![CDATA[<h1 id="引言">引言</h1>
+        <content type="html"><![CDATA[<h2 id="引言">引言</h2>
 <p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
 <!-- more -->
 <figure data-type="image" tabindex="1"><img src="https://jwangkun.github.io/post-images/1587743121392.jpg" alt="" loading="lazy"></figure>
-<h1 id="技术选型介绍">技术选型介绍</h1>
+<h2 id="技术选型介绍">技术选型介绍</h2>
 <p>在项目的架构中，我们需要选择各种技术栈所对应的技术；在项目的开发中，我们需要选择各种工具库。技术选型是我们必然会碰到的，我们常常面临的不是单个技术的选型，而是对于一个项目所涉及的一整套技术、方案、规范或者产品的选型。我们需要仔细的去权衡各种技术、各种组合的利弊，做出取舍。</p>
-<p>#技术选型需要考虑的因素<br>
-项目因素 明确现在项目的规模、重要程度。 项目的需求（特别是非功能性需求）也会限制技术的选型</p>
+<h2 id="技术选型需要考虑的因素">技术选型需要考虑的因素</h2>
+<p>项目因素 明确现在项目的规模、重要程度。 项目的需求（特别是非功能性需求）也会限制技术的选型</p>
 <p>团队因素 考虑团队的因素，也就是人的因素，考虑团队人员的技术组成。 考虑招聘的因素，对于特别小众的技术，可能会因为招不到人而影响到对公司的业务支持。</p>
 <p>技术因素 技术特性考虑（易用性、可维护性、可扩展性、性能等）、技术成熟度、社区活跃度、架构匹配和演化等。 github上的star数，可以作为一个重要的参考。</p>
-<h1 id="如何进行技术选型">如何进行技术选型</h1>
+<h2 id="如何进行技术选型">如何进行技术选型</h2>
 <p>上面列出了很多技术选型需要考虑的因素，那么到底该如何进行技术选型呢？<br>
 首先明确选型的需求和目的，最好能列出必须要考虑的各种因素以及评判标准。寻找候选技术和产品。这时范围可以尽量的广一些，搜集尽可能多的候选技术和产品。<br>
 初步筛选。把一些由于各种限制无法选择或者明显不可能的技术或产品排除，筛选3个左右备选方案。</p>
 <p>做一些详细的调查和分析。可以列个技术选型分析表（小的不太重要的技术选型不一定要这么麻烦，而重要的技术选型则可能要反复各个步骤多次）<br>
 团队、技术成熟度、性能、架构一致性...</p>
 <p>可以咨询其他公司是否用过个技术或产品，可以求教些实践经验。</p>
-<h1 id="技术选型的注意点">技术选型的注意点</h1>
+<h2 id="技术选型的注意点">技术选型的注意点</h2>
 <ul>
 <li>一定要进行可行性分析，如果不太确定，做个Demo验证一下，如果项目进行到一半，发现原来设想的方案      不可选，那会是非常痛苦和浪费时间的事情。</li>
 <li>不要有思维定式，也不要赶时髦。</li>
 <li>随着业务发展，很多架构需要不断升级，所以一定要考虑未来如果替换某项技术，是否会很麻烦。可以选      择一些标准技术或产品，或者在应用中部署一个适配层，方便未来适配其他技术，自由插拔。</li>
-<li>架构应该尽可能统一，一个领域避免引入太多相同功能的技术产品。<br>
-##选型最后<br>
-当一个技术或产品选型后，下面要做的便是接入和推进。抓住时机，坚定地推进。</li>
+<li>架构应该尽可能统一，一个领域避免引入太多相同功能的技术产品。</li>
 </ul>
+<h2 id="选型最后">选型最后</h2>
+<p>当一个技术或产品选型后，下面要做的便是接入和推进。抓住时机，坚定地推进。</p>
 <p>参考：《技术选型的艺术》</p>
 ]]></content>
     </entry>
