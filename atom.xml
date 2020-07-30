@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-07-30T01:42:10.773Z</updated>
+    <updated>2020-07-30T01:42:45.956Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -16,8 +16,12 @@
         <link href="https://jwangkun.github.io/post/angular-huan-jing-da-jian/">
         </link>
         <updated>2020-07-30T01:09:36.000Z</updated>
+        <summary type="html"><![CDATA[<p>适用于Angular4.x、Angular5.x、Angular6.x、Angular7.x、Angular8.x、Angular9.x、Angular10.x，截止目前Angular最新版本</p>
+<figure data-type="image" tabindex="1"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-091916-0806.png" alt="20200730-091916-0806.png" loading="lazy"></figure>
+]]></summary>
         <content type="html"><![CDATA[<p>适用于Angular4.x、Angular5.x、Angular6.x、Angular7.x、Angular8.x、Angular9.x、Angular10.x，截止目前Angular最新版本</p>
 <figure data-type="image" tabindex="1"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-091916-0806.png" alt="20200730-091916-0806.png" loading="lazy"></figure>
+<!-- more -->
 <p>安装前需要先安装 node.js</p>
 <p>下载 node.js 链接地址：http://nodejs.cn/download/</p>
 <p>下载完，安装即可</p>
