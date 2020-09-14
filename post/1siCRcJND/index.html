@@ -1,22 +1,103 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://jwangkun.github.io</id>
-    <title>John Wong&apos;s Blog</title>
-    <updated>2020-09-14T09:00:43.127Z</updated>
-    <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://jwangkun.github.io"/>
-    <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
-    <subtitle>不忘初心</subtitle>
-    <logo>https://jwangkun.github.io/images/avatar.png</logo>
-    <icon>https://jwangkun.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
-    <entry>
-        <title type="html"><![CDATA[ MinIO 集群安装部署]]></title>
-        <id>https://jwangkun.github.io/post/1siCRcJND/</id>
-        <link href="https://jwangkun.github.io/post/1siCRcJND/">
-        </link>
-        <updated>2020-09-14T08:57:20.000Z</updated>
-        <content type="html"><![CDATA[<p>1 简介<br>
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> MinIO 集群安装部署 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" MinIO 集群安装部署 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" MinIO 集群安装部署"/>
+    <meta property="og:url" content="https://jwangkun.github.io/post/1siCRcJND/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/post/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+        </span>
+            <h1> MinIO 集群安装部署</h1>
+            <span class="meta">
+            	Posted on
+              2020-09-14，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>1 简介<br>
 MinIO 是为海量数据存储、人工智能、大数据分析而设计的，基于 Apache License v2.0 开源协议的分布式对象存储系统，它完全兼容 Amazon S3 接口，适合存储海量图片、视频、日志文件、</p>
 <p>备份数据和容器/虚拟机镜像等，单个对象的大小可以从几KB到最大5TB。</p>
 <p>MinIO 采用 Golang 语言实现，整个系统都运行在操作系统的用户态空间，客户端与服务器之间采用HTTP/HTTPS通信协议。</p>
@@ -190,111 +271,91 @@ firewall-cmd --reload<br>
 <p>存储桶名称不得包含大写字符或下划线</p>
 <p>存储桶名称必须以小写字母或数字开头</p>
 <p>存储桶名称必须是一系列一个或多个标签。相邻标签由单个句点（。）分隔。存储桶名称可以包含小写字母，数字和连字符。每个标签必须以小写字母或数字开头和结尾</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Angular 环境搭建]]></title>
-        <id>https://jwangkun.github.io/post/angular-huan-jing-da-jian/</id>
-        <link href="https://jwangkun.github.io/post/angular-huan-jing-da-jian/">
-        </link>
-        <updated>2020-07-30T01:09:36.000Z</updated>
-        <summary type="html"><![CDATA[<p>适用于Angular4.x、Angular5.x、Angular6.x、Angular7.x、Angular8.x、Angular9.x、Angular10.x，截止目前Angular最新版本</p>
-<figure data-type="image" tabindex="1"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-091916-0806.png" alt="20200730-091916-0806.png" loading="lazy"></figure>
-]]></summary>
-        <content type="html"><![CDATA[<p>适用于Angular4.x、Angular5.x、Angular6.x、Angular7.x、Angular8.x、Angular9.x、Angular10.x，截止目前Angular最新版本</p>
-<figure data-type="image" tabindex="1"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-091916-0806.png" alt="20200730-091916-0806.png" loading="lazy"></figure>
-<!-- more -->
-<p>安装前需要先安装 node.js</p>
-<p>下载 node.js 链接地址：http://nodejs.cn/download/</p>
-<p>下载完，安装即可</p>
-<p>检测是否安装成功，可以从终端输入</p>
-<pre><code> node -v 和 npm -v 
-</code></pre>
-<p>查看版本信息；</p>
-<figure data-type="image" tabindex="2"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-090325-0805.png" alt="20200730-090325-0805.png" loading="lazy"></figure>
-<p>其次，已安装 node.js 后便可以继续安装 angular cli 脚手架，具体命令行如下所示：</p>
-<p>1）全局安装 typescript 终端输入如下命令行：</p>
-<pre><code>npm install -g typescript
-</code></pre>
-<p>2）全局安装 angular cli 终端输入如下命令行：</p>
-<pre><code>npm install -g @angular/cli
 
-</code></pre>
-<p>3）校验，等待片刻待安装后，终端输入如下命令可进行验证：</p>
-<pre><code>ng version
-</code></pre>
-<p>此时若终端成功显示版本信息内容即安装成功，如下图所示：</p>
-<figure data-type="image" tabindex="3"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-094427-0806.png" alt="20200730-094427-0806.png" loading="lazy"></figure>
-<p>安装完Angular后，便可以创建项目，在终端 cd 到指定预创建文件夹的目录层级下后，执行命令：</p>
-<pre><code>ng new angularProject 
-</code></pre>
-<p>执行完成如上命令行后，终端会创建一个名为Angularproject的项目，其中需要等待片刻；</p>
-<p>注：其中首次终端可能会提示两个指令问题，第一个回复&quot;y&quot;，第二个箭头选择第一项 CSS 回车即可；</p>
-<p>最后，当项目创建完成后，终端 cd 到刚创建项目的目录层级下执行如下命令启动服务验证，若能成功访问终端内显示的地址即大功告成。</p>
-<pre><code>ng serve
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[开源跨平台软件]]></title>
-        <id>https://jwangkun.github.io/post/kai-yuan-kua-ping-tai-ruan-jian/</id>
-        <link href="https://jwangkun.github.io/post/kai-yuan-kua-ping-tai-ruan-jian/">
-        </link>
-        <updated>2020-04-24T16:31:41.000Z</updated>
-        <summary type="html"><![CDATA[<p>由于我本人经常在Windws10 、Mac OS 、Ubuntu 等系统间来回切换，所以收藏常用软件，保持统一操作习惯，毕竟学习新东西需要花费时间和经历，为了以后查找方便，在此收藏。<br>
-<img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-101237-0806.png" alt="20200730-101237-0806.png" loading="lazy"></p>
-]]></summary>
-        <content type="html"><![CDATA[<p>由于我本人经常在Windws10 、Mac OS 、Ubuntu 等系统间来回切换，所以收藏常用软件，保持统一操作习惯，毕竟学习新东西需要花费时间和经历，为了以后查找方便，在此收藏。<br>
-<img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-101237-0806.png" alt="20200730-101237-0806.png" loading="lazy"></p>
-<!-- more -->
-<h2 id="utools">uTools</h2>
-<p>下载地址：https://u.tools<br>
-支持平台：WINDOWS 、MACOS、LINUX<br>
-uTools是一个极简、插件化、跨平台的现代桌面软件。通过自由选配丰富的插件，打造你得心应手的工具集合。</p>
-<h2 id="vscode">Vscode</h2>
-<p>下载地址：https://code.visualstudio.com<br>
-支持平台：WINDOWS 、MACOS、LINUX<br>
-Visual Studio Code (简称 VSCode / VSC) 是一款免费开源的现代化轻量级代码编辑器，支持几乎所有主流的开发语言的语法高亮、智能代码补全、自定义热键、括号匹配、代码片段、代码对比 Diff、Git 等特性，支持插件扩展，并针对网页开发和云端应用开发做了优化。软件跨平台支持 Win、Mac 以及 Linux，运行流畅，可谓是微软的良心之作</p>
-<h2 id="wps">WPS</h2>
-<p>下载地址：https://www.wps.cn<br>
-支持平台：WINDOWS 、MACOS、LINUX<br>
-WPS是金山办公软件出品的office软件,可以实现办公软件常用的文字、表格、演示等多种功能,小巧易用且永久免费。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[前端技术选型]]></title>
-        <id>https://jwangkun.github.io/post/qian-duan-ji-zhu-xuan-xing/</id>
-        <link href="https://jwangkun.github.io/post/qian-duan-ji-zhu-xuan-xing/">
-        </link>
-        <updated>2020-04-24T15:26:06.000Z</updated>
-        <summary type="html"><![CDATA[<p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
-<!-- more -->
-<figure data-type="image" tabindex="1"><img src="https://jwangkun.github.io/post-images/1587743121392.jpg" alt="" loading="lazy"></figure>
-<h2 id="技术选型介绍">技术选型介绍</h2>
-<p>在项目的架构中，我们需要选择各种技术栈所对应的技术；在项目的开发中，我们需要选择各种工具库。技术选型是我们必然会碰到的，我们常常面临的不是单个技术的选型，而是对于一个项目所涉及的一整套技术、方案、规范或者产品的选型。我们需要仔细的去权衡各种技术、各种组合的利弊，做出取舍。</p>
-<h2 id="技术选型需要考虑的因素">技术选型需要考虑的因素</h2>
-<p>项目因素 明确现在项目的规模、重要程度。 项目的需求（特别是非功能性需求）也会限制技术的选型</p>
-<p>团队因素 考虑团队的因素，也就是人的因素，考虑团队人员的技术组成。 考虑招聘的因素，对于特别小众的技术，可能会因为招不到人而影响到对公司的业务支持。</p>
-<p>技术因素 技术特性考虑（易用性、可维护性、可扩展性、性能等）、技术成熟度、社区活跃度、架构匹配和演化等。 github上的star数，可以作为一个重要的参考。</p>
-<h2 id="如何进行技术选型">如何进行技术选型</h2>
-<p>上面列出了很多技术选型需要考虑的因素，那么到底该如何进行技术选型呢？<br>
-首先明确选型的需求和目的，最好能列出必须要考虑的各种因素以及评判标准。寻找候选技术和产品。这时范围可以尽量的广一些，搜集尽可能多的候选技术和产品。<br>
-初步筛选。把一些由于各种限制无法选择或者明显不可能的技术或产品排除，筛选3个左右备选方案。</p>
-<p>做一些详细的调查和分析。可以列个技术选型分析表（小的不太重要的技术选型不一定要这么麻烦，而重要的技术选型则可能要反复各个步骤多次）<br>
-团队、技术成熟度、性能、架构一致性...</p>
-<p>可以咨询其他公司是否用过个技术或产品，可以求教些实践经验。</p>
-<h2 id="技术选型的注意点">技术选型的注意点</h2>
-<ul>
-<li>一定要进行可行性分析，如果不太确定，做个Demo验证一下，如果项目进行到一半，发现原来设想的方案      不可选，那会是非常痛苦和浪费时间的事情。</li>
-<li>不要有思维定式，也不要赶时髦。</li>
-<li>随着业务发展，很多架构需要不断升级，所以一定要考虑未来如果替换某项技术，是否会很麻烦。可以选      择一些标准技术或产品，或者在应用中部署一个适配层，方便未来适配其他技术，自由插拔。</li>
-<li>架构应该尽可能统一，一个领域避免引入太多相同功能的技术产品。</li>
-</ul>
-<h2 id="选型最后">选型最后</h2>
-<p>当一个技术或产品选型后，下面要做的便是接入和推进。抓住时机，坚定地推进。</p>
-<p>参考：《技术选型的艺术》</p>
-]]></content>
-    </entry>
-</feed>
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/post/angular-huan-jing-da-jian/">
+              <span class="post-title">
+                Angular 环境搭建&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  </body>
+</html>
+
