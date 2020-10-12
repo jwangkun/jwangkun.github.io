@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-12T11:25:47.993Z</updated>
+    <updated>2020-10-12T11:32:39.871Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,218 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[ 使用easzup 快速部署一个 kubernetes的高可用集群]]></title>
+        <id>https://jwangkun.github.io/post/-6mGRsKnd/</id>
+        <link href="https://jwangkun.github.io/post/-6mGRsKnd/">
+        </link>
+        <updated>2020-10-12T11:28:43.000Z</updated>
+        <summary type="html"><![CDATA[<h3 id="下载文件">下载文件</h3>
+<ul>
+<li>通过 Rainbond 加速下载工具脚本 easzup  <code>2.1.0</code>版本，easzup 的不同 release 影响可以安装的 kubernetes 版本，具体对应信息可查看<a href="https://github.com/easzlab/kubeasz/releases">easzup版本</a></li>
+</ul>
+]]></summary>
+        <content type="html"><![CDATA[<h3 id="下载文件">下载文件</h3>
+<ul>
+<li>通过 Rainbond 加速下载工具脚本 easzup  <code>2.1.0</code>版本，easzup 的不同 release 影响可以安装的 kubernetes 版本，具体对应信息可查看<a href="https://github.com/easzlab/kubeasz/releases">easzup版本</a></li>
+</ul>
+<!-- more -->
+<pre><code class="language-bash">wget https://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/pkg/easzup &amp;&amp; chmod +x easzup
+</code></pre>
+<ul>
+<li>使用工具脚本下载其他文件，主要包括离线镜像，二进制文件等，保存在/etc/ansible目录中</li>
+</ul>
+<pre><code class="language-bash">./easzup -D
+</code></pre>
+<h3 id="配置免密钥登录">配置免密钥登录</h3>
+<pre><code class="language-bash">ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
+ssh-copy-id $IP  # $IP 为所有节点地址包括自身，按照提示输入 yes 和 root 密码
+</code></pre>
+<h3 id="在ansible控制端编排k8s安装">在ansible控制端编排k8s安装</h3>
+<ul>
+<li>容器化运行 kubeasz，详见<a href="https://github.com/easzlab/kubeasz/blob/master/docs/setup/docker_kubeasz.md">文档</a></li>
+</ul>
+<pre><code class="language-bash">./easzup -S
+</code></pre>
+<ul>
+<li>使用默认配置安装 aio 集群</li>
+</ul>
+<pre><code class="language-bash">docker exec -it kubeasz easzctl start-aio
+</code></pre>
+<ul>
+<li>完成后复制kubectl工具到<code>/usr/bin/kubectl</code></li>
+<li>需要扩展node节点时，配置对应节点免密钥登录后，执行以下操作添加node节点</li>
+</ul>
+<pre><code class="language-bash">docker exec -it kubeasz easzctl add-node $NEW_NODE_IP
+</code></pre>
+<h3 id="验证安装结果">验证安装结果</h3>
+<p><em><strong>如果提示kubectl: command not found，退出重新ssh登录一下，环境变量生效即可</strong></em></p>
+<pre><code class="language-bash">$ kubectl version                   # 验证集群版本     
+$ kubectl get componentstatus       # 验证 scheduler/controller-manager/etcd等组件状态
+$ kubectl get node                  # 验证节点就绪 (Ready) 状态
+$ kubectl get pod --all-namespaces  # 验证集群pod状态，默认已安装网络插件、coredns、metrics-server等
+$ kubectl get svc --all-namespaces  # 验证集群服务状态
+</code></pre>
+<p>完成Kubernetes的安装，<a href="../minimal_install/">开始Rainbond的安装</a></p>
+<h2 id="kubernetes的高可用安装">kubernetes的高可用安装</h2>
+<h3 id="高可用集群所需节点配置如下">高可用集群所需节点配置如下：</h3>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>数量</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>部署节点</td>
+<td>1</td>
+<td>运行ansible/easzctl脚本，可以复用master，建议使用独立节点</td>
+</tr>
+<tr>
+<td>etcd节点</td>
+<td>3</td>
+<td>注意etcd集群需要1,3,5,7...奇数个节点，一般复用master节点</td>
+</tr>
+<tr>
+<td>master节点</td>
+<td>2</td>
+<td>高可用集群至少2个master节点</td>
+</tr>
+<tr>
+<td>node节点</td>
+<td>3</td>
+<td>运行应用负载的节点，可根据需要提升机器配置/增加节点数</td>
+</tr>
+</tbody>
+</table>
+<h3 id="在各节点安装依赖工具">在各节点安装依赖工具</h3>
+<ul>
+<li>Ubuntu 16.04 请执行以下脚本：</li>
+</ul>
+<pre><code class="language-bash"># 文档中脚本默认均以root用户执行
+apt-get update &amp;&amp; apt-get upgrade -y &amp;&amp; apt-get dist-upgrade -y
+# 安装python2
+apt-get install python2.7
+# Ubuntu16.04可能需要配置以下软连接
+ln -s /usr/bin/python2.7 /usr/bin/python
+</code></pre>
+<ul>
+<li>CentOS 7 请执行以下脚本：</li>
+</ul>
+<pre><code class="language-bash"># 文档中脚本默认均以root用户执行
+yum update
+# 安装python
+yum install python -y
+</code></pre>
+<h3 id="配置免密码登录">配置免密码登录</h3>
+<ul>
+<li>在部署节点执行以下操作：</li>
+</ul>
+<pre><code class="language-bash">ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
+ssh-copy-id $IPs #$IPs为所有节点地址包括自身，按照提示输入yes 和root密码
+</code></pre>
+<h3 id="在ansible控制端编排k8s安装-2">在ansible控制端编排k8s安装</h3>
+<ul>
+<li>通过 Rainbond 加速下载工具脚本 easzup  <code>2.1.0</code>版本</li>
+</ul>
+<pre><code class="language-bash">wget https://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/pkg/easzup &amp;&amp; chmod +x easzup
+</code></pre>
+<ul>
+<li>使用脚本工具下载离线镜像等文件，文件保存在/etc/ansible目录中</li>
+</ul>
+<pre><code class="language-bash">./easzup -D
+</code></pre>
+<ul>
+<li>配置集群参数</li>
+</ul>
+<pre><code class="language-bash">cd /etc/ansible &amp;&amp; cp example/hosts.multi-node hosts
+</code></pre>
+<p><strong>将集群配置模版拷贝到指定位置后，必须按照模版格式，依照自己的节点规划修改/etc/ansible/hosts文件，否则无法安装集群，该文件中包括主机列表及部分集群配置</strong></p>
+<pre><code># etcd集群节点数应为1、3、5...等奇数个，不可设置为偶数
+# 变量NODE_NAME为etcd节点在etcd集群中的唯一名称，不可相同
+# etcd节点主机列表
+[etcd] 
+192.168.1.1   NODE_NAME=etcd1
+192.168.1.2   NODE_NAME=etcd2
+192.168.1.3   NODE_NAME=etcd3
+
+# kubernetes master节点主机列表
+[kube-master]
+192.168.1.1
+192.168.1.2
+
+# kubernetes node节点主机列表
+[kube-node]
+192.168.1.3
+192.168.1.4
+
+# [可选] harbor服务，docker 镜像仓库
+# 'NEW_INSTALL':设置为 yes 会安装harbor服务；设置为 no 不安装harbor服务
+# 'SELF_SIGNED_CERT':设置为 no 你需要将 harbor.pem 和 harbor-key.pem 文件放在 down 目录下
+[harbor]
+#192.168.1.8 HARBOR_DOMAIN=&quot;harbor.yourdomain.com&quot; NEW_INSTALL=no SELF_SIGNED_CERT=yes
+
+# [可选] 外部负载均衡节点主机列表
+[ex-lb]
+#192.168.1.6 LB_ROLE=backup EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
+#192.168.1.7 LB_ROLE=master EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
+
+# [可选] 集群ntp服务器列表
+[chrony]
+#192.168.1.1
+
+[all:vars]
+# --------- Main Variables ---------------
+# 可以选择的kubernetes集群运行时: docker, containerd
+CONTAINER_RUNTIME=&quot;docker&quot;
+
+# kubernetes网络插件: calico, flannel, kube-router, cilium, kube-ovn
+CLUSTER_NETWORK=&quot;flannel&quot;
+
+# kube-proxy服务代理模式: 'iptables' or 'ipvs'
+PROXY_MODE=&quot;ipvs&quot;
+
+# K8S Service CIDR, 不可与主机网络重叠
+SERVICE_CIDR=&quot;10.68.0.0/16&quot;
+
+# Cluster CIDR (Pod CIDR), 不可与主机网络重叠
+CLUSTER_CIDR=&quot;172.20.0.0/16&quot;
+
+# Node端口范围
+NODE_PORT_RANGE=&quot;20000-40000&quot;
+
+# 集群DNS域名
+CLUSTER_DNS_DOMAIN=&quot;cluster.local.&quot;
+
+# -------- Additional Variables (don't change the default value right now) ---
+# 二进制文件目录
+bin_dir=&quot;/opt/kube/bin&quot;
+
+# 证书文件目录
+ca_dir=&quot;/etc/kubernetes/ssl&quot;
+
+# 部署目录 (kubeasz工作空间)
+base_dir=&quot;/etc/ansible&quot;
+</code></pre>
+<ul>
+<li>容器化运行kubeasz</li>
+</ul>
+<pre><code class="language-bash">./easzup -S
+</code></pre>
+<ul>
+<li>使用ansible安装kubernetes集群</li>
+</ul>
+<pre><code class="language-bash">docker exec -it kubeasz ansible-playbook /etc/ansible/90.setup.yml
+</code></pre>
+<ul>
+<li>需要扩展node节点时，配置对应节点免密钥登录后，执行以下操作添加node节点</li>
+</ul>
+<pre><code class="language-bash">docker exec -it kubeasz easzctl add-node $NEW_NODE_IP
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[用Docker搭建Shadowsocks服务器]]></title>
         <id>https://jwangkun.github.io/post/3R1pSdQZa/</id>
@@ -496,6 +708,185 @@ NOTES:                                             ---------③---------
 <p>其他信息，包括后台地址，管理员账号等信息可以参考release 的 NOTES 部分。</p>
 <h1 id="写在最后">写在最后</h1>
 <p>Helm 的使用有点类似 ubuntu 的 apt 或者 RHEL 的 yum，极大的简化了部署一个应用的流程。对于使用者而言，使用 Helm 后不用需要了解 Kubernetes 的 yaml 语法并编写应用部署文件，也无需考虑应用的各种依赖，可以直接通过 Helm 下载并在 kubernetes 上安装需要的应用。 除此以外，Helm 还提供了 kubernetes 上的软件部署，删除，升级，回滚应用的强大功能。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[在K8S上部署eureka-server]]></title>
+        <id>https://jwangkun.github.io/post/XkCaqepMl/</id>
+        <link href="https://jwangkun.github.io/post/XkCaqepMl/">
+        </link>
+        <updated>2020-10-12T09:26:21.000Z</updated>
+        <content type="html"><![CDATA[<AdSenseTitle/>
+<p>本文假设您已经完成了 <a href="/learning/k8s-practice/ocp/">在Kubernetes上部署SpringCloud-OCP</a> 教程的前序步骤：</p>
+<ul>
+<li>
+<p><a href="/learning/k8s-practice/ocp/prepare.html">准备OCP的构建环境和部署环境</a></p>
+</li>
+<li>
+<p><a href="/learning/k8s-practice/ocp/build.html">构建docker镜像并推送到仓库</a></p>
+<blockquote>
+<p>也可以使用 <code>ocpsample/eureka-server:latest</code> 镜像</p>
+</blockquote>
+</li>
+<li>
+<p>理解 Spring Cloud Eureka 组件，请参考 <a href="https://www.jianshu.com/p/c18d140ad9f6">Eureka服务注册与发现</a></p>
+</li>
+</ul>
+<h2 id="理解eureka-server">理解eureka-server</h2>
+<p>本章节参考 eureka-server 的 <a href="https://gitee.com/owenwangwen/open-capacity-platform/tree/2.0.1/register-center/eureka-server">代码仓库</a>，并着重从容器化部署的角度来理解 Spring Cloud eureka-server 以及 OCP 中 eureka-server 的配置文件。</p>
+<p><code>open-capacity-platform/register-center/eureka-server/src/main/resources</code> 目录中包含了 eureka-server 的配置文件，如下所示：</p>
+<pre><code class="language-sh">├── application-slave0.yml
+├── application-slave1.yml
+├── application-slave2.yml
+├── application-slave3.yml
+├── application.yml
+└── bootstrap.yml
+</code></pre>
+<p>其中， <code>application-slave0.yml</code>，<code>application-slave1.yml</code>，<code>application-slave2.yml</code>，<code>application-slave3.yml</code> 为 spring boot 的 4 个 profile 配置，他们之间最重要的差异在于以下两个字段：</p>
+<ul>
+<li>server.port</li>
+<li>eureka.client.defaultZone</li>
+</ul>
+<p>而 <code>application.yml</code> 文件中则指定了 <code>application-slave0.yml</code> 为默认 profile。通过 <code>eureka.client.service-url.defaultZone</code> 字段不难看出：</p>
+<ul>
+<li>配置文件 slave0 为一组，在运行 eureka-server 单节点时使用（该文件中还有一些特定于测试环境的配置项）</li>
+<li>配置文件 slave1/slave2/slave3 为一组，在运行 eureka-server 高可用时使用，为了避免端口冲突，为每一个实例单独定义了 <code>server.port</code> 字段，通过 <code>--spring.profiles.active</code>启动参数为 eureka-server 的实例指定激活的配置文件</li>
+</ul>
+<h2 id="确定部署方案">确定部署方案</h2>
+<p>在 Kubernetes 中部署多个 eureka-server 的实例组成集群时，主要有如下考虑因素：</p>
+<ul>
+<li>每个 eureka-server 需要被赋予一个唯一的 id，通过字段 <code>eureka.instance.instance-id</code> 指定。OCP 中，该字段的配置为 <code>${spring.application.name}:${spring.cloud.client.ip-address}:${spring.application.instance_id:${server.port}}</code>
+<ul>
+<li>Kubernetes 为每一个 Pod 分配一个 IP 地址，此要求可以满足</li>
+</ul>
+</li>
+<li>eureka-server 的每一个实例需要知道集群中其他实例的地址和端口号，通过字段 <code>eureka.client.serviceUrl.defaultZone</code> 指定
+<ul>
+<li>请参考 <a href="/learning/k8s-intermediate/workload/wl-statefulset/#statefulset-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF">StatefulSet的使用场景</a> 以理解为何选择 StatefulSet 部署 eureka</li>
+<li>请参考 <a href="/learning/k8s-intermediate/workload/wl-statefulset/basics.html#%E7%A8%B3%E5%AE%9A%E7%9A%84%E7%BD%91%E7%BB%9C-id">StatefulSet稳定的网络ID</a> 以理解 StatefulSet 如何为其中的 Pod 分配 DNS name</li>
+</ul>
+</li>
+<li>eureka-server 的多个实例之间，不能存在端口冲突
+<ul>
+<li>请参考 <a href="/learning/k8s-intermediate/service/connecting.html#kubernetes-%E7%9A%84%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B">Kubernetes的网络模型</a> 以理解 Kubernetes 中如何避免端口冲突</li>
+</ul>
+</li>
+</ul>
+<p>我们在 Kubernetes 上部署 eureka-server 时：</p>
+<ul>
+<li>使用 StatefulSet 部署 eureka-server，副本数量为 3</li>
+<li>使用 OCP eureka-server 的 application-slave0.yml 这个 profile</li>
+<li>使用环境变量覆盖 <code>eureka.client.service-url.defaultZone</code> 取值，将其设置为：<pre><code>http://cloud-eureka-0.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-1.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-2.cloud-eureka.ocp.svc.cluster.local:1111/eureka
+</code></pre>
+::: tip<br>
+通过 cloud-eureka-0.cloud-eureka 也可以访问到对应的 POD，但是此处必须使用完整域名，否则 eureka-server 将不被认为是 available<br>
+:::</li>
+<li>使用环境变量覆盖 <code>eureka.instance.prefer-ip-address</code> 取值，将其设置为：<code>false</code></li>
+<li>为 eureka-server 创建 Ingress，并分配域名 <code>cloud-eureka.ocp.demo.kuboard.cn</code>
+<ul>
+<li>关于 Ingress，请参考 <a href="/learning/k8s-intermediate/service/ingress.html">Ingress通过互联网访问您的应用</a></li>
+<li>该域名由 <code>工作负载名</code>.<code>名称空间</code>.<code>集群名字</code>.<code>一级域名</code> 组成，这种命名规则下，只需要将 <code>*.demo.kuboard.cn</code> 的域名解析指向集群 Ingress Controller 的地址就可以，在测试环境中配置新的模块时非常方便。</li>
+</ul>
+</li>
+</ul>
+<h2 id="部署eureka-server">部署eureka-server</h2>
+<p>本教程将 eureka-server 及其他 OCP 组件部署到 <code>ocp</code> 名称空间，并假设您已经创建好了该名称空间，参考 <a href="/guide/cluster/namespace.html">创建名称空间</a></p>
+<ul>
+<li>
+<p>在 Kuboard 界面中进入 <code>ocp</code> 名称空间，并点击页头的按钮 <code>创建工作负载</code>，如下图所示：</p>
+<p>填写表单：</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>填写内容</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div style="min-width:70px;">服务类型</div></td>
+<td>StatefulSet</td>
+<td></td>
+</tr>
+<tr>
+<td>服务分层</td>
+<td>中间件</td>
+<td></td>
+</tr>
+<tr>
+<td>服务名称</td>
+<td>eureka</td>
+<td></td>
+</tr>
+<tr>
+<td>服务描述</td>
+<td>服务注册中心</td>
+<td></td>
+</tr>
+<tr>
+<td>副本数量</td>
+<td>3</td>
+<td></td>
+</tr>
+<tr>
+<td>容器名称</td>
+<td>eureka-server</td>
+<td></td>
+</tr>
+<tr>
+<td>镜像</td>
+<td>ocpsample/eureka-server:latest</td>
+<td>也可以使用自己构建的镜像</td>
+</tr>
+<tr>
+<td>抓取策略</td>
+<td>Always</td>
+<td></td>
+</tr>
+<tr>
+<td>环境变量</td>
+<td><div style="max-width: 600px;"><span style="color: blue;">eureka.client.service-url.defaultZone=</span>http://cloud-eureka-0.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-1.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-2.cloud-eureka.ocp.svc.cluster.local:1111/eureka</div> <div style="max-width: 600px;"><span style="color: blue;">eureka.instance.prefer-ip-address=</span>false</div></td>
+<td>填入 kuboard 时<br/>环境变量名后面不带 <code>=</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td>NodePort：<br />协议 <code>TCP</code> 服务端口 <code>1111</code>节点端口 <code>31111</code> 容器端口 <code>1111</code></td>
+<td>可从节点端口访问</td>
+</tr>
+<tr>
+<td>Ingress</td>
+<td>域名：cloud-eureka.ocp.demo.kuboard.cn<br />路由配置： 映射URL <code>/</code> 服务端口 <code>1111</code></td>
+<td>可通过域名访问</td>
+</tr>
+</tbody>
+</table>
+<figure data-type="image" tabindex="1"><img src="./eureka-server.assets/image-20190927104441574.png" alt="Kubernetes教程：在K8S中部署SpringCloud" loading="lazy"></figure>
+</li>
+<li>
+<p>点击 <strong>保存</strong> 按钮</p>
+</li>
+<li>
+<p>点击 <strong>应用</strong> 按钮</p>
+</li>
+<li>
+<p>点击 <strong>完成</strong> 按钮</p>
+<ul>
+<li>等待 eureka-server 完成部署</li>
+<li>根据您服务器到 hub.docker.com 的网速不同，等候的时间约 1-5 分钟</li>
+</ul>
+</li>
+</ul>
+<h2 id="查看部署结果">查看部署结果</h2>
+<SharingBlock>
+<p>按照上面的部署方式，有如下两种方式可以从浏览器访问 eureka-server 的界面：</p>
+<ul>
+<li>使用域名： <a href="http://cloud-eureka.ocp.demo.kuboard.cn/">http://cloud-eureka.ocp.demo.kuboard.cn/</a></li>
+<li>使用节点端口：http://${任意节点的IP地址}:31111</li>
+</ul>
+<p>eureka-server 界面如下图所示：</p>
+<figure data-type="image" tabindex="2"><img src="./eureka-server.assets/image-20190927140934092.png" alt="Kubernetes教程：在K8S部署SpringCloud服务注册中心Eureka-Server" loading="lazy"></figure>
+</SharingBlock>
 ]]></content>
     </entry>
     <entry>
