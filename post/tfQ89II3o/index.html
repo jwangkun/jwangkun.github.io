@@ -97,132 +97,197 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <p>安装要求<br>
-在开始之前，部署Kubernetes集群机器需要满足以下几个条件：<br>
-• 一台或多台机器，操作系统 CentOS7.x-86_x64<br>
-• 硬件配置：2GB或更多RAM，2个CPU或更多CPU，硬盘30GB或更多<br>
-• 集群中所有机器之间网络互通<br>
-• 可以访问外网，需要拉取镜像<br>
-• 禁止swap分区<br>
-学习目标</p>
+          <p><strong>安装要求</strong></p>
+<p>在开始之前，部署Kubernetes集群机器需要满足以下几个条件：</p>
+<p>• 一台或多台机器，操作系统 CentOS7.x-86_x64</p>
+<p>• 硬件配置：2GB或更多RAM，2个CPU或更多CPU，硬盘30GB或更多</p>
+<p>• 集群中所有机器之间网络互通</p>
+<p>• 可以访问外网，需要拉取镜像</p>
+<p>• 禁止swap分区</p>
+<p><strong>学习目标</strong></p>
 <ol>
-<li>在所有节点上安装Docker和kubeadm</li>
-<li>部署Kubernetes Master</li>
-<li>部署容器网络插件</li>
-<li>部署 Kubernetes Node，将节点加入Kubernetes集群中</li>
-<li>部署Dashboard Web页面，可视化查看Kubernetes资源<br>
-准备环境<br>
-kubernetes培训-kuberneters架构图.jpg<br>
-关闭防火墙：<br>
-$ systemctl stop firewalld<br>
-$ systemctl disable firewalld<br>
-$ iptables -F<br>
-关闭selinux：<br>
-$ sed -i &quot;s/^SELINUX=enforcing/SELINUX=disabled/g&quot; /etc/selinux/config<br>
-$ sed -i &quot;s/^SELINUX=permissive/SELINUX=disabled/g&quot; /etc/selinux/config<br>
-$ setenforce 0<br>
-$ cat /etc/selinux/config</li>
+<li>
+<p>在所有节点上安装Docker和kubeadm</p>
+</li>
+<li>
+<p>部署Kubernetes Master</p>
+</li>
+<li>
+<p>部署容器网络插件</p>
+</li>
+<li>
+<p>部署 Kubernetes Node，将节点加入Kubernetes集群中</p>
+</li>
+<li>
+<p>部署Dashboard Web页面，可视化查看Kubernetes资源</p>
+</li>
 </ol>
-<h1 id="this-file-controls-the-state-of-selinux-on-the-system">This file controls the state of SELinux on the system.</h1>
-<h1 id="selinux-can-take-one-of-these-three-values">SELINUX= can take one of these three values:</h1>
-<h1 id="enforcing-selinux-security-policy-is-enforced">enforcing - SELinux security policy is enforced.</h1>
-<h1 id="permissive-selinux-prints-warnings-instead-of-enforcing">permissive - SELinux prints warnings instead of enforcing.</h1>
-<h1 id="disabled-no-selinux-policy-is-loaded">disabled - No SELinux policy is loaded.</h1>
-<p>SELINUX=disabled</p>
-<h1 id="selinuxtype-can-take-one-of-three-two-values">SELINUXTYPE= can take one of three two values:</h1>
-<h1 id="targeted-targeted-processes-are-protected">targeted - Targeted processes are protected,</h1>
-<h1 id="minimum-modification-of-targeted-policy-only-selected-processes-are-protected">minimum - Modification of targeted policy. Only selected processes are protected.</h1>
-<h1 id="mls-multi-level-security-protection">mls - Multi Level Security protection.</h1>
-<p>SELINUXTYPE=targeted<br>
-关闭swap：<br>
-$ swapoff -a $ 临时<br>
-$ vim /etc/fstab $ 永久<br>
-$ sed -i 's/.<em>swap.</em>/#&amp;/' /etc/fstab<br>
-cat /etc/fstab</p>
-<h1 id=""></h1>
-<h1 id="etcfstab">/etc/fstab</h1>
-<h1 id="created-by-anaconda-on-mon-mar-4-172304-2019">Created by anaconda on Mon Mar  4 17:23:04 2019</h1>
-<h1 id="-2"></h1>
-<h1 id="accessible-filesystems-by-reference-are-maintained-under-devdisk">Accessible filesystems, by reference, are maintained under '/dev/disk'</h1>
-<h1 id="see-man-pages-fstab5-findfs8-mount8-andor-blkid8-for-more-info">See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info</h1>
-<h1 id="-3"></h1>
-<p>/dev/mapper/centos-root /                       xfs     defaults        0 0<br>
-UUID=3dd5660e-0905-4f1e-9fa3-9ce664d6eb94 /boot                   xfs     defaults        0 0<br>
-/dev/mapper/centos-home /home                   xfs     defaults        0 0<br>
-#/dev/mapper/centos-swap swap                    swap    defaults        0 0<br>
-将桥接的IPv4流量传递到iptables的链：<br>
-$ cat &gt; /etc/sysctl.d/k8s.conf &lt;&lt; EOF<br>
-net.bridge.bridge-nf-call-ip6tables = 1<br>
-net.bridge.bridge-nf-call-iptables = 1<br>
-EOF<br>
-$ sysctl --system<br>
-修改文件句柄限制<br>
-echo &quot;* soft nofile 65536&quot; &gt;&gt; /etc/security/limits.conf<br>
-echo &quot;* hard nofile 65536&quot; &gt;&gt; /etc/security/limits.conf<br>
-echo &quot;* soft nproc 65536&quot;  &gt;&gt; /etc/security/limits.conf<br>
-echo &quot;* hard nproc 65536&quot;  &gt;&gt; /etc/security/limits.conf<br>
-echo &quot;* soft  memlock  unlimited&quot;  &gt;&gt; /etc/security/limits.conf<br>
-echo &quot;* hard memlock  unlimited&quot;  &gt;&gt; /etc/security/limits.conf<br>
-所有节点安装Docker/kubeadm/kubelet<br>
-Kubernetes默认CRI（容器运行时）为Docker，因此先安装Docker。<br>
-安装Docker<br>
-$ wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo<br>
-$ yum -y install docker-ce-18.06.1.ce-3.el7<br>
-$ systemctl enable docker &amp;&amp; systemctl start docker<br>
-$ docker --version<br>
-Docker version 18.06.1-ce, build e68fc7a<br>
-添加阿里云YUM软件源<br>
-$ cat &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt; EOF<br>
-[kubernetes]<br>
-name=Kubernetes<br>
-baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64<br>
-enabled=1<br>
-gpgcheck=1<br>
-repo_gpgcheck=1<br>
-gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg<br>
-https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg<br>
-EOF<br>
-导入gpgkey文件<br>
-$ wget https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg<br>
-$ rpm --import yum-key.gpg<br>
-$ wget https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg<br>
-$ rpm --import rpm-package-key.gpg<br>
-安装kubeadm，kubelet和kubectl<br>
-由于版本更新频繁，这里指定版本号部署：<br>
-$ yum install -y kubelet-1.13.3 kubeadm-1.13.3 kubectl-1.13.3 kubernetes-cni-0.6.0<br>
-$ systemctl enable kubelet<br>
-部署Kubernetes Master<br>
-由于默认拉取镜像地址k8s.gcr.io国内无法访问，这里指定阿里云镜像仓库地址。<br>
-$ kubeadm init <br>
---apiserver-advertise-address=10.0.52.13 <br>
---image-repository registry.aliyuncs.com/google_containers <br>
---kubernetes-version v1.13.3 <br>
---service-cidr=10.1.0.0/16 <br>
---pod-network-cidr=10.244.0.0/16<br>
-使用kubectl工具：<br>
-mkdir -p $HOME/.kube<br>
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config<br>
-sudo chown <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>i</mi><mi>d</mi><mo>−</mo><mi>u</mi><mo>)</mo><mo>:</mo></mrow><annotation encoding="application/x-tex">(id -u):</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mord mathdefault">d</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">u</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">:</span></span></span></span>(id -g) <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>H</mi><mi>O</mi><mi>M</mi><mi>E</mi><mi mathvariant="normal">/</mi><mi mathvariant="normal">.</mi><mi>k</mi><mi>u</mi><mi>b</mi><mi>e</mi><mi mathvariant="normal">/</mi><mi>c</mi><mi>o</mi><mi>n</mi><mi>f</mi><mi>i</mi><mi>g</mi><mi mathvariant="normal">安</mi><mi mathvariant="normal">装</mi><mi>P</mi><mi>o</mi><mi>d</mi><mi mathvariant="normal">网</mi><mi mathvariant="normal">络</mi><mi mathvariant="normal">插</mi><mi mathvariant="normal">件</mi><mi mathvariant="normal">（</mi><mi>C</mi><mi>N</mi><mi>I</mi><mi mathvariant="normal">）</mi></mrow><annotation encoding="application/x-tex">HOME/.kube/config
-安装Pod网络插件（CNI）
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.08125em;">H</span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mord">/</span><span class="mord">.</span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="mord mathdefault">u</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord">/</span><span class="mord mathdefault">c</span><span class="mord mathdefault">o</span><span class="mord mathdefault">n</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord cjk_fallback">安</span><span class="mord cjk_fallback">装</span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span><span class="mord mathdefault">o</span><span class="mord mathdefault">d</span><span class="mord cjk_fallback">网</span><span class="mord cjk_fallback">络</span><span class="mord cjk_fallback">插</span><span class="mord cjk_fallback">件</span><span class="mord cjk_fallback">（</span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="mord mathdefault" style="margin-right:0.10903em;">N</span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="mord cjk_fallback">）</span></span></span></span> kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml<br>
-确保能够访问到quay.io这个registery。<br>
-加入Kubernetes Node<br>
-向集群添加新节点，执行在kubeadm init输出的kubeadm join命令：<br>
-kubernetes培训-kubeadmin.png<br>
-kubeadm join 10.0.52.13:6443 --token nqg5gl.zr84xb63z2ve7dbn --discovery-token-ca-cert-hash sha256:3e43b9c41dd74ba0f46c260d0e0b6663993cf4563c3852384916d76338d6202e<br>
-在master执行<br>
-$ kubectl get nodes<br>
-kubernetes培训-nodes.png<br>
-测试kubernetes集群<br>
-在Kubernetes集群中创建一个pod，验证是否正常运行：<br>
-$ kubectl create deployment nginx --image=nginx<br>
-$ kubectl expose deployment nginx --port=80 --type=NodePort<br>
-$ kubectl get pod,svc<br>
-访问地址：http://NodeIP:Port<br>
-部署 Dashboard<br>
-kubectl apply -f kubernetes-dashboard.yaml<br>
-kubectl apply -f admin-dashboard.yaml<br>
-访问地址：http://NodeIP:30001</p>
+<p>准备环境</p>
+<p>关闭防火墙：</p>
+<pre><code>$ systemctl stop firewalld
+
+$ systemctl disable firewalld
+
+$ iptables -F
+</code></pre>
+<p>关闭selinux：</p>
+<pre><code>$ sed -i &quot;s/^SELINUX=enforcing/SELINUX=disabled/g&quot; /etc/selinux/config
+
+$ sed -i &quot;s/^SELINUX=permissive/SELINUX=disabled/g&quot; /etc/selinux/config
+
+$ setenforce 0
+</code></pre>
+<p>$ cat /etc/selinux/config</p>
+<pre><code># **This file controls the state of SELinux on the system.**
+# **SELINUX= can take one of these three values:**
+#     **enforcing - SELinux security policy is enforced.**
+#     **permissive - SELinux prints warnings instead of enforcing.**
+#     **disabled - No SELinux policy is loaded.**
+SELINUX=disabled
+# **SELINUXTYPE= can take one of three two values:**
+#     **targeted - Targeted processes are protected,**
+#     **minimum - Modification of targeted policy. Only selected processes are protected.**
+#     **mls - Multi Level Security protection.**
+SELINUXTYPE=targeted
+</code></pre>
+<p>关闭swap：</p>
+<pre><code>$ swapoff -a $ 临时
+
+$ vim /etc/fstab $ 永久
+
+$ sed -i 's/.**swap.**/#&amp;/' /etc/fstab
+</code></pre>
+<p>cat /etc/fstab</p>
+<pre><code># **/etc/fstab**
+# **Created by anaconda on Mon Mar  4 17:23:04 2019**
+# **Accessible filesystems, by reference, are maintained under '/dev/disk'**
+# **See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info**
+dev/mapper/centos-root /                       xfs     defaults        0 0
+UUID=3dd5660e-0905-4f1e-9fa3-9ce664d6eb94 /boot                   xfs     defaults        0 0
+dev/mapper/centos-home /home                   xfs     defaults        0 0
+#**/dev/mapper/centos-swap swap                    swap    defaults        0 0
+</code></pre>
+<p>将桥接的IPv4流量传递到iptables的链：</p>
+<pre><code>$ cat &gt; /etc/sysctl.d/k8s.conf &lt;&lt; EOF
+
+net.bridge.bridge-nf-call-ip6tables = 1
+
+net.bridge.bridge-nf-call-iptables = 1
+
+EOF
+</code></pre>
+<pre><code>$ sysctl --system
+</code></pre>
+<p>修改文件句柄限制</p>
+<pre><code>echo &quot;* soft nofile 65536&quot; &gt;&gt; /etc/security/limits.conf
+
+echo &quot;* hard nofile 65536&quot; &gt;&gt; /etc/security/limits.conf
+
+echo &quot;* soft nproc 65536&quot;  &gt;&gt; /etc/security/limits.conf
+
+echo &quot;* hard nproc 65536&quot;  &gt;&gt; /etc/security/limits.conf
+
+echo &quot;* soft  memlock  unlimited&quot;  &gt;&gt; /etc/security/limits.conf
+
+echo &quot;* hard memlock  unlimited&quot;  &gt;&gt; /etc/security/limits.conf
+</code></pre>
+<p>所有节点安装Docker/kubeadm/kubelet</p>
+<p>Kubernetes默认CRI（容器运行时）为Docker，因此先安装Docker。</p>
+<p>安装Docker</p>
+<pre><code>$ wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo
+
+$ yum -y install docker-ce-18.06.1.ce-3.el7
+
+$ systemctl enable docker &amp;&amp; systemctl start docker
+
+$ docker --version
+
+Docker version 18.06.1-ce, build e68fc7a
+</code></pre>
+<p>添加阿里云YUM软件源</p>
+<pre><code>$ cat &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt; EOF
+
+[kubernetes]
+
+name=Kubernetes
+
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64
+
+enabled=1
+
+gpgcheck=1
+
+repo_gpgcheck=1
+
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
+
+https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+
+EOF
+</code></pre>
+<p>导入gpgkey文件</p>
+<pre><code>$ wget https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
+
+$ rpm --import yum-key.gpg
+
+$ wget https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+
+$ rpm --import rpm-package-key.gpg
+</code></pre>
+<p>安装kubeadm，kubelet和kubectl</p>
+<p>由于版本更新频繁，这里指定版本号部署：</p>
+<pre><code>$ yum install -y kubelet-1.13.3 kubeadm-1.13.3 kubectl-1.13.3 kubernetes-cni-0.6.0
+
+$ systemctl enable kubelet
+</code></pre>
+<p>部署Kubernetes Master</p>
+<p>由于默认拉取镜像地址k8s.gcr.io国内无法访问，这里指定阿里云镜像仓库地址。</p>
+<pre><code>$ kubeadm init \
+
+--apiserver-advertise-address=10.0.52.13 \
+
+--image-repository registry.aliyuncs.com/google_containers \
+
+--kubernetes-version v1.13.3 \
+
+--service-cidr=10.1.0.0/16 \
+
+--pod-network-cidr=10.244.0.0/16
+</code></pre>
+<p>使用kubectl工具：</p>
+<pre><code>mkdir -p $HOME/.kube
+
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+</code></pre>
+<p>安装Pod网络插件（CNI）</p>
+<pre><code>$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml
+</code></pre>
+<p>确保能够访问到quay.io这个registery。</p>
+<p>加入Kubernetes Node</p>
+<p>向集群添加新节点，执行在kubeadm init输出的kubeadm join命令：</p>
+<p>kubernetes培训-kubeadmin.png</p>
+<pre><code>kubeadm join 10.0.52.13:6443 --token nqg5gl.zr84xb63z2ve7dbn --discovery-token-ca-cert-hash sha256:3e43b9c41dd74ba0f46c260d0e0b6663993cf4563c3852384916d76338d6202e
+</code></pre>
+<p>在master执行</p>
+<pre><code>$ kubectl get nodes
+</code></pre>
+<p>测试kubernetes集群</p>
+<p>在Kubernetes集群中创建一个pod，验证是否正常运行：</p>
+<pre><code>$ kubectl create deployment nginx --image=nginx
+
+$ kubectl expose deployment nginx --port=80 --type=NodePort
+
+$ kubectl get pod,svc
+</code></pre>
+<p>访问地址：http://NodeIP:Port</p>
+<p>部署 Dashboard</p>
+<pre><code>kubectl apply -f kubernetes-dashboard.yaml
+
+kubectl apply -f admin-dashboard.yaml
+</code></pre>
+<p>访问地址：http://NodeIP:30001</p>
 
           
           <p class="next-post">下一篇：
