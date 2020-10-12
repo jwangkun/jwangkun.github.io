@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>Kubernetes Secrets 密钥管理 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes Secrets 密钥管理 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="Kubernetes Secrets 密钥管理"/>
+    <meta property="og:url" content="https://jwangkun.github.io/post/sARQMqmyQ/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,114 +71,134 @@
       </div>
     </div>
   </nav>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-            <h1>John Wong&#39;s Blog</h1>
-            <span class="subheading">不忘初心</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/tag/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Kubernetes Secrets 密钥管理</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，3 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/1siCRcJND/">
-            <h2 class="post-title">
-               MinIO 集群安装部署
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-09-14</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/angular-huan-jing-da-jian/">
-            <h2 class="post-title">
-              Angular 环境搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>适用于Angular4.x、Angular5.x、Angular6.x、Angular7.x、Angular8.x、Angular9.x、Angular10.x，截止目前Angular最新版本</p>
-<figure data-type="image" tabindex="1"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-091916-0806.png" alt="20200730-091916-0806.png" loading="lazy"></figure>
 
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-07-30</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/kai-yuan-kua-ping-tai-ruan-jian/">
-            <h2 class="post-title">
-              开源跨平台软件
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>由于我本人经常在Windws10 、Mac OS 、Ubuntu 等系统间来回切换，所以收藏常用软件，保持统一操作习惯，毕竟学习新东西需要花费时间和经历，为了以后查找方便，在此收藏。<br>
-<img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-101237-0806.png" alt="20200730-101237-0806.png" loading="lazy"></p>
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Secrets是一个包含敏感数据的对象，例如我们常用的密码，令牌或密钥等, 我们编写yaml如果直接明文这些信息则会将我们的敏感信息暴漏在我们的脚本中; 所以将其放置在Secret对象中可以更好地控制它的使用方式，并降低意外暴露的风险。</p>
+<p>Pod可以引用我们事先创建好的Secrets键值对到环境变量, 通过获取环境变量的键值对动态更新我们Pod的环境配置, 从而实现动态配置更新.</p>
+<ol>
+<li>创建一个secret</li>
+</ol>
+<p># kubectl create secret generic secret-demo --from-literal='password=countonme'</p>
+<ol start="2">
+<li>查看创建好的secret</li>
+</ol>
+<p># kubectl get secret secret-demo</p>
+<pre><code class="language-bsh">NAME          TYPE      DATA      AGE
+secret-demo   Opaque    1         13s
+</code></pre>
+<p>3.创建一个Pod并引用这个secret</p>
+<p># vi secret-env-pod.yaml</p>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: httpd-pod
+spec:
+  containers:
+  - image: httpd
+    name: httpd
+    imagePullPolicy: Always
+    env:
+    - name: PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: secret-demo
+          key: password
+</code></pre>
+<p># kubectl create -f secret-env-pod.yaml</p>
+<p>4.查看secret</p>
+<p># kubectl describe secret</p>
+<p>5.查看变量是否引入Pod</p>
+<p># kubectl exec -ti httpd-pod env</p>
+<pre><code class="language-bsh">PATH=/usr/local/apache2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=httpd-pod
+TERM=xterm
+PASSWORD=countonme
+KUBERNETES_SERVICE_PORT_HTTPS=443
+KUBERNETES_PORT=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+KUBERNETES_PORT_443_TCP_PORT=443
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+KUBERNETES_SERVICE_HOST=10.96.0.1
+KUBERNETES_SERVICE_PORT=443
+HTTPD_PREFIX=/usr/local/apache2
+NGHTTP2_VERSION=1.18.1-1
+OPENSSL_VERSION=1.0.2l-1~bpo8+1
+HTTPD_VERSION=2.4.29
+HTTPD_SHA256=777753a5a25568a2a27428b2214980564bc1c38c1abf9ccc7630b639991f7f00
+HTTPD_PATCHES=
+APACHE_DIST_URLS=https://www.apache.org/dyn/closer.cgi?action=download&amp;filename=
+HOME=/root
+</code></pre>
+<p>可以看到Pod的环境变量里已经引入一组键值对PASSWORD=countonme</p>
+<p>6.向Pod挂载目录写入secret文件.</p>
+<p># vi secret-vol-pod.yaml</p>
+<pre><code class="language-bsh">apiVersion: v1
+kind: Pod
+metadata:
+  name: httpd-pod-secret-vol
+spec:
+  containers:
+  - image: httpd
+    name: httpd
+    imagePullPolicy: Always
+    volumeMounts:
+    - name: secret
+      mountPath: &quot;/mnt&quot;
+      readOnly: true
+  volumes:
+  - name: secret
+    secret:
+      secretName: secret-demo
+</code></pre>
+<p># kubectl create -f secret-vol-pod.yaml</p>
+<p># kubectl exec -it httpd-pod-secret-vol cat /mnt/password</p>
+<pre><code class="language-bsh">countonme
+</code></pre>
+<p>可以看到该Pod下面有一个文件名为password, 内容为countonme的文本文件.</p>
 
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-04-25</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/qian-duan-ji-zhu-xuan-xing/">
-            <h2 class="post-title">
-              前端技术选型
-            </h2>
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/post/oVB0pVA68/">
+              <span class="post-title">
+                Kubernetes之Pod, Replicaset, Deployment, Label, Service&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              <p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-04-24</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
+          </p>
+        
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://jwangkun.github.io/">&larr; 上一页</a>
-        
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -243,3 +269,4 @@
   })(this));</script>
   </body>
 </html>
+
