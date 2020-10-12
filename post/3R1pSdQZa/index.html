@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>用Docker搭建Shadowsocks服务器 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="用Docker搭建Shadowsocks服务器 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="用Docker搭建Shadowsocks服务器"/>
+    <meta property="og:url" content="https://jwangkun.github.io/post/3R1pSdQZa/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,169 +71,81 @@
       </div>
     </div>
   </nav>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-            <h1>John Wong&#39;s Blog</h1>
-            <span class="subheading">不忘初心</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+        </span>
+            <h1>用Docker搭建Shadowsocks服务器</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/3R1pSdQZa/">
-            <h2 class="post-title">
-              用Docker搭建Shadowsocks服务器
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-12</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/NOhi3BQeN/">
-            <h2 class="post-title">
-              Kubernetes 部署 Wordpress+MySQL
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-12</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/tfQ89II3o/">
-            <h2 class="post-title">
-              kubeadmin 快速部署k8s集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-09-15</span>
-             <span>,</span>
-             <span class="post-stats">6 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/1siCRcJND/">
-            <h2 class="post-title">
-               MinIO 集群安装部署
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-09-14</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/angular-huan-jing-da-jian/">
-            <h2 class="post-title">
-              Angular 环境搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>适用于Angular4.x、Angular5.x、Angular6.x、Angular7.x、Angular8.x、Angular9.x、Angular10.x，截止目前Angular最新版本</p>
-<figure data-type="image" tabindex="1"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-091916-0806.png" alt="20200730-091916-0806.png" loading="lazy"></figure>
 
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-07-30</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/kai-yuan-kua-ping-tai-ruan-jian/">
-            <h2 class="post-title">
-              开源跨平台软件
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>由于我本人经常在Windws10 、Mac OS 、Ubuntu 等系统间来回切换，所以收藏常用软件，保持统一操作习惯，毕竟学习新东西需要花费时间和经历，为了以后查找方便，在此收藏。<br>
-<img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-101237-0806.png" alt="20200730-101237-0806.png" loading="lazy"></p>
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>安装</p>
+<p>1、首先更新包信息</p>
+<pre><code>sudo apt-get update
+</code></pre>
+<p>2、安装ca证书</p>
+<pre><code>sudo apt-get install apt-transport-https ca-certificates
+</code></pre>
+<p>3、获取并安装最新版的docker</p>
+<p>Docker官方为简化安装流程，提供了一套安装脚本，Ubuntu可以直接使用这套脚本安装</p>
+<p>这个安装起来比较方便</p>
+<pre><code>wget -qO- https://get.docker.com/ | sh
+</code></pre>
+<p>或者直接apt安装</p>
+<pre><code>sudo apt-get install docker.io
+</code></pre>
+<p>4、通过docker安装shadowsocks</p>
+<p>安装的过程非常简单，只需要一个命令就可以，命令中有两个参数可以自修改，-p是设置shadowsocks的服务器端口号，-k是设置自己的密码</p>
+<p>命令：</p>
+<pre><code>docker run -d --name shadowsocks -p 12306:12306 oddrationale/docker-shadowsocks -s 0.0.0.0 -p 12306 -k 0000 -m aes-256-cfb
+</code></pre>
+<p>使用docker ps来来查看是否安装成功：</p>
+<pre><code>  docker ps                                                                                                                   
+</code></pre>
+<pre><code>CONTAINER ID        IMAGE                             COMMAND                CREATED                  STATUS              PORTS                            NAMES
 
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-04-25</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/qian-duan-ji-zhu-xuan-xing/">
-            <h2 class="post-title">
-              前端技术选型
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
+1016c8cc0ce4        oddrationale/docker-shadowsocks   &quot;/usr/local/bin/ssse   Less than a second ago   Up 22 seconds       104.130.22.24:12306-&gt;12306/tcp   2ede2591-1ec0-4c2b-a3ef-59697ff02ba7-n1/shadowsocks   
 
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-04-24</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
+b47dd901c3dd        carina/consul                     &quot;/bin/consul agent -   5 hours ago              Up 5 hours                                           2ede2591-1ec0-4c2b-a3ef-59697ff02ba7-n1/carina-svcd
+</code></pre>
+<p>可以看到shadowsocks服务已经在运行了。</p>
+<p>6、使用shadowsocks连接服务器</p>
+<p>下载对应的客户端，配置相应的参数即可使用</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/post/NOhi3BQeN/">
+              <span class="post-title">
+                Kubernetes 部署 Wordpress+MySQL&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -298,3 +216,4 @@
   })(this));</script>
   </body>
 </html>
+

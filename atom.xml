@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-12T11:14:39.262Z</updated>
+    <updated>2020-10-12T11:20:35.647Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,46 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[用Docker搭建Shadowsocks服务器]]></title>
+        <id>https://jwangkun.github.io/post/3R1pSdQZa/</id>
+        <link href="https://jwangkun.github.io/post/3R1pSdQZa/">
+        </link>
+        <updated>2020-10-12T11:17:13.000Z</updated>
+        <content type="html"><![CDATA[<p>安装</p>
+<p>1、首先更新包信息</p>
+<pre><code>sudo apt-get update
+</code></pre>
+<p>2、安装ca证书</p>
+<pre><code>sudo apt-get install apt-transport-https ca-certificates
+</code></pre>
+<p>3、获取并安装最新版的docker</p>
+<p>Docker官方为简化安装流程，提供了一套安装脚本，Ubuntu可以直接使用这套脚本安装</p>
+<p>这个安装起来比较方便</p>
+<pre><code>wget -qO- https://get.docker.com/ | sh
+</code></pre>
+<p>或者直接apt安装</p>
+<pre><code>sudo apt-get install docker.io
+</code></pre>
+<p>4、通过docker安装shadowsocks</p>
+<p>安装的过程非常简单，只需要一个命令就可以，命令中有两个参数可以自修改，-p是设置shadowsocks的服务器端口号，-k是设置自己的密码</p>
+<p>命令：</p>
+<pre><code>docker run -d --name shadowsocks -p 12306:12306 oddrationale/docker-shadowsocks -s 0.0.0.0 -p 12306 -k 0000 -m aes-256-cfb
+</code></pre>
+<p>使用docker ps来来查看是否安装成功：</p>
+<pre><code>  docker ps                                                                                                                   
+</code></pre>
+<pre><code>CONTAINER ID        IMAGE                             COMMAND                CREATED                  STATUS              PORTS                            NAMES
+
+1016c8cc0ce4        oddrationale/docker-shadowsocks   &quot;/usr/local/bin/ssse   Less than a second ago   Up 22 seconds       104.130.22.24:12306-&gt;12306/tcp   2ede2591-1ec0-4c2b-a3ef-59697ff02ba7-n1/shadowsocks   
+
+b47dd901c3dd        carina/consul                     &quot;/bin/consul agent -   5 hours ago              Up 5 hours                                           2ede2591-1ec0-4c2b-a3ef-59697ff02ba7-n1/carina-svcd
+</code></pre>
+<p>可以看到shadowsocks服务已经在运行了。</p>
+<p>6、使用shadowsocks连接服务器</p>
+<p>下载对应的客户端，配置相应的参数即可使用</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Kubernetes 部署 Wordpress+MySQL]]></title>
         <id>https://jwangkun.github.io/post/NOhi3BQeN/</id>
