@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-12T12:12:52.795Z</updated>
+    <updated>2020-10-12T12:46:53.321Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,102 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[搭建私有Charts仓库]]></title>
+        <id>https://jwangkun.github.io/post/j2GK2Y38c/</id>
+        <link href="https://jwangkun.github.io/post/j2GK2Y38c/">
+        </link>
+        <updated>2020-10-12T12:39:06.000Z</updated>
+        <content type="html"><![CDATA[<p>在 centos 上用 nginx 镜像创建一个容器，名字为 c1</p>
+<pre><code>[root@vms12 ~]# docker run -dit --name=c1 -p 8080:80 -v /data:/usr/share/nginx/html/charts  docker.io/nginx 
+</code></pre>
+<pre><code>ca08a2ce9b8e910ed71f458fa3c7dd53843bf50e5bb92c089fdacf7cd65a1657 
+</code></pre>
+<p>在 master 上自定义一个 chart：</p>
+<pre><code>[root@vms10 ~]# mkdir mychar 
+
+[root@vms10 ~]# 
+
+[root@vms10 ~]# cd mychar/ 
+
+[root@vms10 mychar]# helm create chart1 
+</code></pre>
+<pre><code>Creating chart1 
+</code></pre>
+<pre><code>[root@vms10 mychar]# cp -r ../mysql . 
+
+[root@vms10 mychar]# 
+
+[root@vms10 mychar]# ls 
+</code></pre>
+<pre><code>chart1 mysql 
+</code></pre>
+<p>对这两个 chart 进行打包：</p>
+<pre><code>[root@vms10 mychar]# **helm package chart1** 
+</code></pre>
+<pre><code>Successfully packaged chart and saved it to: /root/mychar/chart1-0.1.0.tgz 
+</code></pre>
+<p>[root@vms10 mychar]# h<strong>elm package mysql/</strong></p>
+<pre><code>Successfully packaged chart and saved it to: /root/mychar/mysql-1.6.4.tgz 
+</code></pre>
+<pre><code>[root@vms10 mychar]# ls 
+</code></pre>
+<pre><code>chart1 chart1-0.1.0.tgz mysql mysql-1.6.4.tgz 
+</code></pre>
+<p>给当前目录下的两个包建立索引文件，并指定私有仓库地址：</p>
+<pre><code>[root@vms10 mychar]# helm repo **index** . --url **http://192.168.26.12:8080/charts** 
+</code></pre>
+<pre><code>[root@vms10 mychar]# ls 
+</code></pre>
+<pre><code>chart1 chart1-0.1.0.tgz index.yaml mysql mysql-1.6.4.tgz 
+</code></pre>
+<p>把当前目录下 index.yaml 和后缀为 tgz 的包全部拷贝 192.168.26.12 的/data 目录里（请理解</p>
+<p>前面 c1 容器数据卷的设置）：</p>
+<pre><code>[root@vms10 mychar]# scp index.yaml *.tgz 192.168.26.12:/data 
+</code></pre>
+<p>切换到 vms12 上：</p>
+<pre><code>[root@vms12 ~]# **ls /data/** 
+</code></pre>
+<pre><code>index.yaml mychartxx-0.1.0.tgz mysql-1.6.2.tgz 
+</code></pre>
+<pre><code>[root@vms12 ~]# docker exec -it c1 
+
+&gt; **ls /usr/share/nginx/html/charts** 
+</code></pre>
+<pre><code>index.yaml mychartxx-0.1.0.tgz mysql-1.6.2.tgz 
+</code></pre>
+<p>切换到 master 上，添加 http://192.168.26.12:8080/charts 作为仓库：</p>
+<pre><code>[root@vms10 mychar]# **helm repo add myrepo http://192.168.26.12:8080/charts** 
+</code></pre>
+<pre><code>&quot;myrepo&quot; has been added to your repositories 
+</code></pre>
+<pre><code>[root@vms10 mychar]# helm repo list 
+</code></pre>
+<p>搜索 mysql 的 chart：</p>
+<p>[root@vms10 mychar]# helm search repo mysql</p>
+<p>除了在阿里云里可以找到 mysql 的仓库之外，在我们自定义的仓库里也能找到 mysql。</p>
+<p>查询 chart1：</p>
+<p>[root@vms10 mychar]# helm search repo chart1</p>
+<pre><code>NAME 
+
+CHART VERSION APP VERSION DESCRIPTION 
+
+myrepo/chart1 
+
+0.1.0 
+
+1.16.0 
+
+A Helm chart for Kubernetes 
+</code></pre>
+<p>私有仓库配置完毕。</p>
+<p>删除本地私有仓库地址：</p>
+<pre><code>[root@vms10 mychar]# **helm repo remove myrepo** 
+</code></pre>
+<pre><code>&quot;myrepo&quot; has been removed from your repositories 
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Kubernetes Config Maps]]></title>
         <id>https://jwangkun.github.io/post/apGBI-lqF/</id>
@@ -1648,205 +1744,6 @@ NOTES:                                             ---------③---------
 <p>eureka-server 界面如下图所示：</p>
 <figure data-type="image" tabindex="2"><img src="./eureka-server.assets/image-20190927140934092.png" alt="Kubernetes教程：在K8S部署SpringCloud服务注册中心Eureka-Server" loading="lazy"></figure>
 </SharingBlock>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[kubeadmin 快速部署k8s集群]]></title>
-        <id>https://jwangkun.github.io/post/tfQ89II3o/</id>
-        <link href="https://jwangkun.github.io/post/tfQ89II3o/">
-        </link>
-        <updated>2020-09-15T01:40:21.000Z</updated>
-        <content type="html"><![CDATA[<p><strong>安装要求</strong></p>
-<p>在开始之前，部署Kubernetes集群机器需要满足以下几个条件：</p>
-<p>• 一台或多台机器，操作系统 CentOS7.x-86_x64</p>
-<p>• 硬件配置：2GB或更多RAM，2个CPU或更多CPU，硬盘30GB或更多</p>
-<p>• 集群中所有机器之间网络互通</p>
-<p>• 可以访问外网，需要拉取镜像</p>
-<p>• 禁止swap分区</p>
-<p><strong>学习目标</strong></p>
-<ol>
-<li>
-<p>在所有节点上安装Docker和kubeadm</p>
-</li>
-<li>
-<p>部署Kubernetes Master</p>
-</li>
-<li>
-<p>部署容器网络插件</p>
-</li>
-<li>
-<p>部署 Kubernetes Node，将节点加入Kubernetes集群中</p>
-</li>
-<li>
-<p>部署Dashboard Web页面，可视化查看Kubernetes资源</p>
-</li>
-</ol>
-<p>准备环境</p>
-<p>关闭防火墙：</p>
-<pre><code>$ systemctl stop firewalld
-
-$ systemctl disable firewalld
-
-$ iptables -F
-</code></pre>
-<p>关闭selinux：</p>
-<pre><code>$ sed -i &quot;s/^SELINUX=enforcing/SELINUX=disabled/g&quot; /etc/selinux/config
-
-$ sed -i &quot;s/^SELINUX=permissive/SELINUX=disabled/g&quot; /etc/selinux/config
-
-$ setenforce 0
-</code></pre>
-<p>$ cat /etc/selinux/config</p>
-<pre><code># **This file controls the state of SELinux on the system.**
-# **SELINUX= can take one of these three values:**
-#     **enforcing - SELinux security policy is enforced.**
-#     **permissive - SELinux prints warnings instead of enforcing.**
-#     **disabled - No SELinux policy is loaded.**
-SELINUX=disabled
-# **SELINUXTYPE= can take one of three two values:**
-#     **targeted - Targeted processes are protected,**
-#     **minimum - Modification of targeted policy. Only selected processes are protected.**
-#     **mls - Multi Level Security protection.**
-SELINUXTYPE=targeted
-</code></pre>
-<p>关闭swap：</p>
-<pre><code>$ swapoff -a $ 临时
-
-$ vim /etc/fstab $ 永久
-
-$ sed -i 's/.**swap.**/#&amp;/' /etc/fstab
-</code></pre>
-<p>cat /etc/fstab</p>
-<pre><code># **/etc/fstab**
-# **Created by anaconda on Mon Mar  4 17:23:04 2019**
-# **Accessible filesystems, by reference, are maintained under '/dev/disk'**
-# **See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info**
-dev/mapper/centos-root /                       xfs     defaults        0 0
-UUID=3dd5660e-0905-4f1e-9fa3-9ce664d6eb94 /boot                   xfs     defaults        0 0
-dev/mapper/centos-home /home                   xfs     defaults        0 0
-#**/dev/mapper/centos-swap swap                    swap    defaults        0 0
-</code></pre>
-<p>将桥接的IPv4流量传递到iptables的链：</p>
-<pre><code>$ cat &gt; /etc/sysctl.d/k8s.conf &lt;&lt; EOF
-
-net.bridge.bridge-nf-call-ip6tables = 1
-
-net.bridge.bridge-nf-call-iptables = 1
-
-EOF
-</code></pre>
-<pre><code>$ sysctl --system
-</code></pre>
-<p>修改文件句柄限制</p>
-<pre><code>echo &quot;* soft nofile 65536&quot; &gt;&gt; /etc/security/limits.conf
-
-echo &quot;* hard nofile 65536&quot; &gt;&gt; /etc/security/limits.conf
-
-echo &quot;* soft nproc 65536&quot;  &gt;&gt; /etc/security/limits.conf
-
-echo &quot;* hard nproc 65536&quot;  &gt;&gt; /etc/security/limits.conf
-
-echo &quot;* soft  memlock  unlimited&quot;  &gt;&gt; /etc/security/limits.conf
-
-echo &quot;* hard memlock  unlimited&quot;  &gt;&gt; /etc/security/limits.conf
-</code></pre>
-<p>所有节点安装Docker/kubeadm/kubelet</p>
-<p>Kubernetes默认CRI（容器运行时）为Docker，因此先安装Docker。</p>
-<p>安装Docker</p>
-<pre><code>$ wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo
-
-$ yum -y install docker-ce-18.06.1.ce-3.el7
-
-$ systemctl enable docker &amp;&amp; systemctl start docker
-
-$ docker --version
-
-Docker version 18.06.1-ce, build e68fc7a
-</code></pre>
-<p>添加阿里云YUM软件源</p>
-<pre><code>$ cat &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt; EOF
-
-[kubernetes]
-
-name=Kubernetes
-
-baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64
-
-enabled=1
-
-gpgcheck=1
-
-repo_gpgcheck=1
-
-gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
-
-https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-
-EOF
-</code></pre>
-<p>导入gpgkey文件</p>
-<pre><code>$ wget https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
-
-$ rpm --import yum-key.gpg
-
-$ wget https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-
-$ rpm --import rpm-package-key.gpg
-</code></pre>
-<p>安装kubeadm，kubelet和kubectl</p>
-<p>由于版本更新频繁，这里指定版本号部署：</p>
-<pre><code>$ yum install -y kubelet-1.13.3 kubeadm-1.13.3 kubectl-1.13.3 kubernetes-cni-0.6.0
-
-$ systemctl enable kubelet
-</code></pre>
-<p>部署Kubernetes Master</p>
-<p>由于默认拉取镜像地址k8s.gcr.io国内无法访问，这里指定阿里云镜像仓库地址。</p>
-<pre><code>$ kubeadm init \
-
---apiserver-advertise-address=10.0.52.13 \
-
---image-repository registry.aliyuncs.com/google_containers \
-
---kubernetes-version v1.13.3 \
-
---service-cidr=10.1.0.0/16 \
-
---pod-network-cidr=10.244.0.0/16
-</code></pre>
-<p>使用kubectl工具：</p>
-<pre><code>mkdir -p $HOME/.kube
-
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-</code></pre>
-<p>安装Pod网络插件（CNI）</p>
-<pre><code>$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml
-</code></pre>
-<p>确保能够访问到quay.io这个registery。</p>
-<p>加入Kubernetes Node</p>
-<p>向集群添加新节点，执行在kubeadm init输出的kubeadm join命令：</p>
-<p>kubernetes培训-kubeadmin.png</p>
-<pre><code>kubeadm join 10.0.52.13:6443 --token nqg5gl.zr84xb63z2ve7dbn --discovery-token-ca-cert-hash sha256:3e43b9c41dd74ba0f46c260d0e0b6663993cf4563c3852384916d76338d6202e
-</code></pre>
-<p>在master执行</p>
-<pre><code>$ kubectl get nodes
-</code></pre>
-<p>测试kubernetes集群</p>
-<p>在Kubernetes集群中创建一个pod，验证是否正常运行：</p>
-<pre><code>$ kubectl create deployment nginx --image=nginx
-
-$ kubectl expose deployment nginx --port=80 --type=NodePort
-
-$ kubectl get pod,svc
-</code></pre>
-<p>访问地址：http://NodeIP:Port</p>
-<p>部署 Dashboard</p>
-<pre><code>kubectl apply -f kubernetes-dashboard.yaml
-
-kubectl apply -f admin-dashboard.yaml
-</code></pre>
-<p>访问地址：http://NodeIP:30001</p>
 ]]></content>
     </entry>
 </feed>
