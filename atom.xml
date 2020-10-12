@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-12T11:46:53.536Z</updated>
+    <updated>2020-10-12T11:52:59.673Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,209 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[Kubernetes之Persistent Volume(持久化卷)]]></title>
+        <id>https://jwangkun.github.io/post/meYDSyEo3/</id>
+        <link href="https://jwangkun.github.io/post/meYDSyEo3/">
+        </link>
+        <updated>2020-10-12T11:48:41.000Z</updated>
+        <content type="html"><![CDATA[<p>Persistent Volume(持久化卷)简称PV, 是一个K8S资源对象，我们可以单独创建一个PV, 它不和Pod直接发生关系, 而是通过Persistent Volume Claim, 简称PVC来实现动态绑定, 我们会在Pod定义里指定创建好的PVC, 然后PVC会根据Pod的要求去自动绑定合适的PV给Pod使用.</p>
+<p>持久化卷下PV和PVC概念:</p>
+<p>Persistent Volume（PV）是由管理员设置的存储，它是群集的一部分。就像节点是集群中的资源一样，PV 也是集群中的资源。 PV 是 Volume 之类的卷插件，但具有独立于使用 PV 的 Pod 的生命周期。此 API 对象包含存储实现的细节，即 NFS、iSCSI 或特定于云供应商的存储系统</p>
+<p>PersistentVolumeClaim（PVC）是用户存储的请求。它与 Pod 相似。Pod 消耗节点资源，PVC 消耗 PV 资源。Pod 可以请求特定级别的资源（CPU 和内存）。PVC声明可以请求特定的大小和访问模式（例如，可以以读/写一次或 只读多次模式挂载）</p>
+<p>它和普通Volume的区别是什么呢？</p>
+<p>普通Volume和使用它的Pod之间是一种静态绑定关系，在定义Pod的文件里，同时定义了它使用的Volume。Volume是Pod的附属品，我们无法单独创建一个Volume，因为它不是一个独立的K8S资源对象。</p>
+<p>如何简单理解持久化卷?</p>
+<p>我们需要首先创建一个独立的持久化卷(PV)资源对象, 然后创建一个与PV绑定的PVC存储请求, 这个请求会事先定义accessModes, resources等资源配置, 最终我们会在Pod中挂载定义好的PVC以供我们数据存储使用</p>
+<p><strong>一. NFS安装配置</strong></p>
+<p>我们这里利用NFS去实现<a href="http://www.showerlee.com/archives/tag/k8s">k8s</a>持久化卷的配置</p>
+<p>1,安装NFS server</p>
+<pre><code># yum install nfs-utils -y
+</code></pre>
+<p>2.启动NFS服务</p>
+<pre><code># systemctl enable nfs-server
+# systemctl start nfs-server
+</code></pre>
+<p>3.配置NFS共享目录</p>
+<pre><code># mkdir /srv/pv-demo
+# chown nfsnobody:nfsnobody /srv/pv-demo
+# chmod 755 /srv/pv-demo
+# echo -e &quot;/srv/pv-demo  kube-master(rw,sync)&quot; &gt; /etc/export
+</code></pre>
+<p>4.生效共享目录</p>
+<pre><code># exportfs -a
+</code></pre>
+<p>因为资源有限, 我们最终在Master上创建一个NFS共享目录/srv/pv-demo, 以供我们后面的持久化卷使用, 有富裕的小伙伴可以创建一台与kube-master同一网段的独立server去充当NFS服务器,</p>
+<p><strong>二. Persistent Volume配置</strong></p>
+<p>1.创建Persistent Volume</p>
+<p># vi pv.yaml</p>
+<pre><code>apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-demo
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  nfs:
+    path: /srv/pv-demo
+    server: kube-master
+</code></pre>
+<p>Tip: 这里的定义卷的大小为5G, 使用的accessmodes为ReadWriteOnce, PVC policy为Recycle, NFS共享目录为我们之前在master创建好的/srv/pv-demo, server为我们定义好的本地host kube-master</p>
+<p># kubectl create -f pv.yaml</p>
+<ol start="2">
+<li>查看PV</li>
+</ol>
+<p># kubectl get pv pv-demo</p>
+<pre><code>NAME      CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS    CLAIM              STORAGECLASS   REASON    AGE
+pv-demo   5Gi        RWO            Recycle          Bound     default/pvc-demo                            1h
+</code></pre>
+<p>3.创建Persistent Volume Claim</p>
+<p>Tip: 这里PVC可以理解为在PV请求的资源, 也就是说所有我们的数据都会保存在PVC里, 任何PVC的删除操作都会清除我们存储在这里的数据.</p>
+<pre><code>kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+</code></pre>
+<p># kubectl create -f pvc.yaml</p>
+<p>4.查看PVC</p>
+<p># kubectl get pvc pvc-demo</p>
+<pre><code>NAME       STATUS    VOLUME    CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+pvc-demo   Bound     pv-demo   5Gi        RWO                           1h
+</code></pre>
+<p>5.创建一个Pod并使用该PVC</p>
+<p># vi pvpod.yaml</p>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: httpd-pod
+spec:
+  containers:
+  - image: httpd
+    name: httpd-pod
+    imagePullPolicy: Always
+    volumeMounts:
+    - mountPath: &quot;/usr/local/apache2/htdocs/&quot;
+      name: httpd-volume
+  volumes:
+    - name: httpd-volume
+      persistentVolumeClaim:
+        claimName: pvc-demo
+</code></pre>
+<p>Tip: 这里需要保证claimName的值与我们之前创建的PVC name一致.</p>
+<p># kubectl create -f pvpod.yaml</p>
+<p>Tip: 这里我们将PVC挂载到Pod的Apache根目录&quot;/usr/local/apache2/htdocs/&quot;, 用来最终测试效果.</p>
+<ol start="6">
+<li>查看Pod是否挂载PVC</li>
+</ol>
+<p># kubectl describe pv</p>
+<pre><code>Name:            pv-demo
+Labels:          &lt;none&gt;
+Annotations:     pv.kubernetes.io/bound-by-controller=yes
+StorageClass:
+Status:          Bound
+Claim:           default/pvc-demo
+Reclaim Policy:  Recycle
+Access Modes:    RWO
+Capacity:        5Gi
+Message:
+Source:
+    Type:      NFS (an NFS mount that lasts the lifetime of a pod)
+    Server:    kube-master
+    Path:      /srv/pv-demo
+    ReadOnly:  false
+Events:        &lt;none&gt;
+</code></pre>
+<p># kubectl describe pods</p>
+<pre><code>Name:         httpd-pod
+Namespace:    default
+Node:         kube-master/172.17.2.153
+Start Time:   Fri, 23 Feb 2018 15:38:55 +0800
+Labels:       &lt;none&gt;
+Annotations:  &lt;none&gt;
+Status:       Running
+IP:           10.244.0.46
+Containers:
+  httpd-pod:
+    Container ID:   docker://b7e5fd2732864934b732fdbd4bb24b3ccc8949c2e9d8832a36e271f2ee350b2b
+    Image:          httpd
+    Image ID:       docker-pullable://httpd@sha256:6e61d60e4142ea44e8e69b22f1e739d89e1dc8a2764182d7eecc83a5bb31181e
+    Port:           &lt;none&gt;
+    State:          Running
+      Started:      Fri, 23 Feb 2018 15:38:59 +0800
+    Ready:          True
+    Restart Count:  0
+    Environment:    &lt;none&gt;
+    Mounts:
+      /usr/local/apache2/htdocs from httpd-volume (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-bnkxx (ro)
+Conditions:
+  Type           Status
+  Initialized    True
+  Ready          True
+  PodScheduled   True
+Volumes:
+  httpd-volume:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  pvc-demo
+    ReadOnly:   false
+  default-token-bnkxx:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-bnkxx
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  &lt;none&gt;
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type    Reason                 Age   From                  Message
+  ----    ------                 ----  ----                  -------
+  Normal  Scheduled              58m   default-scheduler     Successfully assigned httpd-pod to kube-master
+  Normal  SuccessfulMountVolume  58m   kubelet, kube-master  MountVolume.SetUp succeeded for volume &quot;default-token-bnkxx&quot;
+  Normal  SuccessfulMountVolume  58m   kubelet, kube-master  MountVolume.SetUp succeeded for volume &quot;pv-demo&quot;
+  Normal  Pulling                58m   kubelet, kube-master  pulling image &quot;httpd&quot;
+  Normal  Pulled                 58m   kubelet, kube-master  Successfully pulled image &quot;httpd&quot;
+  Normal  Created                58m   kubelet, kube-master  Created container
+  Normal  Started                58m   kubelet, kube-master  Started container
+</code></pre>
+<p>通过返回打印的信息我们可以看到PVC已经成功mount到我们定义好的Pod的apache根目录下</p>
+<ol start="7">
+<li>向Pod下apache根目录写入index.html</li>
+</ol>
+<p># kubectl exec -ti httpd-pod -- /bin/sh -c &quot;echo 'This is a persistent volume from httpd-pod' &gt; /usr/local/apache2/htdocs/index.html&quot;</p>
+<p>8.确认文件写入</p>
+<p># kubectl exec -ti httpd-pod -- cat /usr/local/apache2/htdocs/index.html</p>
+<pre><code class="language-bsh">This is a persistent volume from httpd-pod
+</code></pre>
+<ol start="9">
+<li>删除并重新创建Pod来验证数据是否会随Pod销毁而丢失.</li>
+</ol>
+<p># kubectl delete pod httpd-pod<br>
+# kubectl create -f pvpod.yaml<br>
+# kubectl exec -ti httpd-pod -- cat /usr/local/apache2/htdocs/index.html</p>
+<pre><code class="language-bsh">This is a persistent volume from httpd-pod
+</code></pre>
+<p>可以看到我们之前写入的index.html仍旧存储在PVC中, 证明其不会随Pod销毁而丢失.</p>
+<p>10.查看Pod内网IP</p>
+<p># kubectl get pods -o wide</p>
+<pre><code class="language-bsh">NAME        READY     STATUS    RESTARTS   AGE       IP            NODE
+httpd-pod   1/1       Running   0          1m        10.244.0.46   kube-master
+</code></pre>
+<p>11.利用curl验证写入的index.html</p>
+<p># curl 10.244.0.46</p>
+<pre><code>This is a persistent volume from httpd-pod
+</code></pre>
+<p>这里我们成功在Pod下将PVC挂载到apache的家目录, 并返回HTML返回内容.</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ 基于kubekey部署kubernetes生产级集群]]></title>
         <id>https://jwangkun.github.io/post/cIJwT12am/</id>
@@ -1552,42 +1755,6 @@ Visual Studio Code (简称 VSCode / VSC) 是一款免费开源的现代化轻量
 <p>下载地址：https://www.wps.cn<br>
 支持平台：WINDOWS 、MACOS、LINUX<br>
 WPS是金山办公软件出品的office软件,可以实现办公软件常用的文字、表格、演示等多种功能,小巧易用且永久免费。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[前端技术选型]]></title>
-        <id>https://jwangkun.github.io/post/qian-duan-ji-zhu-xuan-xing/</id>
-        <link href="https://jwangkun.github.io/post/qian-duan-ji-zhu-xuan-xing/">
-        </link>
-        <updated>2020-04-24T15:26:06.000Z</updated>
-        <summary type="html"><![CDATA[<p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
-<!-- more -->
-<figure data-type="image" tabindex="1"><img src="https://jwangkun.github.io/post-images/1587743121392.jpg" alt="" loading="lazy"></figure>
-<h2 id="技术选型介绍">技术选型介绍</h2>
-<p>在项目的架构中，我们需要选择各种技术栈所对应的技术；在项目的开发中，我们需要选择各种工具库。技术选型是我们必然会碰到的，我们常常面临的不是单个技术的选型，而是对于一个项目所涉及的一整套技术、方案、规范或者产品的选型。我们需要仔细的去权衡各种技术、各种组合的利弊，做出取舍。</p>
-<h2 id="技术选型需要考虑的因素">技术选型需要考虑的因素</h2>
-<p>项目因素 明确现在项目的规模、重要程度。 项目的需求（特别是非功能性需求）也会限制技术的选型</p>
-<p>团队因素 考虑团队的因素，也就是人的因素，考虑团队人员的技术组成。 考虑招聘的因素，对于特别小众的技术，可能会因为招不到人而影响到对公司的业务支持。</p>
-<p>技术因素 技术特性考虑（易用性、可维护性、可扩展性、性能等）、技术成熟度、社区活跃度、架构匹配和演化等。 github上的star数，可以作为一个重要的参考。</p>
-<h2 id="如何进行技术选型">如何进行技术选型</h2>
-<p>上面列出了很多技术选型需要考虑的因素，那么到底该如何进行技术选型呢？<br>
-首先明确选型的需求和目的，最好能列出必须要考虑的各种因素以及评判标准。寻找候选技术和产品。这时范围可以尽量的广一些，搜集尽可能多的候选技术和产品。<br>
-初步筛选。把一些由于各种限制无法选择或者明显不可能的技术或产品排除，筛选3个左右备选方案。</p>
-<p>做一些详细的调查和分析。可以列个技术选型分析表（小的不太重要的技术选型不一定要这么麻烦，而重要的技术选型则可能要反复各个步骤多次）<br>
-团队、技术成熟度、性能、架构一致性...</p>
-<p>可以咨询其他公司是否用过个技术或产品，可以求教些实践经验。</p>
-<h2 id="技术选型的注意点">技术选型的注意点</h2>
-<ul>
-<li>一定要进行可行性分析，如果不太确定，做个Demo验证一下，如果项目进行到一半，发现原来设想的方案      不可选，那会是非常痛苦和浪费时间的事情。</li>
-<li>不要有思维定式，也不要赶时髦。</li>
-<li>随着业务发展，很多架构需要不断升级，所以一定要考虑未来如果替换某项技术，是否会很麻烦。可以选      择一些标准技术或产品，或者在应用中部署一个适配层，方便未来适配其他技术，自由插拔。</li>
-<li>架构应该尽可能统一，一个领域避免引入太多相同功能的技术产品。</li>
-</ul>
-<h2 id="选型最后">选型最后</h2>
-<p>当一个技术或产品选型后，下面要做的便是接入和推进。抓住时机，坚定地推进。</p>
-<p>参考：《技术选型的艺术》</p>
 ]]></content>
     </entry>
 </feed>
