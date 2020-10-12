@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-12T11:52:59.673Z</updated>
+    <updated>2020-10-12T11:53:58.318Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -11,7 +11,7 @@
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
     <entry>
-        <title type="html"><![CDATA[Kubernetes之Persistent Volume(持久化卷)]]></title>
+        <title type="html"><![CDATA[Kubernetes Volume(持久化卷)]]></title>
         <id>https://jwangkun.github.io/post/meYDSyEo3/</id>
         <link href="https://jwangkun.github.io/post/meYDSyEo3/">
         </link>
