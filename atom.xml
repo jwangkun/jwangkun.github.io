@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-13T09:26:22.635Z</updated>
+    <updated>2020-10-13T09:30:42.181Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,138 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[Kubernetes Ingress]]></title>
+        <id>https://jwangkun.github.io/post/59eFp4SaS/</id>
+        <link href="https://jwangkun.github.io/post/59eFp4SaS/">
+        </link>
+        <updated>2020-10-13T09:30:11.000Z</updated>
+        <content type="html"><![CDATA[<p>Ingress**也是Kubernetes项目里的一种 <strong>API</strong> 对象，它公开了从集群外部到集群内<code>Service</code>的 <strong>HTTP</strong> 和 <strong>HTTPS</strong> 路由，这些路由由 Ingress 资源上定义的规则控制。</p>
+<pre><code>    internet
+        |
+   [ Ingress ]
+   --|-----|--
+   [ Services ]
+</code></pre>
+<p>如果用一句话概况<code>Ingress</code>的话就是：<code>Ingress</code>是<code>Service</code>们的反向代理。通过看<code>Ingress</code>对象的定义你会感觉自己在看<code>Nginx</code>的配置文件一样。</p>
+<p><code>Ingress</code>资源对象的<code>YAML</code>定义。与大多数Kubernetes资源一样，也需要<code>apiVersion</code>，<code>Kind</code>，<code>Metadata</code>和<code>Spec</code> 这些组成部分。</p>
+<p>一个典型的<code>Ingress</code>对象的定义如下所示：</p>
+<pre><code>apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: app-ingress
+spec:
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: app-service
+              servicePort: 80
+          - path: /v2
+            backend:
+              serviceName: app-service-v2
+              servicePort: 80
+</code></pre>
+<p>在上面这个<code>Ingress</code>的<code>YAML</code>定义中，最值得我们关注的，是<strong>spec.rules</strong> 字段。在 Kubernetes 里，这个字段叫作：<strong>IngressRule</strong>。</p>
+<p><code>IngressRule</code> 里面 <strong>host</strong> 字段定义的值，就是这个<code>Ingress</code>的入口。当访问 <code>app.example.com</code> 的时候，实际上访问到的是这个 <code>Ingress</code> 对象。这样就能使用 IngressRule 来对请求进行下一步转发。</p>
+<p><code>IngressRule</code> 的定义，主要依赖于<code>path</code>字段。可以简单地理解为，这里的每一个<code>path</code>都对应一个后端 <code>Service</code>。上面的例子里，定义了两个<code>path</code>，它们分别对应：<strong>app-service</strong>和<strong>app-service-v2</strong> 两个后端<code>Service</code>。通过<code>Service</code>，流量最终会到达<code>Service</code>后面的<code>Pod</code>。</p>
+<p><strong>servicePort</strong>字段指定的端口值就是在<code>Service</code>的定义里<code>port</code>字段的值，上一篇讲Service的文章里已经科普了一下<code>Service</code>定义里的<code>nodePort</code>，<code>port</code>和<code>targetPort</code>都是什么意思，感觉到懵圈（我自己都有点懵）的读者大大可以翻阅一下文章《<a href="https://mp.weixin.qq.com/s?__biz=MzUzNTY5MzU2MA==&amp;mid=2247486082&amp;idx=1&amp;sn=42a9bc8fcfc9da09445e9e2f4cf2fb96&amp;chksm=fa80db15cdf752039494992f71a3bc488cf386841bd1aaaa44115f5e7f155ba55ce468ec89ee&amp;token=1964476830&amp;lang=zh_CN&amp;scene=21#wechat_redirect">学练结合，快速掌握Kubernetes Service</a>》里的这部分内容。</p>
+<p>所以 <code>Ingress</code> 对象，其实就是 <code>Kubernetes</code> 项目对**&quot;反向代理&quot;**的一种抽象。一个 <code>Ingress</code>对象的主要内容，实际上就是一个&quot;反向代理&quot;服务的配置文件的描述。而这个代理服务对应的转发规则，就是 <code>IngressRule</code>。这就是为什么在每条 <code>IngressRule</code> 里，需要有一个 <strong>host</strong> 字段来作为这条 <code>IngressRule</code> 的入口，然后还需要有一系列 <code>path</code> 字段来声明具体的转发策略。</p>
+<p>有了<code>Ingress</code>后我们还需要<code>Ingress Controller</code>，它会根据你定义的<code>Ingress</code>对象，提供对应的代理能力。目前，业界常用的各种反向代理项目，比如 Nginx、Envoy 等，都已经为 Kubernetes 专门维护了对应的 Ingress Controller。</p>
+<p>下面我就用最常用的Nginx Ingress Controller给这个系列教程一直以来用的Demo实践应用一下Ingress</p>
+<h2 id="安装ingress-controller">安装Ingress Controller</h2>
+<p>因为<code>Minikube</code>里边内置了Nginx Ingress Controller这个插件， 默认没有启用，所以如果是在<code>Minikube</code>这个单节点集群里实践的话只需要执行下面的命令：</p>
+<pre><code>minikube addons enable ingress
+</code></pre>
+<p>检查验证 Nginx Ingress 控制器处于运行状态：</p>
+<pre><code>kubectl get pods -n kube-system --filed-selector=Running
+</code></pre>
+<p>有下图红框里的<code>Pod</code>就证明已经安装成功了：</p>
+<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_png/z4pQ0O5h0f7Cibmniccgicp2LOuOxgpXxicZ3QGjssI5jSX23qjj8BNPddYtehC9vonXtoL4nQUXYnF2LmOvaZwk7w/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<blockquote>
+<p>因为这个Pod用的官方镜像是在红帽软件的镜像库里，所以安装时间可能会有点长，也可能会失败，如果网络条件允许的话可以在准备阶段先执行 docker pull http://quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.32.0 把镜像下载到本地。</p>
+</blockquote>
+<p>此外还有不少安装<code>Nginx Ingress Controller</code>的方式，比如用Kubernetes的包管理工具<strong>Helm</strong>安装，这些安装方式可以参考<strong>官方的部署指南</strong>[1]。</p>
+<h2 id="创建ingress">创建Ingress</h2>
+<p>因为我们之前给应用<code>Pod</code>创建的<code>Service</code>名字叫<strong>app-service</strong>，<code>port</code>字段指定的是端口80</p>
+<pre><code>➜  ~ kubectl get svc
+NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+app-service   NodePort    10.108.26.155   &lt;none&gt;        80:30080/TCP   6d16h
+kubernetes    ClusterIP   10.96.0.1       &lt;none&gt;        443/TCP        96d
+
+➜  ~ kubectl describe svc app-service
+Name:                     app-service
+Namespace:                default
+Labels:                   &lt;none&gt;
+Annotations:              &lt;none&gt;
+Selector:                 app=go-app
+Type:                     NodePort
+IP:                       10.108.26.155
+Port:                     http  80/TCP
+TargetPort:               3000/TCP
+NodePort:                 http  30080/TCP
+Endpoints:                10.1.0.24:3000,10.1.0.25:3000
+</code></pre>
+<p>这就确定了我们要创建建的<code>Ingress</code>对象，第一个<code>path</code> 里要设置的<strong>backend.serviceName</strong>和<strong>backend.servicePort</strong>字段的值，Ingress对象的<code>YAML</code>定义如下：</p>
+<pre><code># app-ingress.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: app-ingress
+spec:
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: app-service
+              servicePort: 80
+</code></pre>
+<blockquote>
+<p>说明：因为目前为止我们只创建了一个Service，所以在Ingress里也只能设置一个path。</p>
+</blockquote>
+<p>这个Ingress定义里设置的<code>IngressRules</code>是把所有对app.example.com入口的请求都路由到<code>app-service</code>这个<code>Service</code>的80端口。</p>
+<p>定义好<code>Ingress</code>对象后，也是执行<strong>kubectl apply -f</strong>创建对象，可以看到所有的对象的创建和更新都可以用<strong>apply</strong>操作搞定，这就是<code>Kubernetes</code>项目声明式定义的好处。</p>
+<pre><code>kubectl apply -f app-ingress.yaml --record
+
+# 执行后的输出
+ingress.networking.k8s.io/app-ingress created
+</code></pre>
+<h2 id="验证ingress">验证Ingress</h2>
+<p>查询Ingress是否创建成功，使用通用的<strong>kubectl get</strong>命令：</p>
+<pre><code>➜  ~ kubectl get ingress
+NAME          CLASS    HOSTS             ADDRESS        PORTS   AGE
+app-ingress   &lt;none&gt;   app.example.com   192.168.64.4   80      20s
+</code></pre>
+<blockquote>
+<p>有可能需要在提交创建操作几分钟后才能在集群里查询到Ingress</p>
+</blockquote>
+<p>在集群里查询到Ingress后，就可以通过<strong>kubctl describe ingress</strong>命令查看<code>Ingress</code>对象是否按照我们的定义成功代理了<code>app-service</code>这个<code>Service</code>：</p>
+<pre><code>➜  ~ kubectl describe ingress app-ingress
+Name:             app-ingress
+Namespace:        default
+Address:          192.168.64.4
+Default backend:  default-http-backend:80 (&lt;error: endpoints &quot;default-http-backend&quot; not found&gt;)
+Rules:
+  Host             Path  Backends
+  ----             ----  --------
+  app.example.com
+                   /   app-service:80 (10.1.0.24:3000,10.1.0.25:3000)
+Annotations:       kubernetes.io/change-cause: kubectl apply --filename=app-ingress.yaml --record=true
+Events:            &lt;none&gt;
+</code></pre>
+<p>上面输出里的<code>Rlues</code>部分可以清楚的看到，把<strong>Host:  app.example.com</strong>所有请求（定义了Path是/）都代理到了后端<code>app-service</code>的80端口，Service后面的<code>Pod</code>正是它的<code>Endpoints</code>，与上面的<strong>kubctl describe svc app-service</strong>命令输出里的<code>Endpoints</code>信息一致。</p>
+<p>接下来在<code>/etc/hosts</code>文件里追加下面的内容，就能通过域名访问我们的服务了：</p>
+<pre><code>192.168.64.4 app.example.com
+</code></pre>
+<p>你们在练习的时候，可以自己尝试新增一个<code>Service</code>，然后更新Ingress，再指定一个<code>/v2</code>之类的Path，让所有匹配这个规则的请求都能路由给新的Service。</p>
+<h2 id="接下来">接下来</h2>
+<p><code>Ingress</code>还有很多其他的配置，想要简单的讲完，还是挺难的。最常用的比如怎么设置TLS私钥和证书这些配置在<strong>Kubernetes官方文档-Ingress</strong>[2] 部分都有提到，后面自己练习的时候可以试试给<code>Ingress</code>启用<code>HTTPs</code>访问的功能。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ Kubernetes 集群升级指南：从理论到实践]]></title>
         <id>https://jwangkun.github.io/post/NDmieJqbU/</id>
@@ -1347,46 +1479,6 @@ base_dir=&quot;/etc/ansible&quot;
 </ul>
 <pre><code class="language-bash">docker exec -it kubeasz easzctl add-node $NEW_NODE_IP
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[用Docker搭建Shadowsocks服务器]]></title>
-        <id>https://jwangkun.github.io/post/3R1pSdQZa/</id>
-        <link href="https://jwangkun.github.io/post/3R1pSdQZa/">
-        </link>
-        <updated>2020-10-12T11:17:13.000Z</updated>
-        <content type="html"><![CDATA[<p>安装</p>
-<p>1、首先更新包信息</p>
-<pre><code>sudo apt-get update
-</code></pre>
-<p>2、安装ca证书</p>
-<pre><code>sudo apt-get install apt-transport-https ca-certificates
-</code></pre>
-<p>3、获取并安装最新版的docker</p>
-<p>Docker官方为简化安装流程，提供了一套安装脚本，Ubuntu可以直接使用这套脚本安装</p>
-<p>这个安装起来比较方便</p>
-<pre><code>wget -qO- https://get.docker.com/ | sh
-</code></pre>
-<p>或者直接apt安装</p>
-<pre><code>sudo apt-get install docker.io
-</code></pre>
-<p>4、通过docker安装shadowsocks</p>
-<p>安装的过程非常简单，只需要一个命令就可以，命令中有两个参数可以自修改，-p是设置shadowsocks的服务器端口号，-k是设置自己的密码</p>
-<p>命令：</p>
-<pre><code>docker run -d --name shadowsocks -p 12306:12306 oddrationale/docker-shadowsocks -s 0.0.0.0 -p 12306 -k 0000 -m aes-256-cfb
-</code></pre>
-<p>使用docker ps来来查看是否安装成功：</p>
-<pre><code>  docker ps                                                                                                                   
-</code></pre>
-<pre><code>CONTAINER ID        IMAGE                             COMMAND                CREATED                  STATUS              PORTS                            NAMES
-
-1016c8cc0ce4        oddrationale/docker-shadowsocks   &quot;/usr/local/bin/ssse   Less than a second ago   Up 22 seconds       104.130.22.24:12306-&gt;12306/tcp   2ede2591-1ec0-4c2b-a3ef-59697ff02ba7-n1/shadowsocks   
-
-b47dd901c3dd        carina/consul                     &quot;/bin/consul agent -   5 hours ago              Up 5 hours                                           2ede2591-1ec0-4c2b-a3ef-59697ff02ba7-n1/carina-svcd
-</code></pre>
-<p>可以看到shadowsocks服务已经在运行了。</p>
-<p>6、使用shadowsocks连接服务器</p>
-<p>下载对应的客户端，配置相应的参数即可使用</p>
 ]]></content>
     </entry>
 </feed>
