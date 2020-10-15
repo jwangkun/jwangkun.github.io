@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T03:35:01.327Z</updated>
+    <updated>2020-10-15T03:37:44.229Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,214 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[在K8S上搭建Redis集群]]></title>
+        <id>https://jwangkun.github.io/post/Bf0bV70AO/</id>
+        <link href="https://jwangkun.github.io/post/Bf0bV70AO/">
+        </link>
+        <updated>2020-10-15T03:37:01.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="问题分析">问题分析</h2>
+<p>本质上来说，在k8s上部署一个redis集群和部署一个普通应用没有什么太大的区别，但需要注意下面几个问题：</p>
+<ol>
+<li>
+<p><strong>REDIS是一个有状态应用</strong></p>
+<p>这是部署redis集群时我们最需要注意的问题，当我们把redis以pod的形式部署在k8s中时，每个pod里缓存的数据都是不一样的，而且pod的IP是会随时变化，这时候如果使用普通的deployment和service来部署redis-cluster就会出现很多问题，因此需要改用StatefulSet + Headless Service来解决</p>
+</li>
+<li>
+<p><strong>数据持久化</strong></p>
+<p>redis虽然是基于内存的缓存，但还是需要依赖于磁盘进行数据的持久化，以便服务出现问题重启时可以恢复已经缓存的数据。在集群中，我们需要使用共享文件系统 + PV（持久卷）的方式来让整个集群中的所有pod都可以共享同一份持久化储存</p>
+</li>
+</ol>
+<h2 id="概念介绍">概念介绍</h2>
+<p>在开始之前先来详细介绍一下几个概念和原理</p>
+<h3 id="headless-service">Headless Service</h3>
+<p>简单的说，Headless Service就是没有指定Cluster IP的Service，相应的，在k8s的dns映射里，Headless Service的解析结果不是一个Cluster IP，而是它所关联的所有Pod的IP列表</p>
+<h3 id="statefulset">StatefulSet</h3>
+<ul>
+<li><a href="https://wiki.shileizcc.com/confluence/display/KUB/Kubernetes+StatefulSet">参考介绍</a></li>
+</ul>
+<p><code>StatefulSet</code>是k8s中专门用于解决有状态应用部署的一种资源，总的来说可以认为它是<code>Deployment/RC</code>的一个变种，它有以下几个特性：</p>
+<ol>
+<li>StatefulSet管理的每个Pod都有唯一的文档/网络标识，并且按照数字规律生成，而不是像Deployment中那样名称和IP都是随机的（比如StatefulSet名字为redis，那么pod名就是redis-0, redis-1 ...）</li>
+<li>StatefulSet中ReplicaSet的启停顺序是严格受控的，操作第N个pod一定要等前N-1个执行完才可以</li>
+<li>StatefulSet中的Pod采用稳定的持久化储存，并且对应的PV不会随着Pod的删除而被销毁</li>
+</ol>
+<p>另外需要说明的是，StatefulSet必须要配合Headless Service使用，它会在Headless Service提供的DNS映射上再加一层，最终形成精确到每个pod的域名映射，格式如下：</p>
+<pre><code>$(podname).$(headless service name)
+
+</code></pre>
+<p>有了这个映射，就可以在配置集群时使用域名替代IP，实现有状态应用集群的管理</p>
+<h2 id="方案">方案</h2>
+<p>借助StatefulSet和Headless Service，集群的部署方案设计如下（图片来自参考文章）：</p>
+<figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430bfb7fdee5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p>配置步骤大概罗列如下：</p>
+<ol>
+<li>配置共享文件系统NFS</li>
+<li>创建PV和PVC</li>
+<li>创建ConfigMap</li>
+<li>创建Headless Service</li>
+<li>创建StatefulSet</li>
+<li>初始化redis集群</li>
+</ol>
+<h2 id="实际操作">实际操作</h2>
+<p>由于使用的是minikube的单node环境，为了简化复杂度，这次先不配置PV和PVC，直接通过普通Volume的方式来挂载数据</p>
+<h3 id="创建configmap">创建ConfigMap</h3>
+<p>先创建<code>redis.conf</code>配置文件</p>
+<pre><code>appendonly yes
+cluster-enabled yes
+cluster-config-file /var/lib/redis/nodes.conf
+cluster-node-timeout 5000
+dir /var/lib/redis
+port 6379
+
+</code></pre>
+<p>然后<code>kubectl create configmap redis-conf --from-file=redis.conf</code>来创建ConfigMap</p>
+<h3 id="创建headlessservice">创建HeadlessService</h3>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  labels:
+    app: redis
+spec:
+  ports:
+  - name: redis-port
+    port: 6379
+  clusterIP: None
+  selector:
+    app: redis
+    appCluster: redis-cluster
+
+</code></pre>
+<h3 id="创建statefulset">创建StatefulSet</h3>
+<pre><code>apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: redis-app
+spec:
+  serviceName: &quot;redis-service&quot;
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: redis
+        appCluster: redis-cluster
+    spec:
+      terminationGracePeriodSeconds: 20
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - redis
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: redis
+        image: &quot;registry.cn-qingdao.aliyuncs.com/gold-faas/gold-redis:1.0&quot;
+        command:
+          - &quot;redis-server&quot;
+        args:
+          - &quot;/etc/redis/redis.conf&quot;
+          - &quot;--protected-mode&quot;
+          - &quot;no&quot;
+        resources:
+          requests:
+            cpu: &quot;100m&quot;
+            memory: &quot;100Mi&quot;
+        ports:
+            - name: redis
+              containerPort: 6379
+              protocol: &quot;TCP&quot;
+            - name: cluster
+              containerPort: 16379
+              protocol: &quot;TCP&quot;
+        volumeMounts:
+          - name: &quot;redis-conf&quot;
+            mountPath: &quot;/etc/redis&quot;
+          - name: &quot;redis-data&quot;
+            mountPath: &quot;/var/lib/redis&quot;
+      volumes:
+      - name: &quot;redis-conf&quot;
+        configMap:
+          name: &quot;redis-conf&quot;
+          items:
+            - key: &quot;redis.conf&quot;
+              path: &quot;redis.conf&quot;
+      - name: &quot;redis-data&quot;
+        emptyDir: {} 
+
+</code></pre>
+<h3 id="初始化redis集群">初始化redis集群</h3>
+<p>StatefulSet创建完毕后，可以看到6个pod已经启动了，但这时候整个redis集群还没有初始化，需要使用官方提供的<code>redis-trib</code>工具。</p>
+<p>我们当然可以在任意一个redis节点上运行对应的工具来初始化整个集群，但这么做显然有些不太合适，我们希望每个节点的职责尽可能地单一，所以最好单独起一个pod来运行整个集群的管理工具。</p>
+<p>在这里需要先介绍一下<code>redis-trib</code>，它是官方提供的redis-cluster管理工具，可以实现redis集群的创建、更新等功能，在早期的redis版本中，它是以源码包里<code>redis-trib.rb</code>这个ruby脚本的方式来运作的（pip上也可以拉到python版本，但我运行失败），现在（我使用的<code>5.0.3</code>）已经被官方集成进<code>redis-cli</code>中。</p>
+<p>开始初始化集群，首先在k8s上创建一个ubuntu的pod，用来作为管理节点：</p>
+<pre><code>kubectl run -i --tty redis-cluster-manager --image=ubuntu --restart=Never /bin/bash
+
+</code></pre>
+<p>进入pod内部先安装一些工具，包括<code>wget</code>,<code>dnsutils</code>，然后下载和安装redis：</p>
+<pre><code>wget http://download.redis.io/releases/redis-5.0.3.tar.gz
+tar -xvzf redis-5.0.3.tar.gz
+cd redis-5.0.3.tar.gz &amp;&amp; make
+
+</code></pre>
+<p>编译完毕后<code>redis-cli</code>会被放置在<code>src</code>目录下，把它放进<code>/usr/local/bin</code>中方便后续操作</p>
+<p>接下来要获取已经创建好的6个节点的host ip，可以通过<code>nslookup</code>结合StatefulSet的域名规则来查找，举个例子，要查找<code>redis-app-0</code>这个pod的ip，运行如下命令：</p>
+<pre><code>root@redis-cluster-manager:/# nslookup redis-app-0.redis-service
+Server:		10.96.0.10
+Address:	10.96.0.10#53
+
+Name:	redis-app-0.redis-service.gold.svc.cluster.local
+Address: 172.17.0.10
+
+</code></pre>
+<p><code>172.17.0.10</code>就是对应的ip。这次部署我们使用0，1，2作为Master节点；3，4，5作为Slave节点，先运行下面的命令来初始化集群的Master节点：</p>
+<pre><code>redis-cli --cluster create 172.17.0.10:6379 172.17.0.11:6379 172.17.0.12:6379
+
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430c059eb555?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p>然后给他们分别附加对应的Slave节点，这里的<code>cluster-master-id</code>在上一步创建的时候会给出：</p>
+<pre><code>redis-cli --cluster add-node 172.17.0.13:6379 172.17.0.10:6379 --cluster-slave --cluster-master-id adf443a4d33c4db2c0d4669d61915ae6faa96b46
+
+redis-cli --cluster add-node 172.17.0.14:6379 172.17.0.11:6379 --cluster-slave --cluster-master-id 6e5adcb56a871a3d78343a38fcdec67be7ae98f8
+
+redis-cli --cluster add-node 172.17.0.16:6379 172.17.0.12:6379 --cluster-slave --cluster-master-id c061e37c5052c22f056fff2a014a9f63c3f47ca0
+
+</code></pre>
+<p>集群初始化后，随意进入一个节点检查一下集群信息：</p>
+<figure data-type="image" tabindex="3"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430bfb9fac37?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p>至此，集群初始化完毕，我们进入一个节点来试试，注意在集群模式下<code>redis-cli</code>必须加上<code>-c</code>参数才能够访问其他节点上的数据：</p>
+<figure data-type="image" tabindex="4"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430bfb99c5d8?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="创建service">创建Service</h3>
+<p>现在进入redis集群中的任意一个节点都可以直接进行操作了，但是为了能够对集群其他的服务提供访问，还需要建立一个service来实现服务发现和负载均衡（注意这里的service和我们之前创建的headless service不是一个东西）</p>
+<p>yaml文件如下：</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: gold-redis
+  labels:
+    app: redis
+spec:
+  ports:
+  - name: redis-port
+    protocol: &quot;TCP&quot;
+    port: 6379
+    targetPort: 6379
+  selector:
+    app: redis
+    appCluster: redis-cluster
+
+</code></pre>
+<p>部署完做个测试：</p>
+<figure data-type="image" tabindex="5"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430bfba191df?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p>很nice，到这里所有的工作就完毕了~</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ k8s安装ELK与EFK]]></title>
         <id>https://jwangkun.github.io/post/NmSmQLSLI/</id>
@@ -1878,164 +2086,6 @@ Events:            &lt;none&gt;
 <p>你们在练习的时候，可以自己尝试新增一个<code>Service</code>，然后更新Ingress，再指定一个<code>/v2</code>之类的Path，让所有匹配这个规则的请求都能路由给新的Service。</p>
 <h2 id="接下来">接下来</h2>
 <p><code>Ingress</code>还有很多其他的配置，想要简单的讲完，还是挺难的。最常用的比如怎么设置TLS私钥和证书这些配置在<strong>Kubernetes官方文档-Ingress</strong>[2] 部分都有提到，后面自己练习的时候可以试试给<code>Ingress</code>启用<code>HTTPs</code>访问的功能。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ Kubernetes 集群升级指南：从理论到实践]]></title>
-        <id>https://jwangkun.github.io/post/NDmieJqbU/</id>
-        <link href="https://jwangkun.github.io/post/NDmieJqbU/">
-        </link>
-        <updated>2020-10-13T09:23:39.000Z</updated>
-        <summary type="html"><![CDATA[<p>原创 高相林（禅鸣） [阿里巴巴云原生](javascript:void(0)😉</p>
-<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8Gg0dtQYSV3z6IwqBe4BFlSdyvFyUZBCVxMBIpZaZd6To5AZcvg3Acg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="" loading="lazy"></figure>
-<p>作者 | 高相林（禅鸣）</p>
-<p>**导读：**集群升级是 Kubernetes 集群生命周期中最为重要的一环，也是众多使用者最为谨慎对待的操作之一。为了更好地理解集群升级这件事情的内涵外延，我们首先会对集群升级的必要性和难点进行阐述；随后会对集群升级前必须要做的前置检查进行逐一讲解；接下来会对两种常见的升级方式进行展开介绍；最后对集群升级的三个步骤进行讲解，帮助读者从理论走入实践。<img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></p>
-]]></summary>
-        <content type="html"><![CDATA[<p>原创 高相林（禅鸣） [阿里巴巴云原生](javascript:void(0)😉</p>
-<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8Gg0dtQYSV3z6IwqBe4BFlSdyvFyUZBCVxMBIpZaZd6To5AZcvg3Acg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="" loading="lazy"></figure>
-<p>作者 | 高相林（禅鸣）</p>
-<p>**导读：**集群升级是 Kubernetes 集群生命周期中最为重要的一环，也是众多使用者最为谨慎对待的操作之一。为了更好地理解集群升级这件事情的内涵外延，我们首先会对集群升级的必要性和难点进行阐述；随后会对集群升级前必须要做的前置检查进行逐一讲解；接下来会对两种常见的升级方式进行展开介绍；最后对集群升级的三个步骤进行讲解，帮助读者从理论走入实践。<img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></p>
-<!-- more -->
-<p><strong>升级的必要性&amp;难点</strong></p>
-<p>在 Kubernetes 领域，得益于活跃的开源社区，Kubernetes 的迭代速度较快，目前保持在每个季度发行一个新版本的节奏。新版本的 Kubernetes 有着更为先进的新特性、更加全面的安全加固和漏洞修复。前一段时间社区刚刚完成了 1.19 版本的正式发布。</p>
-<p>对于发展如此快速的开源项目，跟上社区的步伐就显得更为重要，而集群升级能力就是帮助我们跟上社区步伐的不二选择。我们可以从以下两个方面对集群升级的必要性进行说明：</p>
-<ul>
-<li>
-<p><strong>对于 Kubernetes 集群的使用者</strong>：更新的 Kubernetes 版本意味着更新的 feature，更加全面的安全补丁，和诸多的 bugfix。我们可以通过集群升级功能充分享受活跃的 Kubernetes 开源社区带来的发展红利；</p>
-</li>
-<li>
-<p><strong>对于 Kubernetes 集群的运维者</strong>：通过集群升级功能可以拉齐所管理的集群版本，减少集群版本的碎片化，从而减少 Kubernetes 版本碎片化带来的管理成本和维护成本。</p>
-</li>
-</ul>
-<p>讲完了集群升级的必要性，我们来详细看一下集群升级的难点。</p>
-<p>目前多数 Kubernetes 使用者对集群升级这件事持有着非常保守的态度，害怕集群在升级的过程中出现不可预期的情况，也有使用者将集群升级称之为“给飞行中的飞机换引擎”。那么，使用者对于升级的保守态度主要来源于什么原因呢？我认为有以下几点：</p>
-<ul>
-<li>
-<p>经过长时间的运行后，Kubernetes 集群已经累计了复杂的运行时状态；</p>
-</li>
-<li>
-<p>Kubernetes 集群运维者会根据集群承载的不同业务，对集群进行不同的配置，从而导致每个集群都有自己的差异化配置，可能会造成“千集群千面”；</p>
-</li>
-<li>
-<p>对于云上运行的 Kubernetes 集群来说，其使用了大量的云计算底层资源。众多的底层云资源就会带来众多的不确定性因素。</p>
-</li>
-</ul>
-<p>“千集群千面”的情况的存在，导致了集群升级需要以一套逻辑完成各种不同情况集群的升级工作，这也正是集群升级的困难之处。</p>
-<figure data-type="image" tabindex="2"><img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></figure>
-<p><strong>升级预检</strong></p>
-<p>正如我们前面所说，给正在对外提供服务的 Kubernetes 集群升级，就好比是“给飞行中的飞机换引擎”。因为集群升级面临着众多难点，也使得众多的 Kubernetes 集群维护者对集群升级这件事情比较紧张。</p>
-<p>我们可以通过详细的升级预检，来消除集群升级的不确定性。对于上面列举的集群升级的难点，我们也可以分别进行详细的升级预检，对症下药，将难点逐一击破。升级预检主要可以分为三个方面：</p>
-<ul>
-<li>核心组件健康检查</li>
-<li>节点配置检查</li>
-<li>云资源检查</li>
-</ul>
-<h3 id="1-核心组件健康检查"><strong>1. 核心组件健康检查</strong></h3>
-<p>说到核心组件健康检查，就不得不剖析一下集群的健康对于集群升级的重要性。一个不健康的集群很可能会在升级中出现各种异常的问题，就算侥幸完成了升级，各种问题也会在后续使用中逐渐凸显出来。</p>
-<p>有人会说，我的集群看起来挺健康的，但是升级之后就出现问题了。一般来说，之所以会发生这种情况，是因为在集群在升级之前，这个问题已经存在了，只不过是在经历了集群升级之后才显现出来。</p>
-<p>在了解了核心组件健康检查的必要性之后，我们来看一下都需要对那些组件进行检查：</p>
-<ul>
-<li>网络组件：需要确保网络组件版本和需要升级到的目标 Kubernetes 版本兼容；</li>
-<li>apiservice：需要确保集群内的 apiservice 都可用；</li>
-<li>节点：需要确定节点全部健康。</li>
-</ul>
-<h3 id="2-节点配置检查"><strong>2. 节点配置检查</strong></h3>
-<p>节点作为承载 Kubernetes 的底层元计算资源，不仅运行着 Kubelet、Docker 等重要的系统进程，也充当着集群和底层硬件交互接口的角色。</p>
-<p>确保节点的健康性和配置的正确性是确保整个集群健康性重要的一环。下面就对所需的检查项进行讲解。</p>
-<ul>
-<li>操作系统配置：需要确定基础的系统组件（yum、systemd 和 ntp 等系统服务是否正常）和内核参数是否配置合理；</li>
-<li>kubelet：需要确定 kubelet 的进程健康、配置正确；</li>
-<li>Docker：需要确定 Docker 的进程健康、配置正确。</li>
-</ul>
-<h3 id=""></h3>
-<h3 id="3-云资源检查"><strong>3. 云资源检查</strong></h3>
-<p>运行在云上的 Kubernetes 集群依赖着众多云资源，一旦集群所依赖的云资源不健康或者配置错误，就会影响到整个集群的正常运行。我们主要对下列云资源的状态和配置进行预检：</p>
-<ul>
-<li>apiserver 所使用的 SLB：需要确定实例的健康状态和端口配置（转发配置和访问控制配置等）；</li>
-<li>集群所使用的 VPC 和 VSwitch：需要确定实例的健康状况；</li>
-<li>集群内的 ECS 实例：需要确定其健康状况和网络配置。</li>
-</ul>
-<figure data-type="image" tabindex="3"><img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></figure>
-<p><strong>两种常见的升级方式</strong></p>
-<p>在软件升级领域，有两种主流的软件升级方式，即原地升级和替换升级。这两种升级方式同样适用于 Kubernetes 集群，它们采用了不同软件升级思路，但也都存在着各自的利弊。下面我们来对这两种集群升级方式进行逐一讲解。</p>
-<h3 id="-2"></h3>
-<h3 id="1-原地升级"><strong>1. 原地升级</strong></h3>
-<p>原地升级是一种精细化的、对这个那个集群改动量相对较小的一种升级方式。在升级容器的 worker 节点时，该升级方式会通过在 ECS 上原地替换 Kubernetes 组件的方式（主要为 kubelet 和其相关组件），完成整个集群的升级工作。阿里云容器服务 Kubernetes 为客户提供的集群升级就是基于这种方式的。</p>
-<p>以将 Kubernetes 的版本从 1.14 升级到 1.16 为例。首先我们会对 ECS A 上的原本为 1.14 的 Kubelet 及其配置升级为 1.16，在完成节点 ECS A 上的组件升级之后，该节点也就被成功的升级到了 1.16。然后我们再对 ECS B 进行相同的操作，将其升级为 1.16，从而完成整个集群的升级工作。</p>
-<p>在这个过程中节点保持运行，ECS 的相关配置也不会被修改。如图所示：</p>
-<figure data-type="image" tabindex="4"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8qiaHeIqCFuZ3r7bYiat3G0f29ODXwLd26fLKIYDZPrnsbTXib36OkOPHg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="image.png" loading="lazy"></figure>
-<h3 id="1优点"><strong>1）优点</strong></h3>
-<ul>
-<li>
-<p>原地升级通过原地替换 kubelet 组件的方式对节点进行版本升级，从而保证了节点上的 Pod 不会因为集群升级而重建，确保了业务的连贯性；</p>
-</li>
-<li>
-<p>该种升级方式不会对底层 ECS 本身进行修改和替换，保证了依赖特定节点调度的业务可以正常运行，也对 ECS 的包年包月客户更加友好。</p>
-</li>
-</ul>
-<h3 id="2缺点"><strong>2）缺点</strong></h3>
-<ul>
-<li>
-<p>原地升级方式需要在节点上进行一系列升级操作，才能完成整个节点的升级工作，这就导致整个升级过程不够原子化，可能会在中间的某一步骤失败，从而导致该节点升级失败；</p>
-</li>
-<li>
-<p>原地升级的另一个缺点是需要预留一定量的资源，只有在资源足够的情况下升级程序才能在 ECS 上完成对节点的升级。</p>
-</li>
-</ul>
-<h3 id="-3"></h3>
-<h3 id="2-替换升级"><strong>2. 替换升级</strong></h3>
-<p>替换升级又称轮转升级，相对于原地升级，替换升级是一种更加粗狂和原子化的升级方式。替换升级会逐个将旧版本的节点从集群中移除，并用新版本全新的节点来替换，从而完成整个 Kubernetes 集群的升级工作。</p>
-<p>同样以将 Kubernetes 的版本从 1.14 升级到 1.16 为例。使用替代轮转方式的情况下，我们会将集群中 1.14 版本的节点依次进行排水并从集群中移除，并直接加入 1.16 版本的节点。即将 1.14 节点的 ECS A 从节点剔除，并将 1.16 节点的 ECS C 加入集群，再将 ECS B 从集群中删除，最后将 ECS D 加入到集群中。</p>
-<p>这样就完成了所有节点的轮转工作，整个集群就也就升级到 1.16 了。如图所示：</p>
-<figure data-type="image" tabindex="5"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8zlkoL6tgFcG4pLUpfoS1icC49PZRgGbprf1L64tWULyAFcT18oic29ow/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="image.png" loading="lazy"></figure>
-<h3 id="1优点-2"><strong>1）优点</strong></h3>
-<p>替代升级通过将旧版本的节点替换为新版本的节点从而完成集群升级。这个替换的过程相较于原地升级更为原子化，也不存在那么复杂的中间状态，所以也不需要在升级之前进行太多的前置检查。相对应地，升级过程中可能会出现的各种稀奇古怪的问题也会减少很多。</p>
-<h3 id="2缺点-2"><strong>2）缺点</strong></h3>
-<ul>
-<li>
-<p>替代升级将集群内的节点全部进行替换和重置，所有节点都会经历排水的过程，这就会使集群内的 pod 进行大量迁移重建，对于 pod 重建容忍度比较低的业务、只有单副本的应用、stateful set 等相关应用不够友好，可能会因此发生不可用或者故障；</p>
-</li>
-<li>
-<p>所有的节点经历重置，储存在节点本地磁盘上的数据都会丢失；</p>
-</li>
-<li>
-<p>这种升级方式可能会带来宿主机 IP 变化等问题，对包年包月用户也不够友好。</p>
-</li>
-</ul>
-<h2 id="-4"></h2>
-<figure data-type="image" tabindex="6"><img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></figure>
-<p><strong>集群升级三部曲</strong></p>
-<p>一个 Kubernetes 集群主要由负责集群管控的 master，执行工作负载的 worker 和众多功能性的系统组件组成。对一个 Kubernetes 集群升级，也就是对集群中的这三个部分进行分别升级。</p>
-<p>故集群升级的三部曲为：</p>
-<ul>
-<li>滚动升级 master</li>
-<li>分批升级 worker</li>
-<li>系统组件升级（主要为 CoreDNS，kube-proxy 等核心组件）</li>
-</ul>
-<figure data-type="image" tabindex="7"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8XdjExtDy2zPSuMBWibKkJiamWeIR3EWY7otC99pkFyVG7wuevsRHp9NA/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="image.png" loading="lazy"></figure>
-<p>下面我们来对集群升级三部曲进行详细的讲解。</p>
-<h3 id="1-滚动升级-master"><strong>1. 滚动升级 master</strong></h3>
-<p>master 作为集群的大脑，承担了与使用者交互、任务调度和各种功能性的任务处理。集群 master 的部署方式也比较多样，可以通过 static pod 进行部署，可以通过本地进程进行部署，也可以通过 Kubernetes on Kubernetes 的方式在另一个集群内通过 pod 的方式部署。</p>
-<p>总而言之，无论 master 为哪种部署方式，想要升级 master 主要就是对 master 中的三大件进行版本升级，主要包括：</p>
-<ul>
-<li>升级 kube-apiserver</li>
-<li>升级 kube-controller-manager</li>
-<li>升级 kube-scheduler</li>
-</ul>
-<p>需要注意，为了保证 Kubernetes apiserver 的可用性不中断，master 中的 kube-apiserver 最少需要有两个，这样才可以实现滚动升级，从而保证 apiserver 不会出现 downtime。</p>
-<h3 id="2-分批升级-worker"><strong>2. 分批升级 worker</strong></h3>
-<p>在完成 master 的升级工作之后，我们才可以开始对 worker 进行升级。Worker 升级主要是对节点上的 kubelet 及其依赖组件（如 cni 等）进行升级。为了保证集群中 worker 不会同时发生大批量的 kubelet 重启，所以我们需要对 worker 节点进行分批升级。</p>
-<p>需要注意，我们必须要先升级 master，再升级 worker。因为高版本的 kubelet 在连接低版本的 master 时，很可能会出现不兼容的情况，从而导致节点 not ready。对于低版本的 kubelet 连接高版本的 apiserver，开源社区保证了 apiserver 对于 kubelet 两个版本的向后兼容性，即 1.14 的 kubelet 可以连接到 1.16 的 apiserver，而不会发生兼容性问题。</p>
-<h3 id="-5"></h3>
-<h3 id="3-核心系统组件升级"><strong>3. 核心系统组件升级</strong></h3>
-<p>为了保证集群中各个组件的兼容性，我们需要在升级集群的同时对集群中的核心系统组件进行同步升级，主要包括：</p>
-<ul>
-<li><strong>Dns 组件</strong>：根据社区的版本兼容矩阵，将 CoreDNS 的版本升级为与集群版本相对应的版本；</li>
-</ul>
-<p><strong>社区的版本兼容矩阵</strong>：https://github.com/coredns/deployment/blob/master/kubernetes/CoreDNS-k8s_version.md</p>
-<ul>
-<li><strong>网络转发组件</strong>：Kube-proxy 的版本是跟随 Kubernetes 的版本进行演进的，所有我们需要将 kube-proxy 的版本升级到与 Kubernetes 版本相同的版本。</li>
-</ul>
 ]]></content>
     </entry>
 </feed>
