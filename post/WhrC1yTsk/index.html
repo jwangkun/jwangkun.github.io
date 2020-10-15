@@ -99,7 +99,6 @@
         <div class="col-lg-8 col-md-10 mx-auto">
           <p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
 <p>代码：pipeline在代码中实现，通常检查到源代码控制，使团队能够编辑，审查和迭代其交付管道。 持久：pipeline可以在Jenkins master的计划内和计划外重启中存活。 Pausable：在继续pipeline运行之前，pipeline可以选择停止并等待人工输入或批准。 多功能：pipeline支持复杂的实际CD要求，包括并行分叉/连接，循环和执行工作的能力。 可扩展：Pipeline插件支持其DSL的自定义扩展 和多个与其他插件集成的选项</p>
-<!-- more -->
 <h2 id="二-k8s实现集成部署交付">二、k8s实现集成/部署/交付</h2>
 <figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c201e1b59?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
 <h2 id="三-创建一个gitlab的测试项目网上找的简单代码测试">三、创建一个gitlab的测试项目（网上找的简单代码测试）</h2>
@@ -554,7 +553,6 @@ FIELDS:
      ready, old RC can be scaled down further, followed by scaling up the new
      RC, ensuring that the total number of pods available at all times during
      the update is at least 70% of desired pods.
-复制代码
 </code></pre>
 <h3 id="5-其它更新策略金丝雀等">5、其它更新策略（金丝雀等）</h3>
 <p><a href="https://zhuanlan.zhihu.com/p/55964678">zhuanlan.zhihu.com/p/55964678</a></p>

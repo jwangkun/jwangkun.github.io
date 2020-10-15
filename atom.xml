@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T05:43:07.640Z</updated>
+    <updated>2020-10-15T05:49:07.027Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -62,21 +62,18 @@
 <li>打开终端查看版本：</li>
 </ul>
 <pre><code class="language-shell">docker version
-复制代码
 </code></pre>
 <figure data-type="image" tabindex="18"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808203059617.png" alt="image-20200808203059617" loading="lazy"></figure>
 <ul>
 <li>下载nginx镜像</li>
 </ul>
 <pre><code class="language-shell">docker pull nginx
-复制代码
 </code></pre>
 <figure data-type="image" tabindex="19"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802200335386.png" alt="image-20200802200335386" loading="lazy"></figure>
 <ul>
 <li>运行nginx镜像</li>
 </ul>
 <pre><code class="language-shell">docker run -p 81:80 -d --name mynginx nginx
-复制代码
 </code></pre>
 <p>为了方便使用linux的命令，这里使用了git bash</p>
 <figure data-type="image" tabindex="20"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802201727058.png" alt="image-20200802201727058" loading="lazy"></figure>
@@ -91,7 +88,6 @@
 docker ps -a | grep mynginx | awk '{print $1}' | xargs docker stop
 # 删除刚运行的名称为mynginx的实例
 docker ps -a | grep mynginx | awk '{print $1}' | xargs docker rm
-复制代码
 </code></pre>
 <figure data-type="image" tabindex="21"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802201759127.png" alt="image-20200802201759127" loading="lazy"></figure>
 <h2 id="安装kubernetes">安装Kubernetes</h2>
@@ -104,13 +100,12 @@ docker ps -a | grep mynginx | awk '{print $1}' | xargs docker rm
 <li>克隆脚本</li>
 </ul>
 <pre><code class="language-shell">git clone https://github.com/AliyunContainerService/k8s-for-docker-desktop.git
-复制代码
 </code></pre>
 <ul>
 <li>
 <p>进入目录</p>
 <pre><code class="language-shell">cd k8s-for-docker-desktop
-复制代码
+
 </code></pre>
 </li>
 <li>
@@ -118,7 +113,6 @@ docker ps -a | grep mynginx | awk '{print $1}' | xargs docker rm
 </li>
 </ul>
 <pre><code class="language-shell">git checkbot v1.16.5
-复制代码
 </code></pre>
 <ul>
 <li>以管理员身份运行PowerShell</li>
@@ -129,7 +123,6 @@ docker ps -a | grep mynginx | awk '{print $1}' | xargs docker rm
 <li>设置执行脚本权限</li>
 </ul>
 <pre><code class="language-shell">Set-ExecutionPolicy RemoteSigned
-复制代码
 </code></pre>
 <ul>
 <li>执行下载镜像脚本</li>
@@ -141,13 +134,13 @@ docker ps -a | grep mynginx | awk '{print $1}' | xargs docker rm
 <li>删除阿里镜像</li>
 </ol>
 <pre><code class="language-shell">./load_images.ps1
-复制代码
+
 </code></pre>
 <ul>
 <li>关闭执行脚本权限</li>
 </ul>
 <pre><code class="language-shell">Set-ExecutionPolicy Restricted
-复制代码
+
 </code></pre>
 <figure data-type="image" tabindex="23"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802203748999.png" alt="image-20200802203748999" loading="lazy"></figure>
 <figure data-type="image" tabindex="24"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802203800085.png" alt="image-20200802203800085" loading="lazy"></figure>
@@ -165,14 +158,13 @@ docker ps -a | grep mynginx | awk '{print $1}' | xargs docker rm
 <li>切换当前集群</li>
 </ul>
 <pre><code class="language-shell">kubectl config use-context docker-desktop
-复制代码
+
 </code></pre>
 <ul>
 <li>验证Kubernetes集群状态</li>
 </ul>
 <pre><code class="language-shell">kubectl cluster-info
 kubectl get nodes
-复制代码
 </code></pre>
 <figure data-type="image" tabindex="29"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802204955552.png" alt="image-20200802204955552" loading="lazy"></figure>
 <h2 id="安装ingress-nginx">安装ingress-nginx</h2>
@@ -201,13 +193,13 @@ kubectl get nodes
 </ul>
 <pre><code class="language-shell">kubectl apply -f mandatory.yaml
 kubectl apply -f cloud-generic.yaml
-复制代码
+
 </code></pre>
 <ul>
 <li>查看</li>
 </ul>
 <pre><code class="language-shell">kubectl get pods -n ingress-nginx
-复制代码
+
 </code></pre>
 <figure data-type="image" tabindex="35"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802214929902.png" alt="image-20200802214929902" loading="lazy"></figure>
 <ul>
@@ -227,19 +219,16 @@ metadata:
   
 EOF
 
-复制代码
 </code></pre>
 <ul>
 <li>执行发布命令</li>
 </ul>
 <pre><code class="language-shell">kubectl apply -f nginx-ns.yaml
-复制代码
 </code></pre>
 <ul>
 <li>查看执行结果</li>
 </ul>
 <pre><code class="language-shell">kubectl get ns
-复制代码
 </code></pre>
 <figure data-type="image" tabindex="37"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802215728932.png" alt="image-20200802215728932" loading="lazy"></figure>
 <h3 id="创建configmap-配置文件">创建ConfigMap-配置文件</h3>
@@ -283,19 +272,17 @@ data:
   
 EOF
 
-复制代码
 </code></pre>
 <ul>
 <li>执行发布命令</li>
 </ul>
 <pre><code class="language-shell">kubectl apply -f nginx-cm.yaml
-复制代码
+
 </code></pre>
 <ul>
 <li>查看执行结果</li>
 </ul>
 <pre><code class="language-shell">kubectl get cm -n mldong-study
-复制代码
 </code></pre>
 <figure data-type="image" tabindex="38"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802222243494.png" alt="image-20200802222243494" loading="lazy"></figure>
 <h3 id="创建configmap-html文件">创建ConfigMap-html文件</h3>
@@ -317,19 +304,17 @@ data:
   
 EOF
 
-复制代码
 </code></pre>
 <ul>
 <li>执行发布命令</li>
 </ul>
 <pre><code class="language-shell">kubectl apply -f nginx-cm-html.yaml
-复制代码
 </code></pre>
 <ul>
 <li>查看执行结果</li>
 </ul>
 <pre><code class="language-shell">kubectl get cm -n mldong-study
-复制代码
+
 </code></pre>
 <h3 id="创建deployment">创建Deployment</h3>
 <ul>
@@ -375,19 +360,19 @@ spec:
             name: nginx-cm
   
 EOF
-复制代码
+
 </code></pre>
 <ul>
 <li>执行发布命令</li>
 </ul>
 <pre><code class="language-shell">kubectl apply -f nginx-deployment.yaml
-复制代码
+
 </code></pre>
 <ul>
 <li>查看执行结果</li>
 </ul>
 <pre><code class="language-shell">kubectl get pods -n mldong-study
-复制代码
+
 </code></pre>
 <figure data-type="image" tabindex="39"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802222418364.png" alt="image-20200802222418364" loading="lazy"></figure>
 <h3 id="创建service">创建Service</h3>
@@ -425,19 +410,18 @@ spec:
 
 EOF
 
-复制代码
 </code></pre>
 <ul>
 <li>执行发布命令</li>
 </ul>
 <pre><code class="language-shell">kubectl apply -f nginx-service.yaml
-复制代码
+
 </code></pre>
 <ul>
 <li>查看执行结果</li>
 </ul>
 <pre><code class="language-shell">kubectl get service -n mldong-study
-复制代码
+
 </code></pre>
 <figure data-type="image" tabindex="40"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802222632065.png" alt="image-20200802222632065" loading="lazy"></figure>
 <h3 id="创建ingress">创建Ingress</h3>
@@ -477,7 +461,7 @@ EOF
 <li>执行发布命令</li>
 </ul>
 <pre><code class="language-shell">kubectl apply -f nginx-ingress.yaml
-复制代码
+
 </code></pre>
 <ul>
 <li>查看执行结果</li>
@@ -495,7 +479,6 @@ EOF
 <figure data-type="image" tabindex="44"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802230525836.png" alt="image-20200802230525836" loading="lazy"></figure>
 <p>最后清理现场</p>
 <pre><code class="language-shell">kubectl delete -f nginx-ns.yaml
-复制代码
 </code></pre>
 <p>如需要再次执行，依次执行如下命令:</p>
 <pre><code class="language-shell">kubectl apply -f nginx-ns.yaml
@@ -504,7 +487,7 @@ kubectl apply -f nginx-cm-html.yaml
 kubectl apply -f nginx-deployment.yaml
 kubectl apply -f nginx-service.yaml
 kubectl apply -f nginx-ingress.yaml
-复制代码
+
 </code></pre>
 <figure data-type="image" tabindex="45"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802231134661.png" alt="image-20200802231134661" loading="lazy"></figure>
 <h2 id="小结">小结</h2>
@@ -992,7 +975,7 @@ outputs:
 NAME            READY   AGE
 elasticsearch   2/2     33m
 logstash        1/1     19m
-复制代码
+
 </code></pre>
 <h2 id="三-filebeat安装">三、Filebeat安装</h2>
 <h3 id="1-下载与修改helm资源清单修改镜像和配置-2">1、下载与修改helm资源清单（修改镜像和配置）</h3>
@@ -1041,7 +1024,7 @@ config:
     hosts: [&quot;logstash.kube-system.svc.cluster.local:5044&quot;]
   http.enabled: true
   http.port: 5066
-复制代码
+
 </code></pre>
 <h3 id="2-安装与查看-2">2、安装与查看</h3>
 <pre><code>#安装
@@ -1111,12 +1094,8 @@ fluentd-es-v2.7.0   2         2         2       2            2           none   
         <link href="https://jwangkun.github.io/post/WhrC1yTsk/">
         </link>
         <updated>2020-10-15T03:23:46.000Z</updated>
-        <summary type="html"><![CDATA[<p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
-<p>代码：pipeline在代码中实现，通常检查到源代码控制，使团队能够编辑，审查和迭代其交付管道。 持久：pipeline可以在Jenkins master的计划内和计划外重启中存活。 Pausable：在继续pipeline运行之前，pipeline可以选择停止并等待人工输入或批准。 多功能：pipeline支持复杂的实际CD要求，包括并行分叉/连接，循环和执行工作的能力。 可扩展：Pipeline插件支持其DSL的自定义扩展 和多个与其他插件集成的选项</p>
-]]></summary>
         <content type="html"><![CDATA[<p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
 <p>代码：pipeline在代码中实现，通常检查到源代码控制，使团队能够编辑，审查和迭代其交付管道。 持久：pipeline可以在Jenkins master的计划内和计划外重启中存活。 Pausable：在继续pipeline运行之前，pipeline可以选择停止并等待人工输入或批准。 多功能：pipeline支持复杂的实际CD要求，包括并行分叉/连接，循环和执行工作的能力。 可扩展：Pipeline插件支持其DSL的自定义扩展 和多个与其他插件集成的选项</p>
-<!-- more -->
 <h2 id="二-k8s实现集成部署交付">二、k8s实现集成/部署/交付</h2>
 <figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c201e1b59?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
 <h2 id="三-创建一个gitlab的测试项目网上找的简单代码测试">三、创建一个gitlab的测试项目（网上找的简单代码测试）</h2>
@@ -1571,7 +1550,6 @@ FIELDS:
      ready, old RC can be scaled down further, followed by scaling up the new
      RC, ensuring that the total number of pods available at all times during
      the update is at least 70% of desired pods.
-复制代码
 </code></pre>
 <h3 id="5-其它更新策略金丝雀等">5、其它更新策略（金丝雀等）</h3>
 <p><a href="https://zhuanlan.zhihu.com/p/55964678">zhuanlan.zhihu.com/p/55964678</a></p>

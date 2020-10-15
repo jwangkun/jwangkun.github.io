@@ -203,7 +203,7 @@ outputs:
 NAME            READY   AGE
 elasticsearch   2/2     33m
 logstash        1/1     19m
-复制代码
+
 </code></pre>
 <h2 id="三-filebeat安装">三、Filebeat安装</h2>
 <h3 id="1-下载与修改helm资源清单修改镜像和配置-2">1、下载与修改helm资源清单（修改镜像和配置）</h3>
@@ -252,7 +252,7 @@ config:
     hosts: [&quot;logstash.kube-system.svc.cluster.local:5044&quot;]
   http.enabled: true
   http.port: 5066
-复制代码
+
 </code></pre>
 <h3 id="2-安装与查看-2">2、安装与查看</h3>
 <pre><code>#安装
