@@ -109,7 +109,13 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <h3 id="设置命令自动补全">设置命令自动补全</h3>
+<pre><code class="language-bash"># 首先下载这个命令，补全命令才能生效
+yum install -y bash-completion
+# 1、当前shell生效
+yum install -y bash-completion
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-15</span>
@@ -128,7 +134,13 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <h1 id="docker-常用命令汇总"><strong>Docker 常用命令汇总</strong></h1>
+<h3 id="docker-镜像命令">Docker 镜像命令</h3>
+<p>列出镜像列表</p>
+<pre><code class="language-sh">$ docker images
+$ docker image ls -a
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-15</span>
@@ -147,7 +159,15 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
+<p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
+<pre><code># 创建一个 Master 节点
+$ kubeadm init
+
+# 将一个 Node 节点加入到当前集群中
+$ kubeadm join &lt;Master节点的IP和端口 &gt;
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-15</span>
@@ -166,7 +186,15 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
+<p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
+<pre><code># 创建一个 Master 节点
+$ kubeadm init
+
+# 将一个 Node 节点加入到当前集群中
+$ kubeadm join &lt;Master节点的IP和端口 &gt;
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-15</span>

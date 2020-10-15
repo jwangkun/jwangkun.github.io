@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T03:04:48.711Z</updated>
+    <updated>2020-10-15T03:06:05.250Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -164,11 +164,20 @@
         <link href="https://jwangkun.github.io/post/HwKdS3aOl/">
         </link>
         <updated>2020-10-15T02:54:21.000Z</updated>
+        <summary type="html"><![CDATA[<h3 id="设置命令自动补全">设置命令自动补全</h3>
+<pre><code class="language-bash"># 首先下载这个命令，补全命令才能生效
+yum install -y bash-completion
+# 1、当前shell生效
+yum install -y bash-completion
+</code></pre>
+]]></summary>
         <content type="html"><![CDATA[<h3 id="设置命令自动补全">设置命令自动补全</h3>
 <pre><code class="language-bash"># 首先下载这个命令，补全命令才能生效
 yum install -y bash-completion
 # 1、当前shell生效
 yum install -y bash-completion
+
+&lt;!-- more --&gt;
 
 #2、总是会生效
 # vi  .bashrc    (/etc/profile)
@@ -281,12 +290,20 @@ kubectl get pods --namespace demo # 查看指定名称空间的pod
         <link href="https://jwangkun.github.io/post/Ij5JN2yIV/">
         </link>
         <updated>2020-10-15T02:38:20.000Z</updated>
+        <summary type="html"><![CDATA[<h1 id="docker-常用命令汇总"><strong>Docker 常用命令汇总</strong></h1>
+<h3 id="docker-镜像命令">Docker 镜像命令</h3>
+<p>列出镜像列表</p>
+<pre><code class="language-sh">$ docker images
+$ docker image ls -a
+</code></pre>
+]]></summary>
         <content type="html"><![CDATA[<h1 id="docker-常用命令汇总"><strong>Docker 常用命令汇总</strong></h1>
 <h3 id="docker-镜像命令">Docker 镜像命令</h3>
 <p>列出镜像列表</p>
 <pre><code class="language-sh">$ docker images
 $ docker image ls -a
 </code></pre>
+<!-- more -->
 <p>运行 Docker 镜像（守护态方式）</p>
 <pre><code class="language-sh">$ docker run -d {镜像名}
 </code></pre>
@@ -460,6 +477,15 @@ $ sudo docker push registry.tp-link.net:5000/mongo:2014-10-27
         <link href="https://jwangkun.github.io/post/fdMXY3LCV/">
         </link>
         <updated>2020-10-15T00:39:13.000Z</updated>
+        <summary type="html"><![CDATA[<p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
+<p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
+<pre><code># 创建一个 Master 节点
+$ kubeadm init
+
+# 将一个 Node 节点加入到当前集群中
+$ kubeadm join &lt;Master节点的IP和端口 &gt;
+</code></pre>
+]]></summary>
         <content type="html"><![CDATA[<p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
 <p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
 <pre><code># 创建一个 Master 节点
@@ -468,6 +494,7 @@ $ kubeadm init
 # 将一个 Node 节点加入到当前集群中
 $ kubeadm join &lt;Master节点的IP和端口 &gt;
 </code></pre>
+<!-- more -->
 <h2 id="1-安装要求">1. 安装要求</h2>
 <p>在开始之前，部署Kubernetes集群机器需要满足以下几个条件：</p>
 <ul>
@@ -613,6 +640,15 @@ $ kubectl get pod,svc
         <link href="https://jwangkun.github.io/post/qMQ3HyNA5/">
         </link>
         <updated>2020-10-15T00:38:13.000Z</updated>
+        <summary type="html"><![CDATA[<p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
+<p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
+<pre><code># 创建一个 Master 节点
+$ kubeadm init
+
+# 将一个 Node 节点加入到当前集群中
+$ kubeadm join &lt;Master节点的IP和端口 &gt;
+</code></pre>
+]]></summary>
         <content type="html"><![CDATA[<p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
 <p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
 <pre><code># 创建一个 Master 节点
@@ -621,6 +657,7 @@ $ kubeadm init
 # 将一个 Node 节点加入到当前集群中
 $ kubeadm join &lt;Master节点的IP和端口 &gt;
 </code></pre>
+<!-- more -->
 <h2 id="1-安装要求">1. 安装要求</h2>
 <p>在开始之前，部署Kubernetes集群机器需要满足以下几个条件：</p>
 <ul>
