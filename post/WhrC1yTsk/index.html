@@ -97,9 +97,7 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <h1 id=""></h1>
-<h2 id="一-pipeline介绍">一、Pipeline介绍</h2>
-<p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
+          <p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
 <p>代码：pipeline在代码中实现，通常检查到源代码控制，使团队能够编辑，审查和迭代其交付管道。 持久：pipeline可以在Jenkins master的计划内和计划外重启中存活。 Pausable：在继续pipeline运行之前，pipeline可以选择停止并等待人工输入或批准。 多功能：pipeline支持复杂的实际CD要求，包括并行分叉/连接，循环和执行工作的能力。 可扩展：Pipeline插件支持其DSL的自定义扩展 和多个与其他插件集成的选项</p>
 <!-- more -->
 <h2 id="二-k8s实现集成部署交付">二、k8s实现集成/部署/交付</h2>
@@ -207,7 +205,7 @@ podTemplate(label: 'label', cloud: 'kubernetes') {
 <h3 id="5-pipline中视图git凭证">5、Pipline中视图git凭证</h3>
 <figure data-type="image" tabindex="9"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c579a52d7?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
 <figure data-type="image" tabindex="10"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c584a1987?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
-<h2 id="-2"></h2>
+<h2 id=""></h2>
 <h3 id="6-重新构建jnlp-slave镜像添加maven">6、重新构建jnlp-slave镜像（添加maven）</h3>
 <pre><code>mkdir myjenkins
 cd myjenkins/

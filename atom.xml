@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T03:31:10.648Z</updated>
+    <updated>2020-10-15T03:35:01.327Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -11,19 +11,233 @@
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
     <entry>
+        <title type="html"><![CDATA[ k8s安装ELK与EFK]]></title>
+        <id>https://jwangkun.github.io/post/NmSmQLSLI/</id>
+        <link href="https://jwangkun.github.io/post/NmSmQLSLI/">
+        </link>
+        <updated>2020-10-15T03:34:07.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="一-elasticsearch安装">一、Elasticsearch安装</h2>
+<p><strong>helm安装的也行，而且helm安装的stable/elasticsearch可用性更高，但是使用资源更多。</strong></p>
+<h3 id="1-安装elasticsearch线上环境千万记得把emptydir改了一定要使用存储">1、安装<strong>elasticsearch（线上环境千万记得把emptyDir改了，一定要使用存储。）</strong></h3>
+<pre><code>#下载资源文件
+wget https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/fluentd-elasticsearch/es-statefulset.yaml
+wget https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/fluentd-elasticsearch/es-service.yaml
+
+#替换镜像和修改配置
+docker.elastic.co/elasticsearch/elasticsearch-oss:6.7.0
+#其它配置根据自己情况修改，我这里修改了name的值，其它的测试就不添加或修改了
+复制代码
+</code></pre>
+<h3 id="2-查看">2、查看</h3>
+<pre><code>[root@k8s-m elk]# kubectl get svc -n kube-system
+NAME            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                  AGE
+elasticsearch   ClusterIP   10.102.165.164   none        9200/TCP                 108s
+
+[root@k8s-m elk]# curl  10.102.165.164:9200/_cluster/health?pretty
+{
+  &quot;cluster_name&quot; : &quot;docker-cluster&quot;,
+  &quot;status&quot; : &quot;green&quot;,
+  &quot;timed_out&quot; : false,
+  &quot;number_of_nodes&quot; : 1,
+  &quot;number_of_data_nodes&quot; : 1,
+  &quot;active_primary_shards&quot; : 0,
+  &quot;active_shards&quot; : 0,
+  &quot;relocating_shards&quot; : 0,
+  &quot;initializing_shards&quot; : 0,
+  &quot;unassigned_shards&quot; : 0,
+  &quot;delayed_unassigned_shards&quot; : 0,
+  &quot;number_of_pending_tasks&quot; : 0,
+  &quot;number_of_in_flight_fetch&quot; : 0,
+  &quot;task_max_waiting_in_queue_millis&quot; : 0,
+  &quot;active_shards_percent_as_number&quot; : 100.0
+}
+复制代码
+</code></pre>
+<h2 id="二-logstash安装">二、Logstash安装</h2>
+<h3 id="1-下载与修改helm资源清单修改镜像和配置">1、下载与修改helm资源清单（修改镜像和配置）</h3>
+<pre><code>#下载logtsash资源清单
+helm fetch stable/logstash
+
+#修改的配置（我这里就拿messages和audit日志做演示，我去掉了pvc的存储，这里就不记录了）
+#镜像6.7.0
+
+#elasticsearch配置
+elasticsearch:
+  host: elasticsearch.kube-system.svc.cluster.local
+  port: 9200
+
+#输入输出等配置
+inputs:
+  main: |-
+    input {
+      beats {
+        port = 5044
+      }
+    }
+
+filters:
+  main: |-
+    filter {
+      if &quot;audit_log&quot; in [tags] {
+        mutate {
+          rename = { &quot;[host][name]&quot; = &quot;host&quot; }
+        }
+      }
+
+      if &quot;messages_log&quot; in [tags] {
+        mutate {
+          rename = { &quot;[host][name]&quot; = &quot;host&quot; }
+        }
+      }
+    }
+outputs:
+  main: |-
+    output {
+      if &quot;audit_log&quot; in [tags] {
+        elasticsearch {
+          hosts = [&quot;${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}&quot;]
+          index = &quot;audit-%{+YYYY.MM.dd}&quot;
+        }
+      }
+      if &quot;messages_log&quot; in [tags] {
+        elasticsearch {
+          hosts = [&quot;${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}&quot;]
+          index = &quot;messages-%{+YYYY.MM.dd}&quot;
+        }
+      }
+    }
+复制代码
+</code></pre>
+<h3 id="2-安装与查看">2、安装与查看</h3>
+<pre><code>helm  install stable/logstash     --name logstash -f values.yaml    --namespace  kube-system
+
+#查看
+[root@k8s-m logstash]# kubectl get sts -n kube-system
+NAME            READY   AGE
+elasticsearch   2/2     33m
+logstash        1/1     19m
+复制代码
+</code></pre>
+<h2 id="三-filebeat安装">三、Filebeat安装</h2>
+<h3 id="1-下载与修改helm资源清单修改镜像和配置-2">1、下载与修改helm资源清单（修改镜像和配置）</h3>
+<pre><code>#下载清单
+helm fetch stable/filebeat
+
+#修改镜像等配置（演示messages和audit日志）
+config:
+  filebeat.config:
+    modules:
+      path: ${path.config}/modules.d/*.yml
+      # Reload module configs as they change:
+      reload.enabled: false
+
+  processors:
+    - add_cloud_metadata:
+
+  filebeat.inputs:
+    - type: log
+      enabled: true
+      paths:
+        - /var/log/messages
+      close_eof: true
+      tags: messages_log
+      clean_*: true
+    - type: log
+      paths:
+        - /var/log/audit/audit.log
+      close_eof: true
+      tags: audit_log
+      clean_*: true
+    - type: docker
+      containers.ids:
+      - &quot;*&quot;
+      processors:
+        - add_kubernetes_metadata:
+            in_cluster: true
+        - drop_event:
+            when:
+              equals:
+                kubernetes.container.name: &quot;filebeat&quot;
+
+  output.file:
+    enabled: false
+  output.logstash:
+    hosts: [&quot;logstash.kube-system.svc.cluster.local:5044&quot;]
+  http.enabled: true
+  http.port: 5066
+复制代码
+</code></pre>
+<h3 id="2-安装与查看-2">2、安装与查看</h3>
+<pre><code>#安装
+helm install stable/filebeat  --name  filebeat   -f  values.yaml  --namespace kube-system
+
+#查看
+[root@k8s-m filebeat]# kubectl get ds -n kube-system
+NAME          DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                 AGE
+calico-node   3         3         3       3            3           beta.kubernetes.io/os=linux   45m
+filebeat      2         2         2       2            2           none                        21m
+复制代码
+</code></pre>
+<h2 id="四-kibana安装">四、Kibana安装</h2>
+<h3 id="1-下载与修改helm资源清单修改镜像和配置-3">1、下载与修改helm资源清单（修改镜像和配置）</h3>
+<pre><code>#下载清单
+helm  fetch stable/kibana
+
+#修改的配置（我把443改成了80端口访问）
+files:
+  kibana.yml:
+    server.name: kibana
+    server.host: &quot;0&quot;
+    elasticsearch.hosts: http://elasticsearch.kube-system.svc.cluster.local:9200
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 5601
+复制代码
+</code></pre>
+<h3 id="2-安装与查看-3">2、安装与查看</h3>
+<pre><code>#安装
+helm install  stable/kibana   --name kibana -f values.yaml  --namespace kube-system
+
+#让kibana能外网访问
+kubectl  patch svc  kibana -n kube-system -p '{&quot;spec&quot;:{&quot;type&quot;:&quot;NodePort&quot;}}'
+复制代码
+</code></pre>
+<h3 id="3-浏览器查看">3、浏览器查看</h3>
+<figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd3855112aba5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd385532adc98?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd38552dba922?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h2 id="五-fluentd安装filebeat和fluentd选一个安装k8s日志收集方案推荐">五、Fluentd安装（filebeat和fluentd选一个安装）(k8s日志收集方案推荐</h2>
+<p>Fluentd) 安装fluentd就没必要安装logtsah和filebeat了，上面的架构可以说是ELFK，特点是logstash对日志较强的格式处理，格式化输出，还有特点就是之前用过或学过，不用再学习了，可以直接拿来就用。并且logstash保存到Elasticsearch之间还可以添加个消息队列。 EFK (Elasticsearch + Fluentd + Kibana) 是kubernetes官方推荐的日志收集方案。</p>
+<p>Fluentd官方安装的就已经收集了许多日志了。可以根据自己的需求添加修改。 推荐一篇博客：<a href="https://blog.laisky.com/p/fluentd/#">blog.laisky.com/p/fluentd/#</a></p>
+<h3 id="1-安装fluentd记得修改elasticsearch的配置">1、安装Fluentd（记得修改elasticsearch的配置）</h3>
+<pre><code>wget https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/fluentd-elasticsearch/fluentd-es-configmap.yaml
+wget https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/fluentd-elasticsearch/fluentd-es-ds.yaml
+复制代码
+</code></pre>
+<h3 id="2-查看-2">2、查看</h3>
+<pre><code>[root@k8s-m fluentd]# kubectl get ds -n kube-system fluentd-es-v2.7.0 
+NAME                DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+fluentd-es-v2.7.0   2         2         2       2            2           none          101m
+复制代码
+</code></pre>
+<h3 id="3-kibana查看">3、kibana查看</h3>
+<figure data-type="image" tabindex="4"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd38553ae92b5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd38554e506a5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="4-总结">4、总结</h3>
+<p>EFK的安装完全可以使用官方的yaml文件安装，并且官方安装的方式使用的EFK版本都比较新。</p>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[Jenkines Pipline CI/CD 发布至k8s ]]></title>
         <id>https://jwangkun.github.io/post/WhrC1yTsk/</id>
         <link href="https://jwangkun.github.io/post/WhrC1yTsk/">
         </link>
         <updated>2020-10-15T03:23:46.000Z</updated>
-        <summary type="html"><![CDATA[<h1 id=""></h1>
-<h2 id="一-pipeline介绍">一、Pipeline介绍</h2>
-<p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
+        <summary type="html"><![CDATA[<p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
 <p>代码：pipeline在代码中实现，通常检查到源代码控制，使团队能够编辑，审查和迭代其交付管道。 持久：pipeline可以在Jenkins master的计划内和计划外重启中存活。 Pausable：在继续pipeline运行之前，pipeline可以选择停止并等待人工输入或批准。 多功能：pipeline支持复杂的实际CD要求，包括并行分叉/连接，循环和执行工作的能力。 可扩展：Pipeline插件支持其DSL的自定义扩展 和多个与其他插件集成的选项</p>
 ]]></summary>
-        <content type="html"><![CDATA[<h1 id=""></h1>
-<h2 id="一-pipeline介绍">一、Pipeline介绍</h2>
-<p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
+        <content type="html"><![CDATA[<p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
 <p>代码：pipeline在代码中实现，通常检查到源代码控制，使团队能够编辑，审查和迭代其交付管道。 持久：pipeline可以在Jenkins master的计划内和计划外重启中存活。 Pausable：在继续pipeline运行之前，pipeline可以选择停止并等待人工输入或批准。 多功能：pipeline支持复杂的实际CD要求，包括并行分叉/连接，循环和执行工作的能力。 可扩展：Pipeline插件支持其DSL的自定义扩展 和多个与其他插件集成的选项</p>
 <!-- more -->
 <h2 id="二-k8s实现集成部署交付">二、k8s实现集成/部署/交付</h2>
@@ -131,7 +345,7 @@ podTemplate(label: 'label', cloud: 'kubernetes') {
 <h3 id="5-pipline中视图git凭证">5、Pipline中视图git凭证</h3>
 <figure data-type="image" tabindex="9"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c579a52d7?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
 <figure data-type="image" tabindex="10"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c584a1987?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
-<h2 id="-2"></h2>
+<h2 id=""></h2>
 <h3 id="6-重新构建jnlp-slave镜像添加maven">6、重新构建jnlp-slave镜像（添加maven）</h3>
 <pre><code>mkdir myjenkins
 cd myjenkins/
@@ -1822,128 +2036,6 @@ Events:            &lt;none&gt;
 <ul>
 <li><strong>网络转发组件</strong>：Kube-proxy 的版本是跟随 Kubernetes 的版本进行演进的，所有我们需要将 kube-proxy 的版本升级到与 Kubernetes 版本相同的版本。</li>
 </ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Kubernetes 网络插件工作原理]]></title>
-        <id>https://jwangkun.github.io/post/IC6DrTsc6/</id>
-        <link href="https://jwangkun.github.io/post/IC6DrTsc6/">
-        </link>
-        <updated>2020-10-13T09:17:09.000Z</updated>
-        <summary type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3n5sBnyHgeuQBiaFVjeiaiaX67XW1V86TLWiaDUsiaXicqjMG1poRUGPy6vFQ/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>容器的网络解决方案有很多种，每支持一种网络实现就进行一次适配显然是不现实的，而 CNI 就是为了兼容多种网络方案而发明的。CNI 是 Container Network Interface 的缩写，是一个标准的通用的接口，用于连接容器管理系统和网络插件。</p>
-]]></summary>
-        <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3n5sBnyHgeuQBiaFVjeiaiaX67XW1V86TLWiaDUsiaXicqjMG1poRUGPy6vFQ/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>容器的网络解决方案有很多种，每支持一种网络实现就进行一次适配显然是不现实的，而 CNI 就是为了兼容多种网络方案而发明的。CNI 是 Container Network Interface 的缩写，是一个标准的通用的接口，用于连接容器管理系统和网络插件。</p>
-<!-- more -->
-<p>简单来说，容器 runtime 为容器提供 network namespace，网络插件负责将 network interface 插入该 network namespace 中并且在宿主机做一些必要的配置，最后对 namespace 中的 interface 进行 IP 和路由的配置。</p>
-<p>所以网络插件的主要工作就在于为容器提供网络环境，包括为 pod 设置 ip 地址、配置路由保证集群内网络的通畅。目前比较流行的网络插件是 Flannel 和 Calico。</p>
-<h2 id="flannel">Flannel</h2>
-<p>Flannel 主要提供的是集群内的 Overlay 网络，支持三种后端实现，分别是：UDP 模式、VXLAN 模式、host-gw 模式。</p>
-<h3 id="udp-模式">UDP 模式</h3>
-<p>UDP 模式，是 Flannel 项目最早支持的一种方式，却也是性能最差的一种方式。这种模式提供的是一个三层的 Overlay 网络，即：它首先对发出端的 IP 包进行 UDP 封装，然后在接收端进行解封装拿到原始的 IP 包，进而把这个 IP 包转发给目标容器。工作原理如下图所示。</p>
-<figure data-type="image" tabindex="2"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3Tpz3pBw5DuxQaSdlP67EbwNtJVKKc20UhdGVA3ib2zFzc3XvtOGEicPw/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>node1 上的 pod1 请求 node2 上的 pod2 时，流量的走向如下：</p>
-<ol>
-<li>pod1 里的进程发起请求，发出 IP 包；</li>
-<li>IP 包根据 pod1 里的 veth 设备对，进入到 cni0 网桥；</li>
-<li>由于 IP 包的目的 ip 不在 node1 上，根据 flannel 在节点上创建出来的路由规则，进入到 flannel0 中；</li>
-<li>此时 flanneld 进程会收到这个包，flanneld 判断该包应该在哪台 node 上，然后将其封装在一个 UDP 包中；</li>
-<li>最后通过 node1 上的网关，发送给 node2；</li>
-</ol>
-<p>flannel0 是一个 TUN 设备（Tunnel 设备）。在 Linux 中，TUN 设备是一种工作在三层（Network Layer）的虚拟网络设备。TUN 设备的功能：在操作系统内核和用户应用程序之间传递 IP 包。</p>
-<p>可以看到，这种模式性能差的原因在于，整个包的 UDP 封装过程是 flanneld 程序做的，也就是用户态，而这就带来了一次内核态向用户态的转换，以及一次用户态向内核态的转换。在上下文切换和用户态操作的代价其实是比较高的，而 UDP 模式因为封包拆包带来了额外的性能消耗。</p>
-<h3 id="vxlan-模式">VXLAN 模式</h3>
-<p>VXLAN，即 Virtual Extensible LAN（虚拟可扩展局域网），是 Linux 内核本身就支持的一种网络虚拟化技术。通过利用 Linux 内核的这种特性，也可以实现在内核态的封装和解封装的能力，从而构建出覆盖网络。其工作原理如下图所示：</p>
-<figure data-type="image" tabindex="3"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3EVTNRxTO4tWRQVjEfUW39O4ACIjhj0xSTW5nSblDR0PRjZa8tbU0lQ/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>VXLAN 模式的 flannel 会在节点上创建一个叫 flannel.1 的 VTEP (VXLAN Tunnel End Point，虚拟隧道端点) 设备，跟 UDP 模式一样，该设备将二层数据帧封装在 UDP 包里，再转发出去，而与 UDP 模式不一样的是，整个封装的过程是在内核态完成的。</p>
-<p>node1 上的 pod1 请求 node2 上的 pod2 时，流量的走向如下：</p>
-<ol>
-<li>pod1 里的进程发起请求，发出 IP 包；</li>
-<li>IP 包根据 pod1 里的 veth 设备对，进入到 cni0 网桥；</li>
-<li>由于 IP 包的目的 ip 不在 node1 上，根据 flannel 在节点上创建出来的路由规则，进入到 flannel.1 中；</li>
-<li>flannel.1 将原始 IP 包加上一个目的 MAC 地址，封装成一个二层数据帧；然后内核将数据帧封装进一个 UDP 包里；</li>
-<li>最后通过 node1 上的网关，发送给 node2；</li>
-</ol>
-<h3 id="抓包验证">抓包验证</h3>
-<p>在 node1 上部署一个 nginx pod1，node2 上部署一个 nginx pod2。然后在 pod1 的容器中 curl pod2 容器的 80 端口。</p>
-<p>集群网络环境如下：</p>
-<pre><code>node1 网卡 ens33：192.168.50.10pod1 veth：10.244.0.7node1 cni0：10.244.0.1/24node1 flannel.1：10.244.0.0/32
-node2 网卡 ens33：192.168.50.11pod2 veth：10.244.1.9node2 cni0：10.244.1.1/24node2 flannel.1：10.244.1.0/32
-</code></pre>
-<p>node1 上的路由信息如下：</p>
-<pre><code>➜  ~ ip routedefault via 192.168.50.1 dev ens3310.244.0.0/24 dev cni0 proto kernel scope link src 10.244.0.110.244.1.0/24 via 10.244.1.0 dev flannel.1 onlink10.244.2.0/24 via 10.244.2.0 dev flannel.1 onlink172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1192.168.50.0/24 dev ens33 proto kernel scope link src 192.168.50.10 metric 100
-</code></pre>
-<p>node1 的网卡 ens33 的抓包情况：<img src="https://mmbiz.qpic.cn/mmbiz_png/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs32qSqlWzNGUNomJIbtxy2xz1nAAOmtsF0nvCNopRK2K5hCoBIBH6iaKQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></p>
-<p>只能看到源 ip 为 node1 ip、目的 ip 为 node2 ip 的 UDP 包。由于 flannel.1 进行了一层 UDP 封包，这里我们在 Wireshark 中设置一下将 UDP 包解析为 VxLAN 格式（端口为 8472），设置过程为 Analyze-&gt;Decode As：</p>
-<figure data-type="image" tabindex="4"><img src="https://mmbiz.qpic.cn/mmbiz_png/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3DGjyajXV7pWPl6UXgSRpl6fQcECicW6xCPrlVQBSicl9INmZNa9I8CuA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>然后再来看一下 node1 网卡上收到的包：<img src="https://mmbiz.qpic.cn/mmbiz_png/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3Oe1uicleyT2O7qibTJuMd2SH2Fl9H09pKlLRnEwx99pRg2U841XfHgrw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></p>
-<p>可以看到源 ip 为 pod1 ip、目的 ip 为 pod2 ip，并且该 IP 包被封装在 UDP 包中。</p>
-<h3 id="host-gw-模式">host-gw 模式</h3>
-<p>最后一种 host-gw 模式是一种纯三层网络方案。其工作原理为将每个 Flannel 子网的“下一跳”设置成了该子网对应的宿主机的 IP 地址，这台主机会充当这条容器通信路径里的“网关”。这样 IP 包就能通过二层网络达到目的主机，而正是因为这一点，host-gw 模式要求集群宿主机之间的网络是二层连通的，如下图所示。</p>
-<figure data-type="image" tabindex="5"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3ecIHqptBxFLPV3Q0wkicmkV7ZzuiaXU6Jjdybqyr64RMiaX1pKkRzZsicg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>宿主机上的路由信息是 flanneld 设置的，因为 flannel 子网和主机的信息保存在 etcd 中，所以 flanneld 只需要 watch 这些数据的变化，实时更新路由表即可。在这种模式下，容器通信的过程就免除了额外的封包和解包带来的性能损耗。</p>
-<p>node1 上的 pod1 请求 node2 上的 pod2 时，流量的走向如下：</p>
-<ol>
-<li>pod1 里的进程发起请求，发出 IP 包，从网络层进入链路层封装成帧；</li>
-<li>根据主机上的路由规则，数据帧从 Node 1 通过宿主机的二层网络到达 Node 2 上；</li>
-</ol>
-<h2 id="calico">Calico</h2>
-<p>Calico 没有使用 CNI 的网桥模式，而是将节点当成边界路由器，组成了一个全连通的网络，通过 BGP 协议交换路由。所以，Calico 的 CNI 插件还需要在宿主机上为每个容器的 Veth Pair 设备配置一条路由规则，用于接收传入的 IP 包。</p>
-<p>Calico 的组件：</p>
-<ol>
-<li>CNI 插件：Calico 与 Kubernetes 对接的部分</li>
-<li>Felix：负责在宿主机上插入路由规则（即：写入 Linux 内核的 FIB 转发信息库），以及维护 Calico 所需的网络设备等工作。</li>
-<li>BIRD (BGP Route Reflector)：是 BGP 的客户端，专门负责在集群里分发路由规则信息。</li>
-</ol>
-<p>三个组件都是通过一个 DaemonSet 安装的。CNI 插件是通过 initContainer 安装的；而 Felix 和 BIRD 是同一个 pod 的两个 container。</p>
-<h3 id="工作原理">工作原理</h3>
-<p>Calico 采用的 BGP，就是在大规模网络中实现节点路由信息共享的一种协议。全称是 Border Gateway Protocol，即：边界网关协议。它是一个 Linux 内核原生就支持的、专门用在大规模数据中心里维护不同的 “自治系统” 之间路由信息的、无中心的路由协议。</p>
-<p>由于没有使用 CNI 的网桥，Calico 的 CNI 插件需要为每个容器设置一个 Veth Pair 设备，然后把其中的一端放置在宿主机上，还需要在宿主机上为每个容器的 Veth Pair 设备配置一条路由规则，用于接收传入的 IP 包。如下图所示：</p>
-<figure data-type="image" tabindex="6"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3txgkibeQ3fJS3QgvIUPYwXiamwb8wVITibkBnWibHnaFkibxbQdlseNhnGg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>可以使用 calicoctl 查看 node1 的节点连接情况：</p>
-<pre><code>~ calicoctl get noNAMEnode1node2node3~ calicoctl node statusCalico process is running.
-IPv4 BGP status+---------------+-------------------+-------+------------+-------------+| PEER ADDRESS  |     PEER TYPE     | STATE |   SINCE    |    INFO     |+---------------+-------------------+-------+------------+-------------+| 192.168.50.11 | node-to-node mesh | up    | 2020-09-28 | Established || 192.168.50.12 | node-to-node mesh | up    | 2020-09-28 | Established |+---------------+-------------------+-------+------------+-------------+
-IPv6 BGP statusNo IPv6 peers found.
-</code></pre>
-<p>可以看到整个 calico 集群上有 3 个节点，node1 和另外两个节点处于连接状态，模式为 “Node-to-Node Mesh”。再看下 node1 上的路由信息如下：</p>
-<pre><code>~ ip routedefault via 192.168.50.1 dev ens33 proto static metric 10010.244.104.0/26 via 192.168.50.11 dev ens33 proto bird10.244.135.0/26 via 192.168.50.12 dev ens33 proto bird10.244.166.128 dev cali717821d73f3 scope linkblackhole 10.244.166.128/26 proto bird172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1192.168.50.0/24 dev ens33 proto kernel scope link src 192.168.50.10 metric 100
-</code></pre>
-<p>其中，第 2 条的路由规则表明 10.244.104.0/26 网段的数据包通过 bird 协议由 ens33 设备发往网关 192.168.50.11。这也就定义了目的 ip 为 node2 上 pod 请求的走向。第 3 条路由规则与之类似。</p>
-<h4 id="抓包验证-2">抓包验证</h4>
-<p>与上面一样，从 node1 上的 pod1 发送一个 http 请求到 node2 上的 pod2。</p>
-<p>集群网络环境如下：</p>
-<pre><code>node1 网卡 ens33：192.168.50.10pod1 ip：10.244.166.128
-node2 网卡 ens33：192.168.50.11pod2 ip：10.244.104.1
-</code></pre>
-<p>node1 的网卡 ens33 的抓包情况：</p>
-<figure data-type="image" tabindex="7"><img src="https://mmbiz.qpic.cn/mmbiz_png/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3QPUAWQwDmsZOiaMqkbSxIkNUABGTQHrhRYLGicsWgJAcAkHNnYoCZCTQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<h3 id="ipip-模式">IPIP 模式</h3>
-<p>IPIP 模式为了解决两个 node 不在一个子网的问题。只要将名为 calico-node 的 daemonset 的环境变量 CALICOIPV4POOLIPIP 设置为 &quot;Always&quot; 即可。如下：</p>
-<pre><code>- name: CALICO_IPV4POOL_IPIP  value: &quot;Off&quot;
-</code></pre>
-<p>IPIP 模式的 calico 使用了 tunl0 设备，这是一个 IP 隧道设备。IP 包进入 tunl0 后，内核会将原始 IP 包直接封装在宿主机的 IP 包中；封装后的 IP 包的目的地址为下一跳地址，即 node2 的 IP 地址。由于宿主机之间已经使用路由器配置了三层转发，所以这个 IP 包在离开 node 1 之后，就可以经过路由器，最终发送到 node 2 上。如下图所示。</p>
-<figure data-type="image" tabindex="8"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs34yic0D0kkFvhytZic1HtNMKM1o1PUM2IxVnROHAA7k0gygfbCosNO7MQ/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>由于 IPIP 模式的 Calico 额外多出了封包和拆包的过程，集群的网络性能受到了影响，所以在集群的二层网络通的情况下，建议不要使用 IPIP 模式。</p>
-<p>看下 node1 上的路由信息：</p>
-<pre><code>~ ip routedefault via 192.168.50.1 dev ens33 proto static metric 10010.244.104.0/26 via 192.168.50.11 dev tunl0 proto bird onlink10.244.135.0/26 via 192.168.50.12 dev tunl0 proto bird onlinkblackhole 10.244.166.128/26 proto bird10.244.166.129 dev calif3c799362a5 scope link172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1192.168.50.0/24 dev ens33 proto kernel scope link src 192.168.50.10 metric 100
-</code></pre>
-<p>可以看到，与之前不一样的是，目的 IP 为 node2 上的 Pod 的数据包是经由 tunl0 发送到网关 192.168.50.11。</p>
-<h4 id="抓包验证-3">抓包验证</h4>
-<p>从 node1 上的 pod1 发送一个 http 请求到 node2 上的 pod2。</p>
-<p>集群网络环境如下：</p>
-<pre><code>node1 网卡 ens33：192.168.50.10node1 tunl0：10.244.166.128/32pod1 ip：10.244.166.129
-node2 网卡 ens33：192.168.50.11pod2 ip：10.244.104.2node2 tunl0：10.244.104.0/32
-</code></pre>
-<p>tunl0 设备的抓包情况：</p>
-<figure data-type="image" tabindex="9"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3IPLqVnmKWibBdgX8qSwKIrRiaPfya4QMvaqHhS9F4nfqlX0lUsRjZicJw/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>node1 网卡 ens33 的抓包情况：</p>
-<figure data-type="image" tabindex="10"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3A3cCXoDa3GpyMoUaMYHwt6CdCvyl5Tulq8AibgBvznjouKCibZFYERhg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
-<p>可以看到，IP 包在 tunl0 设备中被封装进了另一个 IP 包，其目的 IP 为 node2 的 IP，源 IP 为 node1 的 IP。</p>
-<h2 id="总结">总结</h2>
-<p>Kubernetes 的集群网络插件实现方案有很多种，本文主要分析了社区比较常见的两种 Flannel 和 Calico 的工作原理，针对集群内不同节点的 pod 间通信的场景，抓包分析了网络包的走向。</p>
-<p>Flannel 主要提供了 Overlay 的网络方案，UDP 模式由于其封包拆包的过程涉及了多次上下文的切换，导致性能很差，逐渐被社区抛弃；VXLAN 模式的封包拆包过程均在内核态，性能要比 UDP 好很多，也是最经常使用的模式；host-gw 模式不涉及封包拆包，所以性能相对较高，但要求节点间二层互通。</p>
-<p>Calico 主要采用了 BGP 协议交换路由，没有采用 cni0 网桥，当二层网络不通的时候，可以采用 IPIP 模式，但由于涉及到封包拆包的过程，性能相对较弱，与 Flannel 的 VXLAN 模式相当。</p>
 ]]></content>
     </entry>
 </feed>
