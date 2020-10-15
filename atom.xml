@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-13T09:30:42.181Z</updated>
+    <updated>2020-10-15T00:38:46.704Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,418 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[使用kubeadm搭建高可用的K8s集群]]></title>
+        <id>https://jwangkun.github.io/post/qMQ3HyNA5/</id>
+        <link href="https://jwangkun.github.io/post/qMQ3HyNA5/">
+        </link>
+        <updated>2020-10-15T00:38:13.000Z</updated>
+        <content type="html"><![CDATA[<p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
+<p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
+<pre><code># 创建一个 Master 节点
+$ kubeadm init
+
+# 将一个 Node 节点加入到当前集群中
+$ kubeadm join &lt;Master节点的IP和端口 &gt;
+</code></pre>
+<h2 id="1-安装要求">1. 安装要求</h2>
+<p>在开始之前，部署Kubernetes集群机器需要满足以下几个条件：</p>
+<ul>
+<li>一台或多台机器，操作系统 CentOS7.x-86_x64</li>
+<li>硬件配置：2GB或更多RAM，2个CPU或更多CPU，硬盘30GB或更多</li>
+<li>可以访问外网，需要拉取镜像，如果服务器不能上网，需要提前下载镜像并导入节点</li>
+<li>禁止swap分区</li>
+</ul>
+<h2 id="2-准备环境">2. 准备环境</h2>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>IP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>master1</td>
+<td>192.168.44.155</td>
+</tr>
+<tr>
+<td>master2</td>
+<td>192.168.44.156</td>
+</tr>
+<tr>
+<td>node1</td>
+<td>192.168.44.157</td>
+</tr>
+<tr>
+<td>VIP（虚拟ip）</td>
+<td>192.168.44.158</td>
+</tr>
+</tbody>
+</table>
+<pre><code># 关闭防火墙
+systemctl stop firewalld
+systemctl disable firewalld
+
+# 关闭selinux
+sed -i 's/enforcing/disabled/' /etc/selinux/config  # 永久
+setenforce 0  # 临时
+
+# 关闭swap
+swapoff -a  # 临时
+sed -ri 's/.*swap.*/#&amp;/' /etc/fstab    # 永久
+
+# 根据规划设置主机名
+hostnamectl set-hostname &lt;hostname&gt;
+
+# 在master添加hosts
+cat &gt;&gt; /etc/hosts &lt;&lt; EOF
+192.168.44.158    master.k8s.io   k8s-vip
+192.168.44.155    master01.k8s.io master1
+192.168.44.156    master02.k8s.io master2
+192.168.44.157    node01.k8s.io   node1
+EOF
+
+# 将桥接的IPv4流量传递到iptables的链
+cat &gt; /etc/sysctl.d/k8s.conf &lt;&lt; EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system  # 生效
+
+# 时间同步
+yum install ntpdate -y
+ntpdate time.windows.com
+</code></pre>
+<h2 id="3-所有master节点部署keepalived">3. 所有master节点部署keepalived</h2>
+<h3 id="31-安装相关包和keepalived">3.1 安装相关包和keepalived</h3>
+<pre><code>yum install -y conntrack-tools libseccomp libtool-ltdl
+
+yum install -y keepalived
+</code></pre>
+<h3 id="32配置master节点">3.2配置master节点</h3>
+<p>master1节点配置</p>
+<pre><code>cat &gt; /etc/keepalived/keepalived.conf &lt;&lt;EOF 
+! Configuration File for keepalived
+
+global_defs {
+   router_id k8s
+}
+
+vrrp_script check_haproxy {
+    script &quot;killall -0 haproxy&quot;
+    interval 3
+    weight -2
+    fall 10
+    rise 2
+}
+
+vrrp_instance VI_1 {
+    state MASTER 
+    interface ens33 
+    virtual_router_id 51
+    priority 250
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass ceb1b3ec013d66163d6ab
+    }
+    virtual_ipaddress {
+        192.168.44.158
+    }
+    track_script {
+        check_haproxy
+    }
+
+}
+EOF
+</code></pre>
+<p>master2节点配置</p>
+<pre><code>cat &gt; /etc/keepalived/keepalived.conf &lt;&lt;EOF 
+! Configuration File for keepalived
+
+global_defs {
+   router_id k8s
+}
+
+vrrp_script check_haproxy {
+    script &quot;killall -0 haproxy&quot;
+    interval 3
+    weight -2
+    fall 10
+    rise 2
+}
+
+vrrp_instance VI_1 {
+    state BACKUP 
+    interface ens33 
+    virtual_router_id 51
+    priority 200
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass ceb1b3ec013d66163d6ab
+    }
+    virtual_ipaddress {
+        192.168.44.158
+    }
+    track_script {
+        check_haproxy
+    }
+
+}
+EOF
+</code></pre>
+<h3 id="33-启动和检查">3.3 启动和检查</h3>
+<p>在两台master节点都执行</p>
+<pre><code># 启动keepalived
+$ systemctl start keepalived.service
+设置开机启动
+$ systemctl enable keepalived.service
+# 查看启动状态
+$ systemctl status keepalived.service
+</code></pre>
+<p>启动后查看master1的网卡信息</p>
+<pre><code>ip a s ens33
+</code></pre>
+<h2 id="4-部署haproxy">4. 部署haproxy</h2>
+<h3 id="41-安装">4.1 安装</h3>
+<pre><code>yum install -y haproxy
+</code></pre>
+<h3 id="42-配置">4.2 配置</h3>
+<p>两台master节点的配置均相同，配置中声明了后端代理的两个master节点服务器，指定了haproxy运行的端口为16443等，因此16443端口为集群的入口</p>
+<pre><code>cat &gt; /etc/haproxy/haproxy.cfg &lt;&lt; EOF
+#---------------------------------------------------------------------
+# Global settings
+#---------------------------------------------------------------------
+global
+    # to have these messages end up in /var/log/haproxy.log you will
+    # need to:
+    # 1) configure syslog to accept network log events.  This is done
+    #    by adding the '-r' option to the SYSLOGD_OPTIONS in
+    #    /etc/sysconfig/syslog
+    # 2) configure local2 events to go to the /var/log/haproxy.log
+    #   file. A line like the following can be added to
+    #   /etc/sysconfig/syslog
+    #
+    #    local2.*                       /var/log/haproxy.log
+    #
+    log         127.0.0.1 local2
+    
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon 
+       
+    # turn on stats unix socket
+    stats socket /var/lib/haproxy/stats
+#---------------------------------------------------------------------
+# common defaults that all the 'listen' and 'backend' sections will
+# use if not designated in their block
+#---------------------------------------------------------------------  
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 3000
+#---------------------------------------------------------------------
+# kubernetes apiserver frontend which proxys to the backends
+#--------------------------------------------------------------------- 
+frontend kubernetes-apiserver
+    mode                 tcp
+    bind                 *:16443
+    option               tcplog
+    default_backend      kubernetes-apiserver    
+#---------------------------------------------------------------------
+# round robin balancing between the various backends
+#---------------------------------------------------------------------
+backend kubernetes-apiserver
+    mode        tcp
+    balance     roundrobin
+    server      master01.k8s.io   192.168.44.155:6443 check
+    server      master02.k8s.io   192.168.44.156:6443 check
+#---------------------------------------------------------------------
+# collection haproxy statistics message
+#---------------------------------------------------------------------
+listen stats
+    bind                 *:1080
+    stats auth           admin:awesomePassword
+    stats refresh        5s
+    stats realm          HAProxy\ Statistics
+    stats uri            /admin?stats
+EOF
+</code></pre>
+<h3 id="43-启动和检查">4.3 启动和检查</h3>
+<p>两台master都启动</p>
+<pre><code># 设置开机启动
+$ systemctl enable haproxy
+# 开启haproxy
+$ systemctl start haproxy
+# 查看启动状态
+$ systemctl status haproxy
+</code></pre>
+<p>检查端口</p>
+<pre><code>netstat -lntup|grep haproxy
+</code></pre>
+<h2 id="5-所有节点安装dockerkubeadmkubelet">5. 所有节点安装Docker/kubeadm/kubelet</h2>
+<p>Kubernetes默认CRI（容器运行时）为Docker，因此先安装Docker。</p>
+<h3 id="51-安装docker">5.1 安装Docker</h3>
+<pre><code>$ wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo
+$ yum -y install docker-ce-18.06.1.ce-3.el7
+$ systemctl enable docker &amp;&amp; systemctl start docker
+$ docker --version
+Docker version 18.06.1-ce, build e68fc7a
+</code></pre>
+<pre><code>$ cat &gt; /etc/docker/daemon.json &lt;&lt; EOF
+{
+  &quot;registry-mirrors&quot;: [&quot;https://b9pmyelo.mirror.aliyuncs.com&quot;]
+}
+EOF
+</code></pre>
+<h3 id="52-添加阿里云yum软件源">5.2 添加阿里云YUM软件源</h3>
+<pre><code>$ cat &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt; EOF
+[kubernetes]
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=0
+repo_gpgcheck=0
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+EOF
+</code></pre>
+<h3 id="53-安装kubeadmkubelet和kubectl">5.3 安装kubeadm，kubelet和kubectl</h3>
+<p>由于版本更新频繁，这里指定版本号部署：</p>
+<pre><code>$ yum install -y kubelet-1.16.3 kubeadm-1.16.3 kubectl-1.16.3
+$ systemctl enable kubelet
+</code></pre>
+<h2 id="6-部署kubernetes-master">6. 部署Kubernetes Master</h2>
+<h3 id="61-创建kubeadm配置文件">6.1 创建kubeadm配置文件</h3>
+<p>在具有vip的master上操作，这里为master1</p>
+<pre><code>$ mkdir /usr/local/kubernetes/manifests -p
+
+$ cd /usr/local/kubernetes/manifests/
+
+$ vi kubeadm-config.yaml
+
+apiServer:
+  certSANs:
+    - master1
+    - master2
+    - master.k8s.io
+    - 192.168.44.158
+    - 192.168.44.155
+    - 192.168.44.156
+    - 127.0.0.1
+  extraArgs:
+    authorization-mode: Node,RBAC
+  timeoutForControlPlane: 4m0s
+apiVersion: kubeadm.k8s.io/v1beta1
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controlPlaneEndpoint: &quot;master.k8s.io:16443&quot;
+controllerManager: {}
+dns: 
+  type: CoreDNS
+etcd:
+  local:    
+    dataDir: /var/lib/etcd
+imageRepository: registry.aliyuncs.com/google_containers
+kind: ClusterConfiguration
+kubernetesVersion: v1.16.3
+networking: 
+  dnsDomain: cluster.local  
+  podSubnet: 10.244.0.0/16
+  serviceSubnet: 10.1.0.0/16
+scheduler: {}
+</code></pre>
+<h3 id="62-在master1节点执行">6.2 在master1节点执行</h3>
+<pre><code>$ kubeadm init --config kubeadm-config.yaml
+</code></pre>
+<p>按照提示配置环境变量，使用kubectl工具：</p>
+<pre><code class="language-bash">mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+$ kubectl get nodes
+$ kubectl get pods -n kube-system
+</code></pre>
+<p><strong>按照提示保存以下内容，一会要使用：</strong></p>
+<pre><code class="language-bash">kubeadm join master.k8s.io:16443 --token jv5z7n.3y1zi95p952y9p65 \
+    --discovery-token-ca-cert-hash sha256:403bca185c2f3a4791685013499e7ce58f9848e2213e27194b75a2e3293d8812 \
+    --control-plane 
+</code></pre>
+<p>查看集群状态</p>
+<pre><code class="language-bash">kubectl get cs
+
+kubectl get pods -n kube-system
+</code></pre>
+<h2 id="7安装集群网络">7.安装集群网络</h2>
+<p>从官方地址获取到flannel的yaml，在master1上执行</p>
+<pre><code class="language-bash">mkdir flannel
+cd flannel
+wget -c https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+</code></pre>
+<p>安装flannel网络</p>
+<pre><code class="language-bash">kubectl apply -f kube-flannel.yml 
+</code></pre>
+<p>检查</p>
+<pre><code class="language-bash">kubectl get pods -n kube-system
+</code></pre>
+<h2 id="8-master2节点加入集群">8、master2节点加入集群</h2>
+<h3 id="81-复制密钥及相关文件">8.1 复制密钥及相关文件</h3>
+<p>从master1复制密钥及相关文件到master2</p>
+<pre><code class="language-bash"># ssh root@192.168.44.156 mkdir -p /etc/kubernetes/pki/etcd
+
+# scp /etc/kubernetes/admin.conf root@192.168.44.156:/etc/kubernetes
+   
+# scp /etc/kubernetes/pki/{ca.*,sa.*,front-proxy-ca.*} root@192.168.44.156:/etc/kubernetes/pki
+   
+# scp /etc/kubernetes/pki/etcd/ca.* root@192.168.44.156:/etc/kubernetes/pki/etcd
+</code></pre>
+<h3 id="82-master2加入集群">8.2 master2加入集群</h3>
+<p>执行在master1上init后输出的join命令,需要带上参数<code>--control-plane</code>表示把master控制节点加入集群</p>
+<pre><code>kubeadm join master.k8s.io:16443 --token ckf7bs.30576l0okocepg8b     --discovery-token-ca-cert-hash sha256:19afac8b11182f61073e254fb57b9f19ab4d798b70501036fc69ebef46094aba --control-plane
+</code></pre>
+<p>检查状态</p>
+<pre><code>kubectl get node
+
+kubectl get pods --all-namespaces
+</code></pre>
+<h2 id=""></h2>
+<h2 id="5-加入kubernetes-node">5. 加入Kubernetes Node</h2>
+<p>在node1上执行</p>
+<p>向集群添加新节点，执行在kubeadm init输出的kubeadm join命令：</p>
+<pre><code>kubeadm join master.k8s.io:16443 --token ckf7bs.30576l0okocepg8b     --discovery-token-ca-cert-hash sha256:19afac8b11182f61073e254fb57b9f19ab4d798b70501036fc69ebef46094aba
+</code></pre>
+<p><strong>集群网络重新安装，因为添加了新的node节点</strong></p>
+<p>检查状态</p>
+<pre><code>kubectl get node
+
+kubectl get pods --all-namespaces
+</code></pre>
+<h2 id="-2"></h2>
+<h2 id="7-测试kubernetes集群">7. 测试kubernetes集群</h2>
+<p>在Kubernetes集群中创建一个pod，验证是否正常运行：</p>
+<pre><code>$ kubectl create deployment nginx --image=nginx
+$ kubectl expose deployment nginx --port=80 --type=NodePort
+$ kubectl get pod,svc
+</code></pre>
+<p>访问地址：http://NodeIP:Port</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Kubernetes Ingress]]></title>
         <id>https://jwangkun.github.io/post/59eFp4SaS/</id>
@@ -1273,212 +1685,6 @@ kube-system   nodelocaldns-rkv2d                         1/1     Running   0    
 <li><code>--kubeconfig</code>指定集群kubeconfig文件.</li>
 <li>由于无法全面获取集群配置，生成配置文件后，请根据集群实际信息补全配置文件</li>
 </ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ 使用easzup 快速部署一个 kubernetes的高可用集群]]></title>
-        <id>https://jwangkun.github.io/post/-6mGRsKnd/</id>
-        <link href="https://jwangkun.github.io/post/-6mGRsKnd/">
-        </link>
-        <updated>2020-10-12T11:28:43.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="下载文件">下载文件</h3>
-<ul>
-<li>通过 Rainbond 加速下载工具脚本 easzup  <code>2.1.0</code>版本，easzup 的不同 release 影响可以安装的 kubernetes 版本，具体对应信息可查看<a href="https://github.com/easzlab/kubeasz/releases">easzup版本</a></li>
-</ul>
-<pre><code class="language-bash">wget https://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/pkg/easzup &amp;&amp; chmod +x easzup
-</code></pre>
-<ul>
-<li>使用工具脚本下载其他文件，主要包括离线镜像，二进制文件等，保存在/etc/ansible目录中</li>
-</ul>
-<pre><code class="language-bash">./easzup -D
-</code></pre>
-<h3 id="配置免密钥登录">配置免密钥登录</h3>
-<pre><code class="language-bash">ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
-ssh-copy-id $IP  # $IP 为所有节点地址包括自身，按照提示输入 yes 和 root 密码
-</code></pre>
-<h3 id="在ansible控制端编排k8s安装">在ansible控制端编排k8s安装</h3>
-<ul>
-<li>容器化运行 kubeasz，详见<a href="https://github.com/easzlab/kubeasz/blob/master/docs/setup/docker_kubeasz.md">文档</a></li>
-</ul>
-<pre><code class="language-bash">./easzup -S
-</code></pre>
-<ul>
-<li>使用默认配置安装 aio 集群</li>
-</ul>
-<pre><code class="language-bash">docker exec -it kubeasz easzctl start-aio
-</code></pre>
-<ul>
-<li>完成后复制kubectl工具到<code>/usr/bin/kubectl</code></li>
-<li>需要扩展node节点时，配置对应节点免密钥登录后，执行以下操作添加node节点</li>
-</ul>
-<pre><code class="language-bash">docker exec -it kubeasz easzctl add-node $NEW_NODE_IP
-</code></pre>
-<h3 id="验证安装结果">验证安装结果</h3>
-<p><em><strong>如果提示kubectl: command not found，退出重新ssh登录一下，环境变量生效即可</strong></em></p>
-<pre><code class="language-bash">$ kubectl version                   # 验证集群版本     
-$ kubectl get componentstatus       # 验证 scheduler/controller-manager/etcd等组件状态
-$ kubectl get node                  # 验证节点就绪 (Ready) 状态
-$ kubectl get pod --all-namespaces  # 验证集群pod状态，默认已安装网络插件、coredns、metrics-server等
-$ kubectl get svc --all-namespaces  # 验证集群服务状态
-</code></pre>
-<p>完成Kubernetes的安装，<a href="../minimal_install/">开始Rainbond的安装</a></p>
-<h2 id="kubernetes的高可用安装">kubernetes的高可用安装</h2>
-<h3 id="高可用集群所需节点配置如下">高可用集群所需节点配置如下：</h3>
-<table>
-<thead>
-<tr>
-<th>角色</th>
-<th>数量</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>部署节点</td>
-<td>1</td>
-<td>运行ansible/easzctl脚本，可以复用master，建议使用独立节点</td>
-</tr>
-<tr>
-<td>etcd节点</td>
-<td>3</td>
-<td>注意etcd集群需要1,3,5,7...奇数个节点，一般复用master节点</td>
-</tr>
-<tr>
-<td>master节点</td>
-<td>2</td>
-<td>高可用集群至少2个master节点</td>
-</tr>
-<tr>
-<td>node节点</td>
-<td>3</td>
-<td>运行应用负载的节点，可根据需要提升机器配置/增加节点数</td>
-</tr>
-</tbody>
-</table>
-<h3 id="在各节点安装依赖工具">在各节点安装依赖工具</h3>
-<ul>
-<li>Ubuntu 16.04 请执行以下脚本：</li>
-</ul>
-<pre><code class="language-bash"># 文档中脚本默认均以root用户执行
-apt-get update &amp;&amp; apt-get upgrade -y &amp;&amp; apt-get dist-upgrade -y
-# 安装python2
-apt-get install python2.7
-# Ubuntu16.04可能需要配置以下软连接
-ln -s /usr/bin/python2.7 /usr/bin/python
-</code></pre>
-<ul>
-<li>CentOS 7 请执行以下脚本：</li>
-</ul>
-<pre><code class="language-bash"># 文档中脚本默认均以root用户执行
-yum update
-# 安装python
-yum install python -y
-</code></pre>
-<h3 id="配置免密码登录">配置免密码登录</h3>
-<ul>
-<li>在部署节点执行以下操作：</li>
-</ul>
-<pre><code class="language-bash">ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
-ssh-copy-id $IPs #$IPs为所有节点地址包括自身，按照提示输入yes 和root密码
-</code></pre>
-<h3 id="在ansible控制端编排k8s安装-2">在ansible控制端编排k8s安装</h3>
-<ul>
-<li>通过 Rainbond 加速下载工具脚本 easzup  <code>2.1.0</code>版本</li>
-</ul>
-<pre><code class="language-bash">wget https://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/pkg/easzup &amp;&amp; chmod +x easzup
-</code></pre>
-<ul>
-<li>使用脚本工具下载离线镜像等文件，文件保存在/etc/ansible目录中</li>
-</ul>
-<pre><code class="language-bash">./easzup -D
-</code></pre>
-<ul>
-<li>配置集群参数</li>
-</ul>
-<pre><code class="language-bash">cd /etc/ansible &amp;&amp; cp example/hosts.multi-node hosts
-</code></pre>
-<p><strong>将集群配置模版拷贝到指定位置后，必须按照模版格式，依照自己的节点规划修改/etc/ansible/hosts文件，否则无法安装集群，该文件中包括主机列表及部分集群配置</strong></p>
-<pre><code># etcd集群节点数应为1、3、5...等奇数个，不可设置为偶数
-# 变量NODE_NAME为etcd节点在etcd集群中的唯一名称，不可相同
-# etcd节点主机列表
-[etcd] 
-192.168.1.1   NODE_NAME=etcd1
-192.168.1.2   NODE_NAME=etcd2
-192.168.1.3   NODE_NAME=etcd3
-
-# kubernetes master节点主机列表
-[kube-master]
-192.168.1.1
-192.168.1.2
-
-# kubernetes node节点主机列表
-[kube-node]
-192.168.1.3
-192.168.1.4
-
-# [可选] harbor服务，docker 镜像仓库
-# 'NEW_INSTALL':设置为 yes 会安装harbor服务；设置为 no 不安装harbor服务
-# 'SELF_SIGNED_CERT':设置为 no 你需要将 harbor.pem 和 harbor-key.pem 文件放在 down 目录下
-[harbor]
-#192.168.1.8 HARBOR_DOMAIN=&quot;harbor.yourdomain.com&quot; NEW_INSTALL=no SELF_SIGNED_CERT=yes
-
-# [可选] 外部负载均衡节点主机列表
-[ex-lb]
-#192.168.1.6 LB_ROLE=backup EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
-#192.168.1.7 LB_ROLE=master EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
-
-# [可选] 集群ntp服务器列表
-[chrony]
-#192.168.1.1
-
-[all:vars]
-# --------- Main Variables ---------------
-# 可以选择的kubernetes集群运行时: docker, containerd
-CONTAINER_RUNTIME=&quot;docker&quot;
-
-# kubernetes网络插件: calico, flannel, kube-router, cilium, kube-ovn
-CLUSTER_NETWORK=&quot;flannel&quot;
-
-# kube-proxy服务代理模式: 'iptables' or 'ipvs'
-PROXY_MODE=&quot;ipvs&quot;
-
-# K8S Service CIDR, 不可与主机网络重叠
-SERVICE_CIDR=&quot;10.68.0.0/16&quot;
-
-# Cluster CIDR (Pod CIDR), 不可与主机网络重叠
-CLUSTER_CIDR=&quot;172.20.0.0/16&quot;
-
-# Node端口范围
-NODE_PORT_RANGE=&quot;20000-40000&quot;
-
-# 集群DNS域名
-CLUSTER_DNS_DOMAIN=&quot;cluster.local.&quot;
-
-# -------- Additional Variables (don't change the default value right now) ---
-# 二进制文件目录
-bin_dir=&quot;/opt/kube/bin&quot;
-
-# 证书文件目录
-ca_dir=&quot;/etc/kubernetes/ssl&quot;
-
-# 部署目录 (kubeasz工作空间)
-base_dir=&quot;/etc/ansible&quot;
-</code></pre>
-<ul>
-<li>容器化运行kubeasz</li>
-</ul>
-<pre><code class="language-bash">./easzup -S
-</code></pre>
-<ul>
-<li>使用ansible安装kubernetes集群</li>
-</ul>
-<pre><code class="language-bash">docker exec -it kubeasz ansible-playbook /etc/ansible/90.setup.yml
-</code></pre>
-<ul>
-<li>需要扩展node节点时，配置对应节点免密钥登录后，执行以下操作添加node节点</li>
-</ul>
-<pre><code class="language-bash">docker exec -it kubeasz easzctl add-node $NEW_NODE_IP
-</code></pre>
 ]]></content>
     </entry>
 </feed>
