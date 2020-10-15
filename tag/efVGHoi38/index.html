@@ -162,7 +162,8 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>Ingress**也是Kubernetes项目里的一种 <strong>API</strong> 对象，它公开了从集群外部到集群内<code>Service</code>的 <strong>HTTP</strong> 和 <strong>HTTPS</strong> 路由，这些路由由 Ingress 资源上定义的规则控制。</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-13</span>
@@ -181,7 +182,18 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>1.创建config map</p>
+<h1 id="vi-cfgmap-demoyaml">vi cfgmap-demo.yaml</h1>
+<pre><code>apiVersion: v1
+data:
+  database: db.example.com
+  db_port: &quot;3306&quot;
+  http_url: http://www.example.com
+kind: ConfigMap
+metadata:
+  name: cfgmap-demo
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -200,7 +212,8 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>Secrets是一个包含敏感数据的对象，例如我们常用的密码，令牌或密钥等, 我们编写yaml如果直接明文这些信息则会将我们的敏感信息暴漏在我们的脚本中; 所以将其放置在Secret对象中可以更好地控制它的使用方式，并降低意外暴露的风险。</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -219,7 +232,9 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p><strong>Pod:</strong></p>
+<p>Pod是一组紧密关联的容器集合，它们共享PID、IPC、Network和UTS namespace，是Kubernetes调度的基本单位。Pod的设计理念是支持多个容器在一个Pod中共享网络和文件系统，可以通过进程间通信和文件共享这种简单高效的方式组合完成服务.</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -238,7 +253,8 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>Persistent Volume(持久化卷)简称PV, 是一个K8S资源对象，我们可以单独创建一个PV, 它不和Pod直接发生关系, 而是通过Persistent Volume Claim, 简称PVC来实现动态绑定, 我们会在Pod定义里指定创建好的PVC, 然后PVC会根据Pod的要求去自动绑定合适的PV给Pod使用.</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -257,7 +273,13 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <h3 id="下载文件">下载文件</h3>
+<ul>
+<li>通过 Rainbond 加速下载工具脚本 easzup  <code>2.1.0</code>版本，easzup 的不同 release 影响可以安装的 kubernetes 版本，具体对应信息可查看<a href="https://github.com/easzlab/kubeasz/releases">easzup版本</a></li>
+</ul>
+<pre><code class="language-bash">wget https://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/pkg/easzup &amp;&amp; chmod +x easzup
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -276,7 +298,14 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p><strong>安装要求</strong></p>
+<p>在开始之前，部署Kubernetes集群机器需要满足以下几个条件：</p>
+<p>• 一台或多台机器，操作系统 CentOS7.x-86_x64</p>
+<p>• 硬件配置：2GB或更多RAM，2个CPU或更多CPU，硬盘30GB或更多</p>
+<p>• 集群中所有机器之间网络互通</p>
+<p>• 可以访问外网，需要拉取镜像</p>
+<p>• 禁止swap分区</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-09-15</span>

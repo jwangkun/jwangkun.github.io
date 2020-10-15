@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T03:09:33.987Z</updated>
+    <updated>2020-10-15T03:13:22.629Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -1078,7 +1078,10 @@ $ kubectl get pod,svc
         <link href="https://jwangkun.github.io/post/59eFp4SaS/">
         </link>
         <updated>2020-10-13T09:30:11.000Z</updated>
+        <summary type="html"><![CDATA[<p>Ingress**也是Kubernetes项目里的一种 <strong>API</strong> 对象，它公开了从集群外部到集群内<code>Service</code>的 <strong>HTTP</strong> 和 <strong>HTTPS</strong> 路由，这些路由由 Ingress 资源上定义的规则控制。</p>
+]]></summary>
         <content type="html"><![CDATA[<p>Ingress**也是Kubernetes项目里的一种 <strong>API</strong> 对象，它公开了从集群外部到集群内<code>Service</code>的 <strong>HTTP</strong> 和 <strong>HTTPS</strong> 路由，这些路由由 Ingress 资源上定义的规则控制。</p>
+<!-- more -->
 <pre><code>    internet
         |
    [ Ingress ]
@@ -1210,10 +1213,16 @@ Events:            &lt;none&gt;
         <link href="https://jwangkun.github.io/post/NDmieJqbU/">
         </link>
         <updated>2020-10-13T09:23:39.000Z</updated>
+        <summary type="html"><![CDATA[<p>原创 高相林（禅鸣） [阿里巴巴云原生](javascript:void(0)😉</p>
+<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8Gg0dtQYSV3z6IwqBe4BFlSdyvFyUZBCVxMBIpZaZd6To5AZcvg3Acg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="" loading="lazy"></figure>
+<p>作者 | 高相林（禅鸣）</p>
+<p>**导读：**集群升级是 Kubernetes 集群生命周期中最为重要的一环，也是众多使用者最为谨慎对待的操作之一。为了更好地理解集群升级这件事情的内涵外延，我们首先会对集群升级的必要性和难点进行阐述；随后会对集群升级前必须要做的前置检查进行逐一讲解；接下来会对两种常见的升级方式进行展开介绍；最后对集群升级的三个步骤进行讲解，帮助读者从理论走入实践。<img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></p>
+]]></summary>
         <content type="html"><![CDATA[<p>原创 高相林（禅鸣） [阿里巴巴云原生](javascript:void(0)😉</p>
 <figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8Gg0dtQYSV3z6IwqBe4BFlSdyvFyUZBCVxMBIpZaZd6To5AZcvg3Acg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="" loading="lazy"></figure>
 <p>作者 | 高相林（禅鸣）</p>
 <p>**导读：**集群升级是 Kubernetes 集群生命周期中最为重要的一环，也是众多使用者最为谨慎对待的操作之一。为了更好地理解集群升级这件事情的内涵外延，我们首先会对集群升级的必要性和难点进行阐述；随后会对集群升级前必须要做的前置检查进行逐一讲解；接下来会对两种常见的升级方式进行展开介绍；最后对集群升级的三个步骤进行讲解，帮助读者从理论走入实践。<img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></p>
+<!-- more -->
 <p><strong>升级的必要性&amp;难点</strong></p>
 <p>在 Kubernetes 领域，得益于活跃的开源社区，Kubernetes 的迭代速度较快，目前保持在每个季度发行一个新版本的节奏。新版本的 Kubernetes 有着更为先进的新特性、更加全面的安全加固和漏洞修复。前一段时间社区刚刚完成了 1.19 版本的正式发布。</p>
 <p>对于发展如此快速的开源项目，跟上社区的步伐就显得更为重要，而集群升级能力就是帮助我们跟上社区步伐的不二选择。我们可以从以下两个方面对集群升级的必要性进行说明：</p>
@@ -1362,8 +1371,12 @@ Events:            &lt;none&gt;
         <link href="https://jwangkun.github.io/post/IC6DrTsc6/">
         </link>
         <updated>2020-10-13T09:17:09.000Z</updated>
+        <summary type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3n5sBnyHgeuQBiaFVjeiaiaX67XW1V86TLWiaDUsiaXicqjMG1poRUGPy6vFQ/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<p>容器的网络解决方案有很多种，每支持一种网络实现就进行一次适配显然是不现实的，而 CNI 就是为了兼容多种网络方案而发明的。CNI 是 Container Network Interface 的缩写，是一个标准的通用的接口，用于连接容器管理系统和网络插件。</p>
+]]></summary>
         <content type="html"><![CDATA[<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3n5sBnyHgeuQBiaFVjeiaiaX67XW1V86TLWiaDUsiaXicqjMG1poRUGPy6vFQ/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
 <p>容器的网络解决方案有很多种，每支持一种网络实现就进行一次适配显然是不现实的，而 CNI 就是为了兼容多种网络方案而发明的。CNI 是 Container Network Interface 的缩写，是一个标准的通用的接口，用于连接容器管理系统和网络插件。</p>
+<!-- more -->
 <p>简单来说，容器 runtime 为容器提供 network namespace，网络插件负责将 network interface 插入该 network namespace 中并且在宿主机做一些必要的配置，最后对 namespace 中的 interface 进行 IP 和路由的配置。</p>
 <p>所以网络插件的主要工作就在于为容器提供网络环境，包括为 pod 设置 ip 地址、配置路由保证集群内网络的通畅。目前比较流行的网络插件是 Flannel 和 Calico。</p>
 <h2 id="flannel">Flannel</h2>
@@ -1480,11 +1493,18 @@ node2 网卡 ens33：192.168.50.11pod2 ip：10.244.104.2node2 tunl0：10.244.104
         <link href="https://jwangkun.github.io/post/j2GK2Y38c/">
         </link>
         <updated>2020-10-12T12:39:06.000Z</updated>
+        <summary type="html"><![CDATA[<p>在 centos 上用 nginx 镜像创建一个容器，名字为 c1</p>
+<pre><code>[root@vms12 ~]# docker run -dit --name=c1 -p 8080:80 -v /data:/usr/share/nginx/html/charts  docker.io/nginx 
+</code></pre>
+<pre><code>ca08a2ce9b8e910ed71f458fa3c7dd53843bf50e5bb92c089fdacf7cd65a1657 
+</code></pre>
+]]></summary>
         <content type="html"><![CDATA[<p>在 centos 上用 nginx 镜像创建一个容器，名字为 c1</p>
 <pre><code>[root@vms12 ~]# docker run -dit --name=c1 -p 8080:80 -v /data:/usr/share/nginx/html/charts  docker.io/nginx 
 </code></pre>
 <pre><code>ca08a2ce9b8e910ed71f458fa3c7dd53843bf50e5bb92c089fdacf7cd65a1657 
 </code></pre>
+<!-- more -->
 <p>在 master 上自定义一个 chart：</p>
 <pre><code>[root@vms10 ~]# mkdir mychar 
 

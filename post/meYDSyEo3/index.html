@@ -100,6 +100,7 @@
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <p>Persistent Volume(持久化卷)简称PV, 是一个K8S资源对象，我们可以单独创建一个PV, 它不和Pod直接发生关系, 而是通过Persistent Volume Claim, 简称PVC来实现动态绑定, 我们会在Pod定义里指定创建好的PVC, 然后PVC会根据Pod的要求去自动绑定合适的PV给Pod使用.</p>
+<!-- more -->
 <p>持久化卷下PV和PVC概念:</p>
 <p>Persistent Volume（PV）是由管理员设置的存储，它是群集的一部分。就像节点是集群中的资源一样，PV 也是集群中的资源。 PV 是 Volume 之类的卷插件，但具有独立于使用 PV 的 Pod 的生命周期。此 API 对象包含存储实现的细节，即 NFS、iSCSI 或特定于云供应商的存储系统</p>
 <p>PersistentVolumeClaim（PVC）是用户存储的请求。它与 Pod 相似。Pod 消耗节点资源，PVC 消耗 PV 资源。Pod 可以请求特定级别的资源（CPU 和内存）。PVC声明可以请求特定的大小和访问模式（例如，可以以读/写一次或 只读多次模式挂载）</p>

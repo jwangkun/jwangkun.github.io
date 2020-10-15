@@ -89,7 +89,18 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>1.创建config map</p>
+<h1 id="vi-cfgmap-demoyaml">vi cfgmap-demo.yaml</h1>
+<pre><code>apiVersion: v1
+data:
+  database: db.example.com
+  db_port: &quot;3306&quot;
+  http_url: http://www.example.com
+kind: ConfigMap
+metadata:
+  name: cfgmap-demo
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -108,7 +119,8 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>Secrets是一个包含敏感数据的对象，例如我们常用的密码，令牌或密钥等, 我们编写yaml如果直接明文这些信息则会将我们的敏感信息暴漏在我们的脚本中; 所以将其放置在Secret对象中可以更好地控制它的使用方式，并降低意外暴露的风险。</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -127,7 +139,9 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p><strong>Pod:</strong></p>
+<p>Pod是一组紧密关联的容器集合，它们共享PID、IPC、Network和UTS namespace，是Kubernetes调度的基本单位。Pod的设计理念是支持多个容器在一个Pod中共享网络和文件系统，可以通过进程间通信和文件共享这种简单高效的方式组合完成服务.</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -146,7 +160,8 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>Persistent Volume(持久化卷)简称PV, 是一个K8S资源对象，我们可以单独创建一个PV, 它不和Pod直接发生关系, 而是通过Persistent Volume Claim, 简称PVC来实现动态绑定, 我们会在Pod定义里指定创建好的PVC, 然后PVC会根据Pod的要求去自动绑定合适的PV给Pod使用.</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -165,7 +180,9 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <h2 id="kubekey简介">kubekey简介</h2>
+<p>kubeykey是KubeSphere基于Go 语言开发的kubernetes集群部署程序。使用 KubeKey，您可以轻松、高效、灵活地单独或整体安装 Kubernetes 和 KubeSphere。</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -184,7 +201,13 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <h3 id="下载文件">下载文件</h3>
+<ul>
+<li>通过 Rainbond 加速下载工具脚本 easzup  <code>2.1.0</code>版本，easzup 的不同 release 影响可以安装的 kubernetes 版本，具体对应信息可查看<a href="https://github.com/easzlab/kubeasz/releases">easzup版本</a></li>
+</ul>
+<pre><code class="language-bash">wget https://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/pkg/easzup &amp;&amp; chmod +x easzup
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -203,7 +226,14 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>安装</p>
+<p>1、首先更新包信息</p>
+<pre><code>sudo apt-get update
+</code></pre>
+<p>2、安装ca证书</p>
+<pre><code>sudo apt-get install apt-transport-https ca-certificates
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -222,7 +252,8 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>这部分我们结合之前的 k8s 知识点给大家展示如何使用 kubernetes 部署 wordpress+MySQL, 并利用 NFS 去保存我们容器的源代码以及 DB 数据.</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
@@ -241,12 +272,14 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <h2 id="理解eureka-server">理解eureka-server</h2>
+<p>本章节参考 eureka-server 的 <a href="https://gitee.com/owenwangwen/open-capacity-platform/tree/2.0.1/register-center/eureka-server">代码仓库</a>，并着重从容器化部署的角度来理解 Spring Cloud eureka-server 以及 OCP 中 eureka-server 的配置文件。</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
              <span>,</span>
-             <span class="post-stats">6 min read</span>
+             <span class="post-stats">5 min read</span>
             </p>
         </div>
         <hr>
@@ -260,7 +293,14 @@
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p><strong>安装要求</strong></p>
+<p>在开始之前，部署Kubernetes集群机器需要满足以下几个条件：</p>
+<p>• 一台或多台机器，操作系统 CentOS7.x-86_x64</p>
+<p>• 硬件配置：2GB或更多RAM，2个CPU或更多CPU，硬盘30GB或更多</p>
+<p>• 集群中所有机器之间网络互通</p>
+<p>• 可以访问外网，需要拉取镜像</p>
+<p>• 禁止swap分区</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-09-15</span>

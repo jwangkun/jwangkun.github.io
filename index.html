@@ -232,7 +232,8 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>Ingress**也是Kubernetes项目里的一种 <strong>API</strong> 对象，它公开了从集群外部到集群内<code>Service</code>的 <strong>HTTP</strong> 和 <strong>HTTPS</strong> 路由，这些路由由 Ingress 资源上定义的规则控制。</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-13</span>
@@ -251,7 +252,11 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>原创 高相林（禅鸣） [阿里巴巴云原生](javascript:void(0)😉</p>
+<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8Gg0dtQYSV3z6IwqBe4BFlSdyvFyUZBCVxMBIpZaZd6To5AZcvg3Acg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="" loading="lazy"></figure>
+<p>作者 | 高相林（禅鸣）</p>
+<p>**导读：**集群升级是 Kubernetes 集群生命周期中最为重要的一环，也是众多使用者最为谨慎对待的操作之一。为了更好地理解集群升级这件事情的内涵外延，我们首先会对集群升级的必要性和难点进行阐述；随后会对集群升级前必须要做的前置检查进行逐一讲解；接下来会对两种常见的升级方式进行展开介绍；最后对集群升级的三个步骤进行讲解，帮助读者从理论走入实践。<img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-13</span>
@@ -270,7 +275,9 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/0o3N73q0BCqaiaGwqCeyaYTeEZvrSKXs3n5sBnyHgeuQBiaFVjeiaiaX67XW1V86TLWiaDUsiaXicqjMG1poRUGPy6vFQ/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<p>容器的网络解决方案有很多种，每支持一种网络实现就进行一次适配显然是不现实的，而 CNI 就是为了兼容多种网络方案而发明的。CNI 是 Container Network Interface 的缩写，是一个标准的通用的接口，用于连接容器管理系统和网络插件。</p>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-13</span>
@@ -289,7 +296,12 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </h2>
             </a>
             <h3 class="post-subtitle">
-              
+              <p>在 centos 上用 nginx 镜像创建一个容器，名字为 c1</p>
+<pre><code>[root@vms12 ~]# docker run -dit --name=c1 -p 8080:80 -v /data:/usr/share/nginx/html/charts  docker.io/nginx 
+</code></pre>
+<pre><code>ca08a2ce9b8e910ed71f458fa3c7dd53843bf50e5bb92c089fdacf7cd65a1657 
+</code></pre>
+
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
