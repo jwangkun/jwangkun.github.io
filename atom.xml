@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://jwangkun.github.io</id>
+    <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T15:31:45.533Z</updated>
+    <updated>2020-10-15T16:19:17.313Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://jwangkun.github.io"/>
-    <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
+    <link rel="alternate" href="https://blog.jwangkun.com"/>
+    <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
     <subtitle>Just do it ！</subtitle>
-    <logo>https://jwangkun.github.io/images/avatar.png</logo>
-    <icon>https://jwangkun.github.io/favicon.ico</icon>
+    <logo>https://blog.jwangkun.com/images/avatar.png</logo>
+    <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
     <entry>
         <title type="html"><![CDATA[使用KubeKey安装Kubernetes1.18.6 以及KubeSphere 3.0]]></title>
-        <id>https://jwangkun.github.io/post/x1hHMvXKi/</id>
-        <link href="https://jwangkun.github.io/post/x1hHMvXKi/">
+        <id>https://blog.jwangkun.com/post/x1hHMvXKi/</id>
+        <link href="https://blog.jwangkun.com/post/x1hHMvXKi/">
         </link>
         <updated>2020-10-15T07:43:59.000Z</updated>
         <content type="html"><![CDATA[<h2 id="安装条件">安装条件</h2>
@@ -546,8 +546,8 @@ notification:
     </entry>
     <entry>
         <title type="html"><![CDATA[Kubernetes CKA 实训免费视频课程]]></title>
-        <id>https://jwangkun.github.io/post/pAgHc_hhs/</id>
-        <link href="https://jwangkun.github.io/post/pAgHc_hhs/">
+        <id>https://blog.jwangkun.com/post/pAgHc_hhs/</id>
+        <link href="https://blog.jwangkun.com/post/pAgHc_hhs/">
         </link>
         <updated>2020-10-15T06:29:30.000Z</updated>
         <content type="html"><![CDATA[<p>链接: https://pan.baidu.com/s/1tqYAADyHMyklOh44ZTmUsw 提取码: 5642 复制这段内容后打开百度网盘手机App，操作更方便哦</p>
@@ -555,8 +555,8 @@ notification:
     </entry>
     <entry>
         <title type="html"><![CDATA[Gitlab CI 集成 Kubernetes]]></title>
-        <id>https://jwangkun.github.io/post/uEZxv8lam/</id>
-        <link href="https://jwangkun.github.io/post/uEZxv8lam/">
+        <id>https://blog.jwangkun.com/post/uEZxv8lam/</id>
+        <link href="https://blog.jwangkun.com/post/uEZxv8lam/">
         </link>
         <updated>2020-10-15T06:23:58.000Z</updated>
         <content type="html"><![CDATA[<h3 id="基本配置">基本配置</h3>
@@ -963,8 +963,8 @@ $ git push origin master
     </entry>
     <entry>
         <title type="html"><![CDATA[基于 Jenkins、Gitlab、Harbor、Helm 和 Kubernetes 的 CI/CD]]></title>
-        <id>https://jwangkun.github.io/post/pyEGDeM0P/</id>
-        <link href="https://jwangkun.github.io/post/pyEGDeM0P/">
+        <id>https://blog.jwangkun.com/post/pyEGDeM0P/</id>
+        <link href="https://blog.jwangkun.com/post/pyEGDeM0P/">
         </link>
         <updated>2020-10-15T06:17:36.000Z</updated>
         <content type="html"><![CDATA[<p>我们利用 Kubernetes 来动态运行 Jenkins 的 Slave 节点，可以和好的来解决传统的 Jenkins Slave 浪费大量资源的缺点。之前的示例中我们是将项目放置在 Github 仓库上的，将 Docker 镜像推送到了 Docker Hub，这节课我们来结合我们前面学习的知识点来综合运用下，使用 Jenkins、Gitlab、Harbor、Helm、Kubernetes 来实现一个完整的持续集成和持续部署的流水线作业。</p>
@@ -1631,8 +1631,8 @@ podTemplate(label: label, containers: [
     </entry>
     <entry>
         <title type="html"><![CDATA[在现有 Kubernetes 集群上安装 KubeSphere]]></title>
-        <id>https://jwangkun.github.io/post/UtzHh7Dxw/</id>
-        <link href="https://jwangkun.github.io/post/UtzHh7Dxw/">
+        <id>https://blog.jwangkun.com/post/UtzHh7Dxw/</id>
+        <link href="https://blog.jwangkun.com/post/UtzHh7Dxw/">
         </link>
         <updated>2020-10-15T06:15:54.000Z</updated>
         <content type="html"><![CDATA[<p><a href="https://kubesphere.io/">KubeSphere</a>是在 Kubernetes 之上构建的企业级分布式多租户容器管理平台，提供简单易用的操作界面以及向导式操作方式，在降低用户使用容器调度平台学习成本的同时，极大减轻开发、测试、运维的日常工作的复杂度，旨在解决 Kubernetes 本身存在的存储、网络、安全和易用性等痛点。除此之外，平台已经整合并优化了多个适用于容器场景的功能模块，以完整的解决方案帮助企业轻松应对敏捷开发与自动化运维、微服务治理、多租户管理、工作负载和集群管理、服务与网络管理、应用编排与管理、镜像仓库管理和存储管理等业务场景。</p>
@@ -1800,8 +1800,8 @@ spec:
     </entry>
     <entry>
         <title type="html"><![CDATA[在 Kubernetes 上搭建 EFK 日志收集系统]]></title>
-        <id>https://jwangkun.github.io/post/tgYRQAxUk/</id>
-        <link href="https://jwangkun.github.io/post/tgYRQAxUk/">
+        <id>https://blog.jwangkun.com/post/tgYRQAxUk/</id>
+        <link href="https://blog.jwangkun.com/post/tgYRQAxUk/">
         </link>
         <updated>2020-10-15T06:08:24.000Z</updated>
         <content type="html"><![CDATA[<p><code>Elasticsearch</code> 是一个实时的、分布式的可扩展的搜索引擎，允许进行全文、结构化搜索，它通常用于索引和搜索大量日志数据，也可用于搜索许多不同类型的文档。</p>
@@ -2883,8 +2883,8 @@ Done!
     </entry>
     <entry>
         <title type="html"><![CDATA[win10上搭建k8s集群]]></title>
-        <id>https://jwangkun.github.io/post/J3AaqcxFd/</id>
-        <link href="https://jwangkun.github.io/post/J3AaqcxFd/">
+        <id>https://blog.jwangkun.com/post/J3AaqcxFd/</id>
+        <link href="https://blog.jwangkun.com/post/J3AaqcxFd/">
         </link>
         <updated>2020-10-15T03:47:00.000Z</updated>
         <summary type="html"><![CDATA[<p>前面的系列教程都是在阿里云上实践的，最近自己组装了一台台式电脑，装上了win10系统。为了让更多的小伙伴有机会学习k8s的编排，这里使用了另一个更为简单的方案——Docker for Windows。当然，使用mac的同学也可以使用Docker for Mac。其安装使用方式都大同小异。这里重点讲一下在win10上的安装。</p>
@@ -3368,8 +3368,8 @@ kubectl apply -f nginx-ingress.yaml
     </entry>
     <entry>
         <title type="html"><![CDATA[K8S部署Nacos微服务]]></title>
-        <id>https://jwangkun.github.io/post/8l7nJoUol/</id>
-        <link href="https://jwangkun.github.io/post/8l7nJoUol/">
+        <id>https://blog.jwangkun.com/post/8l7nJoUol/</id>
+        <link href="https://blog.jwangkun.com/post/8l7nJoUol/">
         </link>
         <updated>2020-10-15T03:39:36.000Z</updated>
         <content type="html"><![CDATA[<h2 id="本地搭建nacos环境">本地搭建Nacos环境</h2>
@@ -3533,8 +3533,8 @@ https://zhuanlan.zhihu.com/p/68700978
     </entry>
     <entry>
         <title type="html"><![CDATA[在K8S上搭建Redis集群]]></title>
-        <id>https://jwangkun.github.io/post/Bf0bV70AO/</id>
-        <link href="https://jwangkun.github.io/post/Bf0bV70AO/">
+        <id>https://blog.jwangkun.com/post/Bf0bV70AO/</id>
+        <link href="https://blog.jwangkun.com/post/Bf0bV70AO/">
         </link>
         <updated>2020-10-15T03:37:01.000Z</updated>
         <content type="html"><![CDATA[<h2 id="问题分析">问题分析</h2>
@@ -3742,8 +3742,8 @@ spec:
     </entry>
     <entry>
         <title type="html"><![CDATA[ k8s安装ELK与EFK]]></title>
-        <id>https://jwangkun.github.io/post/NmSmQLSLI/</id>
-        <link href="https://jwangkun.github.io/post/NmSmQLSLI/">
+        <id>https://blog.jwangkun.com/post/NmSmQLSLI/</id>
+        <link href="https://blog.jwangkun.com/post/NmSmQLSLI/">
         </link>
         <updated>2020-10-15T03:34:07.000Z</updated>
         <content type="html"><![CDATA[<h2 id="一-elasticsearch安装">一、Elasticsearch安装</h2>
