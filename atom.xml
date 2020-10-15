@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T03:07:34.952Z</updated>
+    <updated>2020-10-15T03:09:33.987Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,22 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[k8s学习资料]]></title>
+        <id>https://jwangkun.github.io/post/y5GbzS3T8/</id>
+        <link href="https://jwangkun.github.io/post/y5GbzS3T8/">
+        </link>
+        <updated>2020-10-15T03:08:33.000Z</updated>
+        <content type="html"><![CDATA[<ol>
+<li>Kubernetes指南:https://kubernetes.feisky.xyz/<br>
+2.Kubernetes官网:https://kubernetes.io/<br>
+3.Kubernetes中文社区:https://www.kubernetes.org.cn/<br>
+4.Kubernetes中文文档:https://kubernetes.io/zh/docs/home/<br>
+5.Kubernetes官方文档:https://kubernetes.io/docs/home/<br>
+6.书籍：《Kubernetes权威 指南》</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ K8s 资源全汇总 从零入门 K8s]]></title>
         <id>https://jwangkun.github.io/post/Z-wMIR6wz/</id>
@@ -1552,117 +1568,6 @@ A Helm chart for Kubernetes
 </code></pre>
 <pre><code>&quot;myrepo&quot; has been removed from your repositories 
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Kubernetes Config Maps]]></title>
-        <id>https://jwangkun.github.io/post/apGBI-lqF/</id>
-        <link href="https://jwangkun.github.io/post/apGBI-lqF/">
-        </link>
-        <updated>2020-10-12T11:58:58.000Z</updated>
-        <content type="html"><![CDATA[<p>1.创建config map</p>
-<p># vi cfgmap-demo.yaml</p>
-<pre><code>apiVersion: v1
-data:
-  database: db.example.com
-  db_port: &quot;3306&quot;
-  http_url: http://www.example.com
-kind: ConfigMap
-metadata:
-  name: cfgmap-demo
-</code></pre>
-<p># kubectl create -f cfgmap-demo.yaml</p>
-<p>2.查看config map</p>
-<p># kubectl get configmap cfgmap-demo -o yaml</p>
-<pre><code class="language-bsh">apiVersion: v1
-data:
-  database: db.example.com
-  db_port: &quot;3306&quot;
-  http_url: http://www.example.com
-kind: ConfigMap
-metadata:
-  creationTimestamp: 2018-02-24T07:11:01Z
-  name: cfgmap-demo
-  namespace: default
-  resourceVersion: &quot;1064654&quot;
-  selfLink: /api/v1/namespaces/default/configmaps/cfgmap-demo
-  uid: de9248d1-1931-11e8-9e24-00163e0e24bf
-</code></pre>
-<p>\3. 修改config map</p>
-<p># vi cfgmap-demo.yaml</p>
-<p>添加一行键值对</p>
-<pre><code>apiVersion: v1
-data:
-  database: db.example.com
-  db_port: &quot;3306&quot;
-  http_url: http://www.example.com
-  http_port: &quot;80&quot;
-kind: ConfigMap
-metadata:
-  name: cfgmap-demo
-</code></pre>
-<p>更新config map</p>
-<p># kubectl replace -f cfgmap-demo.yaml</p>
-<p>查看更新后的config map</p>
-<p># kubectl get configmap cfgmap-demo -o yaml</p>
-<pre><code>apiVersion: v1
-data:
-  database: db.example.com
-  db_port: &quot;3306&quot;
-  http_port: &quot;80&quot;
-  http_url: http://www.example.com
-kind: ConfigMap
-metadata:
-  creationTimestamp: 2018-02-24T07:11:01Z
-  name: cfgmap-demo
-  namespace: default
-  resourceVersion: &quot;1065520&quot;
-  selfLink: /api/v1/namespaces/default/configmaps/cfgmap-demo
-  uid: de9248d1-1931-11e8-9e24-00163e0e24bf
-</code></pre>
-<p>4.创建一个Pod并引用这个config map</p>
-<p># vi cfgmap-env-pod.yaml</p>
-<pre><code>apiVersion: v1
-kind: Pod
-metadata:
-  name: cfgmap-httpd-pod
-spec:
-  containers:
-  - image: httpd
-    name: httpd
-    imagePullPolicy: Always
-    envFrom:
-    - configMapRef:
-        name: cfgmap-demo
-</code></pre>
-<p># kubectl create -f cfgmap-env-pod.yaml</p>
-<p>5.查看config map的键值对是否引入Pod</p>
-<p># kubectl exec -ti cfgmap-httpd-pod env</p>
-<pre><code>PATH=/usr/local/apache2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-HOSTNAME=cfgmap-httpd-pod
-TERM=xterm
-db_port=3306
-http_port=80
-http_url=http://www.example.com
-database=db.example.com
-KUBERNETES_SERVICE_PORT_HTTPS=443
-KUBERNETES_PORT=tcp://10.96.0.1:443
-KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
-KUBERNETES_PORT_443_TCP_PROTO=tcp
-KUBERNETES_PORT_443_TCP_PORT=443
-KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
-KUBERNETES_SERVICE_HOST=10.96.0.1
-KUBERNETES_SERVICE_PORT=443
-HTTPD_PREFIX=/usr/local/apache2
-NGHTTP2_VERSION=1.18.1-1
-OPENSSL_VERSION=1.0.2l-1~bpo8+1
-HTTPD_VERSION=2.4.29
-HTTPD_SHA256=777753a5a25568a2a27428b2214980564bc1c38c1abf9ccc7630b639991f7f00
-HTTPD_PATCHES=
-APACHE_DIST_URLS=https://www.apache.org/dyn/closer.cgi?action=download&amp;filename=
-HOME=/root
-</code></pre>
-<p>可以看到我们Config map下的所有键值对已经成功引入Pod环境变量.</p>
 ]]></content>
     </entry>
 </feed>
