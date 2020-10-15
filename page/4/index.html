@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
   <head>
-       <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta content="yes" name="apple-mobile-web-app-capable" />
   <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>Kubernetes | John Wong&#39;s Blog</title>
+  <title>John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="Kubernetes | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -27,8 +27,7 @@
 
   </head>
   <body>
-  	<!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,122 +65,37 @@
       </div>
     </div>
   </nav>
-<!-- Page Header -->
   <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="post-heading">
-            <h1 class="tag-tl">#Kubernetes</h1>
+          <div class="site-heading">
+            <h1>John Wong&#39;s Blog</h1>
+            <span class="subheading">不忘初心</span>
           </div>
         </div>
       </div>
     </div>
   </header>
-    <div class="container">
+      <div class="container">
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto">
        
         <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/oVB0pVA68/">
+          <a href="https://jwangkun.github.io/post/qian-duan-ji-zhu-xuan-xing/">
             <h2 class="post-title">
-              Kubernetes之Pod, Replicaset, Deployment, Label, Service
+              前端技术选型
             </h2>
             </a>
             <h3 class="post-subtitle">
-              <p><strong>Pod:</strong></p>
-<p>Pod是一组紧密关联的容器集合，它们共享PID、IPC、Network和UTS namespace，是Kubernetes调度的基本单位。Pod的设计理念是支持多个容器在一个Pod中共享网络和文件系统，可以通过进程间通信和文件共享这种简单高效的方式组合完成服务.</p>
+              <p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
 
             </h3>
           <p class="post-meta">
-             <span class="time">2020-10-12</span>
+             <span class="time">2020-04-24</span>
              <span>,</span>
-             <span class="post-stats">6 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/meYDSyEo3/">
-            <h2 class="post-title">
-              Kubernetes Volume(持久化卷)
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>Persistent Volume(持久化卷)简称PV, 是一个K8S资源对象，我们可以单独创建一个PV, 它不和Pod直接发生关系, 而是通过Persistent Volume Claim, 简称PVC来实现动态绑定, 我们会在Pod定义里指定创建好的PVC, 然后PVC会根据Pod的要求去自动绑定合适的PV给Pod使用.</p>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-12</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/-6mGRsKnd/">
-            <h2 class="post-title">
-               使用easzup 快速部署一个 kubernetes的高可用集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-12</span>
-             <span>,</span>
-             <span class="post-stats">6 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/ctkbBNw6F/">
-            <h2 class="post-title">
-              K8s 持久化存储流程
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-12</span>
-             <span>,</span>
-             <span class="post-stats">18 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/tfQ89II3o/">
-            <h2 class="post-title">
-              kubeadmin 快速部署k8s集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p><strong>安装要求</strong></p>
-<p>在开始之前，部署Kubernetes集群机器需要满足以下几个条件：</p>
-<p>• 一台或多台机器，操作系统 CentOS7.x-86_x64</p>
-<p>• 硬件配置：2GB或更多RAM，2个CPU或更多CPU，硬盘30GB或更多</p>
-<p>• 集群中所有机器之间网络互通</p>
-<p>• 可以访问外网，需要拉取镜像</p>
-<p>• 禁止swap分区</p>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-09-15</span>
-             <span>,</span>
-             <span class="post-stats">6 min read</span>
+             <span class="post-stats">4 min read</span>
             </p>
         </div>
         <hr>
@@ -189,7 +103,7 @@
         </div>
         
         
-        <a class="btn btn-primary float-left" href="https://jwangkun.github.io/tag/efVGHoi38">&larr; 上一页</a>
+        <a class="btn btn-primary float-left" href="https://jwangkun.github.io/page/3/">&larr; 上一页</a>
         
         
       </div>
@@ -197,7 +111,7 @@
   </div>
 
   
- <!-- Footer -->
+    <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">

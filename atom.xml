@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T03:44:30.311Z</updated>
+    <updated>2020-10-15T03:57:50.370Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,508 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[win10上搭建k8s集群]]></title>
+        <id>https://jwangkun.github.io/post/J3AaqcxFd/</id>
+        <link href="https://jwangkun.github.io/post/J3AaqcxFd/">
+        </link>
+        <updated>2020-10-15T03:47:00.000Z</updated>
+        <summary type="html"><![CDATA[<p>前面的系列教程都是在阿里云上实践的，最近自己组装了一台台式电脑，装上了win10系统。为了让更多的小伙伴有机会学习k8s的编排，这里使用了另一个更为简单的方案——Docker for Windows。当然，使用mac的同学也可以使用Docker for Mac。其安装使用方式都大同小异。这里重点讲一下在win10上的安装。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>前面的系列教程都是在阿里云上实践的，最近自己组装了一台台式电脑，装上了win10系统。为了让更多的小伙伴有机会学习k8s的编排，这里使用了另一个更为简单的方案——Docker for Windows。当然，使用mac的同学也可以使用Docker for Mac。其安装使用方式都大同小异。这里重点讲一下在win10上的安装。</p>
+<!-- more -->
+<h2 id="准备工作">准备工作</h2>
+<h3 id="系统配置">系统配置</h3>
+<figure data-type="image" tabindex="1"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802192227735.png" alt="image-20200802192227735" loading="lazy"></figure>
+<h3 id="开始虚拟化">开始虚拟化</h3>
+<p>先查看CPU是否支持虚拟化和是否已启用虚拟化。</p>
+<figure data-type="image" tabindex="2"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802192011497.png" alt="image-20200802192011497" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802191819382.png" alt="image-20200802191819382" loading="lazy"></figure>
+<p>如果未启用，需要进入到BIOS进行设置，这里略。</p>
+<h3 id="启用hyper-v">启用Hyper-V</h3>
+<p>安装Docker for Windows需要使用虚拟化，可以使用Hyper-V，也可以使用Oracle Virtual Box，如果安装的系统不符合运行Docker for Windows的要求，则可以安装Docker Toolbox。这里不做介绍。</p>
+<p>设置-&gt;应用-&gt;程序和功能-&gt;启用和关闭Windows功能<img src="http://qiniu.mldong.com/mldong-article/images/image-20200802192500716.png" alt="image-20200802192500716" loading="lazy"></p>
+<figure data-type="image" tabindex="4"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802194641122.png" alt="image-20200802194641122" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802194820851.png" alt="image-20200802194820851" loading="lazy"></figure>
+<p>启用Hyper-V</p>
+<figure data-type="image" tabindex="6"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802194915968.png" alt="image-20200802194915968" loading="lazy"></figure>
+<p>后续k8s教程需要，NFS客户端也启用了吧。Telnet客户端也是常用工具，也顺道启用了。</p>
+<figure data-type="image" tabindex="7"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802195039581.png" alt="image-20200802195039581" loading="lazy"></figure>
+<p>启用好后，重启电脑。</p>
+<h3 id="下载地址">下载地址</h3>
+<p>[<strong>Docker for Windows</strong>](https://download.docker.com/win/stable/Docker Desktop Installer.exe)</p>
+<figure data-type="image" tabindex="8"><img src="http://qiniu.mldong.com/mldong-article/images/1535260-20190330155308863-1355580174.png" alt="img" loading="lazy"></figure>
+<p>官网</p>
+<figure data-type="image" tabindex="9"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802193904737.png" alt="image-20200802193904737" loading="lazy"></figure>
+<h2 id="安装docker">安装Docker</h2>
+<figure data-type="image" tabindex="10"><img src="http://qiniu.mldong.com/mldong-article/images/1535260-20190330155308863-1355580174.png" alt="img" loading="lazy"></figure>
+<h3 id="双击上面下载的docker-for-windows-installerexe">双击上面下载的Docker for Windows Installer.exe</h3>
+<figure data-type="image" tabindex="11"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808201918679.png" alt="image-20200808201918679" loading="lazy"></figure>
+<figure data-type="image" tabindex="12"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808201952436.png" alt="image-20200808201952436" loading="lazy"></figure>
+<figure data-type="image" tabindex="13"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808202100659.png" alt="image-20200808202100659" loading="lazy"></figure>
+<p>安装成功，桌面会出现图标</p>
+<figure data-type="image" tabindex="14"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802195611901.png" alt="image-20200802195611901" loading="lazy"></figure>
+<p>右下脚可查看</p>
+<figure data-type="image" tabindex="15"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808202428384.png" alt="image-20200808202428384" loading="lazy"></figure>
+<figure data-type="image" tabindex="16"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808202413149.png" alt="image-20200808202413149" loading="lazy"></figure>
+<p>可以修改镜像加速，这里使用阿里云的。</p>
+<figure data-type="image" tabindex="17"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808202712957.png" alt="image-20200808202712957" loading="lazy"></figure>
+<p>这里只要Docker running为绿色即可，Kubernetes先别管。冒然安装，会安装失败。</p>
+<h3 id="验证安装的docker">验证安装的docker</h3>
+<ul>
+<li>打开终端查看版本：</li>
+</ul>
+<pre><code class="language-shell">docker version
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="18"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808203059617.png" alt="image-20200808203059617" loading="lazy"></figure>
+<ul>
+<li>下载nginx镜像</li>
+</ul>
+<pre><code class="language-shell">docker pull nginx
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="19"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802200335386.png" alt="image-20200802200335386" loading="lazy"></figure>
+<ul>
+<li>运行nginx镜像</li>
+</ul>
+<pre><code class="language-shell">docker run -p 81:80 -d --name mynginx nginx
+复制代码
+</code></pre>
+<p>为了方便使用linux的命令，这里使用了git bash</p>
+<figure data-type="image" tabindex="20"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802201727058.png" alt="image-20200802201727058" loading="lazy"></figure>
+<ul>
+<li>浏览器访问<code>http://localhost:81</code></li>
+</ul>
+<p>![image-20200802200928676](data:image/svg+xml;utf8,<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="800" height="600"></svg>)</p>
+<ul>
+<li>清理刚运行的nginx实例</li>
+</ul>
+<pre><code class="language-shell"># 停止刚运行的名称为mynginx的实例
+docker ps -a | grep mynginx | awk '{print $1}' | xargs docker stop
+# 删除刚运行的名称为mynginx的实例
+docker ps -a | grep mynginx | awk '{print $1}' | xargs docker rm
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="21"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802201759127.png" alt="image-20200802201759127" loading="lazy"></figure>
+<h2 id="安装kubernetes">安装Kubernetes</h2>
+<h3 id="准备安装镜像">准备安装镜像</h3>
+<p>如果不提前准备好镜像的话，在启用Kubernetes的时候，页面会卡死，原因就是镜像默认会从Kubernetes提供的官方地址下载，该地址在国内是被墙的，所以我们需要将相关镜像先下载到本地。</p>
+<p><a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop">github.com/AliyunConta…</a></p>
+<p>![</p>
+<p>](<a href="http://qiniu.mldong.com/mldong-article/images/image-20200802202935475.png">qiniu.mldong.com/mldong-arti…</a>)</p>
+<ul>
+<li>克隆脚本</li>
+</ul>
+<pre><code class="language-shell">git clone https://github.com/AliyunContainerService/k8s-for-docker-desktop.git
+复制代码
+</code></pre>
+<ul>
+<li>
+<p>进入目录</p>
+<pre><code class="language-shell">cd k8s-for-docker-desktop
+复制代码
+</code></pre>
+</li>
+<li>
+<p>检出对应版本分支</p>
+</li>
+</ul>
+<pre><code class="language-shell">git checkbot v1.16.5
+复制代码
+</code></pre>
+<ul>
+<li>以管理员身份运行PowerShell</li>
+</ul>
+<figure data-type="image" tabindex="22"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802203245791.png" alt="image-20200802203245791" loading="lazy"></figure>
+<ul>
+<li>重新进入k8s-for-docker-desktop目录</li>
+<li>设置执行脚本权限</li>
+</ul>
+<pre><code class="language-shell">Set-ExecutionPolicy RemoteSigned
+复制代码
+</code></pre>
+<ul>
+<li>执行下载镜像脚本</li>
+</ul>
+<p>脚本的逻辑其实就是</p>
+<ol>
+<li>从阿里云镜像仓库下载镜像</li>
+<li>修改镜像tag为官方地址</li>
+<li>删除阿里镜像</li>
+</ol>
+<pre><code class="language-shell">./load_images.ps1
+复制代码
+</code></pre>
+<ul>
+<li>关闭执行脚本权限</li>
+</ul>
+<pre><code class="language-shell">Set-ExecutionPolicy Restricted
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="23"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802203748999.png" alt="image-20200802203748999" loading="lazy"></figure>
+<figure data-type="image" tabindex="24"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802203800085.png" alt="image-20200802203800085" loading="lazy"></figure>
+<h3 id="启用kubernetes集群">启用Kubernetes集群</h3>
+<p>安装好镜像后，就可以启用Kubernetes集群了。该过程会有一丢丢久，正常启动后，Kubernetes则会显绿色。</p>
+<figure data-type="image" tabindex="25"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808203137963.png" alt="image-20200808203137963" loading="lazy"></figure>
+<figure data-type="image" tabindex="26"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808210124778.png" alt="image-20200808210124778" loading="lazy"></figure>
+<figure data-type="image" tabindex="27"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808210510300.png" alt="image-20200808210510300" loading="lazy"></figure>
+<h3 id="下载kubectl客户端">下载Kubectl客户端</h3>
+<p>下载地址：<a href="https://www.kubernetes.org.cn/installkubectl">www.kubernetes.org.cn/installkube…</a></p>
+<figure data-type="image" tabindex="28"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802204540731.png" alt="image-20200802204540731" loading="lazy"></figure>
+<p>配置环境变量，略。</p>
+<h3 id="验证kubernetes集群">验证Kubernetes集群</h3>
+<ul>
+<li>切换当前集群</li>
+</ul>
+<pre><code class="language-shell">kubectl config use-context docker-desktop
+复制代码
+</code></pre>
+<ul>
+<li>验证Kubernetes集群状态</li>
+</ul>
+<pre><code class="language-shell">kubectl cluster-info
+kubectl get nodes
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="29"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802204955552.png" alt="image-20200802204955552" loading="lazy"></figure>
+<h2 id="安装ingress-nginx">安装ingress-nginx</h2>
+<p>看过前面系列文章的同学可能知道，Kubernetes总共三种暴露服务的方式。</p>
+<ul>
+<li>LoadBlancer Service</li>
+<li>NodePort Service</li>
+<li>Ingress</li>
+</ul>
+<p>这里不做过多的介绍了，有想了解的同学可以去查资料。我们使用云平台的时候，云平台已经帮安装好ingress-nginx了，我们只需要定义yaml文件使用即可，这里我们需要自己安装。</p>
+<p>ingress-nginx负载均衡调用顺序:用户---&gt;ingress-nginx(pod)---&gt;ingress-nginx(控制器)---&gt;ingress---&gt;service---&gt;pod</p>
+<p>不同版本的Kubernetes，使用的ingress-nginx版本是不一样的，我们可以看一下我们现在对应的版本是啥。</p>
+<p>可以看看k8s-for-docker-desktop/images.properties文件</p>
+<figure data-type="image" tabindex="30"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802211535280.png" alt="image-20200802211535280" loading="lazy"></figure>
+<p>github地址：<a href="https://github.com/kubernetes/ingress-nginx">github.com/kubernetes/…</a></p>
+<figure data-type="image" tabindex="31"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802211644109.png" alt="image-20200802211644109" loading="lazy"></figure>
+<p>是啥版本，就去看对应的文件。</p>
+<ul>
+<li>依次下载yaml文件</li>
+</ul>
+<figure data-type="image" tabindex="32"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802212240083.png" alt="image-20200802212240083" loading="lazy"></figure>
+<figure data-type="image" tabindex="33"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802214633217.png" alt="image-20200802214633217" loading="lazy"></figure>
+<figure data-type="image" tabindex="34"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802214705065.png" alt="image-20200802214705065" loading="lazy"></figure>
+<ul>
+<li>开始安装</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f mandatory.yaml
+kubectl apply -f cloud-generic.yaml
+复制代码
+</code></pre>
+<ul>
+<li>查看</li>
+</ul>
+<pre><code class="language-shell">kubectl get pods -n ingress-nginx
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="35"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802214929902.png" alt="image-20200802214929902" loading="lazy"></figure>
+<ul>
+<li>浏览器访问<code>http://localhost</code></li>
+</ul>
+<figure data-type="image" tabindex="36"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802214945340.png" alt="image-20200802214945340" loading="lazy"></figure>
+<h2 id="完整地发布一个nginx服务">完整地发布一个nginx服务</h2>
+<h3 id="创建命名空间">创建命名空间</h3>
+<ul>
+<li>nginx-ns.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-ns.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mldong-study
+  
+EOF
+
+复制代码
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-ns.yaml
+复制代码
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get ns
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="37"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802215728932.png" alt="image-20200802215728932" loading="lazy"></figure>
+<h3 id="创建configmap-配置文件">创建ConfigMap-配置文件</h3>
+<ul>
+<li>nginx-cm.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cm
+  namespace: mldong-study
+data:
+  a.conf: |-
+    server {
+      listen       80;
+      server_name  a.study.com;
+      location / {
+        root   /usr/share/nginx/html;
+        index  a.html;
+      }
+      error_page   500 502 503 504  /50x.html;
+      location = /50x.html {
+        root   /usr/share/nginx/html;
+      }
+    }
+  b.conf: |-
+    server {
+      listen       80;
+      server_name  b.study.com;
+      location / {
+        root   /usr/share/nginx/html;
+        index  b.html;
+      }
+      error_page   500 502 503 504  /50x.html;
+      location = /50x.html {
+        root   /usr/share/nginx/html;
+      }
+    }
+    
+  
+EOF
+
+复制代码
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-cm.yaml
+复制代码
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get cm -n mldong-study
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="38"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802222243494.png" alt="image-20200802222243494" loading="lazy"></figure>
+<h3 id="创建configmap-html文件">创建ConfigMap-html文件</h3>
+<p>win上使用hostpath不是很方便，后续会使用nfs。这里先以最简单的方式演示。</p>
+<ul>
+<li>nginx-cm-html.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-cm-html.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cm-html
+  namespace: mldong-study
+data:
+  a.html: |-
+    aaaaaa
+  b.html: |-
+    bbbbbb
+  
+EOF
+
+复制代码
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-cm-html.yaml
+复制代码
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get cm -n mldong-study
+复制代码
+</code></pre>
+<h3 id="创建deployment">创建Deployment</h3>
+<ul>
+<li>nginx-deployment.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: mldong-study
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        version/config: V0001
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: port
+              protocol: TCP
+          volumeMounts:
+            - name: nginx-cm-html
+              mountPath: &quot;/usr/share/nginx/html&quot;
+            - name: nginx-cm
+              mountPath: &quot;/etc/nginx/conf.d&quot;ls
+      volumes:
+        - name: nginx-cm-html
+          configMap: 
+            name: nginx-cm-html
+        - name: nginx-cm
+          configMap:
+            name: nginx-cm
+  
+EOF
+复制代码
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-deployment.yaml
+复制代码
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get pods -n mldong-study
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="39"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802222418364.png" alt="image-20200802222418364" loading="lazy"></figure>
+<h3 id="创建service">创建Service</h3>
+<ul>
+<li>nginx-service.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-nodeport
+  namespace: mldong-study
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    #nodePort: 32180 # 这里不指定就会随机(30000-32767)
+  selector:
+    app: nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: mldong-study
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+
+EOF
+
+复制代码
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-service.yaml
+复制代码
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get service -n mldong-study
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="40"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802222632065.png" alt="image-20200802222632065" loading="lazy"></figure>
+<h3 id="创建ingress">创建Ingress</h3>
+<ul>
+<li>nginx-ingress.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-ingress.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+  name: mynginx-ingress
+  namespace: mldong-study
+spec:
+  rules:
+    - host: a.study.com
+      http:
+        paths:
+          - backend:
+              serviceName: nginx
+              servicePort: 80
+            path: /
+    - host: b.study.com
+      http:
+        paths:
+          - backend:
+              serviceName: nginx
+              servicePort: 80
+            path: /
+
+  
+EOF
+
+
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-ingress.yaml
+复制代码
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get ingress -n mldong-study
+
+</code></pre>
+<figure data-type="image" tabindex="41"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802223328697.png" alt="image-20200802223328697" loading="lazy"></figure>
+<h3 id="修改hosts">修改hosts</h3>
+<figure data-type="image" tabindex="42"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802223533643.png" alt="image-20200802223533643" loading="lazy"></figure>
+<h3 id="浏览器访问">浏览器访问</h3>
+<p><a href="http://a.study.com/">a.study.com</a></p>
+<p><a href="http://b.study.com/">b.study.com</a></p>
+<figure data-type="image" tabindex="43"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802230514957.png" alt="image-20200802230514957" loading="lazy"></figure>
+<figure data-type="image" tabindex="44"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802230525836.png" alt="image-20200802230525836" loading="lazy"></figure>
+<p>最后清理现场</p>
+<pre><code class="language-shell">kubectl delete -f nginx-ns.yaml
+复制代码
+</code></pre>
+<p>如需要再次执行，依次执行如下命令:</p>
+<pre><code class="language-shell">kubectl apply -f nginx-ns.yaml
+kubectl apply -f nginx-cm.yaml
+kubectl apply -f nginx-cm-html.yaml
+kubectl apply -f nginx-deployment.yaml
+kubectl apply -f nginx-service.yaml
+kubectl apply -f nginx-ingress.yaml
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="45"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802231134661.png" alt="image-20200802231134661" loading="lazy"></figure>
+<h2 id="小结">小结</h2>
+<p>本文在Win10系统上安装Docker for Windows，并启用了其Kubernetes集群-单节点版，完整的发布了一个nginx的服务。可以这么说，安装好Docker for Windows并成功启用其Kubernetes后，你就可以正式入门学习k8s编排了。当然，在该环境下，不只是可以学习k8s编排，像docker/docker-compose也是自带的，也可以安排上。</p>
+<p>原文链接：https://juejin.im/post/6856407118669742094</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[K8S部署Nacos微服务]]></title>
         <id>https://jwangkun.github.io/post/8l7nJoUol/</id>
@@ -1690,428 +2192,6 @@ kubectl get pods -n kube-system
 NAME                          READY   STATUS    RESTARTS   AGE
 kube-flannel-ds-amd64-2pc95   1/1     Running   0          72s
 </code></pre>
-<h2 id="7-测试kubernetes集群">7. 测试kubernetes集群</h2>
-<p>在Kubernetes集群中创建一个pod，验证是否正常运行：</p>
-<pre><code>$ kubectl create deployment nginx --image=nginx
-$ kubectl expose deployment nginx --port=80 --type=NodePort
-$ kubectl get pod,svc
-</code></pre>
-<p>访问地址：http://NodeIP:Port</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[使用kubeadm搭建高可用的K8s集群]]></title>
-        <id>https://jwangkun.github.io/post/qMQ3HyNA5/</id>
-        <link href="https://jwangkun.github.io/post/qMQ3HyNA5/">
-        </link>
-        <updated>2020-10-15T00:38:13.000Z</updated>
-        <summary type="html"><![CDATA[<p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
-<p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
-<pre><code># 创建一个 Master 节点
-$ kubeadm init
-
-# 将一个 Node 节点加入到当前集群中
-$ kubeadm join &lt;Master节点的IP和端口 &gt;
-</code></pre>
-]]></summary>
-        <content type="html"><![CDATA[<p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
-<p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
-<pre><code># 创建一个 Master 节点
-$ kubeadm init
-
-# 将一个 Node 节点加入到当前集群中
-$ kubeadm join &lt;Master节点的IP和端口 &gt;
-</code></pre>
-<!-- more -->
-<h2 id="1-安装要求">1. 安装要求</h2>
-<p>在开始之前，部署Kubernetes集群机器需要满足以下几个条件：</p>
-<ul>
-<li>一台或多台机器，操作系统 CentOS7.x-86_x64</li>
-<li>硬件配置：2GB或更多RAM，2个CPU或更多CPU，硬盘30GB或更多</li>
-<li>可以访问外网，需要拉取镜像，如果服务器不能上网，需要提前下载镜像并导入节点</li>
-<li>禁止swap分区</li>
-</ul>
-<h2 id="2-准备环境">2. 准备环境</h2>
-<table>
-<thead>
-<tr>
-<th>角色</th>
-<th>IP</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>master1</td>
-<td>192.168.44.155</td>
-</tr>
-<tr>
-<td>master2</td>
-<td>192.168.44.156</td>
-</tr>
-<tr>
-<td>node1</td>
-<td>192.168.44.157</td>
-</tr>
-<tr>
-<td>VIP（虚拟ip）</td>
-<td>192.168.44.158</td>
-</tr>
-</tbody>
-</table>
-<pre><code># 关闭防火墙
-systemctl stop firewalld
-systemctl disable firewalld
-
-# 关闭selinux
-sed -i 's/enforcing/disabled/' /etc/selinux/config  # 永久
-setenforce 0  # 临时
-
-# 关闭swap
-swapoff -a  # 临时
-sed -ri 's/.*swap.*/#&amp;/' /etc/fstab    # 永久
-
-# 根据规划设置主机名
-hostnamectl set-hostname &lt;hostname&gt;
-
-# 在master添加hosts
-cat &gt;&gt; /etc/hosts &lt;&lt; EOF
-192.168.44.158    master.k8s.io   k8s-vip
-192.168.44.155    master01.k8s.io master1
-192.168.44.156    master02.k8s.io master2
-192.168.44.157    node01.k8s.io   node1
-EOF
-
-# 将桥接的IPv4流量传递到iptables的链
-cat &gt; /etc/sysctl.d/k8s.conf &lt;&lt; EOF
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
-EOF
-sysctl --system  # 生效
-
-# 时间同步
-yum install ntpdate -y
-ntpdate time.windows.com
-</code></pre>
-<h2 id="3-所有master节点部署keepalived">3. 所有master节点部署keepalived</h2>
-<h3 id="31-安装相关包和keepalived">3.1 安装相关包和keepalived</h3>
-<pre><code>yum install -y conntrack-tools libseccomp libtool-ltdl
-
-yum install -y keepalived
-</code></pre>
-<h3 id="32配置master节点">3.2配置master节点</h3>
-<p>master1节点配置</p>
-<pre><code>cat &gt; /etc/keepalived/keepalived.conf &lt;&lt;EOF 
-! Configuration File for keepalived
-
-global_defs {
-   router_id k8s
-}
-
-vrrp_script check_haproxy {
-    script &quot;killall -0 haproxy&quot;
-    interval 3
-    weight -2
-    fall 10
-    rise 2
-}
-
-vrrp_instance VI_1 {
-    state MASTER 
-    interface ens33 
-    virtual_router_id 51
-    priority 250
-    advert_int 1
-    authentication {
-        auth_type PASS
-        auth_pass ceb1b3ec013d66163d6ab
-    }
-    virtual_ipaddress {
-        192.168.44.158
-    }
-    track_script {
-        check_haproxy
-    }
-
-}
-EOF
-</code></pre>
-<p>master2节点配置</p>
-<pre><code>cat &gt; /etc/keepalived/keepalived.conf &lt;&lt;EOF 
-! Configuration File for keepalived
-
-global_defs {
-   router_id k8s
-}
-
-vrrp_script check_haproxy {
-    script &quot;killall -0 haproxy&quot;
-    interval 3
-    weight -2
-    fall 10
-    rise 2
-}
-
-vrrp_instance VI_1 {
-    state BACKUP 
-    interface ens33 
-    virtual_router_id 51
-    priority 200
-    advert_int 1
-    authentication {
-        auth_type PASS
-        auth_pass ceb1b3ec013d66163d6ab
-    }
-    virtual_ipaddress {
-        192.168.44.158
-    }
-    track_script {
-        check_haproxy
-    }
-
-}
-EOF
-</code></pre>
-<h3 id="33-启动和检查">3.3 启动和检查</h3>
-<p>在两台master节点都执行</p>
-<pre><code># 启动keepalived
-$ systemctl start keepalived.service
-设置开机启动
-$ systemctl enable keepalived.service
-# 查看启动状态
-$ systemctl status keepalived.service
-</code></pre>
-<p>启动后查看master1的网卡信息</p>
-<pre><code>ip a s ens33
-</code></pre>
-<h2 id="4-部署haproxy">4. 部署haproxy</h2>
-<h3 id="41-安装">4.1 安装</h3>
-<pre><code>yum install -y haproxy
-</code></pre>
-<h3 id="42-配置">4.2 配置</h3>
-<p>两台master节点的配置均相同，配置中声明了后端代理的两个master节点服务器，指定了haproxy运行的端口为16443等，因此16443端口为集群的入口</p>
-<pre><code>cat &gt; /etc/haproxy/haproxy.cfg &lt;&lt; EOF
-#---------------------------------------------------------------------
-# Global settings
-#---------------------------------------------------------------------
-global
-    # to have these messages end up in /var/log/haproxy.log you will
-    # need to:
-    # 1) configure syslog to accept network log events.  This is done
-    #    by adding the '-r' option to the SYSLOGD_OPTIONS in
-    #    /etc/sysconfig/syslog
-    # 2) configure local2 events to go to the /var/log/haproxy.log
-    #   file. A line like the following can be added to
-    #   /etc/sysconfig/syslog
-    #
-    #    local2.*                       /var/log/haproxy.log
-    #
-    log         127.0.0.1 local2
-    
-    chroot      /var/lib/haproxy
-    pidfile     /var/run/haproxy.pid
-    maxconn     4000
-    user        haproxy
-    group       haproxy
-    daemon 
-       
-    # turn on stats unix socket
-    stats socket /var/lib/haproxy/stats
-#---------------------------------------------------------------------
-# common defaults that all the 'listen' and 'backend' sections will
-# use if not designated in their block
-#---------------------------------------------------------------------  
-defaults
-    mode                    http
-    log                     global
-    option                  httplog
-    option                  dontlognull
-    option http-server-close
-    option forwardfor       except 127.0.0.0/8
-    option                  redispatch
-    retries                 3
-    timeout http-request    10s
-    timeout queue           1m
-    timeout connect         10s
-    timeout client          1m
-    timeout server          1m
-    timeout http-keep-alive 10s
-    timeout check           10s
-    maxconn                 3000
-#---------------------------------------------------------------------
-# kubernetes apiserver frontend which proxys to the backends
-#--------------------------------------------------------------------- 
-frontend kubernetes-apiserver
-    mode                 tcp
-    bind                 *:16443
-    option               tcplog
-    default_backend      kubernetes-apiserver    
-#---------------------------------------------------------------------
-# round robin balancing between the various backends
-#---------------------------------------------------------------------
-backend kubernetes-apiserver
-    mode        tcp
-    balance     roundrobin
-    server      master01.k8s.io   192.168.44.155:6443 check
-    server      master02.k8s.io   192.168.44.156:6443 check
-#---------------------------------------------------------------------
-# collection haproxy statistics message
-#---------------------------------------------------------------------
-listen stats
-    bind                 *:1080
-    stats auth           admin:awesomePassword
-    stats refresh        5s
-    stats realm          HAProxy\ Statistics
-    stats uri            /admin?stats
-EOF
-</code></pre>
-<h3 id="43-启动和检查">4.3 启动和检查</h3>
-<p>两台master都启动</p>
-<pre><code># 设置开机启动
-$ systemctl enable haproxy
-# 开启haproxy
-$ systemctl start haproxy
-# 查看启动状态
-$ systemctl status haproxy
-</code></pre>
-<p>检查端口</p>
-<pre><code>netstat -lntup|grep haproxy
-</code></pre>
-<h2 id="5-所有节点安装dockerkubeadmkubelet">5. 所有节点安装Docker/kubeadm/kubelet</h2>
-<p>Kubernetes默认CRI（容器运行时）为Docker，因此先安装Docker。</p>
-<h3 id="51-安装docker">5.1 安装Docker</h3>
-<pre><code>$ wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo
-$ yum -y install docker-ce-18.06.1.ce-3.el7
-$ systemctl enable docker &amp;&amp; systemctl start docker
-$ docker --version
-Docker version 18.06.1-ce, build e68fc7a
-</code></pre>
-<pre><code>$ cat &gt; /etc/docker/daemon.json &lt;&lt; EOF
-{
-  &quot;registry-mirrors&quot;: [&quot;https://b9pmyelo.mirror.aliyuncs.com&quot;]
-}
-EOF
-</code></pre>
-<h3 id="52-添加阿里云yum软件源">5.2 添加阿里云YUM软件源</h3>
-<pre><code>$ cat &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt; EOF
-[kubernetes]
-name=Kubernetes
-baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64
-enabled=1
-gpgcheck=0
-repo_gpgcheck=0
-gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
-EOF
-</code></pre>
-<h3 id="53-安装kubeadmkubelet和kubectl">5.3 安装kubeadm，kubelet和kubectl</h3>
-<p>由于版本更新频繁，这里指定版本号部署：</p>
-<pre><code>$ yum install -y kubelet-1.16.3 kubeadm-1.16.3 kubectl-1.16.3
-$ systemctl enable kubelet
-</code></pre>
-<h2 id="6-部署kubernetes-master">6. 部署Kubernetes Master</h2>
-<h3 id="61-创建kubeadm配置文件">6.1 创建kubeadm配置文件</h3>
-<p>在具有vip的master上操作，这里为master1</p>
-<pre><code>$ mkdir /usr/local/kubernetes/manifests -p
-
-$ cd /usr/local/kubernetes/manifests/
-
-$ vi kubeadm-config.yaml
-
-apiServer:
-  certSANs:
-    - master1
-    - master2
-    - master.k8s.io
-    - 192.168.44.158
-    - 192.168.44.155
-    - 192.168.44.156
-    - 127.0.0.1
-  extraArgs:
-    authorization-mode: Node,RBAC
-  timeoutForControlPlane: 4m0s
-apiVersion: kubeadm.k8s.io/v1beta1
-certificatesDir: /etc/kubernetes/pki
-clusterName: kubernetes
-controlPlaneEndpoint: &quot;master.k8s.io:16443&quot;
-controllerManager: {}
-dns: 
-  type: CoreDNS
-etcd:
-  local:    
-    dataDir: /var/lib/etcd
-imageRepository: registry.aliyuncs.com/google_containers
-kind: ClusterConfiguration
-kubernetesVersion: v1.16.3
-networking: 
-  dnsDomain: cluster.local  
-  podSubnet: 10.244.0.0/16
-  serviceSubnet: 10.1.0.0/16
-scheduler: {}
-</code></pre>
-<h3 id="62-在master1节点执行">6.2 在master1节点执行</h3>
-<pre><code>$ kubeadm init --config kubeadm-config.yaml
-</code></pre>
-<p>按照提示配置环境变量，使用kubectl工具：</p>
-<pre><code class="language-bash">mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-$ kubectl get nodes
-$ kubectl get pods -n kube-system
-</code></pre>
-<p><strong>按照提示保存以下内容，一会要使用：</strong></p>
-<pre><code class="language-bash">kubeadm join master.k8s.io:16443 --token jv5z7n.3y1zi95p952y9p65 \
-    --discovery-token-ca-cert-hash sha256:403bca185c2f3a4791685013499e7ce58f9848e2213e27194b75a2e3293d8812 \
-    --control-plane 
-</code></pre>
-<p>查看集群状态</p>
-<pre><code class="language-bash">kubectl get cs
-
-kubectl get pods -n kube-system
-</code></pre>
-<h2 id="7安装集群网络">7.安装集群网络</h2>
-<p>从官方地址获取到flannel的yaml，在master1上执行</p>
-<pre><code class="language-bash">mkdir flannel
-cd flannel
-wget -c https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-</code></pre>
-<p>安装flannel网络</p>
-<pre><code class="language-bash">kubectl apply -f kube-flannel.yml 
-</code></pre>
-<p>检查</p>
-<pre><code class="language-bash">kubectl get pods -n kube-system
-</code></pre>
-<h2 id="8-master2节点加入集群">8、master2节点加入集群</h2>
-<h3 id="81-复制密钥及相关文件">8.1 复制密钥及相关文件</h3>
-<p>从master1复制密钥及相关文件到master2</p>
-<pre><code class="language-bash"># ssh root@192.168.44.156 mkdir -p /etc/kubernetes/pki/etcd
-
-# scp /etc/kubernetes/admin.conf root@192.168.44.156:/etc/kubernetes
-   
-# scp /etc/kubernetes/pki/{ca.*,sa.*,front-proxy-ca.*} root@192.168.44.156:/etc/kubernetes/pki
-   
-# scp /etc/kubernetes/pki/etcd/ca.* root@192.168.44.156:/etc/kubernetes/pki/etcd
-</code></pre>
-<h3 id="82-master2加入集群">8.2 master2加入集群</h3>
-<p>执行在master1上init后输出的join命令,需要带上参数<code>--control-plane</code>表示把master控制节点加入集群</p>
-<pre><code>kubeadm join master.k8s.io:16443 --token ckf7bs.30576l0okocepg8b     --discovery-token-ca-cert-hash sha256:19afac8b11182f61073e254fb57b9f19ab4d798b70501036fc69ebef46094aba --control-plane
-</code></pre>
-<p>检查状态</p>
-<pre><code>kubectl get node
-
-kubectl get pods --all-namespaces
-</code></pre>
-<h2 id=""></h2>
-<h2 id="5-加入kubernetes-node">5. 加入Kubernetes Node</h2>
-<p>在node1上执行</p>
-<p>向集群添加新节点，执行在kubeadm init输出的kubeadm join命令：</p>
-<pre><code>kubeadm join master.k8s.io:16443 --token ckf7bs.30576l0okocepg8b     --discovery-token-ca-cert-hash sha256:19afac8b11182f61073e254fb57b9f19ab4d798b70501036fc69ebef46094aba
-</code></pre>
-<p><strong>集群网络重新安装，因为添加了新的node节点</strong></p>
-<p>检查状态</p>
-<pre><code>kubectl get node
-
-kubectl get pods --all-namespaces
-</code></pre>
-<h2 id="-2"></h2>
 <h2 id="7-测试kubernetes集群">7. 测试kubernetes集群</h2>
 <p>在Kubernetes集群中创建一个pod，验证是否正常运行：</p>
 <pre><code>$ kubectl create deployment nginx --image=nginx
