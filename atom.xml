@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T02:47:53.544Z</updated>
+    <updated>2020-10-15T02:54:47.514Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,123 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[kubectl基本命令]]></title>
+        <id>https://jwangkun.github.io/post/HwKdS3aOl/</id>
+        <link href="https://jwangkun.github.io/post/HwKdS3aOl/">
+        </link>
+        <updated>2020-10-15T02:54:21.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="设置命令自动补全">设置命令自动补全</h3>
+<pre><code class="language-bash"># 首先下载这个命令，补全命令才能生效
+yum install -y bash-completion
+# 1、当前shell生效
+yum install -y bash-completion
+
+#2、总是会生效
+# vi  .bashrc    (/etc/profile)
+source &lt;(kubectl completion bash)
+
+source ~/.bashrc
+</code></pre>
+<h3 id="对节点的操作">对节点的操作</h3>
+<p>获取集群节点信息</p>
+<pre><code class="language-csharp">kubectl get nodes  # 获取集群节点信息
+
+# 输出不同的格式
+kubectl get nodes -o wide
+kubectl get nodes -o json
+kubectl get nodes -o yaml
+
+kubectl get nodes node2 -o wide # 查看某个节点的信息
+</code></pre>
+<p>增加节点</p>
+<pre><code class="language-csharp"># 在主节点上master执行命令
+# kubeadm token create --print-join-command
+# node节点上执行上述命令输出的内容
+kubeadm join apiserver.demo:6443 --token l9y210.bzx98ovq27i7an20     --discovery-token-ca-cert-hash sha256:274bcf2916f6c94b594098043aa697aef5137941b4e8f972f9183547d88323b3
+</code></pre>
+<p>移除节点</p>
+<pre><code class="language-bash"># 只在 worker 节点执行
+kubeadm reset
+# 只在 master 节点执行
+kubectl delete node demo-worker-x-x
+</code></pre>
+<h3 id="对节点标签进行操作">对节点标签进行操作</h3>
+<p>获取标签信息</p>
+<pre><code class="language-dart">kubectl get nodes --show-labels
+kubectl get nodes node2 --show-labels # 查看某个节点的标签信息
+</code></pre>
+<p>添加标签</p>
+<pre><code class="language-csharp"># 标签以key=value的形式存在
+
+# 设置node2节点的label是  disktype: node2
+kubectl label  nodes  node2 disktype:node2
+#会输出 node2 labeled
+
+kubectl get nodes node2 --show-labels
+# 输出节点对应的内容  查看输出label内容   
+</code></pre>
+<p>删除标签</p>
+<pre><code class="language-bash">kubectk label nodes node2 disktype-
+# 删除标签，只需要对应标签的key加减号(-)
+</code></pre>
+<h3 id="设置角色">设置角色</h3>
+<pre><code class="language-csharp"># 刚加入集群  node的角色定义是none，我们可以查看master的标签，查看角色对应的label
+kubectl get nodes master --show-labels
+#会看到 node-role.kubernetes.io/master= 这样的一个标签
+# 修改对应的角色即可
+
+#将node1，node2的角色定义为worker
+kubectl label nodes node1 node-role.kubernetes.io/worker=
+kubectl label nodes node2 node-role.kubernetes.io/worker=
+</code></pre>
+<h3 id="对pod的操作">对pod的操作</h3>
+<p>创建pod</p>
+<pre><code class="language-css">kubectl  create -f xxx.yml
+</code></pre>
+<p>删除pod</p>
+<pre><code class="language-cpp">kubectl delete -f xxx.yml
+</code></pre>
+<p>获取pod信息</p>
+<pre><code class="language-tsx">kubectl get pods  # 获取当前名称空间的pod
+kubectl get pods --namespace demo  # 获取指定名称空间的pod
+</code></pre>
+<p>进入指定pod的指定的容器内</p>
+<pre><code class="language-bash">#kubectl exec -it pod_name -c container_name sh
+kubectl exec -it nginx -c nginx sh
+</code></pre>
+<h3 id="namespace">namespace</h3>
+<p>获取命名空间</p>
+<pre><code class="language-csharp">kubectl get namespace
+</code></pre>
+<p>创建命名空间</p>
+<pre><code class="language-cpp"># kubectl create namespace namespace_name
+kubectl create namespace demo
+</code></pre>
+<p>删除命名空间</p>
+<pre><code class="language-tsx"># kubectl delete namespace namespace_name
+kubectl delete namespace demo
+</code></pre>
+<p>创建一个指定命令空间的pod的yaml文件</p>
+<pre><code class="language-bash">apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: demo  # 指定名称空间
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+</code></pre>
+<pre><code class="language-tsx">kubectl create namespace demo # 创建对应的名称空间
+kubectl create -f nginx_namespace.yml
+kubectl get pods # 在当前名称空间查看pod，查找不到刚才创建的pod
+kubectl get pods --namespace demo # 查看指定名称空间的pod
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Docker 常用命令汇总]]></title>
         <id>https://jwangkun.github.io/post/Ij5JN2yIV/</id>
@@ -1452,185 +1569,6 @@ spec:
 <pre><code class="language-bsh">countonme
 </code></pre>
 <p>可以看到该Pod下面有一个文件名为password, 内容为countonme的文本文件.</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Kubernetes之Pod, Replicaset, Deployment, Label, Service]]></title>
-        <id>https://jwangkun.github.io/post/oVB0pVA68/</id>
-        <link href="https://jwangkun.github.io/post/oVB0pVA68/">
-        </link>
-        <updated>2020-10-12T11:54:59.000Z</updated>
-        <content type="html"><![CDATA[<p><strong>Pod:</strong></p>
-<p>Pod是一组紧密关联的容器集合，它们共享PID、IPC、Network和UTS namespace，是Kubernetes调度的基本单位。Pod的设计理念是支持多个容器在一个Pod中共享网络和文件系统，可以通过进程间通信和文件共享这种简单高效的方式组合完成服务.</p>
-<p>缺点: 不支持高并发, 高可用, 当Pod当机后无法自动恢复.</p>
-<p>1.创建Pod</p>
-<p># vi pod.yaml</p>
-<pre><code>apiVersion: v1
-kind: Pod
-metadata:
-  name: demo
-spec:
-  containers:
-  - image: httpd
-    name: httpd
-    imagePullPolicy: Always
-</code></pre>
-<p># kubectl create -f pod.yaml</p>
-<p>2.查看Pod</p>
-<p># kubectl get pods</p>
-<pre><code>NAME    READY     STATUS    RESTARTS   AGE
-demo    1/1       Running      0       8d
-</code></pre>
-<p># kubectl describe pods</p>
-<p>3.删除Pod</p>
-<p># kubectl delete pod demo</p>
-<p><strong>Replicaset:</strong></p>
-<p>Replicaset在继承Pod的所有特性的同时, 它可以利用预先创建好的模板定义副本数量并自动控制, 通过改变Pod副本数量实现Pod的扩容和缩容</p>
-<p>缺点: 无法修改template模板, 也就无法发布新的镜像版本</p>
-<p>1.创建Replicaset</p>
-<p># vi replicaset.yaml</p>
-<pre><code>apiVersion: apps/v1
-kind: ReplicaSet
-metadata:
-  name: demo-rc
-  labels:
-    app: demo-rc
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: demo-rc
-  template:
-    metadata:
-      labels:
-        app: demo-rc
-    spec:
-      containers:
-      - name: httpd
-        image: httpd
-        imagePullPolicy: Always
-</code></pre>
-<p># kubectl create -f replicaset.yaml</p>
-<p>2.查看replicaset</p>
-<p># kubectl get replicaset</p>
-<pre><code>NAME      READY     STATUS    RESTARTS   AGE
-demo-rc    1/1       Running      0       8d
-</code></pre>
-<p># kubectl describe replicaset</p>
-<p>3.删除replicaset</p>
-<p># kubectl delete replicaset demo-rc</p>
-<p><strong>Deployment</strong></p>
-<p>Deployment在继承Pod和Replicaset的所有特性的同时, 它可以实现对template模板进行实时滚动更新并具备我们线上的Application life circle的特性.</p>
-<p>1.创建Deployment</p>
-<p># vi deployment.yaml</p>
-<pre><code>apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: httpd-deployment
-  labels:
-    app: httpd-deployment
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: httpd-demo
-  template:
-    metadata:
-      labels:
-        app: httpd-demo
-    spec:
-      containers:
-      - name: httpd
-        image: httpd
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 80
-        env:
-        - name: VERSION
-          value: &quot;v1&quot;
-</code></pre>
-<p># kubectl create -f deployment.yaml</p>
-<p>2.查看Deployment</p>
-<p># kubectl get deployment</p>
-<pre><code>NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-httpd-deployment   2         2         2            2           8d
-</code></pre>
-<p># kubectl get pods -o wide</p>
-<pre><code>NAME                               READY     STATUS    RESTARTS   AGE       IP            NODE
-httpd-deployment-956697567-8mqch   1/1       Running   0          8d        10.244.0.36   kube-master
-httpd-deployment-956697567-wcbs6   1/1       Running   0          8d        10.244.0.37   kube-master
-</code></pre>
-<p># kubectl describe deployment</p>
-<p>3.更新deployment</p>
-<p>通过此命令可以呼出vi编辑器对模板进行编辑.</p>
-<p># kubectl edit -f deployment.yaml</p>
-<p>通过此命令使当前编辑结果生效.</p>
-<p># kubectl apply -f deployment.yaml</p>
-<p>再次查看可以看到老版本的deployment已经下架, 新版本的已经生效.</p>
-<p># kubectl get deployment</p>
-<pre><code>NAME                          DESIRED   CURRENT   READY     AGE
-httpd-deployment-6b98d94474   0         0         0         1m
-httpd-deployment-956697567    2         2         2         7m
-</code></pre>
-<p>4.扩容与缩容</p>
-<p>可以修改replicas的赋值对deployment进行扩容与缩容</p>
-<p># kubectl scale deployment/httpd-deployment --replicas=1</p>
-<p>5.删除deployment</p>
-<p># kubectl delete deployment httpd-deployment</p>
-<p><strong>Lable</strong></p>
-<p>Label是attach到Pod的一对键/值对，用来传递用户定义的属性。比如，你可能创建了一个&quot;tier&quot;和“app”标签，通过Label（tier=frontend, app=myapp）来标记前端Pod容器，使用Label（tier=backend, app=myapp）标记后台Pod。然后可以使用Selectors选择带有特定Label的Pod，让具体某一个Pod或者Deployment去使用某一个Service实现特定的网络配置.</p>
-<p><strong>Service</strong></p>
-<p>Service是应用服务的抽象，通过labels为应用提供负载均衡和服务发现。匹配labels的Pod IP和端口列表组成endpoints，由kube-proxy负责将服务IP负载均衡到这些endpoints上。<br>
-每个Service都会自动分配一个cluster IP（仅在集群内部可访问的虚拟地址）和DNS名，其他容器可以通过该地址或DNS来访问服务，而不需要了解后端容器的运行。</p>
-<p>1.更改NodePort限制</p>
-<p>Kubernetes默认对外的NodePort限制范围为30000-32767, 这里如果要使用一些常用的端口(80, 8080, 443)需将这个范围放大.</p>
-<p># vi /etc/kubernetes/manifests/kube-apiserver.yaml</p>
-<p>在--service-cluster-ip-range与insecure-port间添加如下node port配置</p>
-<pre><code class="language-bsh">...
-- --service-cluster-ip-range=10.96.0.0/12
-- --service-node-port-range=0-32767
-- --insecure-port=0
-....
-</code></pre>
-<p>重启服务</p>
-<p># systemctl restart kubelet</p>
-<p>2.创建Service</p>
-<p># vi svc.yaml</p>
-<pre><code>apiVersion: v1
-kind: Service
-metadata:
-  name: demo
-spec:
-  type: NodePort
-  ports:
-    - port: 80
-      nodePort: 80
-  selector:
-    app: httpd-demo
-</code></pre>
-<p># kubectl create -f svc.yaml</p>
-<p>Tip: 如果要对某一Pod或deployment添加对外访问端口, 这里service添加的selector的键值需与之相对应.</p>
-<p>3.查看开放端口</p>
-<p># kubectl get svc demo</p>
-<pre><code class="language-bsh">NAME      TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)     AGE
-demo      NodePort   10.100.96.157   &lt;none&gt;        80:80/TCP   1h
-</code></pre>
-<p># kubectl describe service demo</p>
-<pre><code class="language-bsh">Name:                     demo
-Namespace:                default
-Labels:                   &lt;none&gt;
-Annotations:              &lt;none&gt;
-Selector:                 app=httpd-demo
-Type:                     NodePort
-IP:                       10.100.96.157
-Port:                     &lt;unset&gt;  80/TCP
-TargetPort:               80/TCP
-NodePort:                 &lt;unset&gt;  80/TCP
-Endpoints:                10.244.0.36:80,10.244.0.37:80
-Session Affinity:         None
-External Traffic Policy:  Cluster
-Events:                   &lt;none&gt;
-</code></pre>
 ]]></content>
     </entry>
 </feed>
