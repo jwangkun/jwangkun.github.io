@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T03:18:25.273Z</updated>
+    <updated>2020-10-15T03:25:25.969Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -10,6 +10,482 @@
     <logo>https://jwangkun.github.io/images/avatar.png</logo>
     <icon>https://jwangkun.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[Jenkines Pipline CI/CD 发布至k8s ]]></title>
+        <id>https://jwangkun.github.io/post/WhrC1yTsk/</id>
+        <link href="https://jwangkun.github.io/post/WhrC1yTsk/">
+        </link>
+        <updated>2020-10-15T03:23:46.000Z</updated>
+        <summary type="html"><![CDATA[<h1 id=""></h1>
+<h2 id="一-pipeline介绍">一、Pipeline介绍</h2>
+<p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
+<p>代码：pipeline在代码中实现，通常检查到源代码控制，使团队能够编辑，审查和迭代其交付管道。 持久：pipeline可以在Jenkins master的计划内和计划外重启中存活。 Pausable：在继续pipeline运行之前，pipeline可以选择停止并等待人工输入或批准。 多功能：pipeline支持复杂的实际CD要求，包括并行分叉/连接，循环和执行工作的能力。 可扩展：Pipeline插件支持其DSL的自定义扩展 和多个与其他插件集成的选项</p>
+]]></summary>
+        <content type="html"><![CDATA[<h1 id=""></h1>
+<h2 id="一-pipeline介绍">一、Pipeline介绍</h2>
+<p>pipeline是一套jenkins官方提供的插件，它可以用来在jenkins中实现和集成连续交付 <strong>用户可以利用Pipeline的许多功能：</strong></p>
+<p>代码：pipeline在代码中实现，通常检查到源代码控制，使团队能够编辑，审查和迭代其交付管道。 持久：pipeline可以在Jenkins master的计划内和计划外重启中存活。 Pausable：在继续pipeline运行之前，pipeline可以选择停止并等待人工输入或批准。 多功能：pipeline支持复杂的实际CD要求，包括并行分叉/连接，循环和执行工作的能力。 可扩展：Pipeline插件支持其DSL的自定义扩展 和多个与其他插件集成的选项</p>
+<!-- more -->
+<h2 id="二-k8s实现集成部署交付">二、k8s实现集成/部署/交付</h2>
+<figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c201e1b59?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h2 id="三-创建一个gitlab的测试项目网上找的简单代码测试">三、创建一个gitlab的测试项目（网上找的简单代码测试）</h2>
+<h3 id="1-测试代码">1、测试代码</h3>
+<p>代码结构</p>
+<pre><code>[root@node2 test1]# tree 
+.
+├── pom.xml
+└── src
+    └── main
+        └── java
+            └── hello
+                ├── Greeter.java
+                └── HelloWorld.java
+复制代码
+</code></pre>
+<p><strong>HelloWorld.java</strong></p>
+<pre><code>package hello;
+
+public class HelloWorld {
+    public static void main(String[] args) {
+        Greeter greeter = new Greeter();
+        System.out.println(greeter.sayHello());
+    }
+}
+复制代码
+</code></pre>
+<p><strong>Greeter.java</strong></p>
+<pre><code>package hello;
+
+public class Greeter {
+    public String sayHello() {
+        return &quot;Hello world!&quot;;
+    }
+}
+复制代码
+</code></pre>
+<p><strong>pom.xml</strong></p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+    &lt;artifactId&gt;gs-maven&lt;/artifactId&gt;
+    &lt;packaging&gt;jar&lt;/packaging&gt;
+    &lt;version&gt;0.1.0&lt;/version&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-shade-plugin&lt;/artifactId&gt;
+                &lt;version&gt;2.1&lt;/version&gt;
+                &lt;executions&gt;
+                    &lt;execution&gt;
+                        &lt;phase&gt;package&lt;/phase&gt;
+                        &lt;goals&gt;
+                            &lt;goal&gt;shade&lt;/goal&gt;
+                        &lt;/goals&gt;
+                        &lt;configuration&gt;
+                            &lt;transformers&gt;
+                                &lt;transformer
+                                    implementation=&quot;org.apache.maven.plugins.shade.resource.ManifestResourceTransformer&quot;&gt;
+                                    &lt;mainClass&gt;hello.HelloWorld&lt;/mainClass&gt;
+                                &lt;/transformer&gt;
+                            &lt;/transformers&gt;
+                        &lt;/configuration&gt;
+                    &lt;/execution&gt;
+                &lt;/executions&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/project&gt;
+
+复制代码
+</code></pre>
+<h3 id="2-git的测试项目">2、git的测试项目</h3>
+<figure data-type="image" tabindex="2"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c21c88495?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h2 id="四-jenkins配置">四、jenkins配置</h2>
+<h3 id="1-插件安装">1、插件安装</h3>
+<p>安装好git、GitLab Plugin、Gitlab Hook Plugin、Gitlab API Plugin、Pipeline、Kubernetes plugin插件。</p>
+<h3 id="2-在jenkins中配置kubernetes">2、在jenkins中配置kubernetes</h3>
+<figure data-type="image" tabindex="3"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c25a33197?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="3-简单测试创建一个pipline项目">3、简单测试（创建一个Pipline项目）</h3>
+<p>测试的Pipline脚本</p>
+<pre><code>def label = &quot;mypod-${UUID.randomUUID().toString()}&quot;
+podTemplate(label: 'label', cloud: 'kubernetes') {
+    node('label') {
+        stage('Run shell') {
+            sh 'echo hello world'
+        }
+    }
+}
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="4"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c264f2fe9?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0e46b252d026?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="6"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0e46b252d026?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="7"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c27fbfdd2?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="4-pipline中配置gi凭证">4、pipline中配置gi凭证</h3>
+<p><strong>创建凭证，username是gitlab的账号，password是gitlab账号对应的密码。</strong></p>
+<figure data-type="image" tabindex="8"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c428f0129?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="5-pipline中视图git凭证">5、Pipline中视图git凭证</h3>
+<figure data-type="image" tabindex="9"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c579a52d7?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="10"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c584a1987?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h2 id="-2"></h2>
+<h3 id="6-重新构建jnlp-slave镜像添加maven">6、重新构建jnlp-slave镜像（添加maven）</h3>
+<pre><code>mkdir myjenkins
+cd myjenkins/
+wget https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz
+tar xf apache-maven-3.5.4-bin.tar.gz
+
+[root@node2 myjenkins]# cat Dockerfile 
+FROM jenkins/jnlp-slave:3.27-1
+LABEL maintainer=&quot;maven@qq.com&quot;
+ENV MAVEN_HOME /usr/local/maven
+ENV PATH=$PATH:$MAVEN_HOME/bin
+
+COPY apache-maven-3.5.4  /usr/local/maven
+[root@node2 myjenkins]# docker build  -t myjnlp-slave:1.0 ./
+复制代码
+</code></pre>
+<h3 id="7-配置好镜像仓库我使用的aliyun">7、配置好镜像仓库（我使用的aliyun）</h3>
+<figure data-type="image" tabindex="11"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c5d5b9aae?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="8-把dokcer组的gid改成10000容器中jenkins账号的ugid">8、把dokcer组的gid改成10000（容器中jenkins账号的ugid）</h3>
+<pre><code>groupmod  -g10000  docker
+chown root.docker /var/run/docker.sock
+复制代码
+</code></pre>
+<h3 id="9-配置gitlab和jenkins的交互我使用的webhook方式并设置提交tag就触发构建">9、配置gitlab和jenkins的交互（我使用的webhook方式，并设置提交tag就触发构建）</h3>
+<h3 id="10-重新更改pipline脚本使执行jenkins构建后能直接创建镜像并提交到镜像仓库">10、重新更改Pipline脚本，使执行jenkins构建后能直接创建镜像并提交到镜像仓库</h3>
+<p><strong>Pipline脚本</strong></p>
+<pre><code>def label = &quot;mypod-${UUID.randomUUID().toString()}&quot;
+def registry = &quot;registry-vpc.cn-hongkong.aliyuncs.com&quot;
+def app_name = &quot;javatest&quot;
+def namespace = &quot;aliyun-zhang&quot;
+def username = &quot;xxxxxxxxxxxxxxxxxx&quot;
+def regpass = &quot;xxxxxxxxxxxxxxxxxxx&quot;
+
+
+podTemplate(label: 'label', cloud: 'kubernetes', containers: [
+    containerTemplate(
+        name: 'jnlp', 
+        image: 'myjnlp-slave:1.0'
+    ),
+],
+  volumes: [
+    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+    hostPathVolume(mountPath: '/usr/bin/docker', hostPath: '/usr/bin/docker')
+],)
+{
+    node('label') {
+        stage('Task') {
+            stage('拉取代码') {
+                git credentialsId: 'gitlab-auth', url: 'http://mygitlab-gitlab-ce.default.svc.cluster.local/root/test1.git'
+                def mytag = sh returnStdout: true, script: 'git describe --always --tag'
+                sh &quot;git checkout -b $mytag&quot;
+            }
+            stage('编译打包') {
+                sh &quot;mvn clean package -Dmaven.test.skip=true&quot;
+            }
+            
+            stage('构建上传镜像') {
+                def mytag = sh returnStdout: true, script: 'git describe --always --tag'
+                def image_name = &quot;${app_name}:${mytag}&quot;.minus(&quot;\n&quot;)
+                sh label: '', script: '''              echo \'
+                    FROM tomcat:latest 
+                    ADD pom.xml /usr/local/tomcat/webapps/ 
+                    \'  Dockerfile
+                ''' 
+                    
+                sh &quot;&quot;&quot;
+                    docker build  -t &quot;${registry}/${namespace}/${image_name}&quot; ./
+                    docker login -u ${username} -p \&quot;${regpass}\&quot; ${registry}
+                    docker push ${registry}/${namespace}/${image_name}
+                    
+                &quot;&quot;&quot;
+                
+            }            
+        }
+    }
+}
+复制代码
+</code></pre>
+<h3 id="11-jenkins构建测试与查看">11、jenkins构建测试与查看</h3>
+<figure data-type="image" tabindex="12"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c58fcb584?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="13"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c6fb0cc5a?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h2 id="五-自动部署到k8s集群">五、自动部署到k8s集群</h2>
+<h3 id="1-jenkins下载kubernetes-continuous">1、jenkins下载kubernetes continuous</h3>
+<p>deploy插件（官方文档：<a href="https://plugins.jenkins.io/kubernetes-cd%EF%BC%89">plugins.jenkins.io/kubernetes-…</a></p>
+<figure data-type="image" tabindex="14"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c89243367?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="2-配置kubeconfig凭证">2、配置kubeconfig凭证</h3>
+<p>添加 kubeconfig 文件，我选择的是直接粘贴文件内容（master端的.kube/config文件）</p>
+<figure data-type="image" tabindex="15"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c8a36a07c?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="3-记录凭证id值">3、记录凭证ID值</h3>
+<figure data-type="image" tabindex="16"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c8a88ec9c?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="4-创建一个deployyaml文件并把文件上传到项目的git中">4、创建一个deploy.yaml文件，并把文件上传到项目的git中</h3>
+<pre><code>[root@k8s-m ~]# cat java-deploy.yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mydeploy
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      test_node: k8s-node
+  template:
+    metadata:
+      labels:
+        test_node: k8s-node
+    spec:
+      containers:
+      - name: myjava-server
+        image: tomcat:latest
+        ports:
+        - name: http
+          containerPort: 8080
+复制代码
+</code></pre>
+<figure data-type="image" tabindex="17"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c8efcc776?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="5-更改pipline脚本内容">5、更改Pipline脚本内容</h3>
+<pre><code>def label = &quot;mypod-${UUID.randomUUID().toString()}&quot;
+def registry = &quot;registry-vpc.cn-hongkong.aliyuncs.com&quot;
+def app_name = &quot;javatest&quot;
+def namespace = &quot;aliyun-zhang&quot;
+def username = &quot;xxxxxxxxxxxx&quot;
+def regpass = &quot;xxxxxxxxx&quot;
+def k8s_auth = &quot;5ce0993e-e2e9-4126-a910-2acd0a77fefb&quot;
+
+
+podTemplate(label: 'label', cloud: 'kubernetes', containers: [
+    containerTemplate(
+        name: 'jnlp', 
+        image: 'myjnlp-slave:1.0'
+    ),
+],
+  volumes: [
+    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+    hostPathVolume(mountPath: '/usr/bin/docker', hostPath: '/usr/bin/docker')
+],)
+{
+    node('label') {
+        stage('Task') {
+            stage('拉取代码') {
+                git credentialsId: 'gitlab-auth', url: 'http://mygitlab-gitlab-ce.default.svc.cluster.local/root/test1.git'
+                def mytag = sh returnStdout: true, script: 'git describe --always --tag'
+                sh &quot;git checkout -b $mytag&quot;
+                echo &quot;mytag $mytag ${mytag} ----&quot;
+            }
+            stage('编译打包') {
+                sh &quot;mvn clean package -Dmaven.test.skip=true&quot;
+            }
+            
+            stage('构建上传镜像') {
+                def mytag = sh returnStdout: true, script: 'git describe --always --tag'
+                def image_name = &quot;${app_name}:${mytag}&quot;.minus(&quot;\n&quot;)
+                
+                echo &quot;image_name $image_name&quot;
+                sh label: '', script: '''              echo \'
+                    FROM tomcat:latest 
+                    ADD target/*.jar /usr/local/tomcat/webapps/ 
+                    \'  Dockerfile
+                ''' 
+                    
+                sh &quot;&quot;&quot;
+                    docker build  -t &quot;${registry}/${namespace}/${image_name}&quot; ./
+                    docker login -u ${username} -p \&quot;${regpass}\&quot; ${registry}
+                    docker push ${registry}/${namespace}/${image_name}
+                    
+                &quot;&quot;&quot;
+            }
+             stage('部署到K8S'){
+                def mytag = sh returnStdout: true, script: 'git describe --always --tag'
+                def image_name = &quot;${app_name}:${mytag}&quot;.minus(&quot;\n&quot;)
+                sh &quot;&quot;&quot;
+                sed -i 's#tomcat:latest#${registry}/${namespace}/${image_name}#' java-deploy.yaml
+                &quot;&quot;&quot;
+                kubernetesDeploy configs: 'java-deploy.yaml', kubeconfigId: &quot;${k8s_auth}&quot;
+      }
+        }
+    }
+}
+复制代码
+</code></pre>
+<h3 id="6-构建测试">6、构建测试</h3>
+<h3 id="我配置了jenkins和gitlab的webhook配置提交tag后会自动构建到部署到k8s集群">我配置了jenkins和gitlab的webhook配置,提交tag后会自动构建到部署到k8s集群</h3>
+<p>测试</p>
+<pre><code>[root@node2 test1]# echo 123 &gt;&gt;README.md 
+[root@node2 test1]# git commit -a -m '123'
+[master bda4c6f] 123
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+[root@node2 test1]# git tag  10.0 
+[root@node2 test1]# git push origin master 10.0
+Username for 'http://10.101.58.237': root
+Password for 'http://root@10.101.58.237': 
+Counting objects: 5, done.
+Delta compression using up to 2 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 347 bytes | 0 bytes/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To http://10.101.58.237/root/test1.git
+   da0fbc3..bda4c6f  master - master
+ * [new tag]         10.0 - 10.0
+复制代码
+</code></pre>
+<p>jenkins构建过程</p>
+<figure data-type="image" tabindex="18"><img src="https://user-gold-cdn.xitu.io/2019/8/27/16cd0b4c9a56f59e?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p><strong>k8s集群查看</strong></p>
+<pre><code>[root@k8s-m ~]# kubectl get deploy  mydeploy
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+mydeploy   2/2     2            2           64s
+[root@k8s-m ~]# kubectl get pod  
+NAME                                   READY   STATUS    RESTARTS   AGE
+mydeploy-746bb8db64-4fpvz              1/1     Running   0          69s
+mydeploy-746bb8db64-pp7tw              1/1     Running   0          69s
+
+[root@k8s-m ~]# kubectl get pod mydeploy-746bb8db64-4fpvz  -o yaml|grep image: 
+  - image: registry-vpc.cn-hongkong.aliyuncs.com/aliyun-zhang/javatest:10.0
+    image: registry-vpc.cn-hongkong.aliyuncs.com/aliyun-zhang/javatest:10.0
+复制代码
+</code></pre>
+<h2 id="六-版本回滚">六、版本回滚</h2>
+<p>基于k8s镜像的回滚还是比较简单的 <strong>回滚上一个版本</strong></p>
+<pre><code> kubectl rollout undo deployment/deploy-name
+复制代码
+</code></pre>
+<p><strong>查看历史版本信息</strong></p>
+<pre><code>#查看 deployment 升级历史
+[root@k8s-m ~]# kubectl rollout history deployment/mydeploy
+deployment.extensions/mydeploy 
+REVISION  CHANGE-CAUSE
+3         none
+4         none
+
+#看历史版本更加详细的升级信息
+[root@k8s-m ~]# kubectl rollout history deployment/mydeploy  --revision=3
+deployment.extensions/mydeploy with revision #3
+Pod Template:
+  Labels:    pod-template-hash=746bb8db64
+    test_node=k8s-node
+  Containers:
+   myjava-server:
+    Image:    registry-vpc.cn-hongkong.aliyuncs.com/aliyun-zhang/javatest:10.0
+    Port:    8080/TCP
+    Host Port:    0/TCP
+    Environment:    none
+    Mounts:    none
+  Volumes:    none
+复制代码
+</code></pre>
+<p><strong>回滚指定版本</strong></p>
+<pre><code>kubectl rollout undo deployment/mydeploy --to-revision=3
+复制代码
+</code></pre>
+<p><strong>回滚指定版本2</strong></p>
+<p>直接修改delpoy中的镜像</p>
+<h2 id="七-deployment升级策略">七、Deployment升级策略</h2>
+<h3 id="1-介绍">1、介绍</h3>
+<p>deployment 有 2 种策略，分别是Recreate和RollingUpdate，RollingUpdate是默认的策略RollingUpdate也有相对应的升级策略，如果策略设置的不合理，那么升级的过程就有可能导致服务中断Max Unavailable最多有几个 pod 处于无法工作的状态，默认值是25%Max Surge升级过程中可以比预设的 pod 的数量多出的个数，默认值是25%minReadySeconds等待容器启动的时间，默认值是 0，单位是：秒，容器运行成功之后直接执行下一步根据应用启动时间，设定相应的minReadySeconds，保证应用不中断</p>
+<h3 id="2-查看deploy的更新策略">2、查看deploy的更新策略</h3>
+<pre><code>[root@k8s-m recreate]# kubectl  explain deploy.spec.strategy.type
+KIND:     Deployment
+VERSION:  extensions/v1beta1
+
+FIELD:    type string
+
+DESCRIPTION:
+     Type of deployment. Can be &quot;Recreate&quot; or &quot;RollingUpdate&quot;. Default is
+     RollingUpdate.
+复制代码
+</code></pre>
+<h3 id="3-recreate策略测试">3、recreate策略测试</h3>
+<p><strong>结论</strong>：recreate方式会先停止所有就版本，停止完后才部署新版本</p>
+<pre><code>[root@k8s-m ~]# kubectl  get pod -w 
+NAME                     READY   STATUS    RESTARTS   AGE
+my-app-bb9cc7597-dn5bv   1/1     Running   0          3m36s
+my-app-bb9cc7597-gqfx4   1/1     Running   0          3m36s
+my-app-bb9cc7597-p4dfb   1/1     Running   0          3m36s
+my-app-bb9cc7597-p4dfb   1/1     Terminating   0          3m44s
+my-app-bb9cc7597-dn5bv   1/1     Terminating   0          3m44s
+my-app-bb9cc7597-gqfx4   1/1     Terminating   0          3m44s
+my-app-bb9cc7597-p4dfb   0/1     Terminating   0          3m45s
+my-app-bb9cc7597-gqfx4   0/1     Terminating   0          3m45s
+my-app-bb9cc7597-dn5bv   0/1     Terminating   0          3m45s
+my-app-bb9cc7597-p4dfb   0/1     Terminating   0          3m57s
+my-app-bb9cc7597-p4dfb   0/1     Terminating   0          3m57s
+my-app-db47b56bf-kwd2c   0/1     Pending       0          0s
+my-app-db47b56bf-kwd2c   0/1     Pending       0          0s
+my-app-db47b56bf-xkqdz   0/1     Pending       0          0s
+my-app-db47b56bf-5v4r5   0/1     Pending       0          0s
+my-app-db47b56bf-xkqdz   0/1     Pending       0          0s
+my-app-db47b56bf-kwd2c   0/1     ContainerCreating   0          0s
+复制代码
+</code></pre>
+<h3 id="4-rollingupdate策略测试">4、RollingUpdate策略测试</h3>
+<p><strong>结论:</strong> 一个接一个地以滚动更新方式发布新版本，滚动的方式可以定义，即先删除多少pod在添加多少pod，或者是闲添加在删除。</p>
+<pre><code>[root@k8s-m ~]# kubectl get pod  -w
+NAME                     READY   STATUS    RESTARTS   AGE
+my-app-db47b56bf-2c2c6   1/1     Running   0          19s
+my-app-db47b56bf-k7k5z   1/1     Running   0          19s
+my-app-db47b56bf-mclj8   1/1     Running   0          19s
+my-app-bb9cc7597-hgz6r   0/1     Pending   0          0s
+my-app-bb9cc7597-hgz6r   0/1     Pending   0          0s
+my-app-bb9cc7597-hgz6r   0/1     ContainerCreating   0          1s
+my-app-bb9cc7597-hgz6r   0/1     ContainerCreating   0          1s
+my-app-bb9cc7597-hgz6r   0/1     Running             0          5s
+my-app-bb9cc7597-hgz6r   1/1     Running             0          6s
+my-app-db47b56bf-mclj8   1/1     Terminating         0          29s
+my-app-bb9cc7597-84ngs   0/1     Pending             0          0s
+my-app-bb9cc7597-84ngs   0/1     Pending             0          0s
+my-app-bb9cc7597-84ngs   0/1     ContainerCreating   0          1s
+my-app-bb9cc7597-84ngs   0/1     ContainerCreating   0          2s
+my-app-db47b56bf-mclj8   0/1     Terminating         0          31s
+my-app-db47b56bf-mclj8   0/1     Terminating         0          34s
+my-app-db47b56bf-mclj8   0/1     Terminating         0          34s
+my-app-bb9cc7597-84ngs   0/1     Running             0          6s
+my-app-bb9cc7597-84ngs   1/1     Running             0          7s
+复制代码
+[root@k8s-m recreate]# kubectl  explain deploy.spec.strategy.rollingUpdate
+KIND:     Deployment
+VERSION:  extensions/v1beta1
+
+RESOURCE: rollingUpdate Object
+
+DESCRIPTION:
+     Rolling update config params. Present only if DeploymentStrategyType =
+     RollingUpdate.
+
+     Spec to control the desired behavior of rolling update.
+
+FIELDS:
+   maxSurge    string
+     The maximum number of pods that can be scheduled above the desired number
+     of pods. Value can be an absolute number (ex: 5) or a percentage of desired
+     pods (ex: 10%). This can not be 0 if MaxUnavailable is 0. Absolute number
+     is calculated from percentage by rounding up. By default, a value of 1 is
+     used. Example: when this is set to 30%, the new RC can be scaled up
+     immediately when the rolling update starts, such that the total number of
+     old and new pods do not exceed 130% of desired pods. Once old pods have
+     been killed, new RC can be scaled up further, ensuring that total number of
+     pods running at any time during the update is at most 130% of desired pods.
+
+   maxUnavailable    string
+     The maximum number of pods that can be unavailable during the update. Value
+     can be an absolute number (ex: 5) or a percentage of desired pods (ex:
+     10%). Absolute number is calculated from percentage by rounding down. This
+     can not be 0 if MaxSurge is 0. By default, a fixed value of 1 is used.
+     Example: when this is set to 30%, the old RC can be scaled down to 70% of
+     desired pods immediately when the rolling update starts. Once new pods are
+     ready, old RC can be scaled down further, followed by scaling up the new
+     RC, ensuring that the total number of pods available at all times during
+     the update is at least 70% of desired pods.
+复制代码
+</code></pre>
+<h3 id="5-其它更新策略金丝雀等">5、其它更新策略（金丝雀等）</h3>
+<p><a href="https://zhuanlan.zhihu.com/p/55964678">zhuanlan.zhihu.com/p/55964678</a></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[k8s学习资料]]></title>
         <id>https://jwangkun.github.io/post/y5GbzS3T8/</id>
@@ -1468,109 +1944,6 @@ node2 网卡 ens33：192.168.50.11pod2 ip：10.244.104.2node2 tunl0：10.244.104
 <p>Kubernetes 的集群网络插件实现方案有很多种，本文主要分析了社区比较常见的两种 Flannel 和 Calico 的工作原理，针对集群内不同节点的 pod 间通信的场景，抓包分析了网络包的走向。</p>
 <p>Flannel 主要提供了 Overlay 的网络方案，UDP 模式由于其封包拆包的过程涉及了多次上下文的切换，导致性能很差，逐渐被社区抛弃；VXLAN 模式的封包拆包过程均在内核态，性能要比 UDP 好很多，也是最经常使用的模式；host-gw 模式不涉及封包拆包，所以性能相对较高，但要求节点间二层互通。</p>
 <p>Calico 主要采用了 BGP 协议交换路由，没有采用 cni0 网桥，当二层网络不通的时候，可以采用 IPIP 模式，但由于涉及到封包拆包的过程，性能相对较弱，与 Flannel 的 VXLAN 模式相当。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[搭建私有Charts仓库]]></title>
-        <id>https://jwangkun.github.io/post/j2GK2Y38c/</id>
-        <link href="https://jwangkun.github.io/post/j2GK2Y38c/">
-        </link>
-        <updated>2020-10-12T12:39:06.000Z</updated>
-        <summary type="html"><![CDATA[<p>在 centos 上用 nginx 镜像创建一个容器，名字为 c1</p>
-<pre><code>[root@vms12 ~]# docker run -dit --name=c1 -p 8080:80 -v /data:/usr/share/nginx/html/charts  docker.io/nginx 
-</code></pre>
-<pre><code>ca08a2ce9b8e910ed71f458fa3c7dd53843bf50e5bb92c089fdacf7cd65a1657 
-</code></pre>
-]]></summary>
-        <content type="html"><![CDATA[<p>在 centos 上用 nginx 镜像创建一个容器，名字为 c1</p>
-<pre><code>[root@vms12 ~]# docker run -dit --name=c1 -p 8080:80 -v /data:/usr/share/nginx/html/charts  docker.io/nginx 
-</code></pre>
-<pre><code>ca08a2ce9b8e910ed71f458fa3c7dd53843bf50e5bb92c089fdacf7cd65a1657 
-</code></pre>
-<!-- more -->
-<p>在 master 上自定义一个 chart：</p>
-<pre><code>[root@vms10 ~]# mkdir mychar 
-
-[root@vms10 ~]# 
-
-[root@vms10 ~]# cd mychar/ 
-
-[root@vms10 mychar]# helm create chart1 
-</code></pre>
-<pre><code>Creating chart1 
-</code></pre>
-<pre><code>[root@vms10 mychar]# cp -r ../mysql . 
-
-[root@vms10 mychar]# 
-
-[root@vms10 mychar]# ls 
-</code></pre>
-<pre><code>chart1 mysql 
-</code></pre>
-<p>对这两个 chart 进行打包：</p>
-<pre><code>[root@vms10 mychar]# **helm package chart1** 
-</code></pre>
-<pre><code>Successfully packaged chart and saved it to: /root/mychar/chart1-0.1.0.tgz 
-</code></pre>
-<p>[root@vms10 mychar]# h<strong>elm package mysql/</strong></p>
-<pre><code>Successfully packaged chart and saved it to: /root/mychar/mysql-1.6.4.tgz 
-</code></pre>
-<pre><code>[root@vms10 mychar]# ls 
-</code></pre>
-<pre><code>chart1 chart1-0.1.0.tgz mysql mysql-1.6.4.tgz 
-</code></pre>
-<p>给当前目录下的两个包建立索引文件，并指定私有仓库地址：</p>
-<pre><code>[root@vms10 mychar]# helm repo **index** . --url **http://192.168.26.12:8080/charts** 
-</code></pre>
-<pre><code>[root@vms10 mychar]# ls 
-</code></pre>
-<pre><code>chart1 chart1-0.1.0.tgz index.yaml mysql mysql-1.6.4.tgz 
-</code></pre>
-<p>把当前目录下 index.yaml 和后缀为 tgz 的包全部拷贝 192.168.26.12 的/data 目录里（请理解</p>
-<p>前面 c1 容器数据卷的设置）：</p>
-<pre><code>[root@vms10 mychar]# scp index.yaml *.tgz 192.168.26.12:/data 
-</code></pre>
-<p>切换到 vms12 上：</p>
-<pre><code>[root@vms12 ~]# **ls /data/** 
-</code></pre>
-<pre><code>index.yaml mychartxx-0.1.0.tgz mysql-1.6.2.tgz 
-</code></pre>
-<pre><code>[root@vms12 ~]# docker exec -it c1 
-
-&gt; **ls /usr/share/nginx/html/charts** 
-</code></pre>
-<pre><code>index.yaml mychartxx-0.1.0.tgz mysql-1.6.2.tgz 
-</code></pre>
-<p>切换到 master 上，添加 http://192.168.26.12:8080/charts 作为仓库：</p>
-<pre><code>[root@vms10 mychar]# **helm repo add myrepo http://192.168.26.12:8080/charts** 
-</code></pre>
-<pre><code>&quot;myrepo&quot; has been added to your repositories 
-</code></pre>
-<pre><code>[root@vms10 mychar]# helm repo list 
-</code></pre>
-<p>搜索 mysql 的 chart：</p>
-<p>[root@vms10 mychar]# helm search repo mysql</p>
-<p>除了在阿里云里可以找到 mysql 的仓库之外，在我们自定义的仓库里也能找到 mysql。</p>
-<p>查询 chart1：</p>
-<p>[root@vms10 mychar]# helm search repo chart1</p>
-<pre><code>NAME 
-
-CHART VERSION APP VERSION DESCRIPTION 
-
-myrepo/chart1 
-
-0.1.0 
-
-1.16.0 
-
-A Helm chart for Kubernetes 
-</code></pre>
-<p>私有仓库配置完毕。</p>
-<p>删除本地私有仓库地址：</p>
-<pre><code>[root@vms10 mychar]# **helm repo remove myrepo** 
-</code></pre>
-<pre><code>&quot;myrepo&quot; has been removed from your repositories 
-</code></pre>
 ]]></content>
     </entry>
 </feed>
