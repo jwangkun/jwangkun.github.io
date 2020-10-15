@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-       <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta content="yes" name="apple-mobile-web-app-capable" />
   <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>Kubernetes | John Wong&#39;s Blog</title>
+  <title>在 Kubernetes 上搭建 EFK 日志收集系统 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="Kubernetes | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="在 Kubernetes 上搭建 EFK 日志收集系统 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,6 +25,11 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="在 Kubernetes 上搭建 EFK 日志收集系统"/>
+    <meta property="og:url" content="https://jwangkun.github.io/post/tgYRQAxUk/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
   	<!-- Navigation -->
@@ -66,31 +71,41 @@
       </div>
     </div>
   </nav>
-<!-- Page Header -->
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="post-heading">
-            <h1 class="tag-tl">#Kubernetes</h1>
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/tag/E5U1mEsrq/" class="tag">Elasticsearch</a>
+            
+            <a href="https://jwangkun.github.io/tag/nPBE_sUl52/" class="tag">Kibana</a>
+            
+            <a href="https://jwangkun.github.io/tag/qi6RwSsX4m/" class="tag">EFK</a>
+            
+            <a href="https://jwangkun.github.io/tag/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>在 Kubernetes 上搭建 EFK 日志收集系统</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，44 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- Post Content -->
+  <article>
     <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/tgYRQAxUk/">
-            <h2 class="post-title">
-              在 Kubernetes 上搭建 EFK 日志收集系统
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p><code>Elasticsearch</code> 是一个实时的、分布式的可扩展的搜索引擎，允许进行全文、结构化搜索，它通常用于索引和搜索大量日志数据，也可用于搜索许多不同类型的文档。</p>
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p><code>Elasticsearch</code> 是一个实时的、分布式的可扩展的搜索引擎，允许进行全文、结构化搜索，它通常用于索引和搜索大量日志数据，也可用于搜索许多不同类型的文档。</p>
 <p>Elasticsearch 通常与 <code>Kibana</code> 一起部署，Kibana 是 Elasticsearch 的一个功能强大的数据可视化 Dashboard，Kibana 允许你通过 web 界面来浏览 Elasticsearch 日志数据。</p>
 <p><code>Fluentd</code>是一个流行的开源数据收集器，我们将在 Kubernetes 集群节点上安装 Fluentd，通过获取容器日志文件、过滤和转换日志数据，然后将数据传递到 Elasticsearch 集群，在该集群中对其进行索引和存储。</p>
 <p>我们先来配置启动一个可扩展的 Elasticsearch 集群，然后在 Kubernetes 集群中创建一个 Kibana 应用，最后通过 DaemonSet 来运行 Fluentd，以便它在每个 Kubernetes 工作节点上都可以运行一个 Pod。</p>
@@ -1165,209 +1180,24 @@ Done!
 <p>除此之外我们也可以配置将报警信息发往 <a href="https://github.com/anjia0532/elastalert-wechat-plugin">企业微信</a> 或者 <a href="https://github.com/xuyaoqiang/elastalert-dingtalk-plugin">钉钉</a>，还可以安装一个 elastalert 的 <a href="https://github.com/bitsensor/elastalert-kibana-plugin">Kibana 插件</a>，用于在 Kibana 页面上进行可视化操作。</p>
 <p>关于 elastalert 更多的操作和使用说明，大家可以查看官方文档了解更多：https://elastalert.readthedocs.io/en/latest/。</p>
 <p>原文链接 https://www.qikqiak.com/post/install-efk-stack-on-k8s/</p>
+<!-- more -->
+<!-- more -->
 
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">44 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/J3AaqcxFd/">
-            <h2 class="post-title">
-              win10上搭建k8s集群
-            </h2>
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/post/J3AaqcxFd/">
+              <span class="post-title">
+                win10上搭建k8s集群&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              <p>前面的系列教程都是在阿里云上实践的，最近自己组装了一台台式电脑，装上了win10系统。为了让更多的小伙伴有机会学习k8s的编排，这里使用了另一个更为简单的方案——Docker for Windows。当然，使用mac的同学也可以使用Docker for Mac。其安装使用方式都大同小异。这里重点讲一下在win10上的安装。</p>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/8l7nJoUol/">
-            <h2 class="post-title">
-              K8S部署Nacos微服务
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/Bf0bV70AO/">
-            <h2 class="post-title">
-              在K8S上搭建Redis集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/NmSmQLSLI/">
-            <h2 class="post-title">
-               k8s安装ELK与EFK
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">6 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/Z-wMIR6wz/">
-            <h2 class="post-title">
-               K8s 资源全汇总 从零入门 K8s
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>从 2019 年，云原生技术开始大规模普及，以“云”为核心的软件研发思想，正逐步成为所有开发者的默认选项，像 Kubernetes 等云原生技术正在成为技术人员的必修课。这种背景下，“会 Kubernetes”已经远远不够了，“懂 Kubernetes”、“会云原生架构”的重要性正日益凸显出来，这也是为什么大家都要学习和投资云原生技术的重要原因。</p>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/HwKdS3aOl/">
-            <h2 class="post-title">
-              kubectl基本命令
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/qMQ3HyNA5/">
-            <h2 class="post-title">
-              使用kubeadm搭建高可用的K8s集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
-<p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
-<pre><code># 创建一个 Master 节点
-$ kubeadm init
-
-# 将一个 Node 节点加入到当前集群中
-$ kubeadm join &lt;Master节点的IP和端口 &gt;
-</code></pre>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/59eFp4SaS/">
-            <h2 class="post-title">
-              Kubernetes Ingress
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>Ingress**也是Kubernetes项目里的一种 <strong>API</strong> 对象，它公开了从集群外部到集群内<code>Service</code>的 <strong>HTTP</strong> 和 <strong>HTTPS</strong> 路由，这些路由由 Ingress 资源上定义的规则控制。</p>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-13</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://jwangkun.github.io/post/fCqiP63fp/">
-            <h2 class="post-title">
-              更新一个10年有效期的 Kubernetes 证书
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-13</span>
-             <span>,</span>
-             <span class="post-stats">12 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
-        <a class="btn btn-primary float-right" href="https://jwangkun.github.io/tag/efVGHoi38/page/2">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
+  </article>
  <!-- Footer -->
   <footer>
     <div class="container">
@@ -1439,3 +1269,4 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
   })(this));</script>
   </body>
 </html>
+
