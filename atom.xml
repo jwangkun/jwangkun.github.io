@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jwangkun.github.io</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-15T03:13:22.629Z</updated>
+    <updated>2020-10-15T03:16:59.291Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://jwangkun.github.io"/>
     <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
@@ -24,7 +24,7 @@
 5.Kubernetes官方文档:https://kubernetes.io/docs/home/<br>
 6.书籍：《Kubernetes权威 指南》</li>
 </ol>
-]]></content>
+<!-- more -->]]></content>
     </entry>
     <entry>
         <title type="html"><![CDATA[ K8s 资源全汇总 从零入门 K8s]]></title>
@@ -306,20 +306,11 @@ kubectl get pods --namespace demo # 查看指定名称空间的pod
         <link href="https://jwangkun.github.io/post/Ij5JN2yIV/">
         </link>
         <updated>2020-10-15T02:38:20.000Z</updated>
-        <summary type="html"><![CDATA[<h1 id="docker-常用命令汇总"><strong>Docker 常用命令汇总</strong></h1>
-<h3 id="docker-镜像命令">Docker 镜像命令</h3>
+        <content type="html"><![CDATA[<h3 id="docker-镜像命令">Docker 镜像命令</h3>
 <p>列出镜像列表</p>
 <pre><code class="language-sh">$ docker images
 $ docker image ls -a
 </code></pre>
-]]></summary>
-        <content type="html"><![CDATA[<h1 id="docker-常用命令汇总"><strong>Docker 常用命令汇总</strong></h1>
-<h3 id="docker-镜像命令">Docker 镜像命令</h3>
-<p>列出镜像列表</p>
-<pre><code class="language-sh">$ docker images
-$ docker image ls -a
-</code></pre>
-<!-- more -->
 <p>运行 Docker 镜像（守护态方式）</p>
 <pre><code class="language-sh">$ docker run -d {镜像名}
 </code></pre>
