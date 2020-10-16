@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-       <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta content="yes" name="apple-mobile-web-app-capable" />
   <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>Jenkins | John Wong&#39;s Blog</title>
+  <title>允许Docker使用无权限验证的Docker Registry | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="Jenkins | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="允许Docker使用无权限验证的Docker Registry | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,6 +25,11 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="允许Docker使用无权限验证的Docker Registry"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/wyCYu2kwn/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
   	<!-- Navigation -->
@@ -66,72 +71,61 @@
       </div>
     </div>
   </nav>
-<!-- Page Header -->
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="post-heading">
-            <h1 class="tag-tl">#Jenkins</h1>
+          	<span class="tags">
+          	 
+        </span>
+            <h1>允许Docker使用无权限验证的Docker Registry</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-11，1 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- Post Content -->
+  <article>
     <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/AqWTrwEdK/">
-            <h2 class="post-title">
-              KubeSphere DevOps 3.0 流水线运维指南
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <blockquote>
-<p>本篇主要介绍如何运维 DevOps 流水线，怎么解决一些常见的问题。问题主要分为两大类，一类是 Kubernetes 相关的，具有一定通用性；另一类是与业务相关，需要对领域有所了解，解决问题时才能事半功倍。文档内容，会不断滚动更新。</p>
-</blockquote>
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>默认情况下，Docker不能使用没有配置权限验证的Docker Registry，会出现如下报错：</p>
+<pre><code>docker pull 10.213.120.68/library/dhcc-zuul-gate:1
+Error response from daemon: Get https://10.213.120.68/v2/: http: server gave HTTP response to HTTPS client
+</code></pre>
+<p>这时需要修改docker配置文件，将”10.213.120.68”添加到insecure-registries中：</p>
+<pre><code>vim /etc/docker/daemon.json{
+  &quot;insecure-registries&quot; : [&quot;10.213.120.68&quot;]
+}
+</code></pre>
+<p>然后重启docker</p>
+<pre><code>sudo systemctl restart docker 
+sudo restart docker 
+</code></pre>
 
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/pyEGDeM0P/">
-            <h2 class="post-title">
-              基于 Jenkins、Gitlab、Harbor、Helm 和 Kubernetes 的 CI/CD
-            </h2>
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/3R1pSdQZa/">
+              <span class="post-title">
+                用Docker搭建Shadowsocks服务器&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              <p>我们利用 Kubernetes 来动态运行 Jenkins 的 Slave 节点，可以和好的来解决传统的 Jenkins Slave 浪费大量资源的缺点。之前的示例中我们是将项目放置在 Github 仓库上的，将 Docker 镜像推送到了 Docker Hub，这节课我们来结合我们前面学习的知识点来综合运用下，使用 Jenkins、Gitlab、Harbor、Helm、Kubernetes 来实现一个完整的持续集成和持续部署的流水线作业。</p>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">32 min read</span>
-            </p>
+          </p>
+        
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
       </div>
     </div>
-  </div>
-
-  
+  </article>
  <!-- Footer -->
   <footer>
     <div class="container">
@@ -214,3 +208,4 @@
 
   </body>
 </html>
+
