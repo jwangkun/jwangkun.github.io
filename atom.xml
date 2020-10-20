@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-16T01:39:11.971Z</updated>
+    <updated>2020-10-20T03:08:20.325Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,41 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[sealos+rook 部署 kubeSphere+TiDB]]></title>
+        <id>https://blog.jwangkun.com/post/AqhtD6hL3/</id>
+        <link href="https://blog.jwangkun.com/post/AqhtD6hL3/">
+        </link>
+        <updated>2020-10-20T03:06:12.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[基于Docker Desktop桌面客户端搭建 Kubernetes]]></title>
+        <id>https://blog.jwangkun.com/post/Wev3hXnKO/</id>
+        <link href="https://blog.jwangkun.com/post/Wev3hXnKO/">
+        </link>
+        <updated>2020-10-19T11:34:43.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Minikube - Kubernetes本地实验环境]]></title>
+        <id>https://blog.jwangkun.com/post/ZRTmDbwEA/</id>
+        <link href="https://blog.jwangkun.com/post/ZRTmDbwEA/">
+        </link>
+        <updated>2020-10-19T10:47:46.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[centos7.4配置nfs网络文件共享]]></title>
+        <id>https://blog.jwangkun.com/post/UbCNkIkc8/</id>
+        <link href="https://blog.jwangkun.com/post/UbCNkIkc8/">
+        </link>
+        <updated>2020-10-16T03:42:31.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[k8s使用的web框架：go-restful 源码分析]]></title>
+        <id>https://blog.jwangkun.com/post/cjiYeW8zk/</id>
+        <link href="https://blog.jwangkun.com/post/cjiYeW8zk/">
+        </link>
+        <updated>2020-10-16T02:14:52.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[KubeSphere DevOps 3.0 流水线运维指南]]></title>
         <id>https://blog.jwangkun.com/post/AqWTrwEdK/</id>
@@ -65,65 +100,6 @@
         <summary type="html"><![CDATA[<p>链接: https://pan.baidu.com/s/1tqYAADyHMyklOh44ZTmUsw 提取码: 5642</p>
 ]]></summary>
         <content type="html"><![CDATA[<p>链接: https://pan.baidu.com/s/1tqYAADyHMyklOh44ZTmUsw 提取码: 5642</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Gitlab CI 集成 Kubernetes]]></title>
-        <id>https://blog.jwangkun.com/post/uEZxv8lam/</id>
-        <link href="https://blog.jwangkun.com/post/uEZxv8lam/">
-        </link>
-        <updated>2020-10-15T06:23:58.000Z</updated>
-        <summary type="html"><![CDATA[<h3 id="基本配置">基本配置</h3>
-<p>首先将本节所用到的代码库从 Github 上获得：<a href="https://github.com/cnych/gitlab-ci-k8s-demo">cnych/gitlab-ci-k8s-demo</a>，可以在 Gitlab 上新建一个项目导入该仓库，当然也可以新建一个空白的仓库，然后将 Github 上面的项目 Clone 到本地后，更改远程仓库地址即可：</p>
-]]></summary>
-        <content type="html"><![CDATA[<h3 id="基本配置">基本配置</h3>
-<p>首先将本节所用到的代码库从 Github 上获得：<a href="https://github.com/cnych/gitlab-ci-k8s-demo">cnych/gitlab-ci-k8s-demo</a>，可以在 Gitlab 上新建一个项目导入该仓库，当然也可以新建一个空白的仓库，然后将 Github 上面的项目 Clone 到本地后，更改远程仓库地址即可：</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[基于 Jenkins、Gitlab、Harbor、Helm 和 Kubernetes 的 CI/CD]]></title>
-        <id>https://blog.jwangkun.com/post/pyEGDeM0P/</id>
-        <link href="https://blog.jwangkun.com/post/pyEGDeM0P/">
-        </link>
-        <updated>2020-10-15T06:17:36.000Z</updated>
-        <summary type="html"><![CDATA[<p>我们利用 Kubernetes 来动态运行 Jenkins 的 Slave 节点，可以和好的来解决传统的 Jenkins Slave 浪费大量资源的缺点。之前的示例中我们是将项目放置在 Github 仓库上的，将 Docker 镜像推送到了 Docker Hub，这节课我们来结合我们前面学习的知识点来综合运用下，使用 Jenkins、Gitlab、Harbor、Helm、Kubernetes 来实现一个完整的持续集成和持续部署的流水线作业。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>我们利用 Kubernetes 来动态运行 Jenkins 的 Slave 节点，可以和好的来解决传统的 Jenkins Slave 浪费大量资源的缺点。之前的示例中我们是将项目放置在 Github 仓库上的，将 Docker 镜像推送到了 Docker Hub，这节课我们来结合我们前面学习的知识点来综合运用下，使用 Jenkins、Gitlab、Harbor、Helm、Kubernetes 来实现一个完整的持续集成和持续部署的流水线作业。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[在现有 Kubernetes 集群上安装 KubeSphere]]></title>
-        <id>https://blog.jwangkun.com/post/UtzHh7Dxw/</id>
-        <link href="https://blog.jwangkun.com/post/UtzHh7Dxw/">
-        </link>
-        <updated>2020-10-15T06:15:54.000Z</updated>
-        <summary type="html"><![CDATA[<p><a href="https://kubesphere.io/">KubeSphere</a>是在 Kubernetes 之上构建的企业级分布式多租户容器管理平台，提供简单易用的操作界面以及向导式操作方式，在降低用户使用容器调度平台学习成本的同时，极大减轻开发、测试、运维的日常工作的复杂度，旨在解决 Kubernetes 本身存在的存储、网络、安全和易用性等痛点。除此之外，平台已经整合并优化了多个适用于容器场景的功能模块，以完整的解决方案帮助企业轻松应对敏捷开发与自动化运维、微服务治理、多租户管理、工作负载和集群管理、服务与网络管理、应用编排与管理、镜像仓库管理和存储管理等业务场景。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p><a href="https://kubesphere.io/">KubeSphere</a>是在 Kubernetes 之上构建的企业级分布式多租户容器管理平台，提供简单易用的操作界面以及向导式操作方式，在降低用户使用容器调度平台学习成本的同时，极大减轻开发、测试、运维的日常工作的复杂度，旨在解决 Kubernetes 本身存在的存储、网络、安全和易用性等痛点。除此之外，平台已经整合并优化了多个适用于容器场景的功能模块，以完整的解决方案帮助企业轻松应对敏捷开发与自动化运维、微服务治理、多租户管理、工作负载和集群管理、服务与网络管理、应用编排与管理、镜像仓库管理和存储管理等业务场景。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[在 Kubernetes 上搭建 EFK 日志收集系统]]></title>
-        <id>https://blog.jwangkun.com/post/tgYRQAxUk/</id>
-        <link href="https://blog.jwangkun.com/post/tgYRQAxUk/">
-        </link>
-        <updated>2020-10-15T06:08:24.000Z</updated>
-        <summary type="html"><![CDATA[<p><code>Elasticsearch</code> 是一个实时的、分布式的可扩展的搜索引擎，允许进行全文、结构化搜索，它通常用于索引和搜索大量日志数据，也可用于搜索许多不同类型的文档。</p>
-<p>Elasticsearch 通常与 <code>Kibana</code> 一起部署，Kibana 是 Elasticsearch 的一个功能强大的数据可视化 Dashboard，Kibana 允许你通过 web 界面来浏览 Elasticsearch 日志数据。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p><code>Elasticsearch</code> 是一个实时的、分布式的可扩展的搜索引擎，允许进行全文、结构化搜索，它通常用于索引和搜索大量日志数据，也可用于搜索许多不同类型的文档。</p>
-<p>Elasticsearch 通常与 <code>Kibana</code> 一起部署，Kibana 是 Elasticsearch 的一个功能强大的数据可视化 Dashboard，Kibana 允许你通过 web 界面来浏览 Elasticsearch 日志数据。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[win10上搭建k8s集群]]></title>
-        <id>https://blog.jwangkun.com/post/J3AaqcxFd/</id>
-        <link href="https://blog.jwangkun.com/post/J3AaqcxFd/">
-        </link>
-        <updated>2020-10-15T03:47:00.000Z</updated>
-        <summary type="html"><![CDATA[<p>前面的系列教程都是在阿里云上实践的，最近自己组装了一台台式电脑，装上了win10系统。为了让更多的小伙伴有机会学习k8s的编排，这里使用了另一个更为简单的方案——Docker for Windows。当然，使用mac的同学也可以使用Docker for Mac。其安装使用方式都大同小异。这里重点讲一下在win10上的安装。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>前面的系列教程都是在阿里云上实践的，最近自己组装了一台台式电脑，装上了win10系统。为了让更多的小伙伴有机会学习k8s的编排，这里使用了另一个更为简单的方案——Docker for Windows。当然，使用mac的同学也可以使用Docker for Mac。其安装使用方式都大同小异。这里重点讲一下在win10上的安装。</p>
 ]]></content>
     </entry>
 </feed>

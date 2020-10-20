@@ -161,11 +161,12 @@
 <p>为了方便使用linux的命令，这里使用了git bash</p>
 <figure data-type="image" tabindex="20"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802201727058.png" alt="image-20200802201727058" loading="lazy"></figure>
 <ul>
-<li>浏览器访问<code>http://localhost:81</code></li>
-</ul>
-<p>![image-20200802200928676](data:image/svg+xml;utf8,<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="800" height="600"></svg>)</p>
-<ul>
-<li>清理刚运行的nginx实例</li>
+<li>
+<p>浏览器访问<code>http://localhost:81</code></p>
+</li>
+<li>
+<p>清理刚运行的nginx实例</p>
+</li>
 </ul>
 <pre><code class="language-shell"># 停止刚运行的名称为mynginx的实例
 docker ps -a | grep mynginx | awk '{print $1}' | xargs docker stop
@@ -187,15 +188,15 @@ docker ps -a | grep mynginx | awk '{print $1}' | xargs docker rm
 <ul>
 <li>
 <p>进入目录</p>
-<pre><code class="language-shell">cd k8s-for-docker-desktop
-
-</code></pre>
-</li>
-<li>
-<p>检出对应版本分支</p>
+<pre><code class="language-shell"></code></pre>
 </li>
 </ul>
-<pre><code class="language-shell">git checkbot v1.16.5
+<p>cd k8s-for-docker-desktop</p>
+<pre><code>
+- 检出对应版本分支
+
+```shell
+git checkbot v1.16.5
 </code></pre>
 <ul>
 <li>以管理员身份运行PowerShell</li>
