@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-       <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta content="yes" name="apple-mobile-web-app-capable" />
   <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>docker | John Wong&#39;s Blog</title>
+  <title>docker容器之间网络的通信 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="docker | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="docker容器之间网络的通信 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,6 +25,11 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="docker容器之间网络的通信"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/FwQvnztt3/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
   	<!-- Navigation -->
@@ -66,68 +71,78 @@
       </div>
     </div>
   </nav>
-<!-- Page Header -->
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="post-heading">
-            <h1 class="tag-tl">#docker</h1>
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/TzrzyJwok/" class="tag">docker</a>
+            
+        </span>
+            <h1>docker容器之间网络的通信</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-20，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- Post Content -->
+  <article>
     <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/FwQvnztt3/">
-            <h2 class="post-title">
-              docker容器之间网络的通信
-            </h2>
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="容器之间互通">容器之间互通</h2>
+<p>新建两个容器</p>
+<pre><code>docker run -d --name box1 busybox /bin/sh -c &quot;while true;do sleep 3600;done&quot;
+
+docker run -d --name box2 busybox /bin/sh -c &quot;while true;do sleep 3600;done&quot;
+</code></pre>
+<p>进入box1 ping box2</p>
+<pre><code>docker exec -it ac1aa7242949 /bin/sh
+ping 172.17.0.3
+</code></pre>
+<p>表明新建的两个容器之间是可以互通的，他们之间通过bridge docker0进行通信，docker0为他们分别组了一对</p>
+<figure data-type="image" tabindex="1"><img src="https://img2018.cnblogs.com/blog/1608824/201909/1608824-20190920005907507-1619115809.png" alt="img" loading="lazy"></figure>
+<h2 id="为新建的容器指定bridge网络">为新建的容器指定bridge网络</h2>
+<p>创建新的bridge网络</p>
+<pre><code>docker network ls 查看现在的网络
+
+docker network create -d bridge dockerBridge 创建自己的bridge
+</code></pre>
+<p>创建容器并且指定bridge</p>
+<pre><code>docker run -d --name box5 --network dockerBridge busybox /bin/sh -c &quot;while true;do sleep 3600;done&quot;
+
+docker run -d --name box6 --network dockerBridge busybox /bin/sh -c &quot;while true;do sleep 3600;done&quot;
+</code></pre>
+<p>运用自己的创建的bridge两个容器之间会自动link</p>
+<pre><code>docker exec -it ac1aa7242949 /bin/sh
+ping box5
+</code></pre>
+<h2 id=""></h2>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/AqhtD6hL3/">
+              <span class="post-title">
+                sealos+rook 部署 kubeSphere+TiDB&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-20</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/Ij5JN2yIV/">
-            <h2 class="post-title">
-              Docker 常用命令汇总
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-11</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
       </div>
     </div>
-  </div>
-
-  
+  </article>
  <!-- Footer -->
   <footer>
     <div class="container">
@@ -210,3 +225,4 @@
 
   </body>
 </html>
+

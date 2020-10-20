@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-20T03:08:20.325Z</updated>
+    <updated>2020-10-20T07:09:26.996Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[docker容器之间网络的通信]]></title>
+        <id>https://blog.jwangkun.com/post/FwQvnztt3/</id>
+        <link href="https://blog.jwangkun.com/post/FwQvnztt3/">
+        </link>
+        <updated>2020-10-20T07:08:52.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[sealos+rook 部署 kubeSphere+TiDB]]></title>
         <id>https://blog.jwangkun.com/post/AqhtD6hL3/</id>
@@ -90,16 +97,5 @@
         <link href="https://blog.jwangkun.com/post/x1hHMvXKi/">
         </link>
         <updated>2020-10-15T07:43:59.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Kubernetes CKA 实训免费视频课程]]></title>
-        <id>https://blog.jwangkun.com/post/pAgHc_hhs/</id>
-        <link href="https://blog.jwangkun.com/post/pAgHc_hhs/">
-        </link>
-        <updated>2020-10-15T06:29:30.000Z</updated>
-        <summary type="html"><![CDATA[<p>链接: https://pan.baidu.com/s/1tqYAADyHMyklOh44ZTmUsw 提取码: 5642</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>链接: https://pan.baidu.com/s/1tqYAADyHMyklOh44ZTmUsw 提取码: 5642</p>
-]]></content>
     </entry>
 </feed>
