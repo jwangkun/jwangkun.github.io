@@ -100,6 +100,23 @@
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <h2 id="容器之间互通">容器之间互通</h2>
+<p>Docker在创建容器时有四种网络模式：bridge/host/container/none，bridge为默认不需要用–net去指定，其他三种模式需要在创建容器时使用–net去指定</p>
+<p>bridge模式(默认模式)</p>
+<pre><code> docker run时使用--net=bridge，这种模式会为每个容器分配一个独立的Network Namespace,
+
+ 同一个宿主机上的所有容器会在同一个网段下，相互之间是可以通信的
+
+ 注1：bridge为默认模式，不需要使用参数--net去指定，使用了--net参数反而无效
+
+ 注2：bridge模式无法指定容器IP(但非绝对
+</code></pre>
+<p>host模式</p>
+<pre><code> docker run时使用--net=host，容器将不会虚拟出IP/端口，而是使用宿主机的IP和端口
+
+ docker run -itd --net=host 961769676411
+
+ 注1：host模式不能使用端口映射和自定义路由规则，这些都与主机一致，-p 与-icc 参数是无效的
+</code></pre>
 <p>新建两个容器</p>
 <pre><code>docker run -d --name box1 busybox /bin/sh -c &quot;while true;do sleep 3600;done&quot;
 
