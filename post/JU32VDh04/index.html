@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-       <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta content="yes" name="apple-mobile-web-app-capable" />
   <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>归档 | John Wong&#39;s Blog</title>
+  <title> GitHub 代理加速 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="归档 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title=" GitHub 代理加速 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,6 +25,11 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content=" GitHub 代理加速"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/JU32VDh04/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
   	<!-- Navigation -->
@@ -73,103 +78,69 @@
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="post-heading">
-            <h1 class="tag-tl">Archives</h1>
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/lNg5vz4Em/" class="tag">Github</a>
+            
+            <a href="https://blog.jwangkun.com/tag/MNJgydHbUf/" class="tag">加速</a>
+            
+        </span>
+            <h1> GitHub 代理加速</h1>
+            <span class="meta">
+            	Posted on
+              2020-01-16，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
+
   <!-- Post Content -->
   <article>
     <div class="container">
       <div class="row">
-        
-      
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="post-archives">
-    <h2 class="year">2020</h2>
-    
-                
-        <a href="https://blog.jwangkun.com/post/1siCRcJND/" class="post">
-          <h2 class="post-title Archives">
-             MinIO 集群安装部署
-          </h2>
-          <div class="time post-meta">2020-09-14</div>
-        </a>
-  
-                    
-                
-        <a href="https://blog.jwangkun.com/post/angular-huan-jing-da-jian/" class="post">
-          <h2 class="post-title Archives">
-            Angular 环境搭建
-          </h2>
-          <div class="time post-meta">2020-07-30</div>
-        </a>
-  
-                    
-                
-        <a href="https://blog.jwangkun.com/post/kai-yuan-kua-ping-tai-ruan-jian/" class="post">
-          <h2 class="post-title Archives">
-            开源跨平台软件
-          </h2>
-          <div class="time post-meta">2020-04-25</div>
-        </a>
-  
-                    
-                
-        <a href="https://blog.jwangkun.com/post/qian-duan-ji-zhu-xuan-xing/" class="post">
-          <h2 class="post-title Archives">
-            前端技术选型
-          </h2>
-          <div class="time post-meta">2020-04-24</div>
-        </a>
-  
-                    
-                
-        <a href="https://blog.jwangkun.com/post/JU32VDh04/" class="post">
-          <h2 class="post-title Archives">
-             GitHub 代理加速
-          </h2>
-          <div class="time post-meta">2020-01-16</div>
-        </a>
-  
-                    
-                
-                    
-        </div>
-        </div>
+          <h2 id="github-镜像访问">GitHub 镜像访问</h2>
+<p>这里提供两个最常用的镜像地址：</p>
+<ul>
+<li><a href="https://github.com.cnpmjs.org/">https://github.com.cnpmjs.org</a></li>
+<li><a href="https://hub.fastgit.org/">https://hub.fastgit.org</a></li>
+</ul>
+<p>也就是说上面的镜像就是一个克隆版的Github，你可以访问上面的镜像网站，网站的内容跟Github是完整同步的镜像，然后在这个网站里面进行下载克隆等操作。</p>
+<h2 id="github文件加速">GitHub文件加速</h2>
+<p>利用 Cloudflare Workers 对<code>github release</code> 、<code>archive</code> 以及项目文件进行加速，部署无需服务器且自带CDN.</p>
+<p><a href="https://gh.api.99988866.xyz/">https://gh.api.99988866.xyz</a><br>
+<a href="https://g.ioiox.com/">https://g.ioiox.com</a></p>
+<p>以上网站为演示站点，如无法打开可以查看开源项目：<a href="https://hunsh.net/archives/23/">gh-proxy-GitHub 文件加速</a>自行部署。</p>
+<h2 id="github-加速下载">Github 加速下载</h2>
+<p>只需要复制当前 GitHub 地址粘贴到输入框中就可以代理加速下载！</p>
+<p>地址：http://toolwa.com/github/</p>
+<figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2020/7/28/17395643da21627a?w=1325&amp;h=708&amp;f=png&amp;s=29545" alt="20200728200127-2020-07-28" loading="lazy"></figure>
+<h2 id="加速你的-github">加速你的 Github</h2>
+<p><a href="https://github.zhlh6.cn/">https://github.zhlh6.cn</a></p>
+<p>输入 Github 仓库地址，使用生成的地址进行 git ssh 操作即可</p>
+<h2 id="github-raw-加速">GitHub raw 加速</h2>
+<p>GitHub raw 域名并非 github.com 而是 raw.githubusercontent.com，上方的 GitHub 加速如果不能加速这个域名，那么可以使用 Static CDN 提供的反代服务。</p>
+<p>将原网址 raw.githubusercontent.com 替换为 raw.staticdn.net</p>
+<hr>
+<h3 id=""></h3>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/1v_7tx69G/">
+              <span class="post-title">
+                基于Nexus搭建私服&rarr;
+              </span>
+            </a>
+          </p>
         
-        <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="post-archives">
-    <h2 class="year">2018</h2>
-    
-                
-                    
-                
-                    
-                
-                    
-                
-                    
-                
-                    
-                
-        <a href="https://blog.jwangkun.com/post/1v_7tx69G/" class="post">
-          <h2 class="post-title Archives">
-            基于Nexus搭建私服
-          </h2>
-          <div class="time post-meta">2018-11-15</div>
-        </a>
-  
-                    
+        <div class="comment">
+          
         </div>
-        </div>
-        
       </div>
     </div>
   </article>
-
-
  <!-- Footer -->
   <footer>
     <div class="container">
@@ -252,3 +223,4 @@
 
   </body>
 </html>
+

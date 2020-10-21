@@ -132,14 +132,14 @@ cd k8s-for-docker-desktop
 <figure data-type="image" tabindex="1"><img src="https://raw.githubusercontent.com/jwangkun/picgo/master/imgimage-20201019192224160.png" alt="image-20201019192224160" loading="lazy"></figure>
 <h3 id="配置-kubernetes">配置 Kubernetes</h3>
 <p>可选操作: 切换Kubernetes运行上下文至 docker-for-desktop</p>
-<pre><code>kubectl config use-context docker-for-desktop
+<pre><code>kubectl config use-context docker-desktop
 </code></pre>
 <p>验证 Kubernetes 集群状态</p>
 <pre><code>kubectl cluster-info
 kubectl get nodes
 </code></pre>
 <p>部署 Kubernetes dashboard</p>
-<pre><code>kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+<pre><code>kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.4/aio/deploy/recommended.yaml
 </code></pre>
 <p>或</p>
 <pre><code>kubectl create -f kubernetes-dashboard.yaml
