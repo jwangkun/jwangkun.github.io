@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>K8S部署eureka集群高可用 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="K8S部署eureka集群高可用 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="K8S部署eureka集群高可用"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/FJICN9yKv/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/post/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/2eFiGOtFN/" class="tag">k8s</a>
+            
+            <a href="https://blog.jwangkun.com/tag/FwQUMwCV5Q/" class="tag">eureka</a>
+            
+            <a href="https://blog.jwangkun.com/tag/oi5u9IhD7F/" class="tag">eureka集群</a>
+            
+            <a href="https://blog.jwangkun.com/tag/j6JnwFF9mu/" class="tag">eureka高可用</a>
+            
+            <a href="https://blog.jwangkun.com/tag/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>K8S部署eureka集群高可用</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-21，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="新建eureka-service工程">新建eureka-service工程</h3>
+<h4 id="1-pom">1. pom</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;parent&gt;
+        &lt;artifactId&gt;test-eureka&lt;/artifactId&gt;
+        &lt;groupId&gt;com.test&lt;/groupId&gt;
+        &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+    &lt;/parent&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;artifactId&gt;eureka-server&lt;/artifactId&gt;
+
+    &lt;properties&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+        &lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+        &lt;java.version&gt;1.8&lt;/java.version&gt;
+        &lt;docker.image.prefix&gt;pasq&lt;/docker.image.prefix&gt;
+        &lt;!--docker harbor地址--&gt;
+        &lt;docker.repostory&gt;harborIp:harborPort&lt;/docker.repostory&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+            &lt;version&gt;2.2.2.RELEASE&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-eureka-server&lt;/artifactId&gt;
+            &lt;version&gt;1.4.7.RELEASE&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+            &lt;/plugin&gt;
+            &lt;!-- 使用Maven插件直接将应用打包为一个Docker镜像 --&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;com.spotify&lt;/groupId&gt;
+                &lt;!-- 这里使用新版dockerfile-maven-plugin插件 --&gt;
+                &lt;artifactId&gt;dockerfile-maven-plugin&lt;/artifactId&gt;
+                &lt;version&gt;1.4.10&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;!-- Dockerfile目录指定 --&gt;
+                    &lt;dockerfile&gt;Dockerfile&lt;/dockerfile&gt;
+                    &lt;repository&gt;${docker.repostory}/${docker.image.prefix}/${project.artifactId}&lt;/repository&gt;
+                    &lt;!-- 生成镜像tag 如不指定 默认为latest --&gt;
+                    &lt;tag&gt;1.0.0&lt;/tag&gt;
+                    &lt;buildArgs&gt;
+                        &lt;JAR_FILE&gt;./target/${project.build.finalName}.jar&lt;/JAR_FILE&gt;
+                    &lt;/buildArgs&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/project&gt;
+</code></pre>
+<h4 id="2-yml">2. yml</h4>
+<pre><code class="language-yaml">server:
+  port: ${PORT:9010}
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:${spring.application.name}}
+    appname: ${spring.application.name}
+  client:
+    registerWithEureka: ${BOOL_REGISTER:true}
+    fetchRegistry: ${BOOL_FETCH:true}
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://${eureka.instance.hostname}:${server.port}/eureka/}
+  server:
+    enable-self-preservation: ${SELF_PRESERVATION:false}
+spring:
+  application:
+    name: eureka-server-test
+</code></pre>
+<h4 id="3-dockerfile与工程src目录同级">3. Dockerfile【与工程src目录同级】</h4>
+<pre><code class="language-bash"># 基础镜像
+FROM openjdk:8-jdk-alpine
+# 作者（可选）
+MAINTAINER duhyper
+# 删除无用组件 优化容器体积（可选）
+RUN rm -rf /var/lib/apt/lists/*
+# 创建jar包存放目录
+RUN mkdir -p /usr/local/duhyper
+# 获取pom文件中build参数
+ARG JAR_FILE
+# copy当前工程jar包至容器内
+COPY ${JAR_FILE} /usr/local/duhyper/app.jar
+# 运行jar包
+ENTRYPOINT [&quot;java&quot;,&quot;-jar&quot;,&quot;/usr/local/duhyper/app.jar&quot;]
+1234567891011121314
+</code></pre>
+<h4 id="4-创建启动类">4. 创建启动类</h4>
+<pre><code class="language-java">package com.test.eureka;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
+
+@SpringBootApplication
+@EnableEurekaServer
+public class AppMain {
+    public static void main(String[] args) {
+        SpringApplication.run(AppMain.class, args);
+    }
+}
+</code></pre>
+<h3 id="创建成功后打包编译镜像并推送至docker-harbor"><code>创建成功后打包编译镜像并推送至docker harbor</code></h3>
+<h3 id="创建k8s配置文件eureka-serveryml">创建K8S配置文件eureka-server.yml</h3>
+<pre><code class="language-yaml"># eureka-statefulset.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eureka-service-test
+  labels:
+    app: eureka-service-test
+spec:
+  ports:
+    - port: 9007                                    # service对外提供服务的端口
+      targetPort: 9007 
+      nodePort: 9007
+      name: eureka-service-test
+  # clusterIP: None
+  type: NodePort
+  selector:
+    app: eureka-service-test
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: eureka-service-test
+spec:
+  serviceName: &quot;eureka-service-test&quot;
+  replicas: 3
+  selector:
+    matchLabels:
+      app: eureka-service-test
+  template:
+    metadata:
+      labels:
+        app: eureka-service-test
+    spec:
+      containers:
+        - name: eureka-service-test
+          image: harborIp:harborPort/duhyper/eureka-server:1.0.0
+          ports:
+            - containerPort: 9007
+          resources:
+            limits:
+              # jvm会自动发现该限制
+              memory: 512Mi
+          env:
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JAVA_OPTS
+              value: -XX:+UnlockExperimentalVMOptions
+                -XX:+UseCGroupMemoryLimitForHeap
+                -XX:MaxRAMFraction=2
+                -XX:CICompilerCount=8
+                -XX:ActiveProcessorCount=8
+                -XX:+UseG1GC
+                -XX:+AggressiveOpts
+                -XX:+UseFastAccessorMethods
+                -XX:+UseStringDeduplication
+                -XX:+UseCompressedOops
+                -XX:+OptimizeStringConcat
+            - name: EUREKA_SERVER
+              value: &quot;http://eureka-service-test-0.eureka-service-test:9007/eureka/,http://eureka-service-test-1.eureka-service-test:9007/eureka/,http://eureka-service-test-2.eureka-service-test:9007/eureka/&quot;
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: ${MY_POD_NAME}.eureka
+  podManagementPolicy: &quot;Parallel&quot;
+</code></pre>
+<p>运行kubectl create -f eureka-server.yml， 然后访问k8s任意节点ip:9007访问eureka如下：</p>
+<h3 id="eureka客户端配置">eureka客户端配置</h3>
+<pre><code class="language-yaml">eureka:
+  instance:
+    // k8s部署服务提供方 --与本地环境通信时使用这个配置【配置为k8s任意节点ip】
+    ip-address: 192.168.1.235
+    // k8s部署服务提供方 --k8s集群内部通信时使用这个配置
+    # instance-id: ${spring.cloud.client.ip-address}:${server.port}
+    // 本地部署 --使用这个配置
+    # instance-id: ${spring.cloud.client.ip-address}:${server.port}
+    prefer-ip-address: true
+  client:
+    registerWithEureka: ${BOOL_REGISTER:true}
+    fetchRegistry: ${BOOL_FETCH:true}
+    serviceUrl:
+      // k8s集群部署 自定义namespace使用这个配置 下面namespace替换为自己定义的namespace
+#      defaultZone: http://eureka-service-test-0.eureka-service-test.namespace:9007/eureka/,http://eureka-service-test-1.eureka-service-test.namespace:9007/eureka/,http://eureka-service-test-2.eureka-service-test.namespace:9007/eureka/,
+      // k8s集群部署 未定义/默认namespace使用这个配置
+#      defaultZone: http://eureka-service-test-0.eureka-service-test:9007/eureka/,http://eureka-service-test-1.eureka-service-test:9007/eureka/,http://eureka-service-test-2.eureka-service-test:9007/eureka/,
+      // 本地部署使用这个配置 【这里输入k8s全部节点，逗号分割】
+      defaultZone: http://192.168.1.237:9007/eureka/,
+spring:
+  application:
+    name: eureka-data
+
+server:
+  port: 87
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/FwQvnztt3/">
+              <span class="post-title">
+                docker容器之间网络的通信&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://blog.jwangkun.com/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+
