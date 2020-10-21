@@ -107,7 +107,9 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <h3 id="新建eureka-service工程">新建eureka-service工程</h3>
+          <p>K8S基本目的就是为了集群部署，但集群也分2种，一种是无状态的，类似一些平常的web服务，一种是有状态的，<code>kind:statefulSet</code>，类似<code>kafka</code>，<code>eureka</code>，<code>MySQL</code>，前两个特殊的地方来自于他们需要互相注册，ip要稳定，MySQL则是可能需要主从结构，总之都是ip需要稳定的，至少内部是稳定的。</p>
+<p><code>kind:statefulSet</code> 提供了这个稳定的机制，pod的下的<code>hostname</code>和<code>ip</code>都是有规律有顺序的，而不是像<code>kind:Deployment</code>是随机的字符。通过<code>statefuleSet</code>部署集群，可以在没有启动eureka时，就知道集群中各个<code>pod</code>的<code>ip</code>地址，达到互相注册的目的。</p>
+<h3 id="新建eureka-service工程">新建eureka-service工程</h3>
 <h4 id="1-pom">1. pom</h4>
 <pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
