@@ -112,6 +112,9 @@ cd k8s-for-docker-desktop
 <p>预先从阿里云Docker镜像服务下载 Kubernetes 所需要的镜像, 可以通过修改 <code>images.properties</code> 文件加载你自己需要的镜像</p>
 <pre><code>./load_images.sh
 </code></pre>
+<p>Windows打开Powershell执行</p>
+<pre><code>.\load_images.ps1
+</code></pre>
 <h2 id="安装-kubectl">安装 <a href="https://kubernetes.io/docs/tasks/kubectl/install/">kubectl</a></h2>
 <p>Mac下载kubectl二进制文件，下载最新版本</p>
 <pre><code>curl -LO &quot;https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl&quot;
