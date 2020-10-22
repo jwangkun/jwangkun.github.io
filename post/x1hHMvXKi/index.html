@@ -290,6 +290,10 @@
 </tbody>
 </table>
 <p>KubeKey 以 Go 语言开发，代表全新的安装工具，以替代以前使用的基于易用的安装程序。KubeKey 为用户提供了灵活的安装选择，因为他们可以单独安装 KubeSphere 和 Kubernetes，或同时安装它们，这非常方便和高效。</p>
+<pre><code>yum install -y socat
+yum install -y conntrack-tools
+</code></pre>
+<p>注意：如果不安装该工具在安装时会报错</p>
 <h3 id="网络和-dns-要求">网络和 DNS 要求</h3>
 <ul>
 <li>确保 中的 DNS 地址可用。否则，可能会导致群集中的 DNS 问题。<code>/etc/resolv.conf</code></li>
