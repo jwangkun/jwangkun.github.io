@@ -94,7 +94,7 @@
             <h1>K8S部署eureka集群高可用</h1>
             <span class="meta">
             	Posted on
-              2020-10-21，3 min read
+              2020-10-21，15 min read
             </span>
           </div>
         </div>
@@ -107,107 +107,440 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <p>pipeline {<br>
-agent {<br>
-node {<br>
-label 'maven'<br>
-}<br>
-}<br>
-parameters {<br>
-string(name:'TAG_NAME',defaultValue:'latest',description:'版本号')<br>
-choice(name:'PROJECT_NAME', choices:['third-party-service','cms-service','app-service','applet-service','resource-service','gateway'], description: '需要部署项目')<br>
-}<br>
-environment {<br>
-DOCKER_CREDENTIAL_ID = ''<br>
-GOGS_CREDENTIAL_ID = ''<br>
-KUBECONFIG_CREDENTIAL_ID = ''<br>
-REGISTRY = ''<br>
-ALIBABA_DOCKER_NAMESPACE = ''<br>
-GOGS_ACCOUNT = ''<br>
-SONAR_CREDENTIAL_ID = ''<br>
-BRANCH_NAME = ''<br>
-}<br>
-stages {<br>
-stage('拉取代码') {<br>
-steps {<br>
-git(credentialsId: 'git', url: 'https://git.xxxxx.com', branch: 'master', changelog: true, poll: false)<br>
-sh 'echo 正在构建 $PROJECT_NAME 版本号 $TAG_NAME'</p>
-<pre><code>    container ('maven') {
-      sh &quot;mvn clean install -Dprofiles.active=pro -Dmaven.test.skip=true -gs `pwd`/mvn-settings.xml&quot;
+          <p>K8S基本目的就是为了集群部署，但集群也分2种，一种是无状态的，类似一些平常的web服务，一种是有状态的，<code>kind:statefulSet</code>，类似<code>kafka</code>，<code>eureka</code>，<code>MySQL</code>，前两个特殊的地方来自于他们需要互相注册，ip要稳定，MySQL则是可能需要主从结构，总之都是ip需要稳定的，至少内部是稳定的。</p>
+<p><code>kind:statefulSet</code> 提供了这个稳定的机制，pod的下的<code>hostname</code>和<code>ip</code>都是有规律有顺序的，而不是像<code>kind:Deployment</code>是随机的字符。通过<code>statefuleSet</code>部署集群，可以在没有启动eureka时，就知道集群中各个<code>pod</code>的<code>ip</code>地址，达到互相注册的目的。</p>
+<h3 id="新建eureka-service工程">新建eureka-service工程</h3>
+<h4 id="pom">pom</h4>
+<pre><code class="language-xml">&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+	
+	&lt;parent&gt;
+		&lt;groupId&gt;com.dhcc.jrb&lt;/groupId&gt;
+		&lt;artifactId&gt;dhcc-parent&lt;/artifactId&gt;
+		&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;/parent&gt;
+	
+	&lt;artifactId&gt;dhcc-eureka-server&lt;/artifactId&gt;
+	&lt;name&gt;dhcc-eureka-server&lt;/name&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
 
+	&lt;properties&gt;
+        &lt;start-class&gt;com.dhcc.eureka.server.DhccEurekaServerApplication&lt;/start-class&gt;
+    &lt;/properties&gt;
+    
+	&lt;dependencies&gt;
+		&lt;!-- &lt;dependency&gt;
+			&lt;groupId&gt;com.dhcc.jrb&lt;/groupId&gt;
+			&lt;artifactId&gt;dhcc-common&lt;/artifactId&gt;
+		&lt;/dependency&gt; --&gt;
+		&lt;!-- 基于web应用 --&gt;
+		&lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;!-- 健康监控 --&gt;
+        &lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+			&lt;optional&gt;true&lt;/optional&gt;
+		&lt;/dependency&gt;
+		&lt;!-- spring-cloud-starter-eureka-server --&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-cloud-starter-netflix-eureka-server&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;!-- 是一个强大的和高度可定制的身份验证和访问控制框架，支持很多身份认证模式。 --&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;!-- spring boot admin --&gt;
+		&lt;dependency&gt;
+		    &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+		    &lt;artifactId&gt;spring-boot-admin-starter-client&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;!-- JMX-bean 管理需要使用第三方的 jolokia ，因为 spring-boot-admin-starter-client 会自动依赖 jolokia-core，
+		在SpringBoot中单独使用不需要显示依赖了，基于 Eureka 注册发现的配置中，就需要显示地依赖 --&gt;
+		&lt;dependency&gt;
+		    &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+		    &lt;artifactId&gt;jolokia-core&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;!-- &lt;dependency&gt;
+	        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+	        &lt;artifactId&gt;spring-boot-starter-undertow&lt;/artifactId&gt;
+		&lt;/dependency&gt; --&gt;
+	&lt;/dependencies&gt;
+	&lt;!-- bulid配置 --&gt;
+	&lt;build&gt;
+		&lt;plugins&gt;
+			&lt;plugin&gt;    
+				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;    
+				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+				&lt;configuration&gt;
+					&lt;!-- 指定该Main Class为全局的唯一入口 --&gt;
+					&lt;mainClass&gt;${start-class}&lt;/mainClass&gt;
+					&lt;layout&gt;ZIP&lt;/layout&gt;
+				&lt;/configuration&gt;
+				&lt;executions&gt;
+					&lt;execution&gt;
+						&lt;goals&gt;
+							&lt;!--可以把依赖的包都打包到生成的Jar包中--&gt;
+							&lt;goal&gt;repackage&lt;/goal&gt;
+						&lt;/goals&gt;
+					&lt;/execution&gt;
+				&lt;/executions&gt;
+			&lt;/plugin&gt; 
+			&lt;plugin&gt;
+			    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+			    &lt;artifactId&gt;maven-resources-plugin&lt;/artifactId&gt;
+			    &lt;executions&gt;
+			        &lt;execution&gt;
+			            &lt;id&gt;default-resources&lt;/id&gt;
+			            &lt;phase&gt;validate&lt;/phase&gt;
+			            &lt;goals&gt;
+			                &lt;goal&gt;copy-resources&lt;/goal&gt;
+			            &lt;/goals&gt;
+			            &lt;configuration&gt;
+			                &lt;outputDirectory&gt;target/classes&lt;/outputDirectory&gt;
+			                &lt;useDefaultDelimiters&gt;false&lt;/useDefaultDelimiters&gt;
+			                &lt;delimiters&gt;
+			                    &lt;delimiter&gt;#&lt;/delimiter&gt;
+			                &lt;/delimiters&gt;
+			                &lt;resources&gt;
+			                    &lt;resource&gt;
+			                        &lt;directory&gt;src/main/resources/&lt;/directory&gt;
+			                        &lt;filtering&gt;true&lt;/filtering&gt;
+			                    &lt;/resource&gt;
+			                    &lt;resource&gt;
+			                        &lt;directory&gt;src/main/resources.${spring.profiles.active}&lt;/directory&gt;
+			                        &lt;filtering&gt;false&lt;/filtering&gt;
+			                    &lt;/resource&gt;
+			                &lt;/resources&gt;
+			            &lt;/configuration&gt;
+			        &lt;/execution&gt;
+			    &lt;/executions&gt;
+			&lt;/plugin&gt;
+		&lt;/plugins&gt;
+	&lt;/build&gt;
+&lt;/project&gt;
+</code></pre>
+<h4 id="dockerfile与工程src目录同级">Dockerfile【与工程src目录同级】</h4>
+<pre><code class="language-bash"># 基础镜像
+FROM openjdk:8-jdk-alpine
+# 作者（可选）
+MAINTAINER wangk
+# 删除无用组件 优化容器体积（可选）
+RUN rm -rf /var/lib/apt/lists/*
+ADD dhcc-eureka-server/target/dhcc-eureka-server-0.0.1-SNAPSHOT.jar dhcc-eureka-server.jar
+ENV ACTIVE=&quot;&quot;
+ENTRYPOINT [&quot;java&quot;, &quot;-jar&quot;,&quot;-Dspring.profiles.active=${ACTIVE}&quot;,  &quot;/dhcc-eureka-server.jar&quot;]
+
+</code></pre>
+<p><code>创建成功后打包编译镜像并推送至docker harbor</code></p>
+<h3 id="创建k8s配置文件eureka-serveryml">创建K8S配置文件eureka-server.yml</h3>
+<pre><code class="language-yaml"># eureka-statefulset.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dhcc-eureka-server
+  namespace: pms
+  labels:
+    app: dhcc-eureka-server
+spec:
+  type: NodePort
+  ports:
+    - port: 8010
+      targetPort: 8010
+      nodePort: 32000 # 可根据实际情况进行调整,有效的端口范围：30000-32767
+      protocol: TCP
+      name: dhcc-eureka-server
+  selector:
+    app: dhcc-eureka-server
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dhcc-eureka-server
+  namespace: pms
+spec:
+  serviceName: &quot;dhcc-eureka-server&quot;
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dhcc-eureka-server
+  template:
+    metadata:
+      labels:
+        app: dhcc-eureka-server
+    spec:
+      containers:
+        - name: dhcc-eureka-server
+          image: $REGISTRY/$DOCKERHUB_NAMESPACE/dhcc-eureka-server-$ENVIRONMENT_NAME:latest
+          ports:
+            - containerPort: 8010
+          resources:
+            limits:
+              # jvm会自动发现该限制
+              # memory: 2Gi
+              cpu: 400m
+              memory: 900Mi
+          env:
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: ACTIVE
+              value: dev
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JAVA_OPTS
+              value: -XX:+UnlockExperimentalVMOptions
+                -XX:+UseCGroupMemoryLimitForHeap
+                -XX:MaxRAMFraction=2
+                -XX:CICompilerCount=8
+                -XX:ActiveProcessorCount=8
+                -XX:+UseG1GC
+                -XX:+AggressiveOpts
+                -XX:+UseFastAccessorMethods
+                -XX:+UseStringDeduplication
+                -XX:+UseCompressedOops
+                -XX:+OptimizeStringConcat
+            - name: EUREKA_SERVER
+              value: &quot;http://dhcc:05E38D3E096FE9CAE17E4DA1C6FFD400@dhcc-eureka-server-0.dhcc-eureka-server:8010/dhcc-eureka-server/eureka/,http://dhcc:05E38D3E096FE9CAE17E4DA1C6FFD400@dhcc-eureka-server-1.dhcc-eureka-server:8010/dhcc-eureka-server/eureka/,http://dhcc:05E38D3E096FE9CAE17E4DA1C6FFD400@dhcc-eureka-server-2.dhcc-eureka-server:8010/dhcc-eureka-server/eureka/&quot;
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: ${MY_POD_NAME}.dhcc-eureka-server
+  podManagementPolicy: &quot;Parallel&quot;
+
+</code></pre>
+<p>运行kubectl create -f eureka-server.yml， 然后访问k8s任意节点ip:9007访问eureka如下：</p>
+<h3 id="eureka-yml文件端配置">eureka yml文件端配置</h3>
+<pre><code class="language-yaml">server: 
+  port: 8010
+  servlet: 
+    context-path: /dhcc-eureka-server # 应用程序的上下文路径
+management: 
+  server: 
+    port: 10215 # 如果您不想通过HTTP公开端点，可以将管理端口设置为 -1
+    servlet: 
+      context-path: '/F838F8433F596CFEF0A7C830137E0A5E' # 管理端口的上下文路径
+  endpoints: 
+    enabled-by-default: true # 默认情况下是否启用或禁用所有端点
+    web: 
+      exposure: # 需要暴露的端点
+        include: '*' #health,info,hystrix.stream # Endpoint IDs that should be included or '*' for all.
+        #exclude: # Endpoint IDs that should be excluded or '*' for all.
+  endpoint:
+    health:
+      show-details: ALWAYS        
+
+spring: 
+  application:
+    name: dhcc-eureka-server 
+  security: 
+    filter: 
+      order: -100 # 安全过滤器链顺序。
+    user: 
+      name: dhcc # 默认用户名
+      password: '05E38D3E096FE9CAE17E4DA1C6FFD400' # 默认用户名的密码
+      roles: # 授予默认用户名的角色
+    #oauth2: 
+    #  client: 
+    #    provider.*:  # OAuth提供商详细信息
+    #    registration.*= # OAuth客户注册
+eureka:
+  client: 
+    healthcheck: 
+      enabled: true # 开启健康检查
+    register-with-eureka: true # 指示此实例是否应将其信息注册到eureka服务器以供其他人发现。在某些情况下，您不希望发现您的实例，而您只是想要发现其他实例。
+    fetch-registry: true #指示此客户端是否应从eureka服务器获取eureka注册表信息。
+    serviceUrl: 
+      # defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@${spring.cloud.client.ip-address}:${server.port}${server.servlet.context-path}/eureka/
+      defaultZone: http://dhcc:05E38D3E096FE9CAE17E4DA1C6FFD400@dhcc-eureka-server-0.dhcc-eureka-server:8010/dhcc-eureka-server/eureka/,http://dhcc:05E38D3E096FE9CAE17E4DA1C6FFD400@dhcc-eureka-server-1.dhcc-eureka-server:8010/dhcc-eureka-server/eureka/,http://dhcc:05E38D3E096FE9CAE17E4DA1C6FFD400@dhcc-eureka-server-2.dhcc-eureka-server:8010/dhcc-eureka-server/eureka/
+#      defaultZone: ${EUREKA_SERVER:http://127.0.0.1:${server.port}/eureka/}
+  server: 
+    enable-self-preservation: false # 设为false，关闭自我保护
+    eviction-interval-timer-in-ms: 60000 # 清理间隔（单位毫秒，默认是60*1000）
+  instance:
+    lease-expiration-duration-in-seconds: 90 # 指示eureka服务器在从其视图中删除此实例之前收到最后一次心跳之后等待的时间（以秒为单位），并禁止此流量通过此实例。将此值设置得太长可能意味着即使实例不活动，流量也可以路由到实例。将此值设置得太小可能意味着，由于临时网络故障，实例可能会被取消流量。此值设置为至少高于leaseRenewalIntervalInSeconds中指定的值
+    lease-renewal-interval-in-seconds: 30 # 示eureka客户端向Eureka服务器发送心跳以指示其仍处于活动状态所需的频率（以秒为单位）。如果在leaseExpirationDurationInSeconds中指定的时间段内未收到心跳，则eureka服务器将从其视图中删除该实例，此处不允许此实例的流量
+    prefer-ip-address: false
+#    instanceId: ${spring.application.name}:${spring.cloud.client.ip-address}:${spring.application.instance_id:${server.port}}
+    instance-id: ${EUREKA_INSTANCE_HOSTNAME:${spring.application.name}}:${server.port}@${random.long(1000000,9999999)}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:${spring.application.name}}
+    health-check-url-path: /actuator/health
+    metadata-map:
+      management:
+        context-path: ${management.server.servlet.context-path}/actuator
+    health-check-url: http://${spring.cloud.client.ip-address}:${management.server.port}${management.server.servlet.context-path}/actuator/health
+    status-page-url: http://${spring.cloud.client.ip-address}:${management.server.port}${management.server.servlet.context-path}/actuator/info
+    home-page-url: http://${spring.cloud.client.ip-address}:${management.server.port}${management.server.servlet.context-path} 
+
+#logging:
+#  level:
+#    com.netflix: DEBUG
+#客户端版本号，在监控中心显示
+info: 
+  version: &quot;@project.version@&quot; #客户端版本号，在监控中心显示  | 监控中心地址
+  owner: dhcc
+  name: &quot;@project.name@&quot;  
+  description: &quot;@project.description@&quot; 
+  spring-boot-version: &quot;@project.parent.version@&quot;  
+</code></pre>
+<p>由于我们在kubesphere上发布，以下是jenkines的相关配置</p>
+<h3 id="jenkinsfile文件配置">Jenkinsfile文件配置</h3>
+<pre><code>pipeline {
+  agent {
+    node {
+      label 'maven'
     }
   }
-}
-stage('sonarqube代码质量分析') {
-  steps {
-    container ('maven') {
-      withCredentials([string(credentialsId: &quot;$SONAR_CREDENTIAL_ID&quot;, variable: 'SONAR_TOKEN')]) {
-        withSonarQubeEnv('sonar') {
-          sh &quot;mvn sonar:sonar -gs `pwd`/mvn-settings.xml -Dsonar.projectKey=tzy_cloud -Dsonar.host.url=http://sonarqube-sonarqube.kubesphere-devops-system:9000 -Dsonar.login=$SONAR_TOKEN&quot;
-        }
-      }
-      timeout(time: 1, unit: 'HOURS') {
-        waitForQualityGate abortPipeline: true
+  parameters {
+    choice(name:'ENVIRONMENT_NAME', choices:['dev', 'sit', 'uat'], description:'环境名称')
+    // string(name:'TAG_NAME', defaultValue:'V0.01', description:'版本号')
+    choice(name:'PROJECT_NAME', choices:['dhcc-eureka-server', 'dhcc-authentication', 'dhcc-project-ms', 'dhcc-system-service', 'dhcc-ta-ms'], description: '需要部署项目')
+  }
+  environment {
+    GITLAB_CREDENTIAL_ID = 'gitlab-wangk' // Gitlab账户凭证ID
+    REGISTRY = '10.213.120.68' // Harbor地址
+    DOCKERHUB_NAMESPACE = 'library' // 项目名称
+    DOCKER_CREDENTIAL_ID = 'harbor-admin' // 配置的Harbor账户凭证ID
+    KUBECONFIG_CREDENTIAL_ID = 'pms-kubeconfig' // 配置的kubeconfig凭证ID
+  }
+  stages {
+    stage('拉取代码') {
+      steps {
+        sh 'echo GIT代码分支$GIT_BRANCH'
+        sh 'echo 开始拉取代码'
+        git(credentialsId: &quot;$GITLAB_CREDENTIAL_ID&quot;, branch: &quot;$GIT_BRANCH&quot;, url: 'http://gitlab.******.com/pms/dhcc-parent.git', changelog: true, poll: false)
+        sh 'echo 代码拉取结束'
       }
     }
-  }
-}
-stage ('构建镜像-推送快照镜像') {
-  steps {
-    container ('maven') {
-        sh 'mvn -Dprofiles.active=pro -Dmaven.test.skip=true -gs `pwd`/mvn-settings.xml clean package'
+
+    stage('dhcc-model代码打包') {
+      steps {
+        sh 'echo 当前打包模块$PROJECT_NAME'
         script {
-           if(&quot;$PROJECT_NAME&quot;=='gateway'){
-              sh 'echo 网关环境'
-              sh 'cd $PROJECT_NAME &amp;&amp; docker build -f Dockerfile -t $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER .'
-           }else{
-              sh 'echo $PROJECT_NAME 环境'
-              sh 'cd service/$PROJECT_NAME &amp;&amp; docker build -f Dockerfile -t $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER .'
-           }
-         }
-        withCredentials([usernamePassword(passwordVariable : 'DOCKER_PASSWORD' ,usernameVariable : 'DOCKER_USERNAME' ,credentialsId : &quot;$DOCKER_CREDENTIAL_ID&quot; ,)]) {
-            sh 'echo &quot;$DOCKER_PASSWORD&quot; | docker login $REGISTRY -u &quot;$DOCKER_USERNAME&quot; --password-stdin'
-            sh 'docker tag  $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:$TAG_NAME'
-            sh 'docker push  $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:$TAG_NAME'
-            sh 'docker tag  $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:latest'
-            sh 'docker push  $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:latest'
+          if(&quot;$PROJECT_NAME&quot;=='dhcc-eureka-server'){
+            sh 'echo dhcc-model无需打包'
+          }else{
+            container('maven') {
+              sh 'echo dhcc-model开始打包'
+              sh &quot;mvn clean install -pl dhcc-model -Dmaven.test.skip=true -gs `pwd`/configuration/settings.xml&quot;
+              sh 'echo dhcc-model打包完成'
+            }
+          }
         }
-    }
-  }
-}
-stage('部署到k8s') {
-  steps {
-    input(id: 'deploy-to-dev', message: &quot;是否将 $PROJECT_NAME 部署到k8s集群中？&quot;)
-    script {
-       if(&quot;$PROJECT_NAME&quot;=='gateway'){
-          kubernetesDeploy(configs: &quot;$PROJECT_NAME/deploy/**&quot;, enableConfigSubstitution: true, kubeconfigId: &quot;$KUBECONFIG_CREDENTIAL_ID&quot;)
-       }else{
-          kubernetesDeploy(configs: &quot;service/$PROJECT_NAME/deploy/**&quot;, enableConfigSubstitution: true, kubeconfigId: &quot;$KUBECONFIG_CREDENTIAL_ID&quot;)
-       }
-     }
-  }
-}
-stage('发布版本'){
-  when{
-    expression{
-      return params.TAG_NAME =~ /v.*/
-    }
-  }
-  steps {
-    container ('maven') {
-      input(id: 'release-git-with-tag', message: '发布带tag到git?')
-      withCredentials([usernamePassword(credentialsId: &quot;$GOGS_CREDENTIAL_ID&quot;, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-         sh 'git config --global user.email &quot;***@qq.com&quot;'
-         sh 'git config --global user.name &quot;****&quot;'
-         sh 'git tag -a $TAG_NAME -m &quot;$TAG_NAME&quot; '
-         sh 'git push http://$GIT_USERNAME:$GIT_PASSWORD@git.xxxxx.com --tags --ipv4'
       }
     }
+
+    stage('dhcc-common代码打包') {
+      steps {
+        sh 'echo 当前打包模块$PROJECT_NAME'
+        script {
+          if(&quot;$PROJECT_NAME&quot;=='dhcc-eureka-server'){
+            sh 'echo dhcc-common无需打包'
+          }else{
+            container('maven') {
+              sh 'echo dhcc-common开始打包'
+              sh &quot;mvn clean install -pl dhcc-common -Dmaven.test.skip=true -gs `pwd`/configuration/settings.xml&quot;
+              sh 'echo dhcc-common打包完成'
+            }
+          }
+        }
+      }
+    }
+
+    stage('dhcc-union-ms代码打包') {
+      steps {
+        sh 'echo 当前打包模块$PROJECT_NAME'
+        script {
+          if(&quot;$PROJECT_NAME&quot;=='dhcc-eureka-server'){
+            sh 'echo dhcc-union-ms无需打包'
+          }else{
+            container('maven') {
+              sh 'echo dhcc-union-ms开始打包'
+              sh &quot;mvn clean install -pl dhcc-union-ms -Dmaven.test.skip=true -gs `pwd`/configuration/settings.xml&quot;
+              sh 'echo dhcc-union-ms打包完成'
+            }
+          }
+        }
+      }
+    }
+
+    stage('当前模块打包') {
+      steps {
+        container('maven') {
+          sh 'echo $PROJECT_NAME开始打包'
+          // sh 'cd $PROJECT_NAME &amp;&amp; mvn -Dmaven.test.skip=true -gs `pwd`/configuration/settings.xml clean package'
+          sh 'mvn -Dmaven.test.skip=true -gs `pwd`/configuration/settings.xml clean package -pl $PROJECT_NAME'
+          sh 'echo $PROJECT_NAME打包完成'
+        }
+      }
+    }
+
+    stage('镜像构建') {
+      steps {
+        container('maven') {
+          sh 'echo $PROJECT_NAME镜像构建开始'
+          // sh 'cd $PROJECT_NAME &amp;&amp; docker build -f Dockerfile -t $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$ENVIRONMENT_NAME-$BUILD_NUMBER .'
+          sh 'docker build -f $PROJECT_NAME/Dockerfile -t $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$ENVIRONMENT_NAME-$BUILD_NUMBER .'
+          sh 'echo $PROJECT_NAME镜像构建完成'
+        }
+      }
+    }
+
+    stage('将镜像推送到Harbor私有仓库') {
+      steps {
+        sh 'echo $PROJECT_NAME镜像推送开始'
+        container('maven') {
+          withCredentials([usernamePassword(credentialsId : &quot;$DOCKER_CREDENTIAL_ID&quot; ,passwordVariable : 'DOCKER_PASSWORD' ,usernameVariable : 'DOCKER_USERNAME' ,)]) {
+            sh 'echo &quot;$DOCKER_PASSWORD&quot; | docker login https://$REGISTRY -u &quot;$DOCKER_USERNAME&quot; --password-stdin'
+            sh 'docker tag $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$ENVIRONMENT_NAME-$BUILD_NUMBER $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME-$ENVIRONMENT_NAME:$BUILD_NUMBER'
+            sh 'docker push $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME-$ENVIRONMENT_NAME:$BUILD_NUMBER'
+            sh 'docker tag $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$ENVIRONMENT_NAME-$BUILD_NUMBER $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME-$ENVIRONMENT_NAME:latest'
+            sh 'docker push $REGISTRY/$DOCKERHUB_NAMESPACE/$PROJECT_NAME-$ENVIRONMENT_NAME:latest'
+          }
+        }
+        sh 'echo $PROJECT_NAME镜像推送完成'
+      }
+    }
+
+    stage('服务部署') {
+      steps {
+        sh 'echo $PROJECT_NAME服务部署开始'
+        kubernetesDeploy(enableConfigSubstitution: true, deleteResource: false, kubeconfigId: &quot;$KUBECONFIG_CREDENTIAL_ID&quot;, configs: &quot;$PROJECT_NAME/deploy/$ENVIRONMENT_NAME/**&quot;)
+        sh 'echo $PROJECT_NAME服务部署结束'
+      }
+    }
+
+    // stage('发布版本') {
+      // when{
+        // expression{
+          // return params.TAG_NAME =~ /v.*/
+        // }
+      // }
+      // steps {
+        // container ('maven') {
+          // withCredentials([usernamePassword(credentialsId: &quot;$GITLAB_CREDENTIAL_ID&quot;, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+            // sh 'git config --global user.email &quot;wangk@hngtrust.com&quot;'
+            // sh 'git config --global user.name &quot;wangk&quot;'
+            // sh 'git tag -a $BUILD_NUMBER -m &quot;$BUILD_NUMBER&quot; '
+            // sh 'git push http://$GIT_USERNAME:$GIT_PASSWORD@http://gitlab.hngtrust.com/pms/dhcc-parent.git --tags --ipv4'
+          // }
+        // }
+      // }
+    // }
   }
 }
 </code></pre>
-<p>}<br>
-}</p>
 
           
           <p class="next-post">下一篇：
