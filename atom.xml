@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-21T09:43:56.622Z</updated>
+    <updated>2020-10-22T02:22:01.794Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[CentOS7.4 系统内核升级]]></title>
+        <id>https://blog.jwangkun.com/post/JqFGb7It7/</id>
+        <link href="https://blog.jwangkun.com/post/JqFGb7It7/">
+        </link>
+        <updated>2020-10-22T02:20:58.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[K8S部署eureka集群高可用]]></title>
         <id>https://blog.jwangkun.com/post/FJICN9yKv/</id>
@@ -85,17 +92,6 @@
 ]]></summary>
         <content type="html"><![CDATA[<p>KubeSphere v3.0.0进行了重大升级，其中多集群管理功能是重要更新之一。</p>
 <p>使用KubeSphere，用户可以添加或删除集群。可以以统一的方式管理部署在任何基础架构（例如Amazon EKS和Google Kubernetes Engine）上的异构集群。KubeSphere的中央控制平面通过两种有效的管理方法使之成为可能。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Centos7.4使用rke V1.1.9安装K8s集群]]></title>
-        <id>https://blog.jwangkun.com/post/9zKNF0siQ/</id>
-        <link href="https://blog.jwangkun.com/post/9zKNF0siQ/">
-        </link>
-        <updated>2020-10-15T12:19:57.000Z</updated>
-        <summary type="html"><![CDATA[<p>Rancher Kubernetes引擎(RKE)是一个cncf认证的Kubernetes发行版，它可以在裸机和虚拟化服务器上工作。RKE解决了Kubernetes安装复杂性的问题，有了RKE, Kubernetes的安装和操作既简化又易于自动化，而且完全独立于您正在运行的操作系统和平台。只要可以运行受支持的Docker版本，就可以使用RKE部署和运行Kubernetes。</p>
-]]></summary>
-        <content type="html"><![CDATA[<p>Rancher Kubernetes引擎(RKE)是一个cncf认证的Kubernetes发行版，它可以在裸机和虚拟化服务器上工作。RKE解决了Kubernetes安装复杂性的问题，有了RKE, Kubernetes的安装和操作既简化又易于自动化，而且完全独立于您正在运行的操作系统和平台。只要可以运行受支持的Docker版本，就可以使用RKE部署和运行Kubernetes。</p>
 ]]></content>
     </entry>
 </feed>
