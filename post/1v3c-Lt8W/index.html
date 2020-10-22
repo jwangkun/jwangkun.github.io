@@ -107,26 +107,18 @@
 <h2 id="2-直接连接">2. 直接连接</h2>
 <p>如果 M 集群 kube-apiserver 地址可以在 H 集群上的任一节点上都能访问，即可以使用直接连接的方式。直接连接方式适用于 M 集群可以暴露 kube-apiserver 地址或者 H 和 M 集群处在同一个私网环境中。</p>
 <h3 id="21-安装-host-cluster-集群">2.1. 安装 Host Cluster 集群</h3>
-<ul>
-<li>
 <p>安装 Host Cluster 与安装 KubeSphere 没有大的区别，唯一的区别在于安装时确保 installer 的配置文件 ClusterConfiguration 中 multicluster 项如下配置。</p>
 <pre><code>multicluster:
   clusterRole: host
 </code></pre>
-</li>
-</ul>
 <p>如果你已经有一个安装好的 KubeSphere 集群，也可以通过修改 cluster configuration 的方式改变集群的角色，然后等待配置生效。</p>
 <pre><code>kubectl edit cc ks-installer -n kubesphere-system
 </code></pre>
 <h3 id="22-安装-member-cluster-集群">2.2 安装 Member Cluster 集群</h3>
-<ul>
-<li>
 <p>为了能够使 host 集群直接管理 member 集群，需要将 member 集群的 jwtSecret 设置与 host 相同。 首先在 host 集群上执行下列命令获取到 host 集群的 jwtSecret。</p>
 <pre><code>$ kubectl -n kubesphere-system get cm kubesphere-config -o yaml | grep -v &quot;apiVersion&quot; | grep jwtSecret
   jwtSecret: &quot;WaSEiGROspi5*******&quot;
 </code></pre>
-</li>
-<li>
 <p>安装 Member Cluster 和安装普通的未开启多集群功能的集群没有任何区别。确保安装时 installer 的 ClusterConfiguration 中 multicluster 项设置角色，同时填入上面获取的 host 的 jwtSecret。</p>
 <pre><code>#ClusterConfiguration中默认有此key的，找到后直接修改value值
 authentication:
@@ -135,31 +127,16 @@ authentication:
 multicluster:
   clusterRole: member
 </code></pre>
-</li>
-<li>
 <p>配置完成后，执行安装。如果你已经有一个安装好的 KubeSphere 集群，也可以通过修改 cluster configuration 的方式改变集群的角色和 jwtSecret，然后等待配置生效。</p>
 <pre><code>kubectl edit cc ks-installer -n kubesphere-system
 </code></pre>
-</li>
-</ul>
 <h3 id="23-导入集群">2.3. 导入集群</h3>
-<ul>
-<li>
 <p>打开 H 集群 dashboard，点击添加集群，输入集群基本信息后点击下一步。</p>
-</li>
-<li>
 <p>连接方式选择 <code>直接连接 KubeSphere 集群</code>， 将 Member 集群的 kubeconfig 内容粘贴到输入框中。确保 kubeconfig 中的 <code>server</code> 地址在 H 集群中的任一节点都可以访问。<code>KubeSphere API Server</code> 地址填写 KubeSphere APIServer 的地址，也可以不填。</p>
-<p>[外链图片转存失败, 源站可能有防盗链机制, 建议将图片保存下来直接上传 (img-KBgxmxyK-1597903559965)(KubeSphere3.0 安装笔记 - 草稿. assets/direct_import.png)]</p>
-</li>
-<li>
 <p>点击导入，等待集群初始化完成即可</p>
-</li>
-</ul>
 <h2 id="3-代理连接">3. 代理连接</h2>
 <p>代理连接使用了 KubeSphere 的 <a href="https://github.com/kubesphere/tower">Tower</a> 组件，Tower 是一个可以在集群间通过代理方式创建网络连接的工具。如果 H 集群不能直接访问 M 集群，可以通过暴露 H 集群代理服务地址，M 集群通过代理来创建和 H 集群的网络连接。代理连接的方式适用于 M 集群处在非公开的 IDC 机房等私有环境，而 H 集群有能力暴露代理服务的场景。</p>
 <h3 id="31-安装-host-cluster">3.1. 安装 Host Cluster</h3>
-<ul>
-<li>
 <p>安装 Host Cluster 与安装 KubeSphere 没有大的区别，唯一的区别在于安装时确保 installer 的配置文件 ClusterConfiguration 中 multicluster 项如下配置 。</p>
 <pre><code>multicluster:
   clusterRole: host
@@ -167,51 +144,33 @@ multicluster:
 <p>如果你已经有一个安装好的 KubeSphere 集群，也可以通过修改 cluster configuration 的方式改变集群的角色，然后等待配置生效。</p>
 <pre><code>kubectl edit cc ks-installer -n kubesphere-system
 </code></pre>
-</li>
-<li>
-<p>设置代理服务地址</p>
+<p>1.设置代理服务地址</p>
 <p>Host Cluster 安装成功后，<code>kubesphere-system</code> 项目下会创建一个名称为 tower，type 为 LoadBalancer 的代理服务。</p>
-<ol>
-<li>
 <p>如果集群有可以使用的 LoadBalancer 插件，可以看到 <code>EXTERNAL-IP</code> 栏目有对应的地址显示，KubeSphere 会自动获取这个地址，我们可以跳过接下来的设置代理的步骤。</p>
 <pre><code>$ kubectl -n kubesphere-system get svc
 NAME       TYPE            CLUSTER-IP      EXTERNAL-IP     PORT(S)              AGE
 tower      LoadBalancer    10.233.63.191   139.198.110.23  8080:30721/TCP       16h
 </code></pre>
-</li>
-<li>
-<p>如果一直没有对应的地址显示，则需要手动设置下代理地址。假设现在有可以对外的公网 IP 地址 139.198.120.120，已经通过端口转发的方式将此 IP 地址的 8080 端口转发到集群节点的 30721 端口 (请根据您具体的端口号转发)。</p>
+<p>2.如果一直没有对应的地址显示，则需要手动设置下代理地址。假设现在有可以对外的公网 IP 地址 139.198.120.120，已经通过端口转发的方式将此 IP 地址的 8080 端口转发到集群节点的 30721 端口 (请根据您具体的端口号转发)。</p>
 <pre><code>$ kubectl -n kubesphere-system get svc
 NAME       TYPE            CLUSTER-IP      EXTERNAL-IP     PORT(S)              AGE
 tower      LoadBalancer    10.233.63.191   &lt;pending&gt;  8080:30721/TCP       16h
 </code></pre>
-</li>
-<li>
-<p>修改配置文件，填入之前设置的地址</p>
+<p>3.修改配置文件，填入之前设置的地址</p>
 <pre><code>$ kubectl -n kubesphere-system edit clusterconfiguration ks-installer
 
 multicluster:
     clusterRole: host
     proxyPublishAddress: http://139.198.120.120:8080 # 增加这一行，设置 tower 服务的访问地址，填入上面设置的 IP 地址
 </code></pre>
-</li>
-<li>
-<p>保存设置，并且重启 ks-apiserver</p>
+<p>4.保存设置，并且重启 ks-apiserver</p>
 <pre><code>kubectl -n kubesphere-system rollout restart deployment ks-apiserver
 </code></pre>
-</li>
-</ol>
-</li>
-</ul>
 <h3 id="32-安装-member-cluster">3.2. 安装 Member Cluster</h3>
-<ul>
-<li>
 <p>为了能够使 host 集群直接管理 member 集群，需要将 member 集群的 jwtSecret 设置与 host 相同。 在 host 集群上执行下列命令获取到 host 集群的 jwtSecret。</p>
 <pre><code>$ kubectl -n kubesphere-system get cm kubesphere-config -o yaml | grep -v &quot;apiVersion&quot; | grep jwtSecret
   jwtSecret: &quot;WaSEiGROspi5o*******&quot;
 </code></pre>
-</li>
-<li>
 <p>安装 Member Cluster 和安装普通的未开启多集群功能的集群没有任何区别。确保安装时 installer 的 ClusterConfiguration 中 multicluster 项如下配置，同时填入上面获取的 host 的 jwtSecret。</p>
 <pre><code>#ClusterConfiguration中默认有此key的，找到后直接修改value值
 authentication:
@@ -223,8 +182,6 @@ multicluster:
 <p>配置完成后，执行安装。如果你已经有一个安装好的 KubeSphere 集群，也可以通过修改 cluster configuration 的方式改变集群的角色和 jwtSecret，然后等待配置生效。</p>
 <pre><code>kubectl edit cc ks-installer -n kubesphere-system
 </code></pre>
-</li>
-</ul>
 <h3 id="33-导入集群">3.3. 导入集群</h3>
 <ol>
 <li>打开 H 集群 dashboard，点击添加集群，输入集群基本信息后点击下一步。</li>
@@ -233,17 +190,11 @@ multicluster:
 <figure data-type="image" tabindex="2"><img src="https://img-blog.csdnimg.cn/20200820140725102.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
 <figure data-type="image" tabindex="3"><img src="https://img-blog.csdnimg.cn/2020082014073378.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
 <figure data-type="image" tabindex="4"><img src="https://img-blog.csdnimg.cn/20200820140743935.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
-<ol>
-<li>
 <p>连接方式选择 <code>集群连接代理</code>，点击导入</p>
 <figure data-type="image" tabindex="5"><img src="https://img-blog.csdnimg.cn/20200820140757612.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
-</li>
-<li>
 <p>根据提示在 M 集群中，创建一个 <code>agent.yaml</code> 文件，并将生成的部署粘贴到文件中，在节点上执行 <code>kubectl create -f agent.yaml</code>，等待 agent 运行正常。确保 M 集群上可以访问 H 集群的代理地址。</p>
-</li>
-</ol>
 <figure data-type="image" tabindex="6"><img src="https://img-blog.csdnimg.cn/20200820140808816.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
-<p>3.集群代理运行正常后即可在 H 集群上看到导入的集群</p>
+<p>集群代理运行正常后即可在 H 集群上看到导入的集群</p>
 
           
           <p class="next-post">下一篇：
