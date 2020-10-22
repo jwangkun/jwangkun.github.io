@@ -94,7 +94,7 @@
             <h1>K8S部署eureka集群高可用</h1>
             <span class="meta">
             	Posted on
-              2020-10-21，7 min read
+              2020-10-21，3 min read
             </span>
           </div>
         </div>
@@ -107,218 +107,107 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <p>K8S基本目的就是为了集群部署，但集群也分2种，一种是无状态的，类似一些平常的web服务，一种是有状态的，<code>kind:statefulSet</code>，类似<code>kafka</code>，<code>eureka</code>，<code>MySQL</code>，前两个特殊的地方来自于他们需要互相注册，ip要稳定，MySQL则是可能需要主从结构，总之都是ip需要稳定的，至少内部是稳定的。</p>
-<p><code>kind:statefulSet</code> 提供了这个稳定的机制，pod的下的<code>hostname</code>和<code>ip</code>都是有规律有顺序的，而不是像<code>kind:Deployment</code>是随机的字符。通过<code>statefuleSet</code>部署集群，可以在没有启动eureka时，就知道集群中各个<code>pod</code>的<code>ip</code>地址，达到互相注册的目的。</p>
-<h3 id="新建eureka-service工程">新建eureka-service工程</h3>
-<h4 id="1-pom">1. pom</h4>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
-         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
-    &lt;parent&gt;
-        &lt;artifactId&gt;test-eureka&lt;/artifactId&gt;
-        &lt;groupId&gt;com.test&lt;/groupId&gt;
-        &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
-    &lt;/parent&gt;
-    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+          <p>pipeline {<br>
+agent {<br>
+node {<br>
+label 'maven'<br>
+}<br>
+}<br>
+parameters {<br>
+string(name:'TAG_NAME',defaultValue:'latest',description:'版本号')<br>
+choice(name:'PROJECT_NAME', choices:['third-party-service','cms-service','app-service','applet-service','resource-service','gateway'], description: '需要部署项目')<br>
+}<br>
+environment {<br>
+DOCKER_CREDENTIAL_ID = ''<br>
+GOGS_CREDENTIAL_ID = ''<br>
+KUBECONFIG_CREDENTIAL_ID = ''<br>
+REGISTRY = ''<br>
+ALIBABA_DOCKER_NAMESPACE = ''<br>
+GOGS_ACCOUNT = ''<br>
+SONAR_CREDENTIAL_ID = ''<br>
+BRANCH_NAME = ''<br>
+}<br>
+stages {<br>
+stage('拉取代码') {<br>
+steps {<br>
+git(credentialsId: 'git', url: 'https://git.xxxxx.com', branch: 'master', changelog: true, poll: false)<br>
+sh 'echo 正在构建 $PROJECT_NAME 版本号 $TAG_NAME'</p>
+<pre><code>    container ('maven') {
+      sh &quot;mvn clean install -Dprofiles.active=pro -Dmaven.test.skip=true -gs `pwd`/mvn-settings.xml&quot;
 
-    &lt;artifactId&gt;eureka-server&lt;/artifactId&gt;
-
-    &lt;properties&gt;
-        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
-        &lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
-        &lt;java.version&gt;1.8&lt;/java.version&gt;
-        &lt;docker.image.prefix&gt;pasq&lt;/docker.image.prefix&gt;
-        &lt;!--docker harbor地址--&gt;
-        &lt;docker.repostory&gt;harborIp:harborPort&lt;/docker.repostory&gt;
-    &lt;/properties&gt;
-
-    &lt;dependencies&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
-            &lt;version&gt;2.2.2.RELEASE&lt;/version&gt;
-        &lt;/dependency&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-cloud-starter-eureka-server&lt;/artifactId&gt;
-            &lt;version&gt;1.4.7.RELEASE&lt;/version&gt;
-        &lt;/dependency&gt;
-    &lt;/dependencies&gt;
-
-    &lt;build&gt;
-        &lt;plugins&gt;
-            &lt;plugin&gt;
-                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
-            &lt;/plugin&gt;
-            &lt;!-- 使用Maven插件直接将应用打包为一个Docker镜像 --&gt;
-            &lt;plugin&gt;
-                &lt;groupId&gt;com.spotify&lt;/groupId&gt;
-                &lt;!-- 这里使用新版dockerfile-maven-plugin插件 --&gt;
-                &lt;artifactId&gt;dockerfile-maven-plugin&lt;/artifactId&gt;
-                &lt;version&gt;1.4.10&lt;/version&gt;
-                &lt;configuration&gt;
-                    &lt;!-- Dockerfile目录指定 --&gt;
-                    &lt;dockerfile&gt;Dockerfile&lt;/dockerfile&gt;
-                    &lt;repository&gt;${docker.repostory}/${docker.image.prefix}/${project.artifactId}&lt;/repository&gt;
-                    &lt;!-- 生成镜像tag 如不指定 默认为latest --&gt;
-                    &lt;tag&gt;1.0.0&lt;/tag&gt;
-                    &lt;buildArgs&gt;
-                        &lt;JAR_FILE&gt;./target/${project.build.finalName}.jar&lt;/JAR_FILE&gt;
-                    &lt;/buildArgs&gt;
-                &lt;/configuration&gt;
-            &lt;/plugin&gt;
-        &lt;/plugins&gt;
-    &lt;/build&gt;
-&lt;/project&gt;
-</code></pre>
-<h4 id="2-yml">2. yml</h4>
-<pre><code class="language-yaml">server:
-  port: ${PORT:9010}
-eureka:
-  instance:
-    hostname: ${EUREKA_INSTANCE_HOSTNAME:${spring.application.name}}
-    appname: ${spring.application.name}
-  client:
-    registerWithEureka: ${BOOL_REGISTER:true}
-    fetchRegistry: ${BOOL_FETCH:true}
-    serviceUrl:
-      defaultZone: ${EUREKA_SERVER:http://${eureka.instance.hostname}:${server.port}/eureka/}
-  server:
-    enable-self-preservation: ${SELF_PRESERVATION:false}
-spring:
-  application:
-    name: eureka-server-test
-</code></pre>
-<h4 id="3-dockerfile与工程src目录同级">3. Dockerfile【与工程src目录同级】</h4>
-<pre><code class="language-bash"># 基础镜像
-FROM openjdk:8-jdk-alpine
-# 作者（可选）
-MAINTAINER duhyper
-# 删除无用组件 优化容器体积（可选）
-RUN rm -rf /var/lib/apt/lists/*
-# 创建jar包存放目录
-RUN mkdir -p /usr/local/duhyper
-# 获取pom文件中build参数
-ARG JAR_FILE
-# copy当前工程jar包至容器内
-COPY ${JAR_FILE} /usr/local/duhyper/app.jar
-# 运行jar包
-ENTRYPOINT [&quot;java&quot;,&quot;-jar&quot;,&quot;/usr/local/duhyper/app.jar&quot;]
-1234567891011121314
-</code></pre>
-<h4 id="4-创建启动类">4. 创建启动类</h4>
-<pre><code class="language-java">package com.test.eureka;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
-
-@SpringBootApplication
-@EnableEurekaServer
-public class AppMain {
-    public static void main(String[] args) {
-        SpringApplication.run(AppMain.class, args);
     }
+  }
+}
+stage('sonarqube代码质量分析') {
+  steps {
+    container ('maven') {
+      withCredentials([string(credentialsId: &quot;$SONAR_CREDENTIAL_ID&quot;, variable: 'SONAR_TOKEN')]) {
+        withSonarQubeEnv('sonar') {
+          sh &quot;mvn sonar:sonar -gs `pwd`/mvn-settings.xml -Dsonar.projectKey=tzy_cloud -Dsonar.host.url=http://sonarqube-sonarqube.kubesphere-devops-system:9000 -Dsonar.login=$SONAR_TOKEN&quot;
+        }
+      }
+      timeout(time: 1, unit: 'HOURS') {
+        waitForQualityGate abortPipeline: true
+      }
+    }
+  }
+}
+stage ('构建镜像-推送快照镜像') {
+  steps {
+    container ('maven') {
+        sh 'mvn -Dprofiles.active=pro -Dmaven.test.skip=true -gs `pwd`/mvn-settings.xml clean package'
+        script {
+           if(&quot;$PROJECT_NAME&quot;=='gateway'){
+              sh 'echo 网关环境'
+              sh 'cd $PROJECT_NAME &amp;&amp; docker build -f Dockerfile -t $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER .'
+           }else{
+              sh 'echo $PROJECT_NAME 环境'
+              sh 'cd service/$PROJECT_NAME &amp;&amp; docker build -f Dockerfile -t $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER .'
+           }
+         }
+        withCredentials([usernamePassword(passwordVariable : 'DOCKER_PASSWORD' ,usernameVariable : 'DOCKER_USERNAME' ,credentialsId : &quot;$DOCKER_CREDENTIAL_ID&quot; ,)]) {
+            sh 'echo &quot;$DOCKER_PASSWORD&quot; | docker login $REGISTRY -u &quot;$DOCKER_USERNAME&quot; --password-stdin'
+            sh 'docker tag  $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:$TAG_NAME'
+            sh 'docker push  $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:$TAG_NAME'
+            sh 'docker tag  $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:SNAPSHOT-$BRANCH_NAME-$BUILD_NUMBER $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:latest'
+            sh 'docker push  $REGISTRY/$ALIBABA_DOCKER_NAMESPACE/$PROJECT_NAME:latest'
+        }
+    }
+  }
+}
+stage('部署到k8s') {
+  steps {
+    input(id: 'deploy-to-dev', message: &quot;是否将 $PROJECT_NAME 部署到k8s集群中？&quot;)
+    script {
+       if(&quot;$PROJECT_NAME&quot;=='gateway'){
+          kubernetesDeploy(configs: &quot;$PROJECT_NAME/deploy/**&quot;, enableConfigSubstitution: true, kubeconfigId: &quot;$KUBECONFIG_CREDENTIAL_ID&quot;)
+       }else{
+          kubernetesDeploy(configs: &quot;service/$PROJECT_NAME/deploy/**&quot;, enableConfigSubstitution: true, kubeconfigId: &quot;$KUBECONFIG_CREDENTIAL_ID&quot;)
+       }
+     }
+  }
+}
+stage('发布版本'){
+  when{
+    expression{
+      return params.TAG_NAME =~ /v.*/
+    }
+  }
+  steps {
+    container ('maven') {
+      input(id: 'release-git-with-tag', message: '发布带tag到git?')
+      withCredentials([usernamePassword(credentialsId: &quot;$GOGS_CREDENTIAL_ID&quot;, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+         sh 'git config --global user.email &quot;***@qq.com&quot;'
+         sh 'git config --global user.name &quot;****&quot;'
+         sh 'git tag -a $TAG_NAME -m &quot;$TAG_NAME&quot; '
+         sh 'git push http://$GIT_USERNAME:$GIT_PASSWORD@git.xxxxx.com --tags --ipv4'
+      }
+    }
+  }
 }
 </code></pre>
-<h3 id="创建成功后打包编译镜像并推送至docker-harbor"><code>创建成功后打包编译镜像并推送至docker harbor</code></h3>
-<h3 id="创建k8s配置文件eureka-serveryml">创建K8S配置文件eureka-server.yml</h3>
-<pre><code class="language-yaml"># eureka-statefulset.yaml
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: eureka-service-test
-  labels:
-    app: eureka-service-test
-spec:
-  ports:
-    - port: 9007                                    # service对外提供服务的端口
-      targetPort: 9007 
-      nodePort: 9007
-      name: eureka-service-test
-  # clusterIP: None
-  type: NodePort
-  selector:
-    app: eureka-service-test
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: eureka-service-test
-spec:
-  serviceName: &quot;eureka-service-test&quot;
-  replicas: 3
-  selector:
-    matchLabels:
-      app: eureka-service-test
-  template:
-    metadata:
-      labels:
-        app: eureka-service-test
-    spec:
-      containers:
-        - name: eureka-service-test
-          image: harborIp:harborPort/duhyper/eureka-server:1.0.0
-          ports:
-            - containerPort: 9007
-          resources:
-            limits:
-              # jvm会自动发现该限制
-              memory: 512Mi
-          env:
-            - name: MY_POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: JAVA_OPTS
-              value: -XX:+UnlockExperimentalVMOptions
-                -XX:+UseCGroupMemoryLimitForHeap
-                -XX:MaxRAMFraction=2
-                -XX:CICompilerCount=8
-                -XX:ActiveProcessorCount=8
-                -XX:+UseG1GC
-                -XX:+AggressiveOpts
-                -XX:+UseFastAccessorMethods
-                -XX:+UseStringDeduplication
-                -XX:+UseCompressedOops
-                -XX:+OptimizeStringConcat
-            - name: EUREKA_SERVER
-              value: &quot;http://eureka-service-test-0.eureka-service-test:9007/eureka/,http://eureka-service-test-1.eureka-service-test:9007/eureka/,http://eureka-service-test-2.eureka-service-test:9007/eureka/&quot;
-            - name: EUREKA_INSTANCE_HOSTNAME
-              value: ${MY_POD_NAME}.eureka
-  podManagementPolicy: &quot;Parallel&quot;
-</code></pre>
-<p>运行kubectl create -f eureka-server.yml， 然后访问k8s任意节点ip:9007访问eureka如下：</p>
-<h3 id="eureka客户端配置">eureka客户端配置</h3>
-<pre><code class="language-yaml">eureka:
-  instance:
-    // k8s部署服务提供方 --与本地环境通信时使用这个配置【配置为k8s任意节点ip】
-    ip-address: 192.168.1.235
-    // k8s部署服务提供方 --k8s集群内部通信时使用这个配置
-    # instance-id: ${spring.cloud.client.ip-address}:${server.port}
-    // 本地部署 --使用这个配置
-    # instance-id: ${spring.cloud.client.ip-address}:${server.port}
-    prefer-ip-address: true
-  client:
-    registerWithEureka: ${BOOL_REGISTER:true}
-    fetchRegistry: ${BOOL_FETCH:true}
-    serviceUrl:
-      // k8s集群部署 自定义namespace使用这个配置 下面namespace替换为自己定义的namespace
-#      defaultZone: http://eureka-service-test-0.eureka-service-test.namespace:9007/eureka/,http://eureka-service-test-1.eureka-service-test.namespace:9007/eureka/,http://eureka-service-test-2.eureka-service-test.namespace:9007/eureka/,
-      // k8s集群部署 未定义/默认namespace使用这个配置
-#      defaultZone: http://eureka-service-test-0.eureka-service-test:9007/eureka/,http://eureka-service-test-1.eureka-service-test:9007/eureka/,http://eureka-service-test-2.eureka-service-test:9007/eureka/,
-      // 本地部署使用这个配置 【这里输入k8s全部节点，逗号分割】
-      defaultZone: http://192.168.1.237:9007/eureka/,
-spring:
-  application:
-    name: eureka-data
-
-server:
-  port: 87
-</code></pre>
+<p>}<br>
+}</p>
 
           
           <p class="next-post">下一篇：
