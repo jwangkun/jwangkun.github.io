@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title> docker 安装 oracle-xe-11g | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title=" docker 安装 oracle-xe-11g | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content=" docker 安装 oracle-xe-11g"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/M-uFfBC55/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,226 +71,95 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/v7ePG2CXZ/" class="tag">oracle-xe</a>
+            
+            <a href="https://blog.jwangkun.com/tag/TzrzyJwok/" class="tag">docker</a>
+            
+        </span>
+            <h1> docker 安装 oracle-xe-11g</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-22，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/M-uFfBC55/">
-            <h2 class="post-title">
-               docker 安装 oracle-xe-11g
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h1 id="一如何安装oracle">一.如何安装oracle</h1>
+<p>1.拉取镜像</p>
+<pre><code>docker pull  docker.io/arahman/docker-oracle-xe-11g
+</code></pre>
+<p>2.运行镜像</p>
+<pre><code>docker run -d -v /home/docker/data/oracle_data:/data/oracle_data -p 49160:22 -p 1521:1521 -e ORACLE_ALLOW_REMOTE=true docker.io/arahman/docker-oracle-xe-11g
+</code></pre>
+<p><strong>-e oracle_allow_remote=true表示允许远程连接</strong><br>
+3.连接参数：</p>
+<pre><code>hostname: localhost
+port: 1521
+sid: xe
+username: system
+password: oracle
+</code></pre>
+<h1 id="二设置用户">二.设置用户</h1>
+<p>如何新建表空间和用户：<br>
+(1).进入容器,连接到oracle服务</p>
+<pre><code>docker exec -it 容器id /bin/bash
+su oracle
+cd $ORACLE_HOME
+bin/sqlplus / as sysdba
+</code></pre>
+<p>(2).创建表空间</p>
+<pre><code>create tablespace TEST datafile '/u01/app/oracle/test/test.dbf' size 100M;
+</code></pre>
+<p><strong>这一步可能会有问题，是因为容器里/u01/app/oracle文件夹下不存在test目录。可以先手动新建一个test目录，再给这个目录赋权限</strong></p>
+<pre><code>cd /u01/app/oracle
+mkdir test
+chmod 777 test
+</code></pre>
+<p><strong>然后再执行create tablespace TEST datafile '/u01/app/oracle/test/test.dbf' size 100M;</strong><br>
+(3).创建用户</p>
+<pre><code>create user TEST identified by TEST123 default tablespace TEST;
+</code></pre>
+<p>(4).给用户授权</p>
+<pre><code>grant connect,resource to TEST;
+grant dba to TEST;//授予dba权限后，这个用户能操作所有用户的表
+</code></pre>
+<p>注：如果新建用户失败，可能是这个用户已经存在，要先删除</p>
+<pre><code>drop user TEST cascade;
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/kms1F57yD/">
+              <span class="post-title">
+                使用 docker-compose 部署多机 RabbitMQ 集群&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/kms1F57yD/">
-            <h2 class="post-title">
-              使用 docker-compose 部署多机 RabbitMQ 集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/tqnkelFHT/">
-            <h2 class="post-title">
-              Springcloud Eureka instance 配置项
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">17 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/JqFGb7It7/">
-            <h2 class="post-title">
-              CentOS7.4 系统内核升级
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/FJICN9yKv/">
-            <h2 class="post-title">
-              K8S部署eureka集群高可用
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-21</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/FwQvnztt3/">
-            <h2 class="post-title">
-              docker容器之间网络的通信
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-20</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/AqhtD6hL3/">
-            <h2 class="post-title">
-              sealos+rook 部署 kubeSphere+TiDB
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-20</span>
-             <span>,</span>
-             <span class="post-stats">35 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/Wev3hXnKO/">
-            <h2 class="post-title">
-              基于Docker Desktop桌面客户端搭建 Kubernetes
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-19</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/ZRTmDbwEA/">
-            <h2 class="post-title">
-              Minikube - Kubernetes本地实验环境
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-19</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/UbCNkIkc8/">
-            <h2 class="post-title">
-              centos7.4配置nfs网络文件共享
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-16</span>
-             <span>,</span>
-             <span class="post-stats">6 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/2">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -366,3 +241,4 @@
 
   </body>
 </html>
+
