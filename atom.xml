@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-10-23T01:13:31.003Z</updated>
+    <updated>2020-10-23T01:19:40.340Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[Centos7 优化]]></title>
+        <id>https://blog.jwangkun.com/post/j8crmnX4t/</id>
+        <link href="https://blog.jwangkun.com/post/j8crmnX4t/">
+        </link>
+        <updated>2020-10-23T01:15:18.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[kubernetes - 集群备份和恢复]]></title>
         <id>https://blog.jwangkun.com/post/ieXjrJ3_D/</id>
@@ -72,12 +79,5 @@
         <link href="https://blog.jwangkun.com/post/FJICN9yKv/">
         </link>
         <updated>2020-10-21T01:06:37.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[docker容器之间网络的通信]]></title>
-        <id>https://blog.jwangkun.com/post/FwQvnztt3/</id>
-        <link href="https://blog.jwangkun.com/post/FwQvnztt3/">
-        </link>
-        <updated>2020-10-20T07:08:52.000Z</updated>
     </entry>
 </feed>
