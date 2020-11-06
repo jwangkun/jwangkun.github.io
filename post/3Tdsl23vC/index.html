@@ -213,7 +213,8 @@ nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
 --permanent   #永久生效，没有此参数重启后失效
 </code></pre>
 <p>重启防火墙：</p>
-<pre><code>systemctl stop firewalld.service ``systemctl start firewalld.service 
+<pre><code>systemctl stop firewalld.service 
+systemctl start firewalld.service 
 </code></pre>
 <p>文章转自：https://www.cnblogs.com/liujuncm5/p/6713784.html</p>
 
