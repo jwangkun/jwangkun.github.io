@@ -202,6 +202,19 @@ nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
 </code></pre>
 <figure data-type="image" tabindex="4"><img src="http://www.linuxidc.com/upload/2016_09/160905180451095.png" alt="nginx-rclocal.png" loading="lazy"></figure>
 <p>到这里，nginx就安装完毕了，启动、停止、重启操作也都完成了，当然，你也可以添加为系统服务，我这里就不在演示了。</p>
+<pre><code>firewall-cmd --zone=public --add-port=80/tcp --permanent 
+ 
+命令含义：
+  
+--zone #作用域
+  
+--add-port=80/tcp  #添加端口，格式为：端口/通讯协议
+  
+--permanent   #永久生效，没有此参数重启后失效
+</code></pre>
+<p>重启防火墙：</p>
+<pre><code>systemctl stop firewalld.service ``systemctl start firewalld.service 
+</code></pre>
 <p>文章转自：https://www.cnblogs.com/liujuncm5/p/6713784.html</p>
 
           
