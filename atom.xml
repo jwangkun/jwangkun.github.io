@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-11-06T03:30:09.022Z</updated>
+    <updated>2020-11-06T03:59:38.933Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[Redis5.x集群搭建]]></title>
+        <id>https://blog.jwangkun.com/post/BwodkKc_v/</id>
+        <link href="https://blog.jwangkun.com/post/BwodkKc_v/">
+        </link>
+        <updated>2020-11-06T03:57:24.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Nginx 反向代理]]></title>
         <id>https://blog.jwangkun.com/post/FmS59gnRe/</id>
@@ -72,12 +79,5 @@
         <link href="https://blog.jwangkun.com/post/1v3c-Lt8W/">
         </link>
         <updated>2020-10-22T07:53:04.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[在Kubernetes上部署Redis集群]]></title>
-        <id>https://blog.jwangkun.com/post/TooJXXWJC/</id>
-        <link href="https://blog.jwangkun.com/post/TooJXXWJC/">
-        </link>
-        <updated>2020-10-22T06:23:59.000Z</updated>
     </entry>
 </feed>
