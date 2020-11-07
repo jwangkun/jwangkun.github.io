@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-       <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta content="yes" name="apple-mobile-web-app-capable" />
   <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>docker-compose | John Wong&#39;s Blog</title>
+  <title>Docker 安装 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="docker-compose | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Docker 安装 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,6 +25,11 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="Docker 安装"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/3mPSlrjuV/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
   	<!-- Navigation -->
@@ -66,68 +71,109 @@
       </div>
     </div>
   </nav>
-<!-- Page Header -->
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="post-heading">
-            <h1 class="tag-tl">#docker-compose</h1>
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/9IyfXdfX6/" class="tag">Docker</a>
+            
+            <a href="https://blog.jwangkun.com/tag/u9gvOecvHC/" class="tag">docker-compose</a>
+            
+        </span>
+            <h1>Docker 安装</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-07，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- Post Content -->
+  <article>
     <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/3mPSlrjuV/">
-            <h2 class="post-title">
-              Docker 安装
-            </h2>
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>安装一些必要的系统工具：</p>
+<pre><code>sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+</code></pre>
+<p>添加软件源信息：</p>
+<pre><code>sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+</code></pre>
+<p>更新 yum 缓存：</p>
+<pre><code>sudo yum makecache fast
+</code></pre>
+<p>安装 Docker-ce：（企业版 社区版）</p>
+<pre><code>sudo yum -y install docker-ce
+</code></pre>
+<p>启动 Docker 后台服务</p>
+<pre><code>sudo systemctl start docker
+</code></pre>
+<p>设置自启动</p>
+<pre><code>sudo systemctl enable docker
+</code></pre>
+<p>测试运行 hello-world</p>
+<pre><code>docker run hello-world
+</code></pre>
+<h2 id="docker-compose">Docker-Compose</h2>
+<p>二进制文件安装</p>
+<pre><code>curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+</code></pre>
+<p>如果需要安装其他版本的话，请修改上面命令中的版本号。</p>
+<p>赋予二进制文件可执行权限</p>
+<pre><code> chmod +x /usr/local/bin/docker-compose
+</code></pre>
+<p>根据自己的情况决定是否安装命令补全功能</p>
+<pre><code> yum install bash-completion 
+
+ curl -L [https://raw.githubusercontent.com/docker/compose/1.16.1/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose](https://raw.githubusercontent.com/docker/compose/1.16.1/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose)
+
+</code></pre>
+<p>重新登陆后就生效了</p>
+<pre><code>docker-compose 
+</code></pre>
+<p>build  config  down   exec   images  logs   port   pull   restart run   start  top   up<br>
+bundle  create  events  help   kill   pause  ps    push   rm    scale  stop   unpause version<br>
+测试是否安装成功</p>
+<pre><code> docker-compose --version
+</code></pre>
+<p>卸载docker-compose</p>
+<pre><code> sudo rm /usr/local/bin/docker-compose
+</code></pre>
+<p>pip yum 安装</p>
+<pre><code>yum install python-pip
+pip install docker-compose
+</code></pre>
+<p>测试：</p>
+<pre><code>docker-compose --version
+</code></pre>
+<p>卸载docker-compose</p>
+<p>如果通过Python pip工具安装的，则执行如下命令删除：</p>
+<pre><code> sudo pip uninstall docker-compose
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/3Tdsl23vC/">
+              <span class="post-title">
+                Centos 7 安装Nginx&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-07</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/kms1F57yD/">
-            <h2 class="post-title">
-              使用 docker-compose 部署多机 RabbitMQ 集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
       </div>
     </div>
-  </div>
-
-  
+  </article>
  <!-- Footer -->
   <footer>
     <div class="container">
@@ -210,3 +256,4 @@
 
   </body>
 </html>
+
