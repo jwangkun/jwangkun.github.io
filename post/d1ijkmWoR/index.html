@@ -90,7 +90,7 @@
             <h1>SpringBoot 整合 elk</h1>
             <span class="meta">
             	Posted on
-              2020-11-09，8 min read
+              2020-11-09，7 min read
             </span>
           </div>
         </div>
@@ -113,17 +113,17 @@
 <p>我们采用的 docker 镜像安装。</p>
 <pre><code>#下载镜像
 docker pull sebp/elk
-复制代码
+
 #启动镜像 , 指定es的内存
 docker run -e ES_JAVA_OPTS=&quot;-Xms256m -Xmx256m&quot; -p 5601:5601 -p 5044:5044 -p 9200:9200 -p 9300:9300 -it --name elk 2fbf0a30426d
-复制代码
+
 </code></pre>
 <p>由于sebp/elk中logstash的input的方式默认是filebeat,首先们需要进入elk容器中修改input方式。logstash默认会将etc/logstash/conf.d/中的配置文件进行整合然后启动。</p>
 <pre><code>#进入容器
 docker exec -it elk /bin/bash 
 #进入修改目录
 cd etc/logstash/conf.d/
-复制代码
+
 </code></pre>
 <p>修改 02-beats-input.conf 文件，修改如下：</p>
 <pre><code>input {    
@@ -141,11 +141,11 @@ output{
     } 
     
 }
-复制代码
+
 </code></pre>
 <p>保存，退出容器后容器，重启elk。</p>
 <pre><code>docker restart elk
-复制代码
+
 </code></pre>
 <p>我们访问http://127.0.0.1:5601</p>
 <figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/2/28/16932f622b28ce4a?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
@@ -217,7 +217,7 @@ output{
 
 &lt;/project&gt;
 
-复制代码
+
 </code></pre>
 <h3 id="2-启动类">2. 启动类</h3>
 <pre><code>@RestController
@@ -236,7 +236,7 @@ public class SpringbootElkApplication {
 		return &quot;hi , &quot; + name;
 	}
 }
-复制代码
+
 </code></pre>
 <h3 id="3-logback-springxml">3. logback-spring.xml</h3>
 <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
@@ -303,7 +303,7 @@ public class SpringbootElkApplication {
     &lt;/root&gt;
     
 &lt;/configuration&gt;
-复制代码
+
 </code></pre>
 <p>启动工程，日志会存入elasticsearch中，通过Kibana 的web界面，配置后，我们就可看到，下面我简单的修改下配置。</p>
 <h2 id="三-配置-pattern">三、配置 pattern</h2>
