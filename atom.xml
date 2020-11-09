@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-11-09T12:16:30.920Z</updated>
+    <updated>2020-11-09T12:30:47.354Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -11,11 +11,11 @@
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
     <entry>
-        <title type="html"><![CDATA[Docker中Hadoop集群搭建]]></title>
-        <id>https://blog.jwangkun.com/post/5BdIRpT2c/</id>
-        <link href="https://blog.jwangkun.com/post/5BdIRpT2c/">
+        <title type="html"><![CDATA[搭建企业级ELK日志收集系统]]></title>
+        <id>https://blog.jwangkun.com/post/dtfeDBuT2/</id>
+        <link href="https://blog.jwangkun.com/post/dtfeDBuT2/">
         </link>
-        <updated>2020-11-09T12:14:56.000Z</updated>
+        <updated>2020-11-09T12:29:30.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[HDFS完全分布式集群搭建]]></title>
