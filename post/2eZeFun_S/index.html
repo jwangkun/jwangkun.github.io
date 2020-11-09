@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Spring Boot 整合 elk | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Spring Boot 整合 elk | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Spring Boot 整合 elk"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/2eZeFun_S/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/post/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/TB5guatsI/" class="tag">Spring Boot</a>
+            
+            <a href="https://blog.jwangkun.com/tag/AXH-u-Fklp/" class="tag">elk</a>
+            
+        </span>
+            <h1>Spring Boot 整合 elk</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>一、elk 简介<br>
+Elasticsearch是个开源分布式搜索引擎，它的特点有：分布式，零配置，自动发现，索引自动分片，索引副本机制，restful风格接口，多数据源，自动搜索负载等。</p>
+<p>Logstash是一个完全开源的工具，他可以对你的日志进行收集、过滤，并将其存储供以后使用（如，搜索）。</p>
+<p>Kibana 也是一个开源和免费的工具，它Kibana可以为 Logstash 和 ElasticSearch 提供的日志分析友好的 Web 界面，可以帮助您汇总、分析和搜索重要数据日志。</p>
+<p>二、elk的安装<br>
+我们采用的 docker 镜像安装。</p>
+<p>#下载镜像<br>
+docker pull sebp/elk<br>
+#启动镜像 , 指定es的内存<br>
+docker run -e ES_JAVA_OPTS=&quot;-Xms256m -Xmx256m&quot; -p 5601:5601 -p 5044:5044 -p 9200:9200 -p 9300:9300 -it --name elk 2fbf0a30426d<br>
+需要修改 logstash 配置，新建命令窗口，进行下面的docker命令</p>
+<p>#通过exec命令进入容器<br>
+docker exec -it elk /bin/bash<br>
+进入容器后，修改 /etc/logstash/conf.d/02-beats-input.conf</p>
+<p>input {<br>
+tcp {<br>
+port =&gt; 5044<br>
+codec =&gt; json_lines</p>
+<pre><code>}
+</code></pre>
+<p>}<br>
+output{<br>
+elasticsearch {<br>
+hosts =&gt; [&quot;localhost:9200&quot;]</p>
+<pre><code>}
+</code></pre>
+<p>}<br>
+保存后，我们使用 control + P + Q 退出容器。然后重启容器，让我们的配置生效。</p>
+<p>docker restart elk<br>
+我们访问http://127.0.0.1:5601</p>
+<p>三、创建工程<br>
+创建工程springboot-elk ，并使用logback 记录日志。</p>
+<ol>
+<li>pom.xml</li>
+</ol>
+<?xml version="1.0" encoding="UTF-8"?>
+<p><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"><br>
+<modelVersion>4.0.0</modelVersion></p>
+<pre><code>&lt;groupId&gt;com.gf&lt;/groupId&gt;
+&lt;artifactId&gt;springboot-elk&lt;/artifactId&gt;
+&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+&lt;packaging&gt;jar&lt;/packaging&gt;
+
+&lt;name&gt;springboot-elk&lt;/name&gt;
+&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+&lt;parent&gt;
+	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+	&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+	&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+&lt;/parent&gt;
+
+&lt;properties&gt;
+	&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+	&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+	&lt;java.version&gt;1.8&lt;/java.version&gt;
+&lt;/properties&gt;
+
+&lt;dependencies&gt;
+	&lt;dependency&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+	&lt;/dependency&gt;
+	&lt;dependency&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+		&lt;scope&gt;test&lt;/scope&gt;
+	&lt;/dependency&gt;
+
+	&lt;!-- logback --&gt;
+	&lt;dependency&gt;
+		&lt;groupId&gt;ch.qos.logback&lt;/groupId&gt;
+		&lt;artifactId&gt;logback-classic&lt;/artifactId&gt;
+	&lt;/dependency&gt;
+
+	&lt;dependency&gt;
+		&lt;groupId&gt;net.logstash.logback&lt;/groupId&gt;
+		&lt;artifactId&gt;logstash-logback-encoder&lt;/artifactId&gt;
+		&lt;version&gt;5.2&lt;/version&gt;
+	&lt;/dependency&gt;
+
+&lt;/dependencies&gt;
+
+&lt;build&gt;
+	&lt;plugins&gt;
+		&lt;plugin&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+			&lt;configuration&gt;
+				&lt;fork&gt;true&lt;/fork&gt;
+			&lt;/configuration&gt;
+		&lt;/plugin&gt;
+	&lt;/plugins&gt;
+&lt;/build&gt;
+</code></pre>
+</project>
+<ol start="2">
+<li>
+<p>启动类<br>
+@RestController<br>
+@SpringBootApplication<br>
+public class SpringbootElkApplication {</p>
+<p>private final static Logger logger = LoggerFactory.getLogger( SpringbootElkApplication.class );</p>
+<p>public static void main(String[] args) {<br>
+SpringApplication.run(SpringbootElkApplication.class, args);<br>
+}</p>
+<p>@GetMapping(&quot;/{name}&quot;)<br>
+public String hi(@PathVariable(value = &quot;name&quot;) String name) {<br>
+logger.info( &quot;name = {}&quot; , name );<br>
+return &quot;hi , &quot; + name;<br>
+}<br>
+}</p>
+</li>
+<li>
+<p>logback-spring.xml</p>
+</li>
+</ol>
+<?xml version="1.0" encoding="UTF-8"?>
+<!--该日志将日志级别不同的log信息保存到不同的文件中 -->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+<pre><code>&lt;springProperty scope=&quot;context&quot; name=&quot;springAppName&quot;
+                source=&quot;spring.application.name&quot; /&gt;
+
+&lt;!-- 日志在工程中的输出位置 --&gt;
+&lt;property name=&quot;LOG_FILE&quot; value=&quot;${BUILD_FOLDER:-build}/${springAppName}&quot; /&gt;
+
+&lt;!-- 控制台的日志输出样式 --&gt;
+&lt;property name=&quot;CONSOLE_LOG_PATTERN&quot;
+          value=&quot;%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}&quot; /&gt;
+
+&lt;!-- 控制台输出 --&gt;
+&lt;appender name=&quot;console&quot; class=&quot;ch.qos.logback.core.ConsoleAppender&quot;&gt;
+    &lt;filter class=&quot;ch.qos.logback.classic.filter.ThresholdFilter&quot;&gt;
+        &lt;level&gt;INFO&lt;/level&gt;
+    &lt;/filter&gt;
+    &lt;!-- 日志输出编码 --&gt;
+    &lt;encoder&gt;
+        &lt;pattern&gt;${CONSOLE_LOG_PATTERN}&lt;/pattern&gt;
+        &lt;charset&gt;utf8&lt;/charset&gt;
+    &lt;/encoder&gt;
+&lt;/appender&gt;
+
+&lt;!-- 为logstash输出的JSON格式的Appender --&gt;
+&lt;appender name=&quot;logstash&quot;
+          class=&quot;net.logstash.logback.appender.LogstashTcpSocketAppender&quot;&gt;
+    &lt;destination&gt;127.0.0.1:5044&lt;/destination&gt;
+    &lt;!-- 日志输出编码 --&gt;
+    &lt;encoder
+            class=&quot;net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder&quot;&gt;
+        &lt;providers&gt;
+            &lt;timestamp&gt;
+                &lt;timeZone&gt;UTC&lt;/timeZone&gt;
+            &lt;/timestamp&gt;
+            &lt;pattern&gt;
+                &lt;pattern&gt;
+                    {
+                    &quot;severity&quot;: &quot;%level&quot;,
+                    &quot;service&quot;: &quot;${springAppName:-}&quot;,
+                    &quot;trace&quot;: &quot;%X{X-B3-TraceId:-}&quot;,
+                    &quot;span&quot;: &quot;%X{X-B3-SpanId:-}&quot;,
+                    &quot;exportable&quot;: &quot;%X{X-Span-Export:-}&quot;,
+                    &quot;pid&quot;: &quot;${PID:-}&quot;,
+                    &quot;thread&quot;: &quot;%thread&quot;,
+                    &quot;class&quot;: &quot;%logger{40}&quot;,
+                    &quot;rest&quot;: &quot;%message&quot;
+                    }
+                &lt;/pattern&gt;
+            &lt;/pattern&gt;
+        &lt;/providers&gt;
+    &lt;/encoder&gt;
+&lt;/appender&gt;
+
+&lt;!-- 日志输出级别 --&gt;
+&lt;root level=&quot;INFO&quot;&gt;
+    &lt;appender-ref ref=&quot;console&quot; /&gt;
+    &lt;appender-ref ref=&quot;logstash&quot; /&gt;
+&lt;/root&gt;
+</code></pre>
+</configuration>
+启动工程，日志会存入elasticsearch中，通过Kibana 的web界面，配置后，我们就可看到，下面我简单的修改下配置。
+<p>三、配置 pattern<br>
+配置 pattern 输入*，匹配所有数据。</p>
+<p>选择时间@timestamp，这样数据展示会以时间排序</p>
+<p>好了 ，点击discover，就可以看到我们springboot-elk项目的日志信息了。</p>
+<p>源码下载: https://github.com/gf-huanchupk/SpringBootLearning</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/ozUSZ8tBa/">
+              <span class="post-title">
+                Spring Boot 整合 docker&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://blog.jwangkun.com/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+
