@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-11-09T12:37:42.833Z</updated>
+    <updated>2020-11-09T12:46:09.673Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[使用 Docker 搭建 ELK 环境]]></title>
+        <id>https://blog.jwangkun.com/post/FVtYeBnI5/</id>
+        <link href="https://blog.jwangkun.com/post/FVtYeBnI5/">
+        </link>
+        <updated>2020-11-09T12:41:53.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[SpringBoot 整合 elk]]></title>
         <id>https://blog.jwangkun.com/post/d1ijkmWoR/</id>
@@ -72,12 +79,5 @@
         <link href="https://blog.jwangkun.com/post/YNaOOJ8rC/">
         </link>
         <updated>2020-11-06T04:09:08.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Redis5.x集群搭建]]></title>
-        <id>https://blog.jwangkun.com/post/BwodkKc_v/</id>
-        <link href="https://blog.jwangkun.com/post/BwodkKc_v/">
-        </link>
-        <updated>2020-11-06T03:57:24.000Z</updated>
     </entry>
 </feed>
