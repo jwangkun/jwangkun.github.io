@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Docker中Hadoop集群搭建 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Docker中Hadoop集群搭建 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Docker中Hadoop集群搭建"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/5BdIRpT2c/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/post/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/ax7Zi_u_G/" class="tag">Hadoop</a>
+            
+            <a href="https://blog.jwangkun.com/tag/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>Docker中Hadoop集群搭建</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，13 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="环境">环境</h2>
+<p>1、操作系统： CentOS 7.2 64位</p>
+<h2 id="网路设置">网路设置</h2>
+<table>
+<thead>
+<tr>
+<th>hostname</th>
+<th>IP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cluster-master</td>
+<td>172.18.0.2</td>
+</tr>
+<tr>
+<td>cluster-slave1</td>
+<td>172.18.0.3</td>
+</tr>
+<tr>
+<td>cluster-slave2</td>
+<td>172.18.0.4</td>
+</tr>
+<tr>
+<td>cluster-slave3</td>
+<td>172.18.0.5</td>
+</tr>
+</tbody>
+</table>
+<h2 id="docker-安装">Docker 安装</h2>
+<pre><code>curl -sSL https://get.daocloud.io/docker | sh
+
+##换源
+###这里可以参考这篇文章http://www.jianshu.com/p/34d3b4568059
+curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://67e93489.m.daocloud.io
+
+##开启自启动
+systemctl enable docker
+systemctl start docker
+</code></pre>
+<h3 id="拉去centos镜像">拉去Centos镜像</h3>
+<pre><code>docker pull daocloud.io/library/centos:latest
+</code></pre>
+<p>使用<code>docker ps</code> 查看下载的镜像</p>
+<figure data-type="image" tabindex="1"><img src="http://ww1.sinaimg.cn/large/005JQie4ly1g3p9ctpao0j30l5021755.jpg" alt="img" loading="lazy"></figure>
+<h3 id="创建容器">创建容器</h3>
+<p>按照集群的架构，创建容器时需要设置固定IP，所以先要在docker使用如下命令创建固定IP的子网</p>
+<pre><code>docker network create --subnet=172.18.0.0/16 netgroup
+</code></pre>
+<p>docker的子网创建完成之后就可以创建固定IP的容器了</p>
+<pre><code>#cluster-master
+#-p 设置docker映射到容器的端口 后续查看web管理页面使用
+docker run -d --privileged -ti -v /sys/fs/cgroup:/sys/fs/cgroup --name cluster-master -h cluster-master -p 18088:18088 -p 9870:9870 --net netgroup --ip 172.18.0.2 daocloud.io/library/centos /usr/sbin/init
+
+#cluster-slaves
+docker run -d --privileged -ti -v /sys/fs/cgroup:/sys/fs/cgroup --name cluster-slave1 -h cluster-slave1 --net netgroup --ip 172.18.0.3 daocloud.io/library/centos /usr/sbin/init
+
+docker run -d --privileged -ti -v /sys/fs/cgroup:/sys/fs/cgroup --name cluster-slave2 -h cluster-slave2 --net netgroup --ip 172.18.0.4 daocloud.io/library/centos /usr/sbin/init
+
+docker run -d --privileged -ti -v /sys/fs/cgroup:/sys/fs/cgroup --name cluster-slave3 -h cluster-slave3 --net netgroup --ip 172.18.0.5 daocloud.io/library/centos /usr/sbin/init
+</code></pre>
+<p>启动控制台并进入<code>docker</code>容器中：</p>
+<pre><code>docker exec -it cluster-master /bin/bash
+</code></pre>
+<h3 id="安装openssh免密登录">安装OpenSSH免密登录</h3>
+<p>1、<code>cluster-master</code>安装：</p>
+<pre><code>#cluster-master需要修改配置文件（特殊）
+#cluster-master
+
+#安装openssh
+[root@cluster-master /]# yum -y install openssh openssh-server openssh-clients
+
+[root@cluster-master /]# systemctl start sshd
+####ssh自动接受新的公钥
+####master设置ssh登录自动添加kown_hosts
+[root@cluster-master /]# vi /etc/ssh/ssh_config
+#将原来的StrictHostKeyChecking ask
+#设置StrictHostKeyChecking为no
+#保存
+[root@cluster-master /]# systemctl restart sshd
+</code></pre>
+<p>2、分别对slaves安装OpenSSH</p>
+<pre><code>#安装openssh
+[root@cluster-slave1 /]#yum -y install openssh openssh-server openssh-clients
+
+[root@cluster-slave1 /]# systemctl start sshd
+</code></pre>
+<p>3、cluster-master公钥分发</p>
+<p>在master机上执行<br>
+ssh-keygen -t rsa<br>
+并一路回车，完成之后会生成~/.ssh目录，目录下有id_rsa（私钥文件）和id_rsa.pub（公钥文件），再将id_rsa.pub重定向到文件authorized_keys</p>
+<pre><code>ssh-keygen -t rsa
+#一路回车
+
+[root@cluster-master /]# cat ~/.ssh/id_rsa.pub &gt; ~/.ssh/authorized_keys
+</code></pre>
+<p>文件生成之后用scp将公钥文件分发到集群slave主机</p>
+<pre><code>[root@cluster-master /]# ssh root@cluster-slave1 'mkdir ~/.ssh'
+[root@cluster-master /]# scp ~/.ssh/authorized_keys root@cluster-slave1:~/.ssh
+[root@cluster-master /]# ssh root@cluster-slave2 'mkdir ~/.ssh'
+[root@cluster-master /]# scp ~/.ssh/authorized_keys root@cluster-slave2:~/.ssh
+[root@cluster-master /]# ssh root@cluster-slave3 'mkdir ~/.ssh'
+[root@cluster-master /]# scp ~/.ssh/authorized_keys root@cluster-slave3:~/.ssh
+</code></pre>
+<p>分发完成之后测试(ssh root@cluster-slave1)是否已经可以免输入密码登录</p>
+<h3 id="ansible安装">Ansible安装</h3>
+<pre><code>[root@cluster-master /]# yum -y install epel-release
+[root@cluster-master /]# yum -y install ansible
+#这样的话ansible会被安装到/etc/ansible目录下
+</code></pre>
+<p>此时我们再去编辑ansible的hosts文件</p>
+<pre><code>vi /etc/ansible/hosts
+[cluster]
+cluster-master
+cluster-slave1
+cluster-slave2
+cluster-slave3
+
+[master]
+cluster-master
+
+[slaves]
+cluster-slave1
+cluster-slave2
+cluster-slave3
+</code></pre>
+<h3 id="配置docker容器hosts">配置docker容器hosts</h3>
+<p>由于/etc/hosts文件在容器启动时被重写，直接修改内容在容器重启后不能保留，为了让容器在重启之后获取集群hosts，使用了一种启动容器后重写hosts的方法。<br>
+需要在~/.bashrc中追加以下指令</p>
+<pre><code>:&gt;/etc/hosts
+cat &gt;&gt;/etc/hosts&lt;&lt;EOF
+127.0.0.1   localhost
+172.18.0.2  cluster-master
+172.18.0.3  cluster-slave1
+172.18.0.4  cluster-slave2
+172.18.0.5  cluster-slave3
+EOF
+source ~/.bashrc
+</code></pre>
+<p>使配置文件生效,可以看到/etc/hosts文件已经被改为需要的内容</p>
+<pre><code>[root@cluster-master ansible]# cat /etc/hosts
+127.0.0.1   localhost
+172.18.0.2  cluster-master
+172.18.0.3  cluster-slave1
+172.18.0.4  cluster-slave2
+172.18.0.5  cluster-slave3
+</code></pre>
+<h3 id="用ansible分发bashrc至集群slave下">用ansible分发.bashrc至集群slave下</h3>
+<pre><code>ansible cluster -m copy -a &quot;src=~/.bashrc dest=~/&quot;
+</code></pre>
+<h2 id="软件环境配置">软件环境配置</h2>
+<p>下载JDK1.8并解压缩至<code>/opt</code> 目录下<br>
+<img src="http://ww1.sinaimg.cn/large/005JQie4ly1g3p9vdyqy3j30z60920xv.jpg" alt="img" loading="lazy"></p>
+<p>下载hadoop3 到<code>/opt</code>目录下，解压安装包，并创建链接文件</p>
+<pre><code>tar -xzvf hadoop-3.2.0.tar.gz
+ln -s hadoop-3.2.0 hadoop
+</code></pre>
+<h3 id="配置java和hadoop环境变量">配置java和hadoop环境变量</h3>
+<p>编辑 <code>~/.bashrc</code>文件</p>
+<pre><code># hadoop
+export HADOOP_HOME=/opt/hadoop-3.2.0
+export PATH=$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH
+
+#java
+export JAVA_HOME=/opt/jdk8
+export PATH=$HADOOP_HOME/bin:$PATH
+</code></pre>
+<p>使文件生效：</p>
+<pre><code>source .bashrc
+</code></pre>
+<h2 id="配置hadoop运行所需配置文件">配置hadoop运行所需配置文件</h2>
+<pre><code>cd $HADOOP_HOME/etc/hadoop/
+</code></pre>
+<p>1、修改<code>core-site.xml</code></p>
+<pre><code>&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+        &lt;value&gt;/home/hadoop/tmp&lt;/value&gt;
+        &lt;description&gt;A base for other temporary directories.&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;!-- file system properties --&gt;
+    &lt;property&gt;
+        &lt;name&gt;fs.default.name&lt;/name&gt;
+        &lt;value&gt;hdfs://cluster-master:9000&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+    &lt;name&gt;fs.trash.interval&lt;/name&gt;
+        &lt;value&gt;4320&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>2、修改hdfs-site.xml</p>
+<pre><code>&lt;configuration&gt;
+&lt;property&gt;
+   &lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;
+   &lt;value&gt;/home/hadoop/tmp/dfs/name&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;
+   &lt;value&gt;/home/hadoop/data&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;dfs.replication&lt;/name&gt;
+   &lt;value&gt;3&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;dfs.webhdfs.enabled&lt;/name&gt;
+   &lt;value&gt;true&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;dfs.permissions.superusergroup&lt;/name&gt;
+   &lt;value&gt;staff&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;dfs.permissions.enabled&lt;/name&gt;
+   &lt;value&gt;false&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;/configuration&gt;
+</code></pre>
+<p>3、修改mapred-site.xml</p>
+<pre><code>&lt;configuration&gt;
+&lt;property&gt;
+  &lt;name&gt;mapreduce.framework.name&lt;/name&gt;
+  &lt;value&gt;yarn&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+    &lt;name&gt;mapred.job.tracker&lt;/name&gt;
+    &lt;value&gt;cluster-master:9001&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;mapreduce.jobtracker.http.address&lt;/name&gt;
+  &lt;value&gt;cluster-master:50030&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;mapreduce.jobhisotry.address&lt;/name&gt;
+  &lt;value&gt;cluster-master:10020&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;mapreduce.jobhistory.webapp.address&lt;/name&gt;
+  &lt;value&gt;cluster-master:19888&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;mapreduce.jobhistory.done-dir&lt;/name&gt;
+  &lt;value&gt;/jobhistory/done&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;mapreduce.intermediate-done-dir&lt;/name&gt;
+  &lt;value&gt;/jobhisotry/done_intermediate&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;mapreduce.job.ubertask.enable&lt;/name&gt;
+  &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>4、yarn-site.xml</p>
+<pre><code>&lt;configuration&gt;
+    &lt;property&gt;
+   &lt;name&gt;yarn.resourcemanager.hostname&lt;/name&gt;
+   &lt;value&gt;cluster-master&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;
+   &lt;value&gt;mapreduce_shuffle&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;yarn.nodemanager.aux-services.mapreduce.shuffle.class&lt;/name&gt;
+   &lt;value&gt;org.apache.hadoop.mapred.ShuffleHandler&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;yarn.resourcemanager.address&lt;/name&gt;
+   &lt;value&gt;cluster-master:18040&lt;/value&gt;
+ &lt;/property&gt;
+&lt;property&gt;
+   &lt;name&gt;yarn.resourcemanager.scheduler.address&lt;/name&gt;
+   &lt;value&gt;cluster-master:18030&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;yarn.resourcemanager.resource-tracker.address&lt;/name&gt;
+   &lt;value&gt;cluster-master:18025&lt;/value&gt;
+ &lt;/property&gt; &lt;property&gt;
+   &lt;name&gt;yarn.resourcemanager.admin.address&lt;/name&gt;
+   &lt;value&gt;cluster-master:18141&lt;/value&gt;
+ &lt;/property&gt;
+&lt;property&gt;
+   &lt;name&gt;yarn.resourcemanager.webapp.address&lt;/name&gt;
+   &lt;value&gt;cluster-master:18088&lt;/value&gt;
+ &lt;/property&gt;
+&lt;property&gt;
+   &lt;name&gt;yarn.log-aggregation-enable&lt;/name&gt;
+   &lt;value&gt;true&lt;/value&gt;
+ &lt;/property&gt;
+&lt;property&gt;
+   &lt;name&gt;yarn.log-aggregation.retain-seconds&lt;/name&gt;
+   &lt;value&gt;86400&lt;/value&gt;
+ &lt;/property&gt;
+&lt;property&gt;
+   &lt;name&gt;yarn.log-aggregation.retain-check-interval-seconds&lt;/name&gt;
+   &lt;value&gt;86400&lt;/value&gt;
+ &lt;/property&gt;
+&lt;property&gt;
+   &lt;name&gt;yarn.nodemanager.remote-app-log-dir&lt;/name&gt;
+   &lt;value&gt;/tmp/logs&lt;/value&gt;
+ &lt;/property&gt;
+&lt;property&gt;
+   &lt;name&gt;yarn.nodemanager.remote-app-log-dir-suffix&lt;/name&gt;
+   &lt;value&gt;logs&lt;/value&gt;
+ &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<h3 id="打包hadoop-向slaves分发">打包hadoop 向slaves分发</h3>
+<pre><code>tar -cvf hadoop-dis.tar hadoop hadoop-3.2.0
+</code></pre>
+<h3 id="使用ansible-playbook分发bashrc和hadoop-distar至slave主机">使用ansible-playbook分发.bashrc和hadoop-dis.tar至slave主机</h3>
+<pre><code>---
+- hosts: cluster
+  tasks:
+    - name: copy .bashrc to slaves
+      copy: src=~/.bashrc dest=~/
+      notify:
+        - exec source
+    - name: copy hadoop-dis.tar to slaves
+      unarchive: src=/opt/hadoop-dis.tar dest=/opt
+
+  handlers:
+    - name: exec source
+      shell: source ~/.bashrc
+</code></pre>
+<p>将以上yaml保存为hadoop-dis.yaml，并执行</p>
+<pre><code>ansible-playbook hadoop-dis.yaml
+</code></pre>
+<p>hadoop-dis.tar会自动解压到slave主机的/opt目录下</p>
+<h2 id="hadoop-启动">Hadoop 启动</h2>
+<h3 id="格式化namenode">格式化namenode</h3>
+<pre><code>hadoop namenode -format
+</code></pre>
+<p>如果看到storage format success等字样，即可格式化成功</p>
+<h3 id="启动集群">启动集群</h3>
+<pre><code>cd $HADOOP_HOME/sbin
+start-all.sh
+</code></pre>
+<p>启动后可使用jps命令查看是否启动成功<br>
+<img src="http://ww1.sinaimg.cn/large/005JQie4ly1g3pa702brkj30g50310tr.jpg" alt="img" loading="lazy"></p>
+<p><strong>注意：</strong><br>
+在实践中遇到节点slaves 上的datanode服务没有启动，查看slave上目录结构发现<br>
+没有生成配置文件中设置的文件夹，比如：core-site.xml中</p>
+<pre><code>&lt;property&gt;
+        &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+        &lt;value&gt;/home/hadoop/tmp&lt;/value&gt;
+        &lt;description&gt;A base for other temporary directories.&lt;/description&gt;
+    &lt;/property&gt;
+</code></pre>
+<p>hdfs-site.xml文件中:</p>
+<pre><code>&lt;property&gt;
+   &lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;
+   &lt;value&gt;/home/hadoop/tmp/dfs/name&lt;/value&gt;
+ &lt;/property&gt;
+ &lt;property&gt;
+   &lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;
+   &lt;value&gt;/home/hadoop/data&lt;/value&gt;
+ &lt;/property&gt;
+</code></pre>
+<p>手动到节点中生成这些文件夹，之后删除master中这些文件夹和$HADOOP_HOME下的logs文件夹,之后重新格式化namenode</p>
+<pre><code>hadoop namenode -format
+</code></pre>
+<p>再次启动集群服务：</p>
+<pre><code>start-all.sh
+</code></pre>
+<p>这时在到从节点观察应该会看到节点服务<br>
+<img src="http://ww1.sinaimg.cn/large/005JQie4ly1g3pacbzkc9j308702b74q.jpg" alt="img" loading="lazy"></p>
+<h3 id="验证服务">验证服务</h3>
+<p>访问</p>
+<pre><code>http://host:18088
+http://host:9870
+</code></pre>
+<p>来查看服务是否启动<br>
+<img src="http://ww1.sinaimg.cn/large/005JQie4ly1g3paenyx8wj31wg0u8q7p.jpg" alt="img" loading="lazy"><br>
+<img src="http://ww1.sinaimg.cn/large/005JQie4ly1g3paex7yh6j31zs0t2ak8.jpg" alt="img" loading="lazy"></p>
+<p>转载：https://www.jianshu.com/p/d7fa21504784</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/ldWvjNELN/">
+              <span class="post-title">
+                HDFS完全分布式集群搭建&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://blog.jwangkun.com/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+
