@@ -88,7 +88,7 @@
             <h1>Spring Boot 整合 docker</h1>
             <span class="meta">
             	Posted on
-              2020-11-09，4 min read
+              2020-11-09，5 min read
             </span>
           </div>
         </div>
@@ -101,123 +101,137 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <p>一、什么是docker ？<br>
-简介<br>
-Docker是一个开源的引擎，可以轻松的为任何应用创建一个轻量级的、可移植的、自给自足的容器。开发者在笔记本上编译测试通过的容器可以批量地在生产环境中部署，包括VMs（虚拟机）、bare metal、OpenStack 集群和其他的基础应用平台。</p>
-<p>docker的应用场景<br>
-web应用的自动化打包和发布；<br>
-自动化测试和持续集成、发布；<br>
-在服务型环境中部署和调整数据库或其他的后台应用；<br>
-从头编译或者扩展现有的OpenShift或Cloud Foundry平台来搭建自己的PaaS环境。<br>
-二、整合 docker<br>
-创建工程<br>
-创建一个springboot工程springboot-docker</p>
-<ol>
-<li>启动类<br>
-package com.gf;</li>
-</ol>
-<p>import org.springframework.boot.SpringApplication;<br>
-import org.springframework.boot.autoconfigure.SpringBootApplication;<br>
-import org.springframework.web.bind.annotation.GetMapping;<br>
-import org.springframework.web.bind.annotation.PathVariable;<br>
-import org.springframework.web.bind.annotation.RestController;</p>
-<p>@SpringBootApplication<br>
-@RestController<br>
-public class SpringbootDockerApplication {</p>
-<pre><code>public static void main(String[] args) {
-	SpringApplication.run(SpringbootDockerApplication.class, args);
-}
+          <h2 id="一-什么是docker">一、什么是docker ？</h2>
+<h3 id="简介">简介</h3>
+<p>Docker是一个开源的引擎，可以轻松的为任何应用创建一个轻量级的、可移植的、自给自足的容器。开发者在笔记本上编译测试通过的容器可以批量地在生产环境中部署，包括VMs（虚拟机）、bare metal、OpenStack 集群和其他的基础应用平台。</p>
+<h3 id="docker的应用场景">docker的应用场景</h3>
+<ul>
+<li>web应用的自动化打包和发布；</li>
+<li>自动化测试和持续集成、发布；</li>
+<li>在服务型环境中部署和调整数据库或其他的后台应用；</li>
+<li>从头编译或者扩展现有的OpenShift或Cloud Foundry平台来搭建自己的PaaS环境。</li>
+</ul>
+<h2 id="二-整合-docker">二、整合 docker</h2>
+<h3 id="创建工程">创建工程</h3>
+<p>创建一个springboot工程springboot-docker</p>
+<h4 id="1-启动类">1. 启动类</h4>
+<pre><code class="language-java">package com.gf;
 
-@GetMapping(&quot;/{name}&quot;)
-public String hi(@PathVariable(value = &quot;name&quot;) String name) {
-	return &quot;hi , &quot; + name;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+@SpringBootApplication
+@RestController
+public class SpringbootDockerApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringbootDockerApplication.class, args);
+	}
+
+	@GetMapping(&quot;/{name}&quot;)
+	public String hi(@PathVariable(value = &quot;name&quot;) String name) {
+		return &quot;hi , &quot; + name;
+	}
+
+
 }
 </code></pre>
-<p>}<br>
-2. 将springboot工程容器化<br>
-我们编写一个Dockerfile来定制镜像，在src/main/resources/docker 下创建Dockerfile文件</p>
-<p>FROM frolvlad/alpine-oraclejdk8:slim<br>
-VOLUME /tmp<br>
-ADD springboot-docker-0.0.1-SNAPSHOT.jar app.jar<br>
-RUN sh -c 'touch /app.jar'<br>
-ENV JAVA_OPTS=&quot;&quot;<br>
-ENTRYPOINT [ &quot;sh&quot;, &quot;-c&quot;, &quot;java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar&quot; ]<br>
-3. pom.xml<br>
-我们通过maven 构建docker镜像。 在maven的pom目录，加上docker镜像构建的插件</p>
-<?xml version="1.0" encoding="UTF-8"?>
-<p><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"><br>
-<modelVersion>4.0.0</modelVersion><br>
-<parent><br>
-<groupId>org.springframework.boot</groupId><br>
-<artifactId>spring-boot-starter-parent</artifactId><br>
-<version>2.1.1.RELEASE</version><br>
-<relativePath/> <!-- lookup parent from repository --><br>
-</parent><br>
-<groupId>com.gf</groupId><br>
-<artifactId>springboot-docker</artifactId><br>
-<version>0.0.1-SNAPSHOT</version><br>
-<packaging>jar</packaging><br>
-<name>springboot-docker</name><br>
-<description>Demo project for Spring Boot</description></p>
-<pre><code>&lt;properties&gt;
-	&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
-	&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
-	&lt;java.version&gt;1.8&lt;/java.version&gt;
-	&lt;docker.image.prefix&gt;gf&lt;/docker.image.prefix&gt;
-&lt;/properties&gt;
-
-&lt;dependencies&gt;
-	&lt;dependency&gt;
+<h4 id="2-将springboot工程容器化">2. 将springboot工程容器化</h4>
+<p>我们编写一个<strong>Dockerfile</strong>来定制镜像，在<strong>src/main/resources/docker</strong> 下创建<strong>Dockerfile</strong>文件</p>
+<pre><code>FROM frolvlad/alpine-oraclejdk8:slim
+VOLUME /tmp
+ADD springboot-docker-0.0.1-SNAPSHOT.jar app.jar
+RUN sh -c 'touch /app.jar'
+ENV JAVA_OPTS=&quot;&quot;
+ENTRYPOINT [ &quot;sh&quot;, &quot;-c&quot;, &quot;java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar&quot; ]
+</code></pre>
+<h4 id="3-pomxml">3. pom.xml</h4>
+<p>我们通过maven 构建docker镜像。 在maven的pom目录，加上docker镜像构建的插件</p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+	&lt;parent&gt;
 		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-		&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-	&lt;/dependency&gt;
+		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+		&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+	&lt;/parent&gt;
+	&lt;groupId&gt;com.gf&lt;/groupId&gt;
+	&lt;artifactId&gt;springboot-docker&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
+	&lt;name&gt;springboot-docker&lt;/name&gt;
+	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
 
-	&lt;dependency&gt;
-		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-		&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
-		&lt;scope&gt;test&lt;/scope&gt;
-	&lt;/dependency&gt;
-&lt;/dependencies&gt;
+	&lt;properties&gt;
+		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+		&lt;java.version&gt;1.8&lt;/java.version&gt;
+		&lt;docker.image.prefix&gt;gf&lt;/docker.image.prefix&gt;
+	&lt;/properties&gt;
 
-
-
-&lt;build&gt;
-	&lt;plugins&gt;
-		&lt;plugin&gt;
+	&lt;dependencies&gt;
+		&lt;dependency&gt;
 			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-			&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
-		&lt;/plugin&gt;
-		&lt;plugin&gt;
-			&lt;groupId&gt;com.spotify&lt;/groupId&gt;
-			&lt;artifactId&gt;docker-maven-plugin&lt;/artifactId&gt;
-			&lt;version&gt;1.2.0&lt;/version&gt;
-			&lt;configuration&gt;
-				&lt;imageName&gt;${docker.image.prefix}/${project.artifactId}&lt;/imageName&gt;
-				&lt;dockerDirectory&gt;src/main/resources/docker&lt;/dockerDirectory&gt;
-				&lt;resources&gt;
-					&lt;resource&gt;
-						&lt;targetPath&gt;/&lt;/targetPath&gt;
-						&lt;directory&gt;${project.build.directory}&lt;/directory&gt;
-						&lt;include&gt;${project.build.finalName}.jar&lt;/include&gt;
-					&lt;/resource&gt;
-				&lt;/resources&gt;
-			&lt;/configuration&gt;
-		&lt;/plugin&gt;
-	&lt;/plugins&gt;
-&lt;/build&gt;
+			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+			&lt;scope&gt;test&lt;/scope&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+
+
+
+	&lt;build&gt;
+		&lt;plugins&gt;
+			&lt;plugin&gt;
+				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+			&lt;/plugin&gt;
+			&lt;plugin&gt;
+				&lt;groupId&gt;com.spotify&lt;/groupId&gt;
+				&lt;artifactId&gt;docker-maven-plugin&lt;/artifactId&gt;
+				&lt;version&gt;1.2.0&lt;/version&gt;
+				&lt;configuration&gt;
+					&lt;imageName&gt;${docker.image.prefix}/${project.artifactId}&lt;/imageName&gt;
+					&lt;dockerDirectory&gt;src/main/resources/docker&lt;/dockerDirectory&gt;
+					&lt;resources&gt;
+						&lt;resource&gt;
+							&lt;targetPath&gt;/&lt;/targetPath&gt;
+							&lt;directory&gt;${project.build.directory}&lt;/directory&gt;
+							&lt;include&gt;${project.build.finalName}.jar&lt;/include&gt;
+						&lt;/resource&gt;
+					&lt;/resources&gt;
+				&lt;/configuration&gt;
+			&lt;/plugin&gt;
+		&lt;/plugins&gt;
+	&lt;/build&gt;
+
+
+&lt;/project&gt;
 </code></pre>
-</project>
-构建镜像
-我们运行下面的命令构建镜像：
-<p>mvn clean<br>
-mvn package docker:bulid<br>
-构建成功后，我们通过下面的命令查看镜像：</p>
-<p>docker images</p>
+<h3 id="构建镜像">构建镜像</h3>
+<p>我们运行下面的命令构建镜像：</p>
+<pre><code>mvn clean
+mvn package docker:bulid
+</code></pre>
+<p>构建成功后，我们通过下面的命令查看镜像：</p>
+<pre><code>docker images
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-10/1.png" alt="img" loading="lazy"></figure>
 <p>启动镜像：</p>
-<p>#c2dba352c3c1 为镜像ID<br>
-docker run -p 8080:8080 -t c2dba352c3c1<br>
-之后我们就可以访问服务了。</p>
+<pre><code>#c2dba352c3c1 为镜像ID
+docker run -p 8080:8080 -t c2dba352c3c1
+</code></pre>
+<p>之后我们就可以访问服务了。</p>
+<p>源码下载：https://github.com/gf-huanchupk/SpringBootLearning</p>
 
           
           <p class="next-post">下一篇：
