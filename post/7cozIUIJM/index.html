@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title> Docker 安装部署RabbitMQ | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title=" Docker 安装部署RabbitMQ | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content=" Docker 安装部署RabbitMQ"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/7cozIUIJM/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,228 +71,100 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/4DVIshPOm/" class="tag">rabbitmq</a>
+            
+            <a href="https://blog.jwangkun.com/tag/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1> Docker 安装部署RabbitMQ</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/KxZIg9sIn/">
-            <h2 class="post-title">
-              Spring Boot Security 详解
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>这里注意获取镜像的时候要获取management版本的，不要获取last版本的，management版本的才带有管理界面。</p>
+<h1 id="获查询镜像">获查询镜像</h1>
+<pre><code class="language-css"> docker search rabbitmq:management
+</code></pre>
+<p>可以看到如下结果：</p>
+<pre><code class="language-csharp">[root@localhost ~]# docker search rabbitmq:management
+INDEX       NAME                                          DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+docker.io   docker.io/macintoshplus/rabbitmq-management   Based on rabbitmq:management whit python a...   1                    [OK]
+docker.io   docker.io/transmitsms/rabbitmq-sharded        Fork of rabbitmq:management with sharded_e...   0
+[root@localhost ~]#
+</code></pre>
+<h1 id="获取镜像">获取镜像</h1>
+<pre><code class="language-css">docker pull rabbitmq:management
+</code></pre>
+<p>可以看到如下结果</p>
+<pre><code class="language-csharp">[root@localhost ~]# docker pull rabbitmq:management
+Trying to pull repository docker.io/library/rabbitmq ...
+management: Pulling from docker.io/library/rabbitmq
+e7bb522d92ff: Pull complete
+ad90649c4d84: Pull complete
+5a318b914d6c: Pull complete
+cedd60f70052: Pull complete
+f4ec28761801: Pull complete
+b8fa44aa9074: Pull complete
+e8002a209c24: Pull complete
+cd1206edcd43: Pull complete
+769be0727074: Pull complete
+7308b93d35af: Pull complete
+c4102ef22c29: Pull complete
+fefc8e1aa4b5: Pull complete
+a271d400045b: Pull complete
+b0d4c40c62de: Pull complete
+Digest: sha256:8761de2c22badfc86dfe89791dc9dbf122f67ff0f8981966573d267af421b97f
+[root@localhost ~]#
+</code></pre>
+<h1 id="运行镜像">运行镜像</h1>
+<pre><code class="language-css">docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq rabbitmq:management
+</code></pre>
+<p>看到如下结果，变成功了：</p>
+<pre><code class="language-css">[root@localhost ~]# docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq rabbitmq:management
+e194a2dbeb52f2296dfb6d1c527cf052d82be5ed9a4c974d70dcd6af3da3eb7e
+[root@localhost ~]#
+</code></pre>
+<h1 id="访问管理界面">访问管理界面</h1>
+<p>访问管理界面的地址就是 http://[宿主机IP]:15672，可以使用默认的账户登录，用户名和密码都guest，如：</p>
+<figure data-type="image" tabindex="1"><img src="https://upload-images.jianshu.io/upload_images/6464086-4b6b9dbdc7e50833.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1200/format/webp" alt="img" loading="lazy"></figure>
+<p>到这里就完成安装部署了。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/Q4Cd1QCaP/">
+              <span class="post-title">
+                Docker 安装 Redis&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">15 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/q3uH3ZKcZ/">
-            <h2 class="post-title">
-              Spring Boot 整合 apollo
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/FQJiWX7zK/">
-            <h2 class="post-title">
-              Spring Boot Admin 2.0 详解
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">24 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/2eZeFun_S/">
-            <h2 class="post-title">
-              Spring Boot 整合 elk
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/ozUSZ8tBa/">
-            <h2 class="post-title">
-              Spring Boot 整合 docker
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/5Kswfs5K9/">
-            <h2 class="post-title">
-              Spring Boot 整合 elasticsearch
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/gra6AGClN/">
-            <h2 class="post-title">
-               Spring Boot 整合 rabbitmq
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">12 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/68vxPD-UY/">
-            <h2 class="post-title">
-              Spring Boot 整合 spring cache
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/7YnmQAl3N/">
-            <h2 class="post-title">
-              Spring Boot 整合 mybatis-plus
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/BXn3b8xdV/">
-            <h2 class="post-title">
-              Spring Boot 自定义 starter
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/">&larr; 上一页</a>
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/3/">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -368,3 +246,4 @@
 
   </body>
 </html>
+
