@@ -86,6 +86,33 @@
       <div class="col-lg-8 col-md-10 mx-auto">
        
         <div class="post-preview">
+          <a href="https://blog.jwangkun.com/post/fdMXY3LCV/">
+            <h2 class="post-title">
+              使用kubeadm快速部署一个K8s集群
+            </h2>
+            </a>
+            <h3 class="post-subtitle">
+              <p>kubeadm是官方社区推出的一个用于快速部署kubernetes集群的工具。</p>
+<p>这个工具能通过两条指令完成一个kubernetes集群的部署：</p>
+<pre><code># 创建一个 Master 节点
+$ kubeadm init
+
+# 将一个 Node 节点加入到当前集群中
+$ kubeadm join &lt;Master节点的IP和端口 &gt;
+</code></pre>
+
+            </h3>
+          <p class="post-meta">
+             <span class="time">2020-10-15</span>
+             <span>,</span>
+             <span class="post-stats">5 min read</span>
+            </p>
+        </div>
+        <hr>
+        <div class="clearfix">
+        </div>
+        
+        <div class="post-preview">
           <a href="https://blog.jwangkun.com/post/qMQ3HyNA5/">
             <h2 class="post-title">
               使用kubeadm搭建高可用的K8s集群
@@ -265,26 +292,6 @@ $ kubeadm join &lt;Master节点的IP和端口 &gt;
             </a>
             <h3 class="post-subtitle">
               
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-12</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/sARQMqmyQ/">
-            <h2 class="post-title">
-              Kubernetes Secrets 密钥管理
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>Secrets是一个包含敏感数据的对象，例如我们常用的密码，令牌或密钥等, 我们编写yaml如果直接明文这些信息则会将我们的敏感信息暴漏在我们的脚本中; 所以将其放置在Secret对象中可以更好地控制它的使用方式，并降低意外暴露的风险。</p>
-
             </h3>
           <p class="post-meta">
              <span class="time">2020-10-12</span>
