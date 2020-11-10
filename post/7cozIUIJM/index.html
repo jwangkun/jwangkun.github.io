@@ -137,7 +137,7 @@ Digest: sha256:8761de2c22badfc86dfe89791dc9dbf122f67ff0f8981966573d267af421b97f
 [root@localhost ~]#
 </code></pre>
 <h1 id="运行镜像">运行镜像</h1>
-<pre><code class="language-css">docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq rabbitmq:management
+<pre><code class="language-css">docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq --restart=always        rabbitmq:management
 </code></pre>
 <p>看到如下结果，变成功了：</p>
 <pre><code class="language-css">[root@localhost ~]# docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq rabbitmq:management
