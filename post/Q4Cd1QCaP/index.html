@@ -118,7 +118,7 @@ dir  ./ # 输入本地 redis 数据库存放文件夹（可选）
 appendonly yes #redis 持久化（可选）
 </code></pre>
 <p>docker 启动 redis 命令</p>
-<pre><code>docker run -p 6379:6379 --name redis -v /usr/local/docker/redis.conf:/etc/redis/redis.conf -v /usr/local/docker/data:/data -d redis redis-server /etc/redis/redis.conf --appendonly yes --restart=always 
+<pre><code>docker run -p 6379:6379 --name redis -v /usr/local/docker/redis.conf:/etc/redis/redis.conf -v /usr/local/docker/data:/data -d redis redis-server /etc/redis/redis.conf --appendonly yes --requirepass 123456--restart=always 
 </code></pre>
 <p>命令解释说明：</p>
 <pre><code>-p 6379:6379 端口映射：前表示主机部分，：后表示容器部分。
@@ -127,6 +127,7 @@ appendonly yes #redis 持久化（可选）
 -d redis 表示后台启动 redis
 redis-server /etc/redis/redis.conf  以配置文件启动 redis，加载容器内的 conf 文件，最终找到的是挂载的目录 / usr/local/docker/redis.conf
 appendonly yes 开启 redis 持久化
+ --requirepass redis 密码
 </code></pre>
 <p>使用 docker ps 查看 redis 已经运行了</p>
 <p>使用 docker exec -it redis /bin/bash 进入 redis</p>
