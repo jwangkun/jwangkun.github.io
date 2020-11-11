@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>在Docker中安装使用MySql高可用之MGC | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="在Docker中安装使用MySql高可用之MGC | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="在Docker中安装使用MySql高可用之MGC"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/_7Byo2xUJ/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/post/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/TMUdBgST2/" class="tag">MGC</a>
+            
+            <a href="https://blog.jwangkun.com/tag/npIJD60bm/" class="tag">MySql</a>
+            
+            <a href="https://blog.jwangkun.com/tag/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>在Docker中安装使用MySql高可用之MGC</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-11，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>MariaDB Galera Cluster（下文简称 MGC 集群），是一套在 MySQL innodb 存储引擎上面实现多主、数据实时同步以及强一致性的关系存储架构，业务层面无需做读写分离工作，数据库读写压力都能按照既定的规则分发到 各个节点上去，在数据方面完全兼容 MariaDB 和 MySQL。</p>
+<p>功能特性：</p>
+<p>1、同步复制 Synchronous replication</p>
+<p>2、Active-active multi-master 拓扑逻辑</p>
+<p>3、可对集群中任一节点进行数据读写</p>
+<p>4、自动成员控制，故障节点自动从集群中移除</p>
+<p>*5、*自动节点加入</p>
+<p>6、真正并行的复制，基于行级</p>
+<p>*7、*直接客户端连接，原生的 MySQL 接口</p>
+<p>**8、**每个节点都包含完整的数据副本</p>
+<p>9、多台数据库中数据同步由 wsrep 接口实现</p>
+<p>缺点：</p>
+<p>1、目前的复制仅仅支持 InnoDB 存储引擎, 任何写入其他引擎的表，包括 mysql.* 表将不会复制, 但是 DDL 语句会被复制的, 因此创建用户将会被复制, 但是 insert into mysql.user… 将不会被复制的.</p>
+<p>2、DELETE 操作不支持没有主键的表, 没有主键的表在不同的节点顺序将不同, 如果执行 SELECT…LIMIT… 将出现不同的结果集.</p>
+<p>3、在多主环境下 LOCK/UNLOCK TABLES 不支持, 以及锁函数 GET_LOCK(), RELEASE_LOCK()…</p>
+<p>4、查询日志不能保存在表中。如果开启查询日志，只能保存到文件中。</p>
+<p>5、允许最大的事务大小由 wsrep_max_ws_rows 和 wsrep_max_ws_size 定义。任何大型操作将被拒绝。如大型的 LOAD DATA 操作。</p>
+<p>6、由于集群是乐观的并发控制，事务 commit 可能在该阶段中止。如果有两个事务向在集群中不同的节点向同一行写入并提交，失败的节点将中止。对 于集群级别的中止，集群返回死锁错误代码 (Error: 1213 SQLSTATE: 40001 (ER_LOCK_DEADLOCK)).</p>
+<p>7、XA 事务不支持，由于在提交上可能回滚。</p>
+<p>8、整个集群的写入吞吐量是由最弱的节点限制，如果有一个节点变得缓慢，那么整个集群将是缓慢的。为了稳定的高性能要求，所有的节点应使用统一的硬件。</p>
+<p>9、集群节点建议最少 3 个。</p>
+<p>10、如果 DDL 语句有问题将破坏集群。</p>
+<h2 id="1-环境规划">1、环境规划</h2>
+<p>node1：192.168.1.30:3310</p>
+<p>node2：192.168.1.30:3311</p>
+<p>node3：192.168.1.30:3312</p>
+<h2 id="2-部署环境">2、部署环境</h2>
+<p>创建目录</p>
+<pre><code>mkdir /data/mysql/mariadb/cluster0/
+mkdir /data/mysql/mariadb/cluster0/conf
+mkdir /data/mysql/mariadb/cluster0/data
+mkdir /data/mysql/mariadb/cluster1/
+mkdir /data/mysql/mariadb/cluster1/conf
+mkdir /data/mysql/mariadb/cluster1/data
+mkdir /data/mysql/mariadb/cluster2/
+mkdir /data/mysql/mariadb/cluster2/data
+mkdir /data/mysql/mariadb/cluster2/conf
+</code></pre>
+<p>编辑配置文件</p>
+<pre><code>vi /data/mysql/mariadb/cluster0/conf/server.cnfjavascript:void(0);)
+</code></pre>
+<pre><code>[server]  
+[mysqld]  
+server_id=130
+pid-file=/var/run/mysqld/mysqld.pid
+socket=/var/run/mysqld/mysqld.sock
+basedir=/usr
+datadir=/var/lib/mysql
+tmpdir=/tmp
+user=mysql
+skip-external-locking
+skip-name-resolve
+character-set-server=utf8
+port=3306
+#
+# Instead of skip-networking the default is now to listen only on
+# localhost which is more compatible and is not less secure.
+#bind-address        = 127.0.0.1
+#
+# * Fine Tuning
+#
+max_connections=1000
+connect_timeout=5
+wait_timeout=600
+max_allowed_packet=16M
+thread_cache_size=128
+sort_buffer_size=4M
+bulk_insert_buffer_size=16M
+tmp_table_size=32M
+max_heap_table_size=32M
+[galera]  
+wsrep_causal_reads=ON  #节点应用完事务才返回查询请求  
+wsrep_provider_options=&quot;gcache.size=128M&quot;#同步复制缓冲池  
+wsrep_certify_nonPK=ON   #为没有显式申明主键的表生成一个用于certificationtest的主键，默认为ON  
+#log-bin=/app/galera/mysql-bin  #如果不接从库，注释掉  
+#log_slave_updates=1         #如果不接从库，注释掉  
+query_cache_size=0           #关闭查询缓存  
+wsrep_on=ON   #开启全同步复制模式  
+wsrep_provider=/usr/lib/galera/libgalera_smm.so #galera library  
+wsrep_cluster_name=MGC-Cluster
+#wsrep_cluster_address=&quot;gcomm://192.168.1.30:4567,192.168.1.30:4568,192.168.1.30:4569&quot;  #galera cluster URL  
+wsrep_node_name=mariadb-0
+#wsrep_node_address=172.18.0.4
+wsrep_sst_auth=syncuser:syncuser
+#wsrep_sst_method=xtrabackup-v2
+wsrep_sst_method=rsync
+binlog_format=row  
+default_storage_engine=InnoDB  
+innodb_autoinc_lock_mode=2   #主键自增模式修改为交叉模式  
+wsrep_slave_threads=8  #开启并行复制线程，根据CPU核数设置  
+innodb_flush_log_at_trx_commit=0   #事务提交每隔1秒刷盘  
+innodb_buffer_pool_size=500M
+[embedded] 
+[mariadb]  
+[mariadb-10.3]
+</code></pre>
+<p>cluster0/server.cnf 配置文件 先注释掉 wsrep_cluster_address, 因为要初始化用户之后再开始集群</p>
+<p>注意: wsrep_provider_options=&quot;gcache.size=128M&quot;# 同步复制缓冲池 , 根据电脑固态硬盘容量大小设置成, 这里设置成 128M</p>
+<p>cluster1 差异部分</p>
+<pre><code>wsrep_node_name=mariadb-1
+</code></pre>
+<p>cluster2 差异部分</p>
+<pre><code>wsrep_node_name=mariadb-2
+</code></pre>
+<p>第一次启动节点</p>
+<pre><code>docker run -d --name mariadb-cluster0 --expose 4567 -p 4567:4567 -p 3310:3306 -e TIMEZONE=Asia/Shanghai -v /data/mysql/mariadb/cluster0/conf:/etc/mysql/conf.d -v /data/mysql/mariadb/cluster0/data:/var/lib/mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=yse mariadb:10.3
+docker run -d --name mariadb-cluster1 --expose 4567 -p 4568:4567 -p 3311:3306 -e TIMEZONE=Asia/Shanghai -v /data/mysql/mariadb/cluster1/conf:/etc/mysql/conf.d -v /data/mysql/mariadb/cluster1/data:/var/lib/mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=yse mariadb:10.3
+docker run -d --name mariadb-cluster2 --expose 4567 -p 4569:4567 -p 3312:3306 -e TIMEZONE=Asia/Shanghai -v /data/mysql/mariadb/cluster2/conf:/etc/mysql/conf.d -v /data/mysql/mariadb/cluster2/data:/var/lib/mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=yse mariadb:10.3
+</code></pre>
+<p>分别在三个容器中添加 mysql 账户 注: 生产环境注意安全，我是在测试环境为了方便</p>
+<pre><code>mysql -uroot -p
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '123456' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'syncuser'@'%' IDENTIFIED BY 'syncuser' WITH GRANT OPTION;
+flush privileges;
+shutdown;
+</code></pre>
+<p>先停止然后删除 3 个容器</p>
+<p>然后分别解开 wsrep_cluster_address 注释, 再次启动 3 个节点 --wsrep-new-cluster 只有在第一次集群, 第一个节点, 才需要加上, 下次启动不需要此参数</p>
+<pre><code>docker run -d --name mariadb-cluster0 --expose 4567 -p 4567:4567 -p 3310:3306 -e TZ=Asia/Shanghai -v /data/mysql/mariadb/cluster0/conf:/etc/mysql/conf.d -v /data/mysql/mariadb/cluster0/data:/var/lib/mysql mariadb:10.3 --wsrep-new-cluster
+docker run -d --name mariadb-cluster1 --expose 4567 -p 4568:4567 -p 3311:3306 -e TZ=Asia/Shanghai -v /data/mysql/mariadb/cluster1/conf:/etc/mysql/conf.d -v /data/mysql/mariadb/cluster1/data:/var/lib/mysql mariadb:10.3
+docker run -d --name mariadb-cluster2 --expose 4567 -p 4569:4567 -p 3312:3306 -e TZ=Asia/Shanghai -v /data/mysql/mariadb/cluster2/conf:/etc/mysql/conf.d -v /data/mysql/mariadb/cluster2/data:/var/lib/mysql mariadb:10.3
+</code></pre>
+<p>注意启动顺序</p>
+<p>查看是否成功</p>
+<pre><code>SHOW STATUS LIKE 'wsrep_cluster_size';
+</code></pre>
+<h2 id="三-遇到问题">三、遇到问题</h2>
+<p><strong>1、WSREP: failed to open gcomm backend connection: 131: invalid UUID</strong></p>
+<p>进入该数据库节点 / var/lib/mysql / 目录，将文件 gvwstate.dat 移除 (mv) 掉。然后重新启动 mairbd 即可</p>
+<p><strong>2、bind: Address already in use</strong></p>
+<p>查看 mysql 进程：ps -ef | grep mysql，然后杀死该进程，在启动 mariadb</p>
+<p><strong>3、It may not be safe to bootstrap the cluster from this node</strong></p>
+<p>数据库集群宕机，在运行 / bin/galera_new_cluster 启动第一个节点时报错，意思是该节点不是最后一个停掉的，不能安全启动；<br>
+　　　　然后可以尝试在其他节点运行该命令；<br>
+　　　　如果报错都相同，则需要从 3 个节点中选取一个主节点，修改 / var/lib/mysql/grastate.dat，把其中 safe_to_bootstrap 的值改为 1 即可。然后运行 / bin/galera_new_cluster。其他节点依次启动</p>
+<p><strong>4、[ERROR] WSREP: failed to open gcomm backend connection: 110</strong></p>
+<p>现象：集群三个节点无法启动，日志有如上报错，gvwstate.dat 不存在，三个 grastate.dat 中 seqno 值都为 - 1，并且其内无 safe_to_bootstrap 参数。</p>
+<p>原因：</p>
+<p>1、数据库如果正常关闭的话，gvwstate.dat 文件是不存在的，如果三个节点同时关闭（无数据变化）seqno 值应该是相等的，且不为 - 1。</p>
+<p>2、如果这个时候无论先后顺利启动节点，都会导致所有节点都在不断重启中，并且 seqno 值由原来的值变为 - 1。</p>
+<p>3、此时无法选举出来哪个作为主启动节点，需要再第一个节点启动时手动指定该节点作为集群主节点启动。</p>
+<p>解决办法:</p>
+<p>选定主节点启动时加 --wsrep-new-cluster 参数启动</p>
+<p>正常启动后的节点重新生成 gvwstate.dat 文件</p>
+<p><strong>5、MySQL Unknown/unsupported storage engine: INNODB</strong></p>
+<p>1. 删除 data 目录下文件</p>
+<p>ib_logfile0 , ib_logfile1 , ibdata1</p>
+<p>2. 重新启动服务</p>
+<p><strong>6、[ERROR] mysqld: Table './mysql/user' is marked as crashed and should be repaired</strong></p>
+<p>修复过程：</p>
+<p>表 user 被标记有问题，需要修复</p>
+<p>./myisamchk -c -r /var/lib/mysql/mysql/user.MYI</p>
+<p>出现可以参考这些错误，但根据实际情况来，版本不一样情况可能会有变化。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/C06HSoD2p/">
+              <span class="post-title">
+                在Docker中安装使用MySql部署PXC高可用（多主同时写入）&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://blog.jwangkun.com/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+
