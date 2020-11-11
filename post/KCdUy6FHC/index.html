@@ -184,6 +184,11 @@ fi
 </code></pre>
 <p><strong>4.2 ntpd 服务</strong></p>
 <p>使用 ntpd 服务，要好于 ntpdate 加 cron 的组合。因为，ntpdate 同步时间会造成时间的突变和跳跃，对一些依赖时间的程序和服务会造成影响。比如 sleep，timer 等。而且 ntpd 服务可以在修正时间的同时，修正 CPU Tick。因此理想的做法为，在开机的时候，使用 ntpdate 强制同步时间，在其他时候使用 ntpd 服务来同步时间。</p>
+<p>安装ntpd 服务</p>
+<pre><code>yum install -y ntp
+systemctl enable ntpd
+systemctl start ntpd
+</code></pre>
 <p>要注意的是，ntpd 有一个自我保护的机制：如果本机与上源时间相差太大，ntpd 不会运行时间同步操作，所以新设置的时间服务器一定要先 ntpdate 从上源取得时间初值, 然后启动 ntpd 服务。ntpd 服务运行后，先是每 64 秒与上源 NTP 服务器同步一次，根据每次同步时测得的误差值经复杂计算逐步调整自己的时间，随着误差减小，逐步增加同步的间隔。每次跳动，都会重复这个调整的过程。</p>
 <p><strong>4.3. ntpd 服务的设置</strong></p>
 <p>ntpd 服务的相关设置文件如下：</p>
