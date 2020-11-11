@@ -88,7 +88,7 @@
             <h1>Linux 系统时间同步方法小结</h1>
             <span class="meta">
             	Posted on
-              2020-11-11，14 min read
+              2020-11-11，15 min read
             </span>
           </div>
         </div>
@@ -185,11 +185,29 @@ fi
 <p><strong>4.2 ntpd 服务</strong></p>
 <p>使用 ntpd 服务，要好于 ntpdate 加 cron 的组合。因为，ntpdate 同步时间会造成时间的突变和跳跃，对一些依赖时间的程序和服务会造成影响。比如 sleep，timer 等。而且 ntpd 服务可以在修正时间的同时，修正 CPU Tick。因此理想的做法为，在开机的时候，使用 ntpdate 强制同步时间，在其他时候使用 ntpd 服务来同步时间。</p>
 <p>安装ntpd 服务</p>
-<pre><code>yum install -y ntp
-systemctl enable ntpd
-systemctl start ntpd
+<pre><code>yum install ntp -y                          # 安装 NTP 服务
+# 获取当前系统的时区，如果时区为 (Shanghai) 则打印，如果不是则利用 || 符号
+# 如果执行失败，则执行 || 后面的命令
+timedatectl | grep 'Shanghai' || timedatectl set-timezone Asia/Shanghai  # 将当前主机的时区设为 亚洲/上海
+systemctl enable ntpd.service               # 开机自启动
+systemctl restart ntpd.service              # 启动 NTP 服务守护程序
+firewall-cmd --add-service=ntp
+firewall-cmd --add-service=ntp --permanent  # 在防火墙上开放 NTP 服务
 </code></pre>
 <p>要注意的是，ntpd 有一个自我保护的机制：如果本机与上源时间相差太大，ntpd 不会运行时间同步操作，所以新设置的时间服务器一定要先 ntpdate 从上源取得时间初值, 然后启动 ntpd 服务。ntpd 服务运行后，先是每 64 秒与上源 NTP 服务器同步一次，根据每次同步时测得的误差值经复杂计算逐步调整自己的时间，随着误差减小，逐步增加同步的间隔。每次跳动，都会重复这个调整的过程。</p>
+<p>和内网NTP服务器去同步 此时只需安装utpdate软件</p>
+<pre><code>yum -y install ntpdate
+</code></pre>
+<p>但需添加计划任务  让服务器周期性去同内网NTP同步</p>
+<pre><code> vi  /var/spool/cron/root（或crontab -e）
+</code></pre>
+<p>在每天的0点10分、8点10分、16点10分与时间同步服务器进行同步并写入BIOS</p>
+<pre><code>10 0,8,16 * * *  /usr/sbin/ntpdate 10.3.5.5; /sbin/hwclock -w
+</code></pre>
+<p>如果同步不正常，可以加输出日志1.txt或看系统日志者看/var/mail/root系统邮件</p>
+<pre><code>0 */8  * * *  /usr/sbin/ntpdate 10.3.5.5 &gt;&gt;/tmp/1.txt; /sbin/hwclock -w
+</code></pre>
+<p>也可以编辑cat /etc/sysconfig/ntpdate 中的SYNC_HWCLOCK=yes 自动同步到硬件时间</p>
 <p><strong>4.3. ntpd 服务的设置</strong></p>
 <p>ntpd 服务的相关设置文件如下：</p>
 <p>（1）/etc/ntp.conf：这个是 NTP daemon 的主要设文件，也是 NTP 唯一的设定文件。</p>
@@ -198,59 +216,33 @@ systemctl start ntpd
 <p>（4）/etc /localtime：这个文件就是 &quot;本地端的时间配置文件&quot;。刚刚那个 clock 文件里面规定了使用的时间设置文件 (ZONE) 为 /usr/share/zoneinfo/Asia/Shanghai ，所以说，这就是本地端的时间了，此时， Linux 系统就会将 Shanghai 那个文件另存为一份 /etc/localtime 文件，所以未来我们的时间显示就会以 Beijing 那个时间设定文件为准。</p>
 <p>下面重点介绍 /etc/ntp.conf 文件的设置。在 NTP Server 的设定上，建议不要对 Internet 无限制的开放，尽量仅提供局域网内部的 Client 端联机进行网络校时。此外，NTP Server 总也是需要网络上面较为准确的主机来自行更新自己的时间啊，所以在我们的 NTP Server 上面也要找一部最靠近自己的 Time Server 来进行自我校正。事实上， NTP 这个服务也是 Server/Client 的一种模式。</p>
 <pre><code>[root@linux ~]# vi /etc/ntp.conf 
-# 1. 关于权限设定部分 
-#　　权限的设定主要以 restrict 这个参数来设定，主要的语法为： 
-# 　　restrict IP mask netmask_IP parameter 
-# 　　其中 IP 可以是软件地址，也可以是 default ，default 就类似 0.0.0.0 
-#　　至于 paramter 则有： 
-#　　　ignore　：关闭所有的 NTP 联机服务 
-#　　　nomodify：表示 Client 端不能更改 Server 端的时间参数，不过Client 端仍然可以透过 Server 端来进行网络校时。
-
-#　　　notrust ：该 Client 除非通过认证，否则该 Client 来源将被视为不信任网域 
-#　　　noquery ：不提供 Client 端的时间查询
-
-#　　　notrap ：不提供trap这个远程事件登入
-
-#　　如果 paramter 完全没有设定，那就表示该 IP (或网域)&quot;没有任何限制&quot;
-
-restrict default nomodify notrap noquery　# 关闭所有的 NTP 要求封包
-
-restrict 127.0.0.1　　　 #这是允许本机查询
-
-restrict 192.168.0.1 mask 255.255.255.0 nomodify
-
-#在192.168.0.1/24网段内的服务器就可以通过这台NTP Server进行时间同步了 
-# 2. 上层主机的设定 
-#　　要设定上层主机主要以 server 这个参数来设定，语法为：
-#　　server [IP|HOST Name] [prefer]
-#　　Server 后面接的就是上层 Time Server，而如果 Server 参数
-
-# 后面加上 perfer 的话，那表示我们的 NTP 主机主要以该部主机来
-
-# 作为时间校正的对应。另外，为了解决更新时间封包的传送延迟动作，
-
-#　　所以可以使用 driftfile 来规定我们的主机 
-#　　在与 Time Server 沟通时所花费的时间，可以记录在 driftfile  
-#　　后面接的文件内，例如下面的范例中，我们的 NTP server 与  
-#　　cn.pool.ntp.org联机时所花费的时间会记录在 /etc/ntp/drift文件内 
-server 0.pool.ntp.org
-
-server 1.pool.ntp.org
-
-server 2.pool.ntp.org
-
-server cn.pool.ntp.org prefer
-
-#其他设置值，以系统默认值即可
-
-server  127.127.1.0     # local clock
-
-fudge   127.127.1.0 stratum 10
-
-driftfile /var/lib/ntp/drift
-broadcastdelay  0.008
-
+# Permit all access over the loopback interface.
+# This could be tightened as well, but to do so would effect some of the administrative functions.
+restrict 127.0.0.1
+restrict ::1
+restrict 172.16.18.0 mask 255.255.255.0  default nomodify notrap
+restrict 192.168.168.0 mask 255.255.255.0  default nomodify notrap
+restrict 192.168.57.0 mask 255.255.255.0  default nomodify notrap # 允许目标子网同步时间请求，具有默认，不能修改，不能陷阱 等权限
+ 
+# Hosts on local network are less restricted.
+#restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
+ 
+# Use public servers from the pool.ntp.org project.
+server 127.127.1.0 prefer           # 设置NTP服务器使用 127.127.1.0 主板BIOS上的时钟为时间源，并且使用 prefer(优先)权限
+server 0.centos.pool.ntp.org iburst
+server 1.cn.pool.ntp.org iburst     # 使用公网上的 NTP 服务器作为时间源服务器
+server 192.168.168.100 iburst       # 使用内网上的 NTP 服务器作为时间源服务器
+ 
+# Enable public key cryptography. crypto
+includefile /etc/ntp/crypto/pw
+ 
+# Key file containing the keys and key identifiers used when operating with symmetric key cryptography.
 keys /etc/ntp/keys
+ 
+disable monitor
+</code></pre>
+<pre><code>systemctl restart ntpd.service              # 重启 NTP 服务守护程序
+timedatectl set-local-rtc false
 </code></pre>
 <p>总结一下，restrict 用来设置访问权限，server 用来设置上层时间服务器，driftfile 用来设置保存漂移时间的文件。</p>
 <p><strong>4.4 ntpd 服务的启动与查询</strong></p>
@@ -259,10 +251,7 @@ keys /etc/ntp/keys
 25 Feb 21:10:52 ntpdate[9549]: adjust time server 202.112.31.197 offset 0.000101 sec
 </code></pre>
 <p>然后，启动 ntpd 服务：</p>
-<pre><code>[root@node1 ~]# /etc/init.d/ntpd start
-Starting ntpd: [ OK ]
-[root@node1 ~]# date
-Tue Feb 25 21:11:07 CST 2014
+<pre><code>systemctl start ntpd
 </code></pre>
 <p>查看端口（ntpd 服务使用 UDP 的 123 端口）：</p>
 <pre><code>[root@node1 ~]# netstat -ln |grep :123
