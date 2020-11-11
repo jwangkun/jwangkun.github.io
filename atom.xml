@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-11-11T03:42:32.577Z</updated>
+    <updated>2020-11-11T03:49:12.983Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -39,7 +39,7 @@
         <updated>2020-11-11T03:25:37.000Z</updated>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Mysql慢查询]]></title>
+        <title type="html"><![CDATA[MySql慢查询]]></title>
         <id>https://blog.jwangkun.com/post/9QRKkt5vh/</id>
         <link href="https://blog.jwangkun.com/post/9QRKkt5vh/">
         </link>
@@ -60,14 +60,14 @@
         <updated>2020-11-11T02:28:37.000Z</updated>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Keeplive搭建Mysql 主主从集群环境]]></title>
+        <title type="html"><![CDATA[Keepalived搭建MySql 主主从集群环境]]></title>
         <id>https://blog.jwangkun.com/post/VqNvY1txA/</id>
         <link href="https://blog.jwangkun.com/post/VqNvY1txA/">
         </link>
         <updated>2020-11-11T01:54:01.000Z</updated>
     </entry>
     <entry>
-        <title type="html"><![CDATA[Mysql 集群环境搭建]]></title>
+        <title type="html"><![CDATA[MySql 集群环境搭建]]></title>
         <id>https://blog.jwangkun.com/post/aXLFZey34/</id>
         <link href="https://blog.jwangkun.com/post/aXLFZey34/">
         </link>
