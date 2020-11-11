@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta content="yes" name="apple-mobile-web-app-capable" />
   <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>Angular 环境搭建 | John Wong&#39;s Blog</title>
+  <title>Angular | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="Angular 环境搭建 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Angular | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,11 +25,6 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
-    <meta property="og:description" content="Angular 环境搭建"/>
-    <meta property="og:url" content="https://blog.jwangkun.com/post/angular-huan-jing-da-jian/"/>
-    <meta property="og:locale" content="zh-CN"/>
-    <meta property="og:type" content="website"/>
-    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
   	<!-- Navigation -->
@@ -71,84 +66,51 @@
       </div>
     </div>
   </nav>
-  <!-- Page Header -->
+<!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="post-heading">
-          	<span class="tags">
-          	 
-            <a href="https://blog.jwangkun.com/tag/OvZjkTZfc/" class="tag">Angular</a>
-            
-            <a href="https://blog.jwangkun.com/tag/1d9yyKXap/" class="tag">前端</a>
-            
-        </span>
-            <h1>Angular 环境搭建</h1>
-            <span class="meta">
-            	Posted on
-              2020-07-30，2 min read
-            </span>
+            <h1 class="tag-tl">#Angular</h1>
           </div>
         </div>
       </div>
     </div>
   </header>
-
-  <!-- Post Content -->
-  <article>
     <div class="container">
-      <div class="row">
-        <div class="col-lg-8 col-md-10 mx-auto">
-          <p>适用于Angular4.x、Angular5.x、Angular6.x、Angular7.x、Angular8.x、Angular9.x、Angular10.x，截止目前Angular最新版本</p>
-<figure data-type="image" tabindex="1"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-091916-0806.png" alt="20200730-091916-0806.png" loading="lazy"></figure>
-<!-- more -->
-<p>安装前需要先安装 node.js</p>
-<p>下载 node.js 链接地址：http://nodejs.cn/download/</p>
-<p>下载完，安装即可</p>
-<p>检测是否安装成功，可以从终端输入</p>
-<pre><code> node -v 和 npm -v 
-</code></pre>
-<p>查看版本信息；</p>
-<figure data-type="image" tabindex="2"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-090325-0805.png" alt="20200730-090325-0805.png" loading="lazy"></figure>
-<p>其次，已安装 node.js 后便可以继续安装 angular cli 脚手架，具体命令行如下所示：</p>
-<p>1）全局安装 typescript 终端输入如下命令行：</p>
-<pre><code>npm install -g typescript
-</code></pre>
-<p>2）全局安装 angular cli 终端输入如下命令行：</p>
-<pre><code>npm install -g @angular/cli
-
-</code></pre>
-<p>3）校验，等待片刻待安装后，终端输入如下命令可进行验证：</p>
-<pre><code>ng version
-</code></pre>
-<p>此时若终端成功显示版本信息内容即安装成功，如下图所示：</p>
-<figure data-type="image" tabindex="3"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-094427-0806.png" alt="20200730-094427-0806.png" loading="lazy"></figure>
-<p>安装完Angular后，便可以创建项目，在终端 cd 到指定预创建文件夹的目录层级下后，执行命令：</p>
-<pre><code>ng new angularProject 
-</code></pre>
-<p>执行完成如上命令行后，终端会创建一个名为Angularproject的项目，其中需要等待片刻；</p>
-<p>注：其中首次终端可能会提示两个指令问题，第一个回复&quot;y&quot;，第二个箭头选择第一项 CSS 回车即可；</p>
-<p>最后，当项目创建完成后，终端 cd 到刚创建项目的目录层级下执行如下命令启动服务验证，若能成功访问终端内显示的地址即大功告成。</p>
-<pre><code>ng serve
-</code></pre>
-
-          
-          <p class="next-post">下一篇：
-            <a href="https://blog.jwangkun.com/post/kai-yuan-kua-ping-tai-ruan-jian/">
-              <span class="post-title">
-                开源跨平台软件&rarr;
-              </span>
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+       
+        <div class="post-preview">
+          <a href="https://blog.jwangkun.com/post/angular-huan-jing-da-jian/">
+            <h2 class="post-title">
+              Angular 环境搭建
+            </h2>
             </a>
-          </p>
-        
-        <div class="comment">
-          
+            <h3 class="post-subtitle">
+              <p>适用于Angular4.x、Angular5.x、Angular6.x、Angular7.x、Angular8.x、Angular9.x、Angular10.x，截止目前Angular最新版本</p>
+<figure data-type="image" tabindex="1"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-091916-0806.png" alt="20200730-091916-0806.png" loading="lazy"></figure>
+
+            </h3>
+          <p class="post-meta">
+             <span class="time">2020-07-30</span>
+             <span>,</span>
+             <span class="post-stats">2 min read</span>
+            </p>
         </div>
+        <hr>
+        <div class="clearfix">
+        </div>
+        
+        
+        
       </div>
     </div>
-  </article>
+  </div>
+
+  
  <!-- Footer -->
   <footer>
     <div class="container">
@@ -231,4 +193,3 @@
 
   </body>
 </html>
-
