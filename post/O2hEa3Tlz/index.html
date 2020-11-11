@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>Centos7.4 安装MySql教程 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Centos7.4 安装MySql教程 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="Centos7.4 安装MySql教程"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/O2hEa3Tlz/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,228 +71,101 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/npIJD60bm/" class="tag">MySql</a>
+            
+            <a href="https://blog.jwangkun.com/tag/l-lwQxp4GJ/" class="tag">Centos</a>
+            
+        </span>
+            <h1>Centos7.4 安装MySql教程</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-11，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/BXn3b8xdV/">
-            <h2 class="post-title">
-              SpringBoot 自定义 starter
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="1先检查系统是否装有mysql">1.先检查系统是否装有mysql</h3>
+<pre><code>rpm -qa | grep mysql
+</code></pre>
+<h3 id="2下载mysql的repo源">2.下载mysql的repo源</h3>
+<pre><code>wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm
+</code></pre>
+<p>如果报错: -bash: wget: 未找到命令</p>
+<p>安装插件</p>
+<p><code>yum -y install wget</code></p>
+<h3 id="3安装-mysql-community-release-el7-5noarchrpm包">3.安装 mysql-community-release-el7-5.noarch.rpm包</h3>
+<pre><code>sudo rpm -ivh mysql-community-release-el7-5.noarch.rpm
+</code></pre>
+<h3 id="4安装mysql"><strong>4.安装MySQL</strong></h3>
+<pre><code>sudo yum install mysql-server
+</code></pre>
+<h3 id="5重置mysql密码">5.重置<strong>MySQL</strong>密码</h3>
+<pre><code>mysql -u root
+</code></pre>
+<p>如果报错：</p>
+<p>ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/lib/mysql/mysql.sock' (2)</p>
+<p>原因：原因是/var/lib/mysql的访问权限问题。</p>
+<pre><code>chown root /var/lib/mysql/
+</code></pre>
+<p>重启MySQL服务</p>
+<pre><code>service mysqld restart
+</code></pre>
+<p>接着登陆设置密码</p>
+<pre><code>mysql -u root**
+use mysql;
+update user set password=password('123456') where user='root';
+exit;
+</code></pre>
+<h3 id="6重启mysql服务">6.重启MySQL服务</h3>
+<pre><code>service mysqld restart
+</code></pre>
+<p>接着设置Root账户远程连接密码，账户和密码都是 root</p>
+<pre><code> mysql -u root -p
+</code></pre>
+<pre><code>GRANT ALL PRIVILEGES ON \*.\* TO root@&quot;%&quot; IDENTIFIED BY &quot;root&quot;
+</code></pre>
+<p>重启服务器</p>
+<pre><code>service mysqld restart
+</code></pre>
+<h3 id="7使用外网工具连接mysql">7.使用外网工具连接MySQL</h3>
+<p><strong>连接mysql的用户名和密码都是 root</strong></p>
+<p>关闭防火墙</p>
+<pre><code>systemctl stop firewalld.service
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/Pw8vFa6Zm/">
+              <span class="post-title">
+                SpringBoot实现邮件发送功能&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/_C0uB9Jcs/">
-            <h2 class="post-title">
-               SpringBoot 日志
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">11 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/sY0ka1Vfs/">
-            <h2 class="post-title">
-              SpringBoot Profile多环境配置
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">1 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/duZ4RFDl-/">
-            <h2 class="post-title">
-               SpringBoot 配置文件详解
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/Mcc2pXo1i/">
-            <h2 class="post-title">
-              构建一个SpringBoot工程
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/FVtYeBnI5/">
-            <h2 class="post-title">
-              使用 Docker 搭建 ELK 环境
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">16 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/dtfeDBuT2/">
-            <h2 class="post-title">
-              搭建企业级ELK日志收集系统
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">24 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/ldWvjNELN/">
-            <h2 class="post-title">
-              HDFS完全分布式集群搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/fja0PWFwF/">
-            <h2 class="post-title">
-              elasticsearch集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/bvYFbY7Mb/">
-            <h2 class="post-title">
-              RabbitMQ集群搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/page/4/">&larr; 上一页</a>
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/6/">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -368,3 +247,4 @@
 
   </body>
 </html>
+
