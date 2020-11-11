@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-11-11T01:18:40.541Z</updated>
+    <updated>2020-11-11T01:56:55.317Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[Keeplive搭建Mysql 主主从集群环境]]></title>
+        <id>https://blog.jwangkun.com/post/VqNvY1txA/</id>
+        <link href="https://blog.jwangkun.com/post/VqNvY1txA/">
+        </link>
+        <updated>2020-11-11T01:54:01.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Mysql 集群环境搭建]]></title>
         <id>https://blog.jwangkun.com/post/aXLFZey34/</id>
@@ -72,12 +79,5 @@
         <link href="https://blog.jwangkun.com/post/SsY627xmA/">
         </link>
         <updated>2020-11-10T15:18:04.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[SpringBoot  整合Kafka]]></title>
-        <id>https://blog.jwangkun.com/post/CQYgRrC-u/</id>
-        <link href="https://blog.jwangkun.com/post/CQYgRrC-u/">
-        </link>
-        <updated>2020-11-10T15:15:16.000Z</updated>
     </entry>
 </feed>

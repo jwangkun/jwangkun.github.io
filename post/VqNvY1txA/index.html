@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Keeplive搭建Mysql 主主从集群环境 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Keeplive搭建Mysql 主主从集群环境 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Keeplive搭建Mysql 主主从集群环境"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/VqNvY1txA/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/post/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/Gd-RHcRNC/" class="tag">Keeplive</a>
+            
+            <a href="https://blog.jwangkun.com/tag/ssC-m-xMOC/" class="tag">主主从</a>
+            
+            <a href="https://blog.jwangkun.com/tag/NppnTVzsJ/" class="tag">Mysql</a>
+            
+        </span>
+            <h1>Keeplive搭建Mysql 主主从集群环境</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-11，14 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h1 id="一-准备新服务器做从节点">一． 准备新服务器做从节点</h1>
+<p>新的从节点IP是10.213.103.179，部署两主10.213.103.143、10.213.103.144，一从10.213.103.179。</p>
+<h1 id="二-新服务器上安装mysql">二． 新服务器上安装MySQL</h1>
+<p>10.213.103.179执行</p>
+<p>1、卸载mariadb</p>
+<pre><code>[root@VM_0_4_centos ~]# rpm -qa | grep mariadb
+mariadb-libs-5.5.52-1.el7.x86_64
+[root@VM_0_4_centos ~]# rpm -e mariadb-libs --nodeps
+warning: /etc/my.cnf saved as /etc/my.cnf.rpmsave
+[root@VM_0_4_centos ~]# rpm -qa | grep mariadb
+</code></pre>
+<p>2、下载MySQL安装包</p>
+<pre><code>[root@VM_0_4_centos ~]# cd /usr/local
+[root@VM_0_4_centos local]# wget https://mirrors.huaweicloud.com/mysql/Downloads/MySQL-8.0/mysql-8.0.17-linux-glibc2.12-x86_64.tar.xz 
+[root@VM_0_4_centos local]# tar xvJf mysql-8.0.17-linux-glibc2.12-x86_64.tar.xz
+[root@VM_0_4_centos local]# mv mysql-8.0.17-linux-glibc2.12-x86_64/ mysql80/
+[root@VM_0_4_centos local]# mv mysql80/ /usr/local/
+</code></pre>
+<p>3、配置文件</p>
+<pre><code>[root@VM_0_4_centos mysql80]# touch /etc/my.cnf
+</code></pre>
+<p>修改/etc/my.cnf内容</p>
+<pre><code>[mysqld]
+
+user=mysql
+server_id=3
+port=3306
+mysqlx_port=33060
+mysqlx_socket=/home/mysql80/sock/mysqlx.sock #放到大磁盘里，下同
+basedir=/usr/local/mysql80
+datadir=/home/mysql80/data
+socket=/home/mysql80/sock/mysql.sock
+pid-file=/home/mysql80/pid/mysqld.pid
+log-error=/home/mysql80/logs/error.log
+# slow-query-log=0
+# slow-query-log-file=/home/mysql80/logs/slow.log
+# long_query_time=2
+# log_output=TABLE
+
+log-bin=/home/mysql80/logs/bin.log
+relay-log=/home/mysql80/logs/relay.log
+binlog_format=ROW
+relay_log_recovery=1
+character-set-client-handshake=FALSE
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+init_connect ='SET NAMES utf8mb4'
+default-time-zone='+8:00'
+innodb_buffer_pool_size=1G
+join_buffer_size=128M
+sort_buffer_size=2M
+read_rnd_buffer_size=2M
+log_timestamps = SYSTEM
+lower_case_table_names = 1
+explicit_defaults_for_timestamp = OFF
+default-authentication-plugin=mysql_native_password
+sql_mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
+max_connections=1000
+#skip-grant-tables
+auto_increment_offset = 1
+auto_increment_increment = 2
+log-slave-updates = true #多主多从时保证数据一致
+max_binlog_size=5120M #binlog文件最大容量
+replicate-ignore-db = mysql #忽略mysql库同步，下同
+replicate-ignore-db = information_schema
+replicate-ignore-db = performance_schema
+replicate-ignore-db = sys
+replicate-ignore-table = pmsdb.bs_syrmx_his #忽略pmsdb.bs_syrmx_his表同步，下同
+replicate-ignore-table = pmsdb.bs_syrmx_text
+[mysql]
+socket=/home/mysql80/sock/mysql.sock
+[client]
+socket=/home/mysql80/sock/mysql.sock
+</code></pre>
+<p>4、创建用户及目录</p>
+<pre><code>[root@VM_0_4_centos data]# useradd mysql
+[root@VM_0_4_centos data]# mkdir -p /home/mysql80/data
+[root@VM_0_4_centos data]# mkdir -p /home/mysql80/logs
+[root@VM_0_4_centos data]# mkdir -p /home/mysql80/pid
+[root@VM_0_4_centos data]# mkdir -p /home/mysql80/sock
+
+chown -R mysql:mysql /home/mysql80
+</code></pre>
+<p>5、初始化</p>
+<pre><code>[root@VM_0_4_centos bin]# cd /usr/local/mysql80/bin
+[root@VM_0_4_centos bin]# ./mysqld  --initialize
+[root@VM_0_4_centos bin]# cd ../support-files
+[root@VM_0_4_centos support-files]# ./mysql.server start
+</code></pre>
+<p>Starting MySQL.. SUCCESS!</p>
+<p>6、注册服务</p>
+<pre><code>[root@VM_0_4_centos mysql80]# cp  /usr/local/mysql80/support-files/mysql.server /etc/init.d/mysqld
+[root@VM_0_4_centos mysql80]# service mysqld status
+</code></pre>
+<p>SUCCESS! MySQL running (26360)</p>
+<p>7、配置环境变量</p>
+<pre><code>MYSQL_HOME=/usr/local/mysql80
+PATH=$PATH:$HOME/bin:$MYSQL_HOME/bin
+</code></pre>
+<p>8、改密</p>
+<p>查看初始密码</p>
+<pre><code>grep &quot;temporary password&quot; /home/mysql80/logs/error.log
+</code></pre>
+<p>2020-04-29T19:46:58.392030+08:00 5 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: 0QFs0!mhlYua</p>
+<p>以上面查到的密码登录mysql修改root密码</p>
+<pre><code>mysql&gt; ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+</code></pre>
+<p>Query OK, 0 rows affected (0.01 sec)</p>
+<p>设置远程访问</p>
+<pre><code>mysql&gt; CREATE USER 'root'@'%' IDENTIFIED BY '123456';
+</code></pre>
+<p>Query OK, 0 rows affected (0.01 sec)</p>
+<pre><code>mysql&gt; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'  WITH GRANT OPTION;
+</code></pre>
+<p>Query OK, 0 rows affected (0.01 sec)</p>
+<pre><code>mysql&gt; flush privileges;
+</code></pre>
+<p>Query OK, 0 rows affected (0.01 sec)</p>
+<p>9、开放端口</p>
+<pre><code>firewall-cmd --zone=public --add-port=3306/tcp --permanent
+
+firewall-cmd --reload
+</code></pre>
+<p>10、开机启动</p>
+<pre><code>[root@VM_0_4_centos mysql80]# cp /usr/local/mysql80/support-files/mysql.server /etc/rc.d/init.d/mysqld
+[root@VM_0_4_centos mysql80]# chmod u+x /etc/init.d/mysqld
+[root@dhcjrbdb init.d]# chkconfig --add mysqld
+[root@dhcjrbdb init.d]# chkconfig --list
+</code></pre>
+<pre><code>Note: This output shows SysV services only and does not include native
+
+​    systemd services. SysV configuration data might be overridden by native
+
+​    systemd configuration.
+
+ 
+
+​    If you want to list systemd services use 'systemctl list-unit-files'.
+
+​    To see services enabled on particular target use
+
+​    'systemctl list-dependencies [target]'.
+
+ 
+
+db2autostart      0:off     1:off     2:on     3:on     4:on     5:on     6:off
+
+mysqld         0:off     1:off     2:on     3:on     4:on     5:on     6:off
+
+netconsole       0:off     1:off     2:off     3:off     4:off     5:off     6:off
+
+network         0:off     1:off     2:on     3:on     4:on     5:on     6:off
+</code></pre>
+<p>看到3、4、5状态为开或者为 on 则表示成功。如果是 关或者 off 则执行一下：chkconfig --level 345 mysqld on</p>
+<p>重启计算机:reboot</p>
+<h1 id="三-mysql配置调整">三． MySQL配置调整</h1>
+<p>10.213.103.143/144的/etc/my.cnf里面[mysqld]下新增下面配置</p>
+<pre><code>log-slave-updates = true #多主多从时保证数据一致
+
+max_binlog_size=5120M #binlog文件最大容量
+
+replicate-ignore-db = mysql #忽略mysql库同步，下同
+
+replicate-ignore-db = information_schema
+
+replicate-ignore-db = performance_schema
+
+replicate-ignore-db = sys
+
+replicate-ignore-table = pmsdb.bs_syrmx_his #忽略pmsdb.bs_syrmx_his表同步，下同
+
+replicate-ignore-table = pmsdb.bs_syrmx_text
+</code></pre>
+<p>各节点并登录mysql，执行stop slave停止主从复制。然后执行service mysqld restart重启数据库。</p>
+<h1 id="四-数据准备">四． 数据准备</h1>
+<p>1． 应用停止</p>
+<p>2． 备份10.213.103.143上数据</p>
+<pre><code>/opt/mysql80/bin/mysqldump -upmsdba -ppmsadmin -h 127.0.0.1 -R --opt pmsdb | gzip &gt; pmsdb20200702.143.sql.gz
+
+/opt/mysql80/bin/mysqldump -uworkflow -pworkflow -h 127.0.0.1 -R --opt workflow | gzip &gt; workflow20200702.143.sql.gz
+</code></pre>
+<p>3． 备份10.213.103.144上数据</p>
+<pre><code>/opt/mysql80/bin/mysqldump -upmsdba -ppmsadmin -h 127.0.0.1 -R --opt pmsdb | gzip &gt; pmsdb20200702.144.sql.gz
+
+/opt/mysql80/bin/mysqldump -uworkflow -pworkflow -h 127.0.0.1 -R --opt workflow | gzip &gt; workflow20200702.144.sql.gz
+</code></pre>
+<p>将pmsdb20200702.144.sql.gz、workflow20200702.144.sql.gz传至10.213.103.143、10.213.103.179的/home/hngc下并解压</p>
+<pre><code>scp pmsdb20200702.144.sql.gz root@10.213.103.143:/home/hngc
+
+scp workflow20200702.144.sql.gz root@10.213.103.179:/home/hngc
+
+gzip –d pmsdb20200702.144.sql.gz
+
+gzip –d workflow20200702.144.sql.gz
+</code></pre>
+<p>4． 登录各数据库节点并登录mysql，执行stop slave停止主从复制</p>
+<p>5． 10.213.103.143上登录mysql，执行</p>
+<pre><code>use pmsdb;
+
+tee /home/hngc/pmsdb20200702.log;
+
+source /home/hngc/pmsdb20200702.144.sql;
+
+use workflow;
+
+tee /home/hngc/workflow20200702.log;
+
+source /home/hngc/workflow20200702.144.sql;
+</code></pre>
+<p>6． 10.213.103.179上登录mysql，执行</p>
+<pre><code>create user 'pmsdba' identified by 'pmsadmin';
+
+create database pmsdb;
+
+grant all privileges on pmsdb.* to 'pmsdba'@'%' with grant option;
+
+create user 'workflow' identified by 'dhccmobile20181111';
+
+create database workflow;
+
+grant all privileges on workflow.* to 'workflow'@'%' with grant option;
+
+flush privileges;
+
+use pmsdb;
+
+tee /home/hngc/pmsdb20200702.log;
+
+source /home/hngc/pmsdb20200702.144.sql;
+
+use workflow;
+
+tee /home/hngc/workflow20200702.log;
+
+source /home/hngc/workflow20200702.144.sql;
+</code></pre>
+<h1 id="五-配置mysql主从关系">五． 配置MySQL主从关系</h1>
+<p>1、前提是各节点都已登录并执行stop slave；</p>
+<p>2、143-144主从</p>
+<p>10.213.103.143上执行</p>
+<pre><code>mysql&gt; show master status\G;
+
+*************************** 1. row ***************************
+
+​       File: mysql-bin.000002
+
+​     Position: 573
+
+   Binlog_Do_DB:
+
+Binlog_Ignore_DB:
+
+Executed_Gtid_Set:
+
+1 row in set (0.00 sec)
+</code></pre>
+<p>10.213.103.144上执行</p>
+<pre><code>mysql&gt; change master to master_host='10.213.103.144', master_user='repl_A', master_password='dhccmobile123456', master_log_file='上面的File值',master_log_pos=上面的Position值;
+</code></pre>
+<p>3、144-143主从</p>
+<p>10.213.103.144上执行</p>
+<pre><code>mysql&gt; show master status\G;
+
+*************************** 1. row ***************************
+
+​       File: mysql-bin.000002
+
+​     Position: 573
+
+   Binlog_Do_DB:A
+
+Binlog_Ignore_DB:
+
+Executed_Gtid_Set:
+
+1 row in set (0.00 sec)
+</code></pre>
+<p>10.213.103.143上执行</p>
+<pre><code>mysql&gt; change master to master_host='10.213.103.143', master_user='repl_B', master_password='dhccmobile123456', master_log_file='上面的File值',master_log_pos=上面的Position值;
+</code></pre>
+<p>4、144-149主从</p>
+<p>10.213.103.144上执行</p>
+<pre><code>mysql&gt; create user 'm144s179'@'10.213.103.179' identified by 'dhccmobile123456';
+
+mysql&gt; grant replication slave on *.* to 'm144s179'@'10.213.103.179';
+
+mysql&gt; grant file on *.* to 'm144s179'@'10.213.103.179';
+
+mysql&gt; show master status\G;
+
+*************************** 1. row ***************************
+
+​       File: mysql-bin.000002
+
+​     Position: 573
+
+   Binlog_Do_DB:
+
+Binlog_Ignore_DB:
+
+Executed_Gtid_Set:
+
+1 row in set (0.00 sec)
+</code></pre>
+<p>10.213.103.149上执行</p>
+<pre><code>mysql&gt; change master to master_host='10.213.103.144', master_user='m144s149', master_password='dhccmobile123456',master_log_file='bin.000078',master_log_pos=155;
+</code></pre>
+<p>master_log_file='上面的File值',master_log_pos=上面的Position值;</p>
+<p>5、各节点登录mysql并执行</p>
+<pre><code>start slave；
+</code></pre>
+<p>6、各节点登录mysql并执行</p>
+<pre><code>show slave status\G
+</code></pre>
+<p>查看Master_Host字段是否如预设一样，并查看Slave_IO_Running、Slave_SQL_Running和Seconds_Behind_Master，<strong>如果值分别是Yes、Yes和0说明配置成功；</strong></p>
+<h1 id="六-设置10213103179只读">六． 设置10.213.103.179只读</h1>
+<p>以root用户登录10.213.103.179的mysql，执行</p>
+<pre><code>mysql&gt; REVOKE ALL PRIVILEGES ON *.* FROM `pmsdba`@`%`;
+
+mysql&gt; grant select  on pmsdb.* to 'pmsdba'@'%' with grant option;
+
+mysql&gt; REVOKE ALL PRIVILEGES ON *.* FROM `workflow`@`%`;
+
+mysql&gt; grant select  on workflow.* to ' workflow '@'%' with grant option;
+
+mysql&gt; flush privileges;
+</code></pre>
+<h1 id="七-配置linux邮件服务">七． 配置Linux邮件服务</h1>
+<p>各数据库节点执行</p>
+<pre><code>yum remove sendmail
+
+yum remove postfix
+</code></pre>
+<p>然后修改/etc/mail.rc，在文件末尾增加以下内容，指定外部的smtp服务器地址、帐号密码等</p>
+<pre><code>set from=发件邮箱
+
+set smtp=smtp.qq.com
+
+set smtp-auth-user=用户
+
+set smtp-auth-password=密码
+
+set smtp-auth=login
+</code></pre>
+<p>测试</p>
+<pre><code>echo Hello World | mail -s &quot;test&quot;
+</code></pre>
+<p>管理员邮箱，多个之间以英文逗号分隔</p>
+<h1 id="八-定时监测mysql主从关系">八． 定时监测MySQL主从关系</h1>
+<p>各数据库节点执行</p>
+<p>/home/hngc下添加监测脚本mysqlms<a href="http://www.baidu.com/link?url=aOjxHc5KetD2cjXBIHEmuOnmFvTD6b9Frp4mDwCvkFet5-G8YtfZrfMyV7NAQlvL71_S4Ogek6911PUy42xO7xdfEKa5eTLxI7yP2OwaBsu">monitor</a>.sh，内容如下（黄色部分需要调整）</p>
+<pre><code>#!/bin/bash
+export mysql_cmd=&quot;mysql -u数据库用户名 -p数据库密码&quot; ## 数据库用户名需有replication权限
+errorno=(1158 1159 1008 1007 1062)
+while true
+do
+  export array=($($mysql_cmd -e &quot;show slave status\G&quot;|egrep &quot;_Running|Behind_Master|Last_SQL_Errno&quot;|awk &quot;{print $NF}&quot;))
+  if [ &quot;${array[1]}&quot; == &quot;Yes&quot; -a &quot;${array[3]}&quot; == &quot;Yes&quot;  -a &quot;${array[5]}&quot; == &quot;0&quot; ]
+  then
+    echo &quot;MySQL 主从复制状态正常（主主节点IP-从从节点IP）&quot;
+  else
+      for ((i=0;i&lt;${#errorno[*]};i++))
+      do
+        if [ &quot;${array[3]}&quot; = &quot;${errorno[$i]}&quot; ];then
+        $mysql_cmd -e &quot;stop slave &amp;&amp;set global sql_slave_skip_counter=1;start slave;&quot;
+        fi
+      done
+      char=&quot;MySQL 主从复制状态异常（主主节点IP-从从节点IP）&quot;
+      echo &quot;$char&quot;
+      echo &quot;$char&quot; | mail -s &quot;$char&quot; 管理员邮箱，多个之间以英文逗号分隔
+      break
+  fi
+  sleep 30
+done
+</code></pre>
+<p>特别说明，这个脚本每个节点都要放一份。其中的“从节点IP”是本机IP，“主节点IP”是对应主节点IP，关系如下</p>
+<table>
+<thead>
+<tr>
+<th>从节点IP</th>
+<th>主节点IP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10.213.103.143</td>
+<td>10.213.103.144</td>
+</tr>
+<tr>
+<td>10.213.103.144</td>
+<td>10.213.103.143</td>
+</tr>
+<tr>
+<td>10.213.103.179</td>
+<td>10.213.103.144</td>
+</tr>
+</tbody>
+</table>
+<p>授权</p>
+<pre><code>chmod u+x /home/hngc/mysqlms[monitor](http://www.baidu.com/link?url=aOjxHc5KetD2cjXBIHEmuOnmFvTD6b9Frp4mDwCvkFet5-G8YtfZrfMyV7NAQlvL71_S4Ogek6911PUy42xO7xdfEKa5eTLxI7yP2OwaBsu).sh
+</code></pre>
+<p>定时配置</p>
+<pre><code>crontab –e
+
+*/1 * * * *  /home/hngc/mysqlms[monitor](http://www.baidu.com/link?url=aOjxHc5KetD2cjXBIHEmuOnmFvTD6b9Frp4mDwCvkFet5-G8YtfZrfMyV7NAQlvL71_S4Ogek6911PUy42xO7xdfEKa5eTLxI7yP2OwaBsu).sh
+</code></pre>
+<h1 id="九-keepalived安装以及日志配置">九． Keepalived安装以及日志配置</h1>
+<pre><code>yum -y install gcc gcc+ gcc-c++ openssl openssl-devel pcre pcre-devel libnl libnl-devel libnfnetlink-devel
+</code></pre>
+<pre><code>wget https://www.keepalived.org/software/keepalived-2.0.10.tar.gz
+tar xzvf keepalived-2.0.10.tar.gz -C /usr/local 
+</code></pre>
+<p>(当前目录：/usr/local)</p>
+<p>编译和安装keepalived-2.0.10</p>
+<pre><code>./configure --prefix=/usr/local/keepalived
+
+make &amp;&amp; make install
+</code></pre>
+<p>拷贝keepalived的服务至指定目录</p>
+<pre><code>cp /usr/local/keepalived/etc/sysconfig/keepalived /etc/sysconfig/keepalived
+
+cp /usr/local/keepalived/sbin/keepalived /usr/sbin/keepalived
+
+cp /usr/local/keepalived-2.0.10/keepalived/etc/init.d/keepalived /etc/init.d/keepalived
+</code></pre>
+<p>创建目录 拷贝keepalived的配置文件</p>
+<pre><code>mkdir /etc/keepalived
+
+cp /usr/local/keepalived/etc/keepalived/keepalived.conf /etc/keepalived
+</code></pre>
+<p>集群中的主从节点，分别编写keepalived配置和监听、连接、检测等脚本</p>
+<p>登录10.213.103.143/144执行</p>
+<ol>
+<li>
+<p>/usr/local/keepalived/etc/sysconfig/keepalived及/etc/sysconfig/keepalived最后的KEEPALIVED_OPTIONS改为&quot;-D -d -S 0&quot;</p>
+</li>
+<li>
+<p>修改/etc/rsyslog.conf</p>
+</li>
+</ol>
+<pre><code>*.info;mail.none;authpriv.none;cron.none   /var/log/messages
+</code></pre>
+<p>改为</p>
+<pre><code>*.info;mail.none;authpriv.none;cron.none;local0.none  /var/log/messages
+</code></pre>
+<p>末尾添加local0.* /var/log/keepalived.log</p>
+<ol start="3">
+<li>
+<p>重启</p>
+<pre><code>systemctl restart rsyslog
+</code></pre>
+</li>
+<li>
+<p>重启</p>
+<pre><code>systemctl restart keepalived
+</code></pre>
+</li>
+<li>
+<p>keepalived日志路径/var/log/keepalived.log</p>
+</li>
+<li>
+<p>执行ip addr检查vip是否在144上</p>
+</li>
+</ol>
+<figure data-type="image" tabindex="1"><img src="https://cdn.nlark.com/yuque/0/2020/png/235191/1593675277149-f07c3b26-918a-4637-bfd1-79ef5c8b8668.png" alt="image" loading="lazy"></figure>
+<h1 id="十-vip切换通知配置">十． VIP切换通知配置</h1>
+<p>10.213.103.143/144节点执行</p>
+<p>/etc/keepalived下新建notify.sh脚本并授予执行权限，内容如下</p>
+<pre><code>#!/bin/bash
+# Author: MageEdu &lt;linuxedu@foxmail.com&gt;
+# description: An example of notify script
+#
+ 
+vip=10.213.103.118
+contact='管理员邮箱，多个以逗号分隔'
+ 
+notify() {
+    mailsubject=&quot;`hostname` to be $1: $vip floating&quot;
+    mailbody=&quot;`date '+%F %H:%M:%S'`: vrrp transition, `hostname` changed to be $1&quot;
+    echo $mailbody | mail -s &quot;$mailsubject&quot; $contact
+}
+ 
+case &quot;$1&quot; in
+    master)
+        notify master
+        exit 0
+    ;;
+    backup)
+        notify backup
+        exit 0
+    ;;
+    fault)
+        notify fault
+        exit 0
+    ;;
+    *)
+        echo 'Usage: `basename $0` {master|backup|fault}'
+        exit 1
+    ;;
+esac
+</code></pre>
+<p>/usr/local/keepalived/etc/keepalived/keepalived.conf及/etc/keepalived/keepalived.conf中vrrp_instance VI_1中添加</p>
+<pre><code>notify_master &quot;/etc/keepalived/notify.sh master&quot;
+
+notify_backup &quot;/etc/keepalived/notify.sh backup&quot;
+</code></pre>
+<p>待节点主备发生变化时，邮件内容如下：</p>
+<figure data-type="image" tabindex="2"><img src="https://cdn.nlark.com/yuque/0/2020/png/235191/1593675277358-c9c53964-2314-4564-8e72-a038417baa58.png" alt="image" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://cdn.nlark.com/yuque/0/2020/png/235191/1593675277573-a24373e4-740f-41ff-b46d-8e644e24d44e.png" alt="image" loading="lazy"></figure>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/aXLFZey34/">
+              <span class="post-title">
+                Mysql 集群环境搭建&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://blog.jwangkun.com/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+
