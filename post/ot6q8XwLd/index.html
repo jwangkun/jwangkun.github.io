@@ -86,7 +86,7 @@
             <h1>Centos7.4  Keepalived安装配</h1>
             <span class="meta">
             	Posted on
-              2020-11-06，9 min read
+              2020-11-06，10 min read
             </span>
           </div>
         </div>
@@ -339,6 +339,14 @@ notify_backup &quot;/etc/keepalived/notify.sh backup&quot;
 firewall-cmd --zone=public --add-rich-rule 'rule family=&quot;ipv4&quot; source address=&quot;10.213.120.58&quot; accept' --permanent
 
  firewall-cmd --reload
+</code></pre>
+<p>其他注意内容</p>
+<p>A、如果在正式环境中，建议将添加回环地址作为开机启动项，并且keepalived 也配置成开机启动</p>
+<p>B、如果使用了防火墙，务必允许keepalived使用的vrrp组播通过防火墙，否则虚IP会同时出现在主备两台机器上。</p>
+<p>命令如下（网卡换成你的网卡即可）：</p>
+<pre><code>firewall-cmd --direct --permanent --add-rule ipv4 filter INPUT 0 --in-interface [网卡] --destination 224.0.0.18 --protocol vrrp -j ACCEPT
+
+firewall-cmd --reload
 </code></pre>
 
           
