@@ -333,6 +333,13 @@ esac
 
 notify_backup &quot;/etc/keepalived/notify.sh backup&quot;
 </code></pre>
+<p>开放防火墙访问</p>
+<pre><code>firewall-cmd --zone=public --add-rich-rule 'rule family=&quot;ipv4&quot; source address=&quot;10.213.120.59&quot; accept' --permanent
+
+firewall-cmd --zone=public --add-rich-rule 'rule family=&quot;ipv4&quot; source address=&quot;10.213.120.58&quot; accept' --permanent
+
+ firewall-cmd --reload
+</code></pre>
 
           
           <p class="next-post">下一篇：
