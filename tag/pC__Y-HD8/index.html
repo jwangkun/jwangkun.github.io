@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta content="yes" name="apple-mobile-web-app-capable" />
   <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>Kubernetes CKA 实训免费视频课程 | John Wong&#39;s Blog</title>
+  <title>CKA | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="Kubernetes CKA 实训免费视频课程 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="CKA | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,11 +25,6 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
-    <meta property="og:description" content="Kubernetes CKA 实训免费视频课程"/>
-    <meta property="og:url" content="https://blog.jwangkun.com/post/pAgHc_hhs/"/>
-    <meta property="og:locale" content="zh-CN"/>
-    <meta property="og:type" content="website"/>
-    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
   	<!-- Navigation -->
@@ -71,200 +66,50 @@
       </div>
     </div>
   </nav>
-  <!-- Page Header -->
+<!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="post-heading">
-          	<span class="tags">
-          	 
-            <a href="https://blog.jwangkun.com/tag/pC__Y-HD8/" class="tag">CKA</a>
-            
-            <a href="https://blog.jwangkun.com/tag/efVGHoi38/" class="tag">Kubernetes</a>
-            
-        </span>
-            <h1>Kubernetes CKA 实训免费视频课程</h1>
-            <span class="meta">
-            	Posted on
-              2020-10-15，4 min read
-            </span>
+            <h1 class="tag-tl">#CKA</h1>
           </div>
         </div>
       </div>
     </div>
   </header>
-
-  <!-- Post Content -->
-  <article>
     <div class="container">
-      <div class="row">
-        <div class="col-lg-8 col-md-10 mx-auto">
-          <p>链接: https://pan.baidu.com/s/1tqYAADyHMyklOh44ZTmUsw 提取码: 5642</p>
-<!-- more -->
-<p>K8s练习</p>
-<p>1、</p>
-<pre><code>kubectl create clusterrole deployment-clusterrole --verb=create --resource=deployments,StatefulSets,DaemonSet 
-
-clusterrole.rbac.authorization.k8s.io/deployment-clusterrole created
-
-kubectl create sa cicd-tocken -n app-team1
-
-kubectl create clusterrolebinding --help | head
-
-kubectl create clusterrolebinding aaa --clusterrole=deployment-clusterrole --serviceaccount=app-team1:cicd-token 
-</code></pre>
-<p>2、</p>
-<pre><code>kubectl uncordon vms25.rhce.cc 
-
-kubectl drain vms25.rhce.cc --ignore-daemonsets --force
-</code></pre>
-<p>3、升级k8s集群：</p>
-<p>https://kubernetes.io/zh/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/</p>
-<p>4、</p>
-<pre><code>etcdctl snapshot save --help
-etcdctl snapshot save --endpoints=https://127.0.0.1:2379 --cacert=&quot;/opt/KUIN00601/ca.crt&quot; --cert=&quot;/opt/KUIN00601/etcd-client.crt&quot; --key=:&quot;/opt/KUIN00601/etcd-client.key&quot; /srv/data/etcd-snapshot.db
-
-grep dir /etc/etcd/etcd.conf
-rm -rf /var/lib/etcd/default.etcd/.etcd
-etcdctl snapshot restore /srv/data/etcd-snapshot-previous.db --endpoints=https://127.0.0.1:2379  --cacert=&quot;/opt/KUIN00601/ca.crt&quot; --cert=&quot;/opt/KUIN00601/etcd-client.crt&quot; --key=:&quot;/opt/KUIN00601/etcd-client.key&quot; 
---data-dir=/var/lib/etcd/default.etcd 
-chown -R etcd /var/lib/etcd/default.etcd
-systemctl start etcd
-</code></pre>
-<p>5、https://kubernetes.io/zh/docs/concepts/services-networking/network-policies/</p>
-<pre><code>kubectl get ns
-kubectl create ns my-app
-kubectl label ns my-app name=my-app
-
-5.yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-port-from-namespace
-  namespace: my-app
-spec:
-  podSelector:
-    matchLabels:
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: my-app
-    ports:
-    - protocol: TCP
-      port: 9200  
-
-kubectl apply -f 5.yaml 
-</code></pre>
-<p>6、https://kubernetes.io/docs/concepts/services-networking/service/</p>
-<pre><code>kubectl edit deploy front-end
-kubectl expose --name front-end-svc deployment front-end --port=80 --type=NodePort
-</code></pre>
-<p>7、https://kubernetes.io/zh/docs/concepts/services-networking/ingress/</p>
-<pre><code>kubectl get ingress -n ing-internal
-curl -kL 192.168.26.23/hello/
-</code></pre>
-<p>8、</p>
-<pre><code>kubectl scale deployment webserver --replicas=6
-</code></pre>
-<p>9、</p>
-<pre><code>kubectl run nginx-kusc00401 --image=nginx --dry-run=client -o yaml &gt;9.yaml
-
-nodeSelector（与containers平级）
-disk： ssd
-</code></pre>
-<p>10、</p>
-<pre><code>kubectl get nodes
-kubectl describe node vms22.rhce.cc
-kubectl describe node vms22.rhce.cc | grep Taints
-echo 0 &gt; /opt/KUSC00402/kusc00402.txt
-cat /opt/KUSC00402/kusc00402.txt
-</code></pre>
-<p>11、</p>
-<pre><code>kubectl run kucc4 --image=nginx --dry-run=client -o yaml &gt; 11.yaml
-</code></pre>
-<p>12、https://kubernetes.io/docs/concepts/storage/persistent-volumes/</p>
-<p>13、https://kubernetes.io/docs/concepts/storage/persistent-volumes/</p>
-<pre><code>kubectl edit pvc pvvolume
-</code></pre>
-<p>14、</p>
-<pre><code>kubectl logs foo | grep unable-to-access-website &gt;/opt/KUTR00101/foo
-cat /opt/KUTR00101/foo
-</code></pre>
-<p>15、</p>
-<pre><code>kubectl edit pod  legacy-app
-
-spec:
-  containers:
-  - command:
-    - /bin/sh
-    - -c
-    - tail -n+1 -f /var/log/legacy-app.log
-    image: busybox
-    imagePullPolicy: Always
-    name: c1
-    resources: {}
-    terminationMessagePath: /dev/termination-log
-    terminationMessagePolicy: File
-    volumeMounts:
-    - mountPath: /var/log/legacy-app.log
-      name: logs
-    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-
-- env:
-    - name: LOG_FILENAME
-      value: /var/log/legacy-app.log
-    image: docker.io/lfcert/monitor:latest
-    imagePullPolicy: IfNotPresent
-    name: liveness
-    resources: {}
-    terminationMessagePath: /dev/termination-log
-    terminationMessagePolicy: File
-    volumeMounts:
-    - mountPath: /var/log/legacy-app.log
-      name: logs
-    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-      name: default-token-5ttw5
-      readOnly: true
-      
- volumes:
-  - emptyDir: {}
-    name: logs
-  - name: default-token-5ttw5
-    secret:
-      defaultMode: 420
-      secretName: default-token-5ttw5
-</code></pre>
-<p>16、</p>
-<pre><code>kubectl top pods -l name=cpu-user
-echo webserver-7484bc7558-bjbn9 &gt;/opt/KUTR000401/KUTR00401.txt
-</code></pre>
-<p>17、</p>
-<pre><code>sudo -i
-Systemctl is-active kubelet
-systemctl start kubelet
-System enable kubelet
-</code></pre>
-
-          
-          <p class="next-post">下一篇：
-            <a href="https://blog.jwangkun.com/post/uEZxv8lam/">
-              <span class="post-title">
-                Gitlab CI 集成 Kubernetes&rarr;
-              </span>
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+       
+        <div class="post-preview">
+          <a href="https://blog.jwangkun.com/post/pAgHc_hhs/">
+            <h2 class="post-title">
+              Kubernetes CKA 实训免费视频课程
+            </h2>
             </a>
-          </p>
-        
-        <div class="comment">
-          
+            <h3 class="post-subtitle">
+              <p>链接: https://pan.baidu.com/s/1tqYAADyHMyklOh44ZTmUsw 提取码: 5642</p>
+
+            </h3>
+          <p class="post-meta">
+             <span class="time">2020-10-15</span>
+             <span>,</span>
+             <span class="post-stats">4 min read</span>
+            </p>
         </div>
+        <hr>
+        <div class="clearfix">
+        </div>
+        
+        
+        
       </div>
     </div>
-  </article>
+  </div>
+
+  
  <!-- Footer -->
   <footer>
     <div class="container">
@@ -347,4 +192,3 @@ System enable kubelet
 
   </body>
 </html>
-
