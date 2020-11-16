@@ -133,11 +133,10 @@ Git学习成本高（主要是功能强大）</p>
 <strong>GitFlow</strong>设计非常全面，考虑到了实际开发过程中的各种问题，都能稳定应对，是非常适合大型项目的代码管理。他的主要理念包括2个主干分支——Master和Develop，1个发布分支——Release，若干个开发分支——Feature，以及HotFix分支。整体实施流程略微复杂，对持续集成不太友好。<br>
 <strong>TBD</strong>（Trunk Based Development）早在svn时代就已经流行，是种比较简单的分支管理模型，他只有一个主干分支，每个人写完代码自测通过后就往主干上面Push，要发布的时候就拉个Release分支，对持续集成友好，但如果临上线前发现有问题，剔除代码比较困难。</p>
 <h1 id="git分支原理">GIT分支原理</h1>
-<p>GIT分支和SVN的分支区别，SVN的分支就是一个目录，是一份代码拷贝，新分支没有过去的历史记录。而GIT分支是一个指向commit对象的指针，差异通过元数据记录在版本库中。GIT中有一个特别的指针名为HEAD，它是一个指向你正在工作中的本地分支的指针，切换分支，本质上就是移动HEAD指针。Git鼓励频繁使用分支。<br>
-<img src="http://hn.uiyun.com:7500/Public/Uploads/2020-06-28/5ef83302ee1ed.jpg" alt="img" loading="lazy"></p>
-<hr>
+<p>GIT分支和SVN的分支区别，SVN的分支就是一个目录，是一份代码拷贝，新分支没有过去的历史记录。而GIT分支是一个指向commit对象的指针，差异通过元数据记录在版本库中。GIT中有一个特别的指针名为HEAD，它是一个指向你正在工作中的本地分支的指针，切换分支，本质上就是移动HEAD指针。Git鼓励频繁使用分支。</p>
+<figure data-type="image" tabindex="1"><img src="https://blog.jwangkun.com/post-images/1605493144035.jpg" alt="" loading="lazy"></figure>
 <h2 id="图解git结构">图解GIT结构</h2>
-<p>![<a href="http://hn.uiyun.com:7500/Public/Uploads/2020-11-13/5fae5a112f117.png">QQ截图20200628140718.png</a></p>
+<figure data-type="image" tabindex="2"><img src="https://blog.jwangkun.com/post-images/1605493152466.png" alt="" loading="lazy"></figure>
 <p>画图工具： https://www.processon.com/i/54c5c898e4b0c7bde4f2156c</p>
 <blockquote>
 <p>注：git fetch是将远程仓库的更新拉取到本地仓库，不影响工作区。而git pull则是将远程仓库的代码拉到本地仓库并合并到工作区。</p>
@@ -159,8 +158,7 @@ Git学习成本高（主要是功能强大）</p>
 <blockquote>
 <p>当代码冲突时，执行 git mergetool 启动三路合并</p>
 </blockquote>
-<figure data-type="image" tabindex="1"><img src="http://hn.uiyun.com:7500/Public/Uploads/2020-06-28/5ef833f61e383.png" alt="img" loading="lazy"></figure>
-<hr>
+<figure data-type="image" tabindex="3"><img src="https://blog.jwangkun.com/post-images/1605493174061.png" alt="" loading="lazy"></figure>
 <p>VSCODE 是微软开发的一款代码编辑工具，里面自带的GIT管理功能非常好用，特别是冲突解决直观高效<br>
 TortoiseGit 是一个GIT的GUI工具，操作及界面和TortoiseSVN非常相似（我自己见过没用过）。</p>
 <hr>
