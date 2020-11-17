@@ -104,24 +104,24 @@
 <p>此时，可通过手动或定时任务进行清除。</p>
 <p>针对 / var/lib/docker/overlay2 空间占用很大网上提供了很多解决方案，其中有些误导的说法需要去迁移路径等操作。其实磁盘空间的占用和 overlay 没关系（它的 usage 和真实的 disk usage 相同），它只是一个 docker 的虚拟文件系统，真实的文件系统是前者 / dev/vda1, 可以看到路径所指为根目录，所以你要去找是哪里出现了垃圾。</p>
 <p>通常情况下与 overlay2 的同级目录下会有如下的目录：</p>
-<p>builder buildkit containerd containers image network overlay2 plugins runtimes swarm tmp trust volumes</p>
-<p>[root@iZ docker]# ls builder buildkit containerd containers image network overlay2 plugins runtimes swarm tmp trust volumes</p>
-<pre><code>[root@iZ docker]# ls
+<pre><code>builder buildkit containerd containers image network overlay2 plugins runtimes swarm tmp trust volumes
+</code></pre>
+<pre><code>[root@iZ docker]# ls builder buildkit containerd containers image network overlay2 plugins runtimes swarm tmp trust volumes
+
+[root@iZ docker]# ls
 builder  buildkit  containerd  containers  image  network  overlay2  plugins  runtimes  swarm  tmp  trust  volumes
 </code></pre>
 <p>而往往占用大量空间的日志文件位于 containers 下，该目录下存在如下目录：</p>
-<p>123ace927dc96745bac8ae09d0feddbdef853ff089c831bc80547b2d1115b0ac 635619a5ce22b551c5c75095b8b01647b9a02c839be64cd465e1542bfbec8ee6 a979b62fc10ab0ac54af4799d40c2c5865099883ff124012328ab3a8587c1dda</p>
-<p>[root@iZ containers]# ls 123ace927dc96745bac8ae09d0feddbdef853ff089c831bc80547b2d1115b0ac 635619a5ce22b551c5c75095b8b01647b9a02c839be64cd465e1542bfbec8ee6 a979b62fc10ab0ac54af4799d40c2c5865099883ff124012328ab3a8587c1dda</p>
-<pre><code>[root@iZ containers]# ls
-123ace927dc96745bac8ae09d0feddbdef853ff089c831bc80547b2d1115b0ac  635619a5ce22b551c5c75095b8b01647b9a02c839be64cd465e1542bfbec8ee6  a979b62fc10ab0ac54af4799d40c2c5865099883ff124012328ab3a8587c1dda
+<pre><code>[root@iZ containers]# ls 123ace927dc96745bac8ae09d0feddbdef853ff089c831bc80547b2d1115b0ac 635619a5ce22b551c5c75095b8b01647b9a02c839be64cd465e1542bfbec8ee6 a979b62fc10ab0ac54af4799d40c2c5865099883ff124012328ab3a8587c1dda
+
 </code></pre>
 <p>在目录中会存在以目录名为前缀，以 “-json.log” 为后缀的目录文件。使用如下命令会看到该文件的大小：</p>
 <pre><code>ll -h
 </code></pre>
 <p>然后可使用如下命令对该文件的内容进行清理：</p>
-<p>cat /dev/null &gt; *-json.log</p>
-<p>cat /dev/null &gt; *-json.log</p>
 <pre><code>cat /dev/null &gt; *-json.log
+cat /dev/null &gt; *-json.log
+cat /dev/null &gt; *-json.log
 </code></pre>
 <p>清理完成可不重启服务，但如果允许建议重启一下 docker 服务。</p>
 <p>在此执行 df -h 命令之后，你会发现 overlay2 所占的磁盘空间已经减小。</p>
