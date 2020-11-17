@@ -139,13 +139,10 @@ sudo systemctl restart docker
 <p>保存退出，重启docker服务</p>
 <pre><code class="language-bash">sudo systemctl restart docker
 </code></pre>
-<blockquote>
-<p>主要是用<code>data-root</code>来修改docker的工作目录</p>
-<p>另外要提到的一点是，我尝试了drop-in文件方式，没有作用。</p>
-</blockquote>
 <h2 id="验证">验证</h2>
 <h4 id="验证一">验证一：</h4>
 <p>查看 <code>docker info</code></p>
+<p>查看  Docker Root 来验证目录位置</p>
 <pre><code>[root@HNGC-SVR-QCCBigDataSvr-Dev2 docker]# docker info 
 Client:
  Debug Mode: false
