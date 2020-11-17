@@ -99,11 +99,10 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <p>在使用 docker 时，往往会出现磁盘空间不足，导致该问题的通常原因是因为 docker 中部署的系统输出</p>
-<p>在使用 docker 时，往往会出现磁盘空间不足，导致该问题的通常原因是因为 docker 中部署的系统输出了大量的日志内容。</p>
-<p>此时，可通过手动或定时任务进行清除。</p>
-<p>针对 / var/lib/docker/overlay2 空间占用很大网上提供了很多解决方案，其中有些误导的说法需要去迁移路径等操作。其实磁盘空间的占用和 overlay 没关系（它的 usage 和真实的 disk usage 相同），它只是一个 docker 的虚拟文件系统，真实的文件系统是前者 / dev/vda1, 可以看到路径所指为根目录，所以你要去找是哪里出现了垃圾。</p>
-<p>通常情况下与 overlay2 的同级目录下会有如下的目录：</p>
+          <p>在使用 docker 时，往往会出现磁盘空间不足，导致该问题的通常原因是因为 docker 中部署的系统输出了大量的日志内容。<br>
+此时，可通过手动或定时任务进行清除。<br>
+针对 / var/lib/docker/overlay2 空间占用很大网上提供了很多解决方案，其中有些误导的说法需要去迁移路径等操作。其实磁盘空间的占用和 overlay 没关系（它的 usage 和真实的 disk usage 相同），它只是一个 docker 的虚拟文件系统，真实的文件系统是前者 / dev/vda1, 可以看到路径所指为根目录，所以你要去找是哪里出现了垃圾。<br>
+通常情况下与 overlay2 的同级目录下会有如下的目录：</p>
 <pre><code>builder buildkit containerd containers image network overlay2 plugins runtimes swarm tmp trust volumes
 </code></pre>
 <pre><code>[root@iZ docker]# ls builder buildkit containerd containers image network overlay2 plugins runtimes swarm tmp trust volumes
