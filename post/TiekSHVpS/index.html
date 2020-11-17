@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>修改Docker数据目录位置，包含镜像位置 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="修改Docker数据目录位置，包含镜像位置 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="修改Docker数据目录位置，包含镜像位置"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/TiekSHVpS/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,228 +71,105 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+        </span>
+            <h1>修改Docker数据目录位置，包含镜像位置</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-17，3 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/sY0ka1Vfs/">
-            <h2 class="post-title">
-              SpringBoot Profile多环境配置
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Docker安装后默认下载的位置在<code>/var/lib/docker</code> ，如果<code>/var</code>分区没有独立分出来，Linux下默认是与<code>/</code>根分区在一起。一般我们装Linux系统的时候，除了做邮件服务器外，都不会把/var分区独立分出来，而且/分区一般不会太大，比如我现在用的这台根分区50G的，在拉镜像的时候提示硬盘空间不足的问题，而其它分区还有很大空间。基于此情此景，我们都要把这个目录改一下</p>
+<h2 id="查看当前docker目录位置">查看当前Docker目录位置</h2>
+<pre><code class="language-bash">#展示当前docker的配置信息
+docker info
+-------------------------------------------------------------------
+#在信息找到Docker Root Dir，对应的就是了，默认为：
+Docker Root Dir: /var/lib/docker
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://img2018.cnblogs.com/blog/1149398/201907/1149398-20190704161211856-423375502.png" alt="img" loading="lazy"></figure>
+<h2 id="几种改法">几种改法</h2>
+<p><strong>1、最简单也是最暴力的方式——修改 <code>/etc/systemd/system/multi-user.target.wants/docker.service</code></strong></p>
+<pre><code class="language-bash">sudo vim /etc/systemd/system/multi-user.target.wants/docker.service
+-------------------------------------------------------------------
+#找到ExecStart部分，在此行末尾添加--graph=你的目录，我的如下
+[Service]
+Type=notify
+# the default is not to use systemd for cgroups because the delegate issues still
+# exists and systemd currently does not support the cgroup feature set required
+# for containers run by docker
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock 
+--graph=/home/hellxz/docker-home
+
+-------------------------------------------------------------------
+#保存退出，接着让systemd重新读取下这些service等的配置
+sudo systemctl daemon-reload
+#重启docker服务
+sudo systemctl restart docker
+</code></pre>
+<blockquote>
+<p><code>--graph=/path/to/path</code>可以替换成<code>-g /path/to/path</code> 效果等同</p>
+</blockquote>
+<p><strong>2、官方文档中的方式，修改 <code>/etc/docker/daemon.json</code></strong></p>
+<pre><code class="language-json">{
+  &quot;registry-mirrors&quot;: [&quot;http://hub-mirror.c.163.com&quot;],
+  &quot;data-root&quot;: &quot;/home/hellxz/docker-home&quot;
+}
+</code></pre>
+<p>保存退出，重启docker服务</p>
+<pre><code class="language-bash">sudo systemctl restart docker
+</code></pre>
+<blockquote>
+<p>主要是用<code>data-root</code>来修改docker的工作目录</p>
+<p>另外要提到的一点是，我尝试了drop-in文件方式，没有作用。</p>
+</blockquote>
+<h2 id="验证">验证</h2>
+<h4 id="验证一">验证一：</h4>
+<p>查看 <code>docker info</code></p>
+<figure data-type="image" tabindex="2"><img src="https://img2018.cnblogs.com/blog/1149398/201907/1149398-20190704161019154-2144727749.png" alt="img" loading="lazy"></figure>
+<h4 id="验证二">验证二：</h4>
+<p>查看之前<code>/</code>的容量</p>
+<figure data-type="image" tabindex="3"><img src="https://img2018.cnblogs.com/blog/1149398/201907/1149398-20190704134417712-1247386373.png" alt="img" loading="lazy"></figure>
+<p>拉个镜像，如mysql:5.7</p>
+<figure data-type="image" tabindex="4"><img src="https://img2018.cnblogs.com/blog/1149398/201907/1149398-20190704134527181-825504372.png" alt="img" loading="lazy"></figure>
+<p>再查看<code>/</code>容量</p>
+<figure data-type="image" tabindex="5"><img src="https://img2018.cnblogs.com/blog/1149398/201907/1149398-20190704161630044-62327543.png" alt="img" loading="lazy"></figure>
+<p>相比上边的，镜像位置已经修改完毕。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/NqaLe6s2O/">
+              <span class="post-title">
+                产品经理的基本工作流程&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">1 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/duZ4RFDl-/">
-            <h2 class="post-title">
-               SpringBoot 配置文件详解
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/Mcc2pXo1i/">
-            <h2 class="post-title">
-              构建一个SpringBoot工程
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/FVtYeBnI5/">
-            <h2 class="post-title">
-              使用 Docker 搭建 ELK 环境
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">16 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/dtfeDBuT2/">
-            <h2 class="post-title">
-              搭建企业级ELK日志收集系统
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">24 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/ldWvjNELN/">
-            <h2 class="post-title">
-              HDFS完全分布式集群搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/fja0PWFwF/">
-            <h2 class="post-title">
-              elasticsearch集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/bvYFbY7Mb/">
-            <h2 class="post-title">
-              RabbitMQ集群搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/3Tdsl23vC/">
-            <h2 class="post-title">
-              Centos 7 安装Nginx
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-06</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/YNaOOJ8rC/">
-            <h2 class="post-title">
-              MinIO 分布式集群搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-06</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/page/6/">&larr; 上一页</a>
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/8/">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -368,3 +251,4 @@
 
   </body>
 </html>
+
