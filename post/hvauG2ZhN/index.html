@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>Docker overlay2 占用大量磁盘空间处理方法  | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Docker overlay2 占用大量磁盘空间处理方法  | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="Docker overlay2 占用大量磁盘空间处理方法 "/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/hvauG2ZhN/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,155 +71,77 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>Docker overlay2 占用大量磁盘空间处理方法 </h1>
+            <span class="meta">
+            	Posted on
+              2020-11-17，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/kdAwcPtws/">
-            <h2 class="post-title">
-              Git 常用基本操作
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-08-08</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/angular-huan-jing-da-jian/">
-            <h2 class="post-title">
-              Angular 环境搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>适用于Angular4.x、Angular5.x、Angular6.x、Angular7.x、Angular8.x、Angular9.x、Angular10.x，截止目前Angular最新版本</p>
-<figure data-type="image" tabindex="1"><img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-091916-0806.png" alt="20200730-091916-0806.png" loading="lazy"></figure>
 
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-07-30</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/kai-yuan-kua-ping-tai-ruan-jian/">
-            <h2 class="post-title">
-              开源跨平台软件
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>由于我本人经常在Windws10 、Mac OS 、Ubuntu 等系统间来回切换，所以收藏常用软件，保持统一操作习惯，毕竟学习新东西需要花费时间和经历，为了以后查找方便，在此收藏。<br>
-<img src="https://gitee.com/jwangkun/tuchuang/raw/master/blog/20200730-101237-0806.png" alt="20200730-101237-0806.png" loading="lazy"></p>
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>在使用 docker 时，往往会出现磁盘空间不足，导致该问题的通常原因是因为 docker 中部署的系统输出</p>
+<p>在使用 docker 时，往往会出现磁盘空间不足，导致该问题的通常原因是因为 docker 中部署的系统输出了大量的日志内容。</p>
+<p>此时，可通过手动或定时任务进行清除。</p>
+<p>针对 / var/lib/docker/overlay2 空间占用很大网上提供了很多解决方案，其中有些误导的说法需要去迁移路径等操作。其实磁盘空间的占用和 overlay 没关系（它的 usage 和真实的 disk usage 相同），它只是一个 docker 的虚拟文件系统，真实的文件系统是前者 / dev/vda1, 可以看到路径所指为根目录，所以你要去找是哪里出现了垃圾。</p>
+<p>通常情况下与 overlay2 的同级目录下会有如下的目录：</p>
+<p>builder buildkit containerd containers image network overlay2 plugins runtimes swarm tmp trust volumes</p>
+<p>[root@iZ docker]# ls builder buildkit containerd containers image network overlay2 plugins runtimes swarm tmp trust volumes</p>
+<pre><code>[root@iZ docker]# ls
+builder  buildkit  containerd  containers  image  network  overlay2  plugins  runtimes  swarm  tmp  trust  volumes
+</code></pre>
+<p>而往往占用大量空间的日志文件位于 containers 下，该目录下存在如下目录：</p>
+<p>123ace927dc96745bac8ae09d0feddbdef853ff089c831bc80547b2d1115b0ac 635619a5ce22b551c5c75095b8b01647b9a02c839be64cd465e1542bfbec8ee6 a979b62fc10ab0ac54af4799d40c2c5865099883ff124012328ab3a8587c1dda</p>
+<p>[root@iZ containers]# ls 123ace927dc96745bac8ae09d0feddbdef853ff089c831bc80547b2d1115b0ac 635619a5ce22b551c5c75095b8b01647b9a02c839be64cd465e1542bfbec8ee6 a979b62fc10ab0ac54af4799d40c2c5865099883ff124012328ab3a8587c1dda</p>
+<pre><code>[root@iZ containers]# ls
+123ace927dc96745bac8ae09d0feddbdef853ff089c831bc80547b2d1115b0ac  635619a5ce22b551c5c75095b8b01647b9a02c839be64cd465e1542bfbec8ee6  a979b62fc10ab0ac54af4799d40c2c5865099883ff124012328ab3a8587c1dda
+</code></pre>
+<p>在目录中会存在以目录名为前缀，以 “-json.log” 为后缀的目录文件。使用如下命令会看到该文件的大小：</p>
+<pre><code>ll -h
+</code></pre>
+<p>然后可使用如下命令对该文件的内容进行清理：</p>
+<p>cat /dev/null &gt; *-json.log</p>
+<p>cat /dev/null &gt; *-json.log</p>
+<pre><code>cat /dev/null &gt; *-json.log
+</code></pre>
+<p>清理完成可不重启服务，但如果允许建议重启一下 docker 服务。</p>
+<p>在此执行 df -h 命令之后，你会发现 overlay2 所占的磁盘空间已经减小。</p>
 
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-04-25</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/qian-duan-ji-zhu-xuan-xing/">
-            <h2 class="post-title">
-              前端技术选型
-            </h2>
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/TiekSHVpS/">
+              <span class="post-title">
+                修改Docker数据目录位置，包含镜像位置&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              <p>前端技术几乎每天都有新事物冒出来，技术也是由时尚来驱动了，我们常常臣服于时尚，面对快速的变化常常让我们感觉局促不安，开始焦虑，唯恐错过了些什么。如何打破这种焦虑呢？需要在快速变化的前端世界里保持清醒，保持独立的思考和认知。让我们回归到技术的本质，因为解决现实中存在的问题，技术才会有价值。真正厉害的技术都静悄悄的跑在线上。</p>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-04-24</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/JU32VDh04/">
-            <h2 class="post-title">
-               GitHub 代理加速
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-01-16</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/1v_7tx69G/">
-            <h2 class="post-title">
-              基于Nexus搭建私服
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2018-11-15</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/page/14/">&larr; 上一页</a>
-        
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -295,3 +223,4 @@
 
   </body>
 </html>
+
