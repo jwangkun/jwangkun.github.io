@@ -86,7 +86,7 @@
             <h1>修改Docker数据目录位置，包含镜像位置</h1>
             <span class="meta">
             	Posted on
-              2020-11-17，4 min read
+              2020-11-17，3 min read
             </span>
           </div>
         </div>
@@ -140,7 +140,6 @@ sudo systemctl restart docker
 <pre><code class="language-bash">sudo systemctl restart docker
 </code></pre>
 <h2 id="验证">验证</h2>
-<h4 id="验证一">验证一：</h4>
 <p>查看 <code>docker info</code></p>
 <p>查看  Docker Root 来验证目录位置</p>
 <pre><code>[root@HNGC-SVR-QCCBigDataSvr-Dev2 docker]# docker info 
@@ -193,13 +192,6 @@ Server:
   http://hub-mirror.c.163.com/
  Live Restore Enabled: false
 </code></pre>
-<h4 id="验证二">验证二：</h4>
-<p>查看之前<code>/</code>的容量</p>
-<figure data-type="image" tabindex="2"><img src="https://img2018.cnblogs.com/blog/1149398/201907/1149398-20190704134417712-1247386373.png" alt="img" loading="lazy"></figure>
-<p>拉个镜像，如mysql:5.7</p>
-<figure data-type="image" tabindex="3"><img src="https://img2018.cnblogs.com/blog/1149398/201907/1149398-20190704134527181-825504372.png" alt="img" loading="lazy"></figure>
-<p>再查看<code>/</code>容量</p>
-<figure data-type="image" tabindex="4"><img src="https://img2018.cnblogs.com/blog/1149398/201907/1149398-20190704161630044-62327543.png" alt="img" loading="lazy"></figure>
 <p>相比上边的，镜像位置已经修改完毕。</p>
 
           
