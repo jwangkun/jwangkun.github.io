@@ -86,6 +86,25 @@
       <div class="col-lg-8 col-md-10 mx-auto">
        
         <div class="post-preview">
+          <a href="https://blog.jwangkun.com/post/FwQvnztt3/">
+            <h2 class="post-title">
+              Docker 容器之间网络的通信
+            </h2>
+            </a>
+            <h3 class="post-subtitle">
+              
+            </h3>
+          <p class="post-meta">
+             <span class="time">2020-10-20</span>
+             <span>,</span>
+             <span class="post-stats">2 min read</span>
+            </p>
+        </div>
+        <hr>
+        <div class="clearfix">
+        </div>
+        
+        <div class="post-preview">
           <a href="https://blog.jwangkun.com/post/AqhtD6hL3/">
             <h2 class="post-title">
               sealos+rook 部署 kubeSphere+TiDB
@@ -256,121 +275,6 @@
              <span class="time">2020-10-15</span>
              <span>,</span>
              <span class="post-stats">26 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/pAgHc_hhs/">
-            <h2 class="post-title">
-               CKA考试经验总结
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              <p>先晒一下本人的证书</p>
-<figure data-type="image" tabindex="1"><img src="https://picgo-jwangkun.oss-cn-beijing.aliyuncs.com/images/20201118110434.png?Expires=1605670273&amp;OSSAccessKeyId=TMP.3KfqsxpTtGGZx1gFKsiNP8EKttGimhSkQXaSo2c3dQ9T9ZVLjuYNwxtDm2xis6zqZgAduDv4jVCWaQpEonMx1B1izeRMT8&amp;Signature=U%2FVDsUSd5Io%2B99cW2IhkBIBwzBY%3D" alt="https://picgo-jwangkun.oss-cn-beijing.aliyuncs.com/images/20201118110434.png?Expires=1605670273&amp;OSSAccessKeyId=TMP.3KfqsxpTtGGZx1gFKsiNP8EKttGimhSkQXaSo2c3dQ9T9ZVLjuYNwxtDm2xis6zqZgAduDv4jVCWaQpEonMx1B1izeRMT8&amp;Signature=U%2FVDsUSd5Io%2B99cW2IhkBIBwzBY%3D" loading="lazy"></figure>
-<h2 id="1考前准备">1.考前准备</h2>
-<h3 id="11-报考相关">1.1 报考相关</h3>
-<p>报考地址。<a href="https://links.jianshu.com/go?to=https%3A%2F%2Fwww.cncf.io%2Fcertification%2Fcka">https://www.cncf.io/certification/cka</a></p>
-<p><strong>1、有效期一年</strong>。在一年内需要定好考试的时间。</p>
-<p>2、<strong>提前15分钟进入考试系统，</strong> 提前进入考试系统后并不是立马开始考试，而是预留给考官时间考察你的考试环境</p>
-<p>3、<strong>考试时间</strong> ，注意报考的TimeZone。<strong>默认是UTC时间，请改成China Time。</strong></p>
-<p>4、<strong>修改考试时间</strong>，考试前24小时且工作日内可更改。</p>
-<h3 id="11-ckackad考纲">1.1 CKA/CKAD考纲</h3>
-<p>考纲隔几个月会更新，考前请留意GitHub上Latest commit 时间，一般变动不大，留意考点分值比重，以及考点中的细项</p>
-<h3 id="12-考生手册">1.2 考生手册</h3>
-<p>这部分基本变动不大，除了分值，考纲同步更新。文档中几点需要留意</p>
-<p><strong>Candidate Requirements（考试环境要求） ：</strong></p>
-<p>1、谷歌浏览器、稳定的网络、摄像头、麦克风；</p>
-<blockquote>
-<p>避坑提示：</p>
-<p>重点提一下摄像头。考试前请充分测试摄像头，考官会要求你在摄像头前出示护照，摄像头要能够对焦并清晰地拍摄到上面的文字。</p>
-<p>实践证明<strong>罗技 C270i</strong>不能自动对焦。</p>
-</blockquote>
-<p>2、干净整洁的桌面。桌面、桌底、键盘下上不得放任何东西。</p>
-<p>3、摄像头的线要够长，允许移动。（笔记本就不用担心了）</p>
-<p><strong>Retake Policy</strong></p>
-<p>重考策略，有一次免费重考的机会。一年后过期</p>
-<p><strong>Exam Rules and Policies</strong></p>
-<p>考试规则，这个熟读一下，环境要求必须安静、考生背后不能有玻璃或者强光，考试期间不能大声朗读，不能吃、喝。除非要求暂停考试（暂停考试不停止时间）、考试期间脸不能离开摄像头、不允许任何电子设备，不允许在考试系统外记录任何笔记。等等</p>
-<p><strong>Policy on Warnings and Exam Terminations</strong></p>
-<p><strong>Exam Misconduct</strong></p>
-<p>这两块也大致浏览一下。避坑，否则考官会无条件终止你的考试。</p>
-<p>注意，只允许打开多一个Chrome的 Tab，Tab只允许<a href="https://links.jianshu.com/go?to=https%3A%2F%2Fkubernetes.io%2Fdocs%2F">https://kubernetes.io/docs/</a>和<a href="https://links.jianshu.com/go?to=https%3A%2F%2Fkubernetes.io%2Fblog%2F">https://kubernetes.io/blog/</a>。使用官方文档内的搜索功能可能会搜出除上述两个地址之外的链接，要注意甄别！</p>
-<p><strong>考生有义务甄别不是上述两个地址的网址，千万不要点开！</strong></p>
-<h3 id="13-考试tip手册">1.3 考试Tip手册</h3>
-<p>主要看两部分：<strong>Technical Instructions</strong> 、<strong>CKA &amp; CKAD Environment</strong> ；这份文档中，Technical Instructions与考生手册重复了。主要留意一下Ctrl+W 和 Ctrl+C 、Ctrl+V的替代键。以及考试中的k8s环境，要用到</p>
-<p>kubectl config use-context &lt;环境名称&gt;进行替换，题目中会有提醒。</p>
-<h3 id="14-官方文档">1.4 官方文档</h3>
-<p>除了HOME CONTRIBUTE之外，其余栏目都要仔细看过一遍。SETUP CONCEPTS TASKS TUTORIALS REFERENCE里面的与考纲相关的均不能放过，我就因为大意漏了<strong>kubectl Cheat Sheet</strong>，超简单的第一题加上考试系统故障，浪费了快10min（涉及GCE等云服务的、集群联邦除外，不在考点内，可不看），英文文档难啃，难免有遗漏，<strong>建议结合JimmySong的<a href="https://links.jianshu.com/go?to=https%3A%2F%2Fjimmysong.io%2Fkubernetes-handbook%2F">Kubernetes-handbook</a>加深印象</strong>。最好使用二进制部署一遍，尤其是kubelet等组件的配置，再回到英文doc定位考点。</p>
-<h2 id="2-考中避坑经验">2、考中避坑经验</h2>
-<h3 id="21-与考官交流">2.1 与考官交流</h3>
-<p>​    考试全程与考官在Live Chat上英文交流（文字）,考前考官会跟你提示注意事项。考验平时英语作文词汇量的时候到了。国外的考官都很人性化的，考试中有意外状况，询问考官，并向考官争取你应有的权益。举例一下我遇到的 场景（基本上是大意，英文我就不写了，渣渣）：</p>
-<p>1、考试正式开始前，罗技摄像头无法清晰看到护照，向考官申请使用笔记本电脑摄像头验证。验证完成后请求考官使用回台式机重新考试（屏幕大有好处）</p>
-<p>2、考试过程中，考试系统崩溃，提示，lost connection，询问考官什么情况，是我电脑的问题还是系统问题。考试的中断是否会影响我的计时。我能延长多少时间等等。</p>
-<p>3、考试中如果有半边脸不小心离开摄像头，考官会在Live Chat会弹出窗口提示你，这时候请注意。并向考官表达歉意。</p>
-<h3 id="22-考试中的技巧">2.2 考试中的技巧</h3>
-<p><strong>1、审题：</strong></p>
-<p>审题一定要仔细再仔细。题目有中文翻译的版本，但标点符号特别少，断句可能会出现问题，建议切换成英文版本再看一遍。</p>
-<p><strong>2、答题策略</strong></p>
-<p>整场考试总计24道题，分值高的题目花费的时间较多，我遇见的是集群故障排查、和TLS Bootstraping，以及节点失联、一般较为靠后。但不是所有分值高的题目都在最后，（我的最后一题是创建PV，2%）。<strong>合理规划答题策略。</strong></p>
-<p><strong>3、网络问题</strong></p>
-<p>根据同行交流经验所得，CKA考试普遍网络较慢，表现为考试系统Lost Connection，终端反应较慢、无法进入终端的情况:</p>
-<p><strong>Lost Connection</strong>：在考试计时器停止后，考官会给你相应的额外时间。</p>
-<p><strong>无法进入终端</strong>：这种情况使用考试系统上的reflash exam window按钮。刷新后重新进入终端，此时会退出特权模式，需要重新使用sudo -i 进入。且bash环境需要重新配置。（bash这块不确定，反正kubectl的自动补全我是执行了好几次）</p>
-<p><strong>终端反应慢</strong>：这块无解，只能重其他技巧节省时间。</p>
-<blockquote>
-<p>**不要刷新浏览器！不要刷新浏览器！不要刷新浏览器！**刷新浏览器会导致考试被终止。</p>
-</blockquote>
-<p><strong>4、节省时间的技巧</strong></p>
-<ul>
-<li>
-<p>考试题目刷出来较慢，建议开考时，将考题列记录考试系统notepad里面，过一遍（后悔没这么做）。</p>
-</li>
-<li>
-<p>kubectl bash自动补全的命令一定要用，最好记录在notepad上。切换环境，关键时刻可以复制粘贴到终端内。</p>
-<pre><code class="language-bash">source &lt;(kubectl completion bash)
-</code></pre>
-</li>
-<li>
-<p>考试中的终端是可以复制黏贴的、但是鼠标姿势要对，多尝试几次（我一开始以为复制不了，白敲了很久），无论如何请多使用终端内复制粘贴的功能（Windows下是Ctrl+Insect复制，Shift+Insect）。终端内复制粘贴一个yaml是毫无压力的，不要被Important Tip和考生手册给误导了。</p>
-<blockquote>
-<p>Important Tip和考生手册里面的Technical Instructions有这么一句话，容易被误导</p>
-<ol>
-<li>Ctrl+C &amp; and Ctrl+V are not supported in your exam terminal, nor is copy and pasting large amounts of text. To copy and paste <strong>limited amounts of text (1−2 lines)</strong> please use;</li>
-</ol>
-</blockquote>
-</li>
-<li>
-<p>kubectl explain 查定义，太慢了，查个pod.spce.containers.livenessProbe.initialDelaySeconds只能一层层的查，可能是我不熟悉grep + 正则（脑子转的不够快）乖乖在doc上找案例Shift+Insert（粘贴）更快</p>
-</li>
-<li>
-<p>善用官方文档的搜索功能，记住一些考点的关键字。有些知识点在CONCEPTS、TASKS、TUTORIALS、REFERENCE 连番出现，不好查找，搜索关键字较长时，搜索效率会低下。</p>
-<blockquote>
-<p>比如，查找Pod和Service的解析记录，搜索组合关键字Service DNS效率太低，不如直接搜索nslookup</p>
-</blockquote>
-</li>
-<li>
-<p>与考点相关的文档可以提前加入收藏夹，利用地址栏自动补全功能跳转到对应的文档  @Kevin Wang</p>
-</li>
-<li>
-<p>避免手敲yaml，能不手敲yaml的，就别手敲，尽量从文档上复制，手敲的效率太低了，碰上终端响应慢，那是时间的杀手！！</p>
-</li>
-<li>
-<p>尽量使用命令创建Pod、deployment、service</p>
-</li>
-</ul>
-<p>最后分享福利：</p>
-<p>Kubernetes CKA 实训免费视频课程<br>
-链接: https://pan.baidu.com/s/1tqYAADyHMyklOh44ZTmUsw 提取码: 5642</p>
-
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-15</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
             </p>
         </div>
         <hr>
