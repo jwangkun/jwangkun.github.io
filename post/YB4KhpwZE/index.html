@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-       <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta content="yes" name="apple-mobile-web-app-capable" />
   <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>Docker | John Wong&#39;s Blog</title>
+  <title> Docker 部署 Gitlab | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="Docker | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title=" Docker 部署 Gitlab | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,6 +25,11 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content=" Docker 部署 Gitlab"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/post/YB4KhpwZE/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
   	<!-- Navigation -->
@@ -66,222 +71,112 @@
       </div>
     </div>
   </nav>
-<!-- Page Header -->
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
           <div class="post-heading">
-            <h1 class="tag-tl">#Docker</h1>
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/tag/9IyfXdfX6/" class="tag">Docker</a>
+            
+            <a href="https://blog.jwangkun.com/tag/B5IR6REH-N/" class="tag">Gitlab</a>
+            
+        </span>
+            <h1> Docker 部署 Gitlab</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-20，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- Post Content -->
+  <article>
     <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/YB4KhpwZE/">
-            <h2 class="post-title">
-               Docker 部署 Gitlab
-            </h2>
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p><strong>基于 docker 部署 gitlab 比较方便，但服务器至少需要 4GB 内存，否则可能出现 502 错误。</strong></p>
+<h4 id="1-拉取镜像">1. 拉取镜像</h4>
+<pre><code># 查询
+docker search gitlab
+# 拉取 默认latest
+docker pull gitlab/gitlab-ce
+</code></pre>
+<h4 id="2-安装镜像">2. 安装镜像</h4>
+<pre><code>docker run --detach \
+--hostname gitlab.example.com \
+--publish 443:443 --publish 80:80 --publish 3322:22 \
+--name gitlab \
+--restart always \
+--volume $GITLAB_HOME/config:/etc/gitlab \
+--volume $GITLAB_HOME/logs:/var/log/gitlab \
+--volume $GITLAB_HOME/data:/var/opt/gitlab \
+gitlab/gitlab-ee:latest
+#正常情况下 就可以通过ip访问了
+</code></pre>
+<h4 id="3-配置端口">3. 配置端口</h4>
+<p>配置 gitlab 克隆时的端口（端口配置根据自己的需求选择）</p>
+<pre><code># 进入容器
+docker exec -it gitlab /bin/bash
+
+# 编辑配置文件
+vim /etc/gitlab/gitlab.rb
+# 添加内容
+# gitlab 访问地址/域名
+external_url 'http://192.168.1.109:'
+# ssh IP
+gitlab_rails['gitlab_ssh_host'] = '192.168.1.109'
+# ssh clone 端口
+gitlab_rails['gitlab_shell_ssh_port'] = 22
+# nginx 监听端口IP
+nginx['listen_addresses'] = ['*']
+# nginx 监听端口
+nginx['listen_port'] = 80
+</code></pre>
+<p><strong>去掉注释</strong></p>
+<pre><code>external_url &quot;http://192.168.1.109&quot;
+gitlab_rails['gitlab_ssh_host'] = '192.168.1.109'
+gitlab_rails['gitlab_shell_ssh_port'] = 3322
+nginx['listen_addresses'] = ['*']
+nginx['listen_port'] = 80
+# 重新配置
+gitlab-ctl reconfigure
+
+# 重启gitlab
+gitlab-ctl restart
+
+# 退出容器
+exit
+</code></pre>
+<p><em>补充</em></p>
+<pre><code># 退出前，可以在容器中打开配置文件可以查看是否生效
+vim /opt/gitlab/embedded/service/gitlab-rails/config/gitlab.yml
+</code></pre>
+<p><strong>重启 container</strong></p>
+<pre><code>docker restart &lt;gitlab-container-id&gt;
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/post/OGrlYQrkV/">
+              <span class="post-title">
+                Docker 安装 FastDFS&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-20</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/OGrlYQrkV/">
-            <h2 class="post-title">
-              Docker 安装 FastDFS
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-20</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/hvauG2ZhN/">
-            <h2 class="post-title">
-              Docker overlay2 占用大量磁盘空间处理方法 
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-17</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/TiekSHVpS/">
-            <h2 class="post-title">
-              修改Docker数据目录位置，包含镜像位置
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-17</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/_7Byo2xUJ/">
-            <h2 class="post-title">
-              在Docker中安装使用MySQL 高可用之MGC（多主同时写入）
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/hYITM0vod/">
-            <h2 class="post-title">
-              在Docker中安装使用MySQL 高可用之MGR（多主同时写入）
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">19 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/7cozIUIJM/">
-            <h2 class="post-title">
-               Docker 安装部署RabbitMQ
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/Q4Cd1QCaP/">
-            <h2 class="post-title">
-              Docker 安装 Redis
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/ozUSZ8tBa/">
-            <h2 class="post-title">
-              SpringBoot 整合 docker
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/post/FVtYeBnI5/">
-            <h2 class="post-title">
-              使用 Docker 搭建 ELK 环境
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">16 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/tag/9IyfXdfX6/page/2">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
+  </article>
  <!-- Footer -->
   <footer>
     <div class="container">
@@ -364,3 +259,4 @@
 
   </body>
 </html>
+
