@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-11-20T15:13:15.511Z</updated>
+    <updated>2020-11-21T04:03:49.317Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -11,73 +11,73 @@
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
     <entry>
+        <title type="html"><![CDATA[Git flow 规范]]></title>
+        <id>https://blog.jwangkun.com/3Me5sxE_I/</id>
+        <link href="https://blog.jwangkun.com/3Me5sxE_I/">
+        </link>
+        <updated>2020-11-21T04:03:17.000Z</updated>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[ Docker 部署 Gitlab]]></title>
-        <id>https://blog.jwangkun.com/post/YB4KhpwZE/</id>
-        <link href="https://blog.jwangkun.com/post/YB4KhpwZE/">
+        <id>https://blog.jwangkun.com/YB4KhpwZE/</id>
+        <link href="https://blog.jwangkun.com/YB4KhpwZE/">
         </link>
         <updated>2020-11-20T15:11:34.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Docker 安装 FastDFS]]></title>
-        <id>https://blog.jwangkun.com/post/OGrlYQrkV/</id>
-        <link href="https://blog.jwangkun.com/post/OGrlYQrkV/">
+        <id>https://blog.jwangkun.com/OGrlYQrkV/</id>
+        <link href="https://blog.jwangkun.com/OGrlYQrkV/">
         </link>
         <updated>2020-11-20T13:35:48.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Docker 部署 Confluence(破解版)]]></title>
-        <id>https://blog.jwangkun.com/post/Ov0CrYjjG/</id>
-        <link href="https://blog.jwangkun.com/post/Ov0CrYjjG/">
+        <id>https://blog.jwangkun.com/Ov0CrYjjG/</id>
+        <link href="https://blog.jwangkun.com/Ov0CrYjjG/">
         </link>
         <updated>2020-11-20T10:09:41.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[CentOS7.4 源码安装MySQL8.0的教程详解 ]]></title>
-        <id>https://blog.jwangkun.com/post/o6tAVfUH0/</id>
-        <link href="https://blog.jwangkun.com/post/o6tAVfUH0/">
+        <id>https://blog.jwangkun.com/o6tAVfUH0/</id>
+        <link href="https://blog.jwangkun.com/o6tAVfUH0/">
         </link>
         <updated>2020-11-20T02:12:32.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Ansible 极简教程]]></title>
-        <id>https://blog.jwangkun.com/post/8_XaqMMnz/</id>
-        <link href="https://blog.jwangkun.com/post/8_XaqMMnz/">
+        <id>https://blog.jwangkun.com/8_XaqMMnz/</id>
+        <link href="https://blog.jwangkun.com/8_XaqMMnz/">
         </link>
         <updated>2020-11-20T01:04:09.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[ CKA考试经验总结]]></title>
-        <id>https://blog.jwangkun.com/post/pAgHc_hhs/</id>
-        <link href="https://blog.jwangkun.com/post/pAgHc_hhs/">
+        <id>https://blog.jwangkun.com/pAgHc_hhs/</id>
+        <link href="https://blog.jwangkun.com/pAgHc_hhs/">
         </link>
         <updated>2020-11-18T11:29:30.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[MySQL 高可用复制管理工具 - Orchestrator ]]></title>
-        <id>https://blog.jwangkun.com/post/3KLBeooeF/</id>
-        <link href="https://blog.jwangkun.com/post/3KLBeooeF/">
+        <id>https://blog.jwangkun.com/3KLBeooeF/</id>
+        <link href="https://blog.jwangkun.com/3KLBeooeF/">
         </link>
         <updated>2020-11-18T02:40:42.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[MySQL 高可用复制管理工具 —— Orchestrator 介绍]]></title>
-        <id>https://blog.jwangkun.com/post/wD_JHQNwi/</id>
-        <link href="https://blog.jwangkun.com/post/wD_JHQNwi/">
+        <id>https://blog.jwangkun.com/wD_JHQNwi/</id>
+        <link href="https://blog.jwangkun.com/wD_JHQNwi/">
         </link>
         <updated>2020-11-18T02:38:54.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[Docker overlay2 占用大量磁盘空间处理方法 ]]></title>
-        <id>https://blog.jwangkun.com/post/hvauG2ZhN/</id>
-        <link href="https://blog.jwangkun.com/post/hvauG2ZhN/">
+        <id>https://blog.jwangkun.com/hvauG2ZhN/</id>
+        <link href="https://blog.jwangkun.com/hvauG2ZhN/">
         </link>
         <updated>2020-11-17T06:45:02.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[修改Docker数据目录位置，包含镜像位置]]></title>
-        <id>https://blog.jwangkun.com/post/TiekSHVpS/</id>
-        <link href="https://blog.jwangkun.com/post/TiekSHVpS/">
-        </link>
-        <updated>2020-11-17T06:04:11.000Z</updated>
     </entry>
 </feed>

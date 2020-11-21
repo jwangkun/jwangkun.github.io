@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> MinIO 集群安装部署 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" MinIO 集群安装部署 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" MinIO 集群安装部署"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/1siCRcJND/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/post/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+        </span>
+            <h1> MinIO 集群安装部署</h1>
+            <span class="meta">
+            	Posted on
+              2020-09-14，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>1 简介</p>
+<p>MinIO 是为海量数据存储、人工智能、大数据分析而设计的，基于 Apache License v2.0 开源协议的分布式对象存储系统，它完全兼容 Amazon S3 接口，适合存储海量图片、视频、日志文件、</p>
+<p>备份数据和容器/虚拟机镜像等，单个对象的大小可以从几KB到最大5TB。</p>
+<!-- more -->
+<p>MinIO 采用 Golang 语言实现，整个系统都运行在操作系统的用户态空间，客户端与服务器之间采用HTTP/HTTPS通信协议。</p>
+<p>与之类似的分布式存储产品还有：Ceph、GlusterFS、Sheepdog、Lustre、Swift、Cinder、TFS、HDFS、MooseFS、FastDFS、MogileFS 等。综合对比各方面因素，MinIO 的主要优势在于：</p>
+<p>1）部署简单</p>
+<p>MinIO 仅有 minio 一个可执行文件，基本不依赖其它共享库或者rpm/apt包。</p>
+<p>2）配置简单</p>
+<p>MinIO 的配置项很少，大部分都是内核之类系统级的设置，甚至不配置也可以正常运行起来。百度、Google 上基本没有关于MinIO部署问题的网页，可见在实践中，很少有遇到这方面的问题。</p>
+<p>相比之下其他分布式文件系统的安装配置要复杂得多，如：FastDFS、Ceph。</p>
+<p>3）二次开发容易</p>
+<p>MinIO 除了极少数代码使用汇编实现以外，其他全部使用 Golang 实现。因此系统的维护、二次开发比较容易。另外支持多种客户端语言 SDK，包括：JavaScript、Java、Python、</p>
+<p>Golang、.NET、Haskell</p>
+<p>4）支持多种存储</p>
+<p>通过网关模式，MinIO 可以对接各种现有的常见存储类型，如 NAS、亚马逊S3、微软Azure Blob、Google 云存储、HDFS、阿里巴巴OSS 等，非常有利于企业复用现有资源，低成本（硬件成本</p>
+<p>约等于零，部署MinIO 即可）的从传统的文件系统平滑升级到分布式存储存储。</p>
+<p>综合对比，目前 MinIO 都可作为开源分布式存储系统的首选。</p>
+<p>参考：</p>
+<p>MinIO 官网：https://min.io</p>
+<p>文档地址：https://docs.min.io/</p>
+<p>中文文档地址：https://docs.min.io/cn</p>
+<p>2 集群安装部署</p>
+<p>MinIO 有两种集群部署方式，一种是本地集群部署，最为常见。一种是联盟模式部署。</p>
+<p>本地集群部署方式在本地服务器节点部署 MinIO，组成分布式集群，提供统一命名空间和标准 S3 访问接口。</p>
+<p>联盟部署模式将多个 MinIO 本地集群在逻辑上组成统一命名空间，实现近乎无限的扩展与海量规模的数据管理，这些集群可以都在本地，或者分布在不同地域的数据中心。</p>
+<p>下面的部署以本地集群部署为准，相关说明及注意事项如下：</p>
+<p>1）MinIO 集群最少需要 4 块磁盘，单机不限制</p>
+<p>2）对于一个租户（每个租户对应一个用户名/密码）最多只能有 16 块磁盘（受纠删码技术限制）</p>
+<p>3）默认情况下，如果有 N 块磁盘，那么每个文件将被平均分为 N/2 个分片分别存储在 N/2 个节点上，其余 N/2 个节点存放对应的纠删码。这样，最多能保证 N/2 块磁盘坏掉，系统仍能提供</p>
+<p>读文件功能，但是无法提供写功能。如果要求写功能正常，则集群中至少有 N/2 + 1 块磁盘可用</p>
+<p>4）N 块磁盘可以在集群的节点中随意挂载，比如，对于4块磁盘，既可以部署为4个节点，每个节点1块磁盘的集群，也可以部署为2个节点，每个节点2块磁盘的集群</p>
+<p>MinIO 支持二进制方式安装和 Docker 方式安装。在开发和测试环境下，使用 Docker 方式更加简便，但是在正式的生产环境中，应使用二进制方式安装。</p>
+<p>不只是 MinIO，凡是涉及持久化数据存储的服务，例如关系数据库、Redis、RabbitMQ 等，在生产环境下，都强烈不建议使用 Docker 方式安装部署。</p>
+<p>下面介绍二进制方式的集群安装</p>
+<p>2.1 集群节点规划</p>
+<p>现在以 2 个节点，每个节点挂载 2 块硬盘的 MinIO 集群为例进行说明。</p>
+<p>节点IP  操作系统  磁盘挂载点  开放的端口</p>
+<p>10.213.120.11  CentOS 7.4+，64位 /usr/local/minio/data1 /usr/local/minio/data2  9000</p>
+<p>10.213.120.12  CentOS 7.4+，64位 /usr/local/minio/data1 /usr/local/minio/data2  9000</p>
+<p>说明：</p>
+<p>1）在开发和测试环境中，磁盘挂载点可以为服务器中的一个任意目录，如上表中的 /usr/local/minio/data1，但是在正式环境中，必须为实际的磁盘挂载点</p>
+<p>2）MinIO 服务器默认HTTP通信端口为 9000（也可以在启动时指定为其他端口），因此所在服务器的防火墙中必须开启 9000 TCP端口</p>
+<p>2.2 开放必要的端口</p>
+<p>在所有节点中，开启 9000 TCP 端口：</p>
+<pre><code>firewall-cmd --add-port=9000/tcp --permanent
+
+firewall-cmd --reload
+</code></pre>
+<p>2.3 安装 MinIO</p>
+<p>在所有的节点上都要安装 MinIO，并确保版本和安装位置完全一致</p>
+<p>以 root 用户登录服务器，执行如下命令安装 MinIO：</p>
+<pre><code>cd /usr/local
+</code></pre>
+<p># <strong>创建 minIO 家目录</strong></p>
+<pre><code>mkdir minio
+</code></pre>
+<p># <strong>进入 minIO，创建其他目录</strong></p>
+<pre><code>cd minio
+
+mkdir bin
+
+mkdir conf
+
+mkdir data1
+
+mkdir data2
+</code></pre>
+<p># <strong>下载 minIO，并放到 /usr/local/minio/bin下</strong></p>
+<pre><code>wget https://dl.min.io/server/minio/release/linux-amd64/minio -O ./bin
+</code></pre>
+<p># <strong>设置 minio 为可执行</strong></p>
+<pre><code>chmod +x bin/minio
+</code></pre>
+<p>至此，MinIO 安装完成，最终的目录结构如下：</p>
+<pre><code>/usr/local/minio
+
+​       --/bin/minio
+
+​      --/conf/
+
+​      --data1/
+
+​      --data2/
+</code></pre>
+<p>按照上述步骤，在其他节点上安装 MinIO。</p>
+<p>2.4 启动 MinIO 集群</p>
+<p>在所有的节点上都要启动 MinIO，并且启动命令要完全相同</p>
+<p>在所有的节点中，按照如下方式启动 MinIO：</p>
+<p># <strong>进入 MioIO 家目录</strong></p>
+<pre><code>cd /usr/local/minio
+</code></pre>
+<p># <strong>设置用户名和密码</strong></p>
+<pre><code>export MINIO_ACCESS_KEY=admin ; export MINIO_SECRET_KEY=admin123
+</code></pre>
+<p># <strong>启动 MinIO 集群</strong></p>
+<pre><code>bin/minio server http://10.213.120.11/usr/local/minio/data1 \ http://10.213.120.11/usr/local/minio/data2 \ 
+
+http://10.213.120.12/usr/local/minio/data1 \
+
+http://10.213.120.12/usr/local/minio/data2
+</code></pre>
+<p>说明：</p>
+<p>1）export MINIO_ACCESS_KEY=admin ; export MINIO_SECRET_KEY=admin123 用于设置用户名和密码。用户名和密码用于登录 MinIO 管理界面，并进行上传、下载、删除等读写操作。由于</p>
+<p>MinIO 支持无限租户，因此这两个变量并不适合作为系统环境变量存放，而是应该作为脚本参数传入。</p>
+<p>2）启动集群的命令中，必须列出集群中所有节点中的所有磁盘的URL，形式如下：</p>
+<p>http://ip/&lt;磁盘挂载路径&gt;</p>
+<p>上述集群中有2个节点，每个节点2块磁盘，因此启动命令中的 url 如下：</p>
+<p>http://10.213.120.11/usr/local/minio/data1 \</p>
+<p>http://10.213.120.11/usr/local/minio/data2 \</p>
+<p>http://10.213.120.12/usr/local/minio/data1 \</p>
+<p>http://10.213.120.12/usr/local/minio/data2</p>
+<p>启动成功后，应该看到如下提示信息：</p>
+<pre><code>Waiting for all MinIO sub-systems to be initialized.. lock acquired
+
+All MinIO sub-systems initialized successfully
+
+Status:     4 Online, 0 Offline. 
+
+Endpoint:  http://10.213.120.182:9000  http://127.0.0.1:9000     
+
+AccessKey: admin 
+
+SecretKey: admin123 
+</code></pre>
+<p>Browser Access:</p>
+<p>http://10.213.120.182:9000  http://127.0.0.1:9000</p>
+<p>Command-line Access: https://docs.min.io/docs/minio-client-quickstart-guide</p>
+<pre><code>  $ mc config host add myminio http://10.213.120.182:9000 admin admin123
+</code></pre>
+<p>Object API (Amazon S3 compatible):</p>
+<p>Go:     https://docs.min.io/docs/golang-client-quickstart-guide</p>
+<p>Java:    https://docs.min.io/docs/java-client-quickstart-guide</p>
+<p>Python:   https://docs.min.io/docs/python-client-quickstart-guide</p>
+<p>JavaScript: https://docs.min.io/docs/javascript-client-quickstart-guide</p>
+<p>.NET:    https://docs.min.io/docs/dotnet-client-quickstart-guide</p>
+<p>至此，MinIO 集群启动成功。</p>
+<p>在浏览器中，分别打开如下url，看能否进入 MinIO 管理控制台：</p>
+<p>http://10.213.120.11:9000</p>
+<p>http://10.213.120.12:9000</p>
+<p>登录用户名 admin，密码 admin123，就是在启动 MinIO 时设置的如下参数：</p>
+<p>export MINIO_ACCESS_KEY=admin ; export MINIO_SECRET_KEY=admin123</p>
+<p>2.5 配置 Nginx 负载均衡</p>
+<p>打开 Nginx 根目录中的 conf/nginx.conf，为 MinIO 集群配置负载均衡（最简配置）：</p>
+<pre><code>http {
+
+​    ......
+
+​    \# MinIO Upstream  
+
+​    upstream minio {
+
+​        server 10.213.120.11:9000;
+
+​        server 10.213.120.12:9000;
+
+​    }
+
+​    \# minIO server
+
+​    server {
+
+​        \# 使用 9999 作为 MinIO 监听端口
+
+​        listen 9999;
+
+​        \# 为 MinIO 的访问设置单独的日志文件（根据需要而定）
+
+​        access_log logs/minio.log  main;
+
+​        \# 注意：目前 MinIO 的 location 只能设置为 /，不能带路径，如 /minio
+
+​        location / {
+
+​            \# 设置可上传的文件大小，默认为 1m，根据需要设置大一些
+
+​            client_max_body_size 20M;
+
+​            \# 注意必须设置 Host，否则使用 Java Client 无法正常访问 MinIO
+
+​            proxy_set_header Host $http_host;
+
+​            proxy_pass http://minio;
+
+​        }
+
+​    }
+
+}
+</code></pre>
+<p>然后在防火墙中开启 9999 端口：</p>
+<pre><code>firewall-cmd --add-port=9999/tcp --permanent
+
+firewall-cmd --reload
+</code></pre>
+<p>再重启 Nginx：</p>
+<pre><code>/usr/local/nginx/sbin/nginx -s reload
+</code></pre>
+<p>使用如下地址访问 MinIO 管理控制台，确认能否正常访问：</p>
+<p>http://10.213.120.10:9999</p>
+<p>这里 10.213.120.10 为 Nginx 所在服务器地址。</p>
+<p>3 将 MinIO 设置为系统服务</p>
+<p>// TODO 待补充</p>
+<p>4 MinIO 操作规范</p>
+<p>4.1 存储桶命名规范</p>
+<p>以下约定来自于 MinIO 的官方声明。</p>
+<p>以下是在所有AWS区域中命名S3存储桶的规则：</p>
+<p>存储桶名称在Amazon S3中的所有现有存储桶名称中必须是唯一的</p>
+<p>存储桶名称必须符合DNS命名约定</p>
+<p>存储桶名称长度必须至少为3且不超过63个字符</p>
+<p>存储桶名称不得包含大写字符或下划线</p>
+<p>存储桶名称必须以小写字母或数字开头</p>
+<p>存储桶名称必须是一系列一个或多个标签。相邻标签由单个句点（。）分隔。存储桶名称可以包含小写字母，数字和连字符。每个标签必须以小写字母或数字开头和结尾</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/Ij5JN2yIV/">
+              <span class="post-title">
+                Docker 常用命令汇总&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://blog.jwangkun.com/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

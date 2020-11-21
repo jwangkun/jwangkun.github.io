@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> SpringBoot 日志 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" SpringBoot 日志 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" SpringBoot 日志"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/_C0uB9Jcs/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/post/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://blog.jwangkun.com/DzkIaAlA0/" class="tag">日志</a>
+            
+        </span>
+            <h1> SpringBoot 日志</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，11 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="日志框架">日志框架</h2>
+<p>市面上的日志框架： JUL、JCL、Jboss-logging、logback、log4j、log4j2、slf4j ...</p>
+<table>
+<thead>
+<tr>
+<th>日志门面</th>
+<th>日志实现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><s>JUL（Jakarta Commons Logging）</s> <strong>SLF4j</strong>(Simple Logging Facade for Java) <s>jboss-logging</s></td>
+<td>Log4j JUL(java.util.logging) Log4j2 <strong>Logback</strong></td>
+</tr>
+<tr>
+<td>划线的是我们开发中不常用的，所以我们首选的日志框架是<strong>SLF4j</strong>，log4j性能问题，所以其作者开发了新的 logback；log4j2是apache开的的日志框架，性能很好，但是现在市面上用它的还比较少，我们若使用可能会出现兼容问题，所以我们开发中一般的选择是：</td>
+<td></td>
+</tr>
+<tr>
+<td>日志门面：SLF4j</td>
+<td></td>
+</tr>
+<tr>
+<td>日志实现：logback</td>
+<td></td>
+</tr>
+<tr>
+<td>SpringBoot：底层是Spring框架，Spring框架默认是用JCL；SpringBoot对其进行了包装，Srping</td>
+<td></td>
+</tr>
+<tr>
+<td>Boot选用 SLF4j和logback。</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="slf4j">SLF4j</h2>
+<h3 id="1-如何在系统中使用slf4j">1、如何在系统中使用SLF4j</h3>
+<p>以后我们开发的时候，日志记录方法的调用，不应该直接掉用日志的实现类，而是调用日志抽象层里的方法。首先要给系统导入slf4j的jar 和 logback的实现jar</p>
+<pre><code class="language-java">import org.slf4j.Logger;
+import org.slf4j.LoggerFactory
+
+public class HelloWorld {
+	public static void main(String[] args) {
+		Logger logger = LoggerFactory.getLogger(HelloWorld.class);
+		logger.info(&quot;hello World&quot;);
+	}
+}
+</code></pre>
+<h3 id="2-日志框架适配slf4j的图解">2、日志框架适配SLF4j的图解</h3>
+<p><img src="http://image.itwolfed.com/springboot-4/concrete-bindings.png" alt="img" loading="lazy"> 每个日志的实现框架都有自己的配置文件，使用slf4j以后，<strong>配置文件还是用日志实现框架自己本身的配置文件</strong></p>
+<h3 id="3-统一日志框架">3、统一日志框架</h3>
+<h4 id="1问题">1.问题</h4>
+<p>实际开发中项目可能是整合了很多框架例如 Spring（commons-logging）、Hibernate（jboss-logging）等等<br>
+我们怎么统一使用slf4j进行输出 ？</p>
+<h4 id="2统一日志框架图解">2.统一日志框架图解</h4>
+<p><img src="http://image.itwolfed.com/springboot-4/legacy.png" alt="img" loading="lazy"> <strong>让系统中所有的日志都统一到slf4j：</strong><br>
+1、将系统中的其他日志框架先排除出去<br>
+2、用中间包来替换原有的日志框架<br>
+3、我们导入slf4j其他的实现</p>
+<h3 id="4-springboot日志关系">4、SpringBoot日志关系</h3>
+<h4 id="1pomxml">1.pom.xml</h4>
+<pre><code class="language-xml">&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-boot-starter-logging&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-core&lt;/artifactId&gt;
+	&lt;exclusions&gt;
+		&lt;exclusion&gt;
+			&lt;groupId&gt;commons-logging&lt;/groupId&gt;
+			&lt;artifactId&gt;commons-logging&lt;/artifactId&gt;
+		&lt;/exclusion&gt;
+	&lt;/exclusions&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h4 id="2底层依赖关系图">2.底层依赖关系图</h4>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-4/springboot-logging.png" alt="img" loading="lazy"></figure>
+<h4 id="3总结">3.总结</h4>
+<ul>
+<li>SpringBoot底层也是使用slf4j+logback的方式进行日志记录</li>
+<li>SpringBoot把其他的日志替换成了slf4j</li>
+</ul>
+<h2 id="日志的使用">日志的使用</h2>
+<h3 id="1-默认配置">1、默认配置</h3>
+<p>SpringBoot默认帮我配置好了日志.</p>
+<pre><code class="language-java">package com.gf;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringbootLoggingApplicationTests {
+
+	//日志记录器
+	Logger logger = LoggerFactory.getLogger( this.getClass() );
+
+	@Test
+	public void contextLoads() {
+
+		//日志级别（由高到底）：trace &lt; debug &lt; info &lt; warn &lt; error
+		//可以调整输出的日志级别，日志只会在这个级别以后的高级别生效
+		logger.trace( &quot;这是trace日志...&quot; );
+		logger.warn( &quot;这是warn日志...&quot; );
+		logger.debug( &quot;这是error日志...&quot; );
+		//SpringBoot默认给我们使用的是info级别，没有指定级别就使用SpringBoot默认的规定
+		logger.info( &quot;这是error日志...&quot; );
+		logger.warn( &quot;这是error日志...&quot; );
+		logger.error( &quot;这是error日志...&quot; );
+
+	}
+
+}
+日志输出格式: 
+	%d表示日期时间，
+	%thread表示线程名，
+	%‐5level:级别从左显示5个字符宽度
+	%logger{50} 表示logger名字最长50个字符，否则按照句点分割。 %msg:日志消息，
+	%n是换行符
+	‐‐&gt;
+	%d{yyyy‐MM‐dd HH:mm:ss.SSS} [%thread] %‐5level %logger{50} ‐ %msg%n
+</code></pre>
+<h3 id="2-修改springboot日志的默认配置">2、修改SpringBoot日志的默认配置</h3>
+<pre><code>logging.level.com.gf=trace
+
+#logging.path 和 logging.path 是冲突设置 ，两者都设置时只有 logging.path 起作用
+#指定文件名，就在项目下生产springboot.log日志
+#logging.file=springboot.log
+
+# 在当前磁盘路径下创建spring文件夹和里面的log文件夹；使用spring.log 作为默认文件
+logging.path=/Users/huanchu/Documents/spring/log
+
+# 指定控制台输出的日志格式
+logging.pattern.console=%d{yyyy-MM-dd} [%thread] %-5level %logger{50} -%msg%n
+
+# 指定文件中日志输出的格式
+logging.pattern.file=%d{yyyy-MM-dd} === [%thread] === %-5level === %logger{50} === %msg%n
+</code></pre>
+<h3 id="3-logbackxml指定配置">3、logback.xml指定配置</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!--
+scan：当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true。
+scanPeriod：设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒当scan为true时，此属性生效。默认的时间间隔为1分钟。
+debug：当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。
+--&gt;
+&lt;configuration scan=&quot;true&quot; scanPeriod=&quot;10 seconds&quot; debug=&quot;false&quot;&gt;
+    &lt;!-- 定义日志的根目录 --&gt;
+    &lt;property name=&quot;LOG_HOME&quot; value=&quot;log&quot; /&gt;
+    &lt;!-- 定义日志文件名称 --&gt;
+    &lt;property name=&quot;appName&quot; value=&quot;springboot-logging&quot;&gt;&lt;/property&gt;
+    &lt;!-- ch.qos.logback.core.ConsoleAppender 表示控制台输出 --&gt;
+    &lt;appender name=&quot;stdout&quot; class=&quot;ch.qos.logback.core.ConsoleAppender&quot;&gt;
+        &lt;!--
+        日志输出格式：
+			%d表示日期时间，
+			%thread表示线程名，
+			%-5level：级别从左显示5个字符宽度
+			%logger{50} 表示logger名字最长50个字符，否则按照句点分割。
+			%msg：日志消息，
+			%n是换行符
+        --&gt;
+        &lt;layout class=&quot;ch.qos.logback.classic.PatternLayout&quot;&gt;
+            &lt;pattern&gt;%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n&lt;/pattern&gt;
+        &lt;/layout&gt;
+    &lt;/appender&gt;
+
+    &lt;!-- 滚动记录文件，先将日志记录到指定文件，当符合某个条件时，将日志记录到其他文件 --&gt;
+    &lt;appender name=&quot;appLogAppender&quot; class=&quot;ch.qos.logback.core.rolling.RollingFileAppender&quot;&gt;
+        &lt;!-- 指定日志文件的名称 --&gt;
+        &lt;file&gt;${LOG_HOME}/${appName}.log&lt;/file&gt;
+        &lt;!--
+        当发生滚动时，决定 RollingFileAppender 的行为，涉及文件移动和重命名
+        TimeBasedRollingPolicy： 最常用的滚动策略，它根据时间来制定滚动策略，既负责滚动也负责出发滚动。
+        --&gt;
+        &lt;rollingPolicy class=&quot;ch.qos.logback.core.rolling.TimeBasedRollingPolicy&quot;&gt;
+            &lt;!--
+            滚动时产生的文件的存放位置及文件名称 %d{yyyy-MM-dd}：按天进行日志滚动
+            %i：当文件大小超过maxFileSize时，按照i进行文件滚动
+            --&gt;
+            &lt;fileNamePattern&gt;${LOG_HOME}/${appName}-%d{yyyy-MM-dd}-%i.log&lt;/fileNamePattern&gt;
+            &lt;!--
+            可选节点，控制保留的归档文件的最大数量，超出数量就删除旧文件。假设设置每天滚动，
+            且maxHistory是365，则只保存最近365天的文件，删除之前的旧文件。注意，删除旧文件是，
+            那些为了归档而创建的目录也会被删除。
+            --&gt;
+            &lt;MaxHistory&gt;365&lt;/MaxHistory&gt;
+            &lt;!--
+            当日志文件超过maxFileSize指定的大小是，根据上面提到的%i进行日志文件滚动 注意此处配置SizeBasedTriggeringPolicy是无法实现按文件大小进行滚动的，必须配置timeBasedFileNamingAndTriggeringPolicy
+            --&gt;
+            &lt;timeBasedFileNamingAndTriggeringPolicy class=&quot;ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP&quot;&gt;
+                &lt;maxFileSize&gt;100MB&lt;/maxFileSize&gt;
+            &lt;/timeBasedFileNamingAndTriggeringPolicy&gt;
+        &lt;/rollingPolicy&gt;
+        &lt;!-- 日志输出格式： --&gt;
+        &lt;layout class=&quot;ch.qos.logback.classic.PatternLayout&quot;&gt;
+            &lt;pattern&gt;%d{yyyy-MM-dd HH:mm:ss.SSS} [ %thread ] - [ %-5level ] [ %logger{50} : %line ] - %msg%n&lt;/pattern&gt;
+        &lt;/layout&gt;
+
+    &lt;/appender&gt;
+
+    &lt;!--
+		logger主要用于存放日志对象，也可以定义日志类型、级别
+		name：表示匹配的logger类型前缀，也就是包的前半部分
+		level：要记录的日志级别，包括 TRACE &lt; DEBUG &lt; INFO &lt; WARN &lt; ERROR
+		additivity：作用在于children-logger是否使用 rootLogger配置的appender进行输出，
+		false：表示只用当前logger的appender-ref，true：
+		表示当前logger的appender-ref和rootLogger的appender-ref都有效
+    --&gt;
+    &lt;!--hibernate logger--&gt;
+    &lt;logger name=&quot;com.gf&quot; level=&quot;debug&quot; /&gt;
+    &lt;!-- Spring framework logger --&gt;
+    &lt;!--&lt;logger name=&quot;org.springframework&quot; level=&quot;debug&quot; additivity=&quot;false&quot;&gt;&lt;/logger&gt;--&gt;
+
+    &lt;!--
+    root与logger是父子关系，没有特别定义则默认为root，任何一个类只会和一个logger对应，
+    要么是定义的logger，要么是root，判断的关键在于找到这个logger，然后判断这个logger的appender和level。
+    --&gt;
+    &lt;root level=&quot;info&quot;&gt;
+        &lt;appender-ref ref=&quot;stdout&quot; /&gt;
+        &lt;appender-ref ref=&quot;appLogAppender&quot; /&gt;
+    &lt;/root&gt;
+&lt;/configuration&gt; 
+</code></pre>
+<p>配置文件命名为logback.xml时，直接被日志框架识别。如果我们把文件名更改成<strong>logback-spring.xml</strong>，这样就不会被日志框架直接识别，<strong>这样配置文件就由SpringBoot加载</strong>，就可以使用SpringBoot的一些高级功能:</p>
+<pre><code class="language-xml">&lt;!-- 可以指定某段配置只在某个环境下生效 --&gt;
+&lt;springProfile name=&quot;staging&quot;&gt;
+&lt;!-- configuration to be enabled when the &quot;staging&quot; profile is active --&gt; 
+&lt;/springProfile&gt;
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-xml">&lt;!-- 设置不同环境下日志的打印格式 --&gt;
+&lt;layout class=&quot;ch.qos.logback.classic.PatternLayout&quot;&gt;
+	&lt;springProfile name=&quot;dev&quot;&gt;
+   		&lt;pattern&gt;%d{yyyy-MM-dd HH:mm:ss.SSS} ----&gt; [%thread] ----&gt; %-5level %logger{50} - %msg%n&lt;/pattern&gt;
+   	&lt;/springProfile&gt;
+   	&lt;springProfile name=&quot;test&quot;&gt;
+   		&lt;pattern&gt;%d{yyyy-MM-dd HH:mm:ss.SSS} ===== [%thread] ===== %-5level %logger{50} - %msg%n&lt;/pattern&gt;
+    &lt;/springProfile&gt;
+    &lt;springProfile name=&quot;test&quot;&gt;
+    	&lt;pattern&gt;%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n&lt;/pattern&gt;
+	&lt;/springProfile&gt;
+&lt;/layout&gt;
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/sY0ka1Vfs/">
+              <span class="post-title">
+                SpringBoot Profile多环境配置&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://blog.jwangkun.com/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://blog.jwangkun.com/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+
