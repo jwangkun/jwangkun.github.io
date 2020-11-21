@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2020-11-21T04:03:49.317Z</updated>
+    <updated>2020-11-21T04:07:17.594Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2020, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[ Git 工作流程]]></title>
+        <id>https://blog.jwangkun.com/xzpF4Te2G/</id>
+        <link href="https://blog.jwangkun.com/xzpF4Te2G/">
+        </link>
+        <updated>2020-11-21T04:06:46.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Git flow 规范]]></title>
         <id>https://blog.jwangkun.com/3Me5sxE_I/</id>
@@ -72,12 +79,5 @@
         <link href="https://blog.jwangkun.com/wD_JHQNwi/">
         </link>
         <updated>2020-11-18T02:38:54.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Docker overlay2 占用大量磁盘空间处理方法 ]]></title>
-        <id>https://blog.jwangkun.com/hvauG2ZhN/</id>
-        <link href="https://blog.jwangkun.com/hvauG2ZhN/">
-        </link>
-        <updated>2020-11-17T06:45:02.000Z</updated>
     </entry>
 </feed>
