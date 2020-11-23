@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>Gitlab添加K8S集群 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Gitlab添加K8S集群 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="Gitlab添加K8S集群"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/MkmjjOlzc/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,228 +71,101 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/B5IR6REH-N/" class="tag">Gitlab</a>
+            
+            <a href="https://blog.jwangkun.com/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Gitlab添加K8S集群</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-23，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/ieXjrJ3_D/">
-            <h2 class="post-title">
-              Kubernetes - 集群备份和恢复
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h1 id="gitlab添加k8s集群"><a href="https://www.cnblogs.com/Med1tator/p/13141853.html">Gitlab添加K8S集群</a></h1>
+<p>本文介绍如何在Gitlab项目中添加K8S集群，以便使用K8S集群部署gitlab-runner帮我们运行gitlab的CI/CD。</p>
+<p>参考官方文档：https://docs.gitlab.com/ee/user/project/clusters/add_remove_clusters.html#add-existing-cluster</p>
+<h2 id="操作步骤">操作步骤</h2>
+<p><strong>找到添加位置</strong></p>
+<p>登入gitlab后，进入自己的项目主页，菜单栏 Operations =&gt; Kubernetes =&gt; Add Kubernetes cluster，选择页签 Add existing cluster。</p>
+<figure data-type="image" tabindex="1"><img src="http://images.towita.com/ever/image-20200616142451397.png" alt="image-20200616142451397" loading="lazy"></figure>
+<p>我们只需要获取响应的值填录到该表单即可。Kubernetes cluster name集群名称随意填，Project namespace可不填。</p>
+<p><strong>获取API URL</strong></p>
+<p>运行以下命令得到输出值：</p>
+<pre><code>kubectl cluster-info | grep 'Kubernetes master' | awk '/http/ {print $NF}'
+</code></pre>
+<p><strong>获取CA Certificate</strong></p>
+<p>运行以下命令得到输出值：</p>
+<pre><code class="language-shell">kubectl get secret $(kubectl get secret | grep default-token | awk '{print $1}') -o jsonpath=&quot;{['data']['ca\.crt']}&quot; | base64 --decode
+</code></pre>
+<p><strong>获取Token</strong></p>
+<p>创建文件gitlab-admin-service-account.yaml：</p>
+<pre><code>vim gitlab-admin-service-account.yaml
+</code></pre>
+<p>文件写入如下内容：</p>
+<pre><code>apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gitlab-admin
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: gitlab-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: gitlab-admin
+  namespace: kube-system
+</code></pre>
+<p>运行以下命令得到输出值：</p>
+<pre><code>kubectl apply -f gitlab-admin-service-account.yaml
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep gitlab-admin | awk '{print $1}')
+</code></pre>
+<p>添加完成之后，可以在集群中安装你想用的插件了，例如gitlab-runner。</p>
+<h2 id="踩坑记录">踩坑记录</h2>
+<p>在Gitlab中添加Kubernetes集群，可能存在两者版本兼容的问题，这回导致gitlab调用K8S集群的API失败，可能是因为K8S不同版本的api更新的缘故。尽量使用最新版本的Gitlab，他会支持更多版本的K8S API。</p>
+<p>可以通过文档查看Gitlab支持的K8S版本：https://docs.gitlab.com/ee/user/project/clusters/index.html</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/Tc-8M_vLY/">
+              <span class="post-title">
+                Docker搭建YAPI服务&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-23</span>
-             <span>,</span>
-             <span class="post-stats">12 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/cbHCwLkry/">
-            <h2 class="post-title">
-              kubernetes集群证书更新
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-23</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/1v3c-Lt8W/">
-            <h2 class="post-title">
-              KubeSphere3.0启用k8s多集群 
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/TooJXXWJC/">
-            <h2 class="post-title">
-              在Kubernetes上部署Redis集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/M-uFfBC55/">
-            <h2 class="post-title">
-               Docker  安装 oracle-xe-11g
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/kms1F57yD/">
-            <h2 class="post-title">
-              使用 Docker -compose 部署多机 RabbitMQ 集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/tqnkelFHT/">
-            <h2 class="post-title">
-              Springcloud Eureka instance 配置项
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">17 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/JqFGb7It7/">
-            <h2 class="post-title">
-              CentOS7.4 系统内核升级
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/FJICN9yKv/">
-            <h2 class="post-title">
-              K8S部署eureka集群高可用
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-21</span>
-             <span>,</span>
-             <span class="post-stats">15 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/FwQvnztt3/">
-            <h2 class="post-title">
-              Docker 容器之间网络的通信
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-20</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/page/9/">&larr; 上一页</a>
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/11/">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -368,3 +247,4 @@
 
   </body>
 </html>
+
