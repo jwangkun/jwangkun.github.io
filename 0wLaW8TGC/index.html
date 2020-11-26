@@ -104,7 +104,7 @@
           <ol>
 <li>
 <p>拉取 jenkins 镜像：</p>
-<pre><code>docker pull jenkins/jenkins:latest
+<pre><code>docker pull jenkins/blueocean:latest
 </code></pre>
 </li>
 <li>
@@ -124,7 +124,7 @@
 </li>
 <li>
 <p>启动 jenkins 镜像：</p>
-<pre><code>docker run -d --name jenkins -p 8080:8080 --restart always -v /home/jenkins:/var/jenkins_home jenkins/jenkins
+<pre><code>docker run -d --name jenkins -p 8080:8080 --restart always -v /home/jenkins:/var/jenkins_home jenkins/blueocean
 </code></pre>
 </li>
 <li>
