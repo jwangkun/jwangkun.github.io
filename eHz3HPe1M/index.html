@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>基于Docker安装破解版Jira | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="基于Docker安装破解版Jira | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="基于Docker安装破解版Jira"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/eHz3HPe1M/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,228 +71,94 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/4xrbPGxh2/" class="tag">Jira</a>
+            
+            <a href="https://blog.jwangkun.com/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>基于Docker安装破解版Jira</h1>
+            <span class="meta">
+            	Posted on
+              2020-12-04，3 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/9QRKkt5vh/">
-            <h2 class="post-title">
-              MySQL 慢查询
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>1、下载镜像</p>
+<p>一定要安装jira-software(不是jira),否则没有agile</p>
+<pre><code class="language-shell">[root@iZo7e61fz42ik0Z ~]# docker pull dchevell/jira-software:7.13.0
+</code></pre>
+<p>2、运行容器</p>
+<pre><code class="language-shell">[root@iZo7e61fz42ik0Z data]# docker run -d -it -p  8080:8080  --privileged  -m 4096M -v /data/jira-data:/var/atlassian/application-data/jira  -v /etc/localtime:/etc/localtime --name jira dchevell/jira-software:7.13.0
+</code></pre>
+<p>3、拷贝文件到容器内</p>
+<pre><code class="language-shell"># 下载3个文件
+[root@iZo7e61fz42ik0Z data]# wget https://github.com/hlwojiv/some-software/raw/master/Jira/mysql-connector-java-5.1.25-bin.jar
+[root@iZo7e61fz42ik0Z data]# wget https://github.com/hlwojiv/some-software/raw/master/Jira/atlassian-universal-plugin-manager-plugin-2.22.4.jar
+[root@iZo7e61fz42ik0Z data]# wget https://github.com/hlwojiv/some-software/raw/master/Jira/atlassian-extras-3.2.jar
+
+# 拷贝mysql-connector
+[root@iZo7e61fz42ik0Z data]# docker cp mysql-connector-java-5.1.25-bin.jar jira:/opt/atlassian/jira/atlassian-jira/WEB-INF/lib/
+# 进入容器修改mysql-connector的权限
+[root@iZo7e61fz42ik0Z data]# docker exec -it jira bash
+bash-4.4# chmod 755 /opt/atlassian/jira/atlassian-jira/WEB-INF/lib/mysql-connector-java-5.1.25-bin.jar
+bash-4.4# exit
+# 重启容器
+[root@iZo7e61fz42ik0Z data]# docker restart jira
+</code></pre>
+<p>3、拷贝文件到容器内</p>
+<pre><code class="language-shell"># 拷贝atlassian-extras到容器内
+[root@iZo7e61fz42ik0Z data]# docker cp atlassian-extras-3.2.jar jira:/opt/atlassian/jira/atlassian-jira/WEB-INF/lib/
+# 进入容器设置atlassian-extras的权限
+[root@iZo7e61fz42ik0Z data]# docker exec -it jira bash
+bash-4.4# chmod 755 /opt/atlassian/jira/atlassian-jira/WEB-INF/lib/atlassian-extras-3.2.jar
+# 重启容器
+[root@iZo7e61fz42ik0Z data]# docker restart jira
+jira
+
+# 拷贝插件到容器内
+[root@iZo7e61fz42ik0Z data]# docker cp atlassian-universal-plugin-manager-plugin-2.22.4.jar jira:/opt/atlassian/jira/atlassian-jira/WEB-INF/atlassian-bundled-plugins/
+# 进入容器内修改插件的属性
+[root@iZo7e61fz42ik0Z data]# docker exec -it jira bash
+bash-4.4# chmod 755  /opt/atlassian/jira/atlassian-jira/WEB-INF/atlassian-bundled-plugins/atlassian-universal-plugin-manager-plugin-2.22.4.jar
+# 删除另一个插件
+bash-4.4# rm -rf /opt/atlassian/jira/atlassian-jira/WEB-INF/atlassian-bundled-plugins/atlassian-universal-plugin-manager-plugin-2.22.9.jar
+</code></pre>
+<p>破解结束，进入Jira下载任意插件，申请试用，自动破解</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/z1DaTQKse/">
+              <span class="post-title">
+                Angular-内存溢出的问题&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/88dTMMWAq/">
-            <h2 class="post-title">
-              Keepalived高可用集群（双主）
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/lV9LJXd56/">
-            <h2 class="post-title">
-              Keepalived + Nginx 实现高可用 Web 负载均衡
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/VqNvY1txA/">
-            <h2 class="post-title">
-              Keepalived搭建MySQL  主主从集群环境
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">14 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/aXLFZey34/">
-            <h2 class="post-title">
-              MySQL  集群环境搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/O2hEa3Tlz/">
-            <h2 class="post-title">
-              Centos7.4 安装MySQL 教程
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/Pw8vFa6Zm/">
-            <h2 class="post-title">
-              SpringBoot实现邮件发送功能
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/cTw-2dnqX/">
-            <h2 class="post-title">
-              SpringBoot Quartz实现动态定时任务
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/TrR0hf0TL/">
-            <h2 class="post-title">
-              Spring Task实现简单定时任务
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/Y5VB2-e2s/">
-            <h2 class="post-title">
-              spring-boot-admin监控服务
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/page/3/">&larr; 上一页</a>
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/5/">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -368,3 +240,4 @@
 
   </body>
 </html>
+
