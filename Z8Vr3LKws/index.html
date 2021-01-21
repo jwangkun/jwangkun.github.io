@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>Docker安装单机ElasticSearch | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Docker安装单机ElasticSearch | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="Docker安装单机ElasticSearch"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/Z8Vr3LKws/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,228 +71,107 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/R-H9gtYSF/" class="tag">ElasticSearch</a>
+            
+            <a href="https://blog.jwangkun.com/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>Docker安装单机ElasticSearch</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-21，3 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/KxZIg9sIn/">
-            <h2 class="post-title">
-              SpringBoot Security 详解
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>搜索ElasticSearch镜像</p>
+<pre><code>docker search elasticsearch
+</code></pre>
+<p>拉取镜像</p>
+<pre><code>docker pull docker.io/elasticsearch:版本号
+</code></pre>
+<p>拉取镜像的时候，可以指定版本，如果不指定，默认使用latest。</p>
+<p>查看镜像</p>
+<pre><code>docker images
+</code></pre>
+<p>运行容器</p>
+<pre><code>docker run -d --name es2 -p 9200:9200 -p 9300:9300 -e &quot;discovery.type=single-node&quot; elasticsearch
+</code></pre>
+<p>通过镜像启动容器，然后查看容器。</p>
+<pre><code>docker ps   # 列出正在运行的容器
+docker ps -a    # 列出所有容器，包括未运行的
+</code></pre>
+<p>明明启动了容器，为什么会自动退出了呢？这里通过查看日志来看看是什么原因。</p>
+<pre><code>docker logs 676164fb24b3   	# 查看某个容器的日志
+</code></pre>
+<p>经过相关资料证实，这是因为内存不足导致的。所以在启动的时候，调整内存的分配，重新启动。<br>
+“ES_JAVA_OPTS=-Xms512m -Xmx512m”</p>
+<p>通过上图可知，容器已经启动完成。现在就可以在浏览器输入 ip + 端口号 访问了。</p>
+<p>配置跨域<br>
+通过项目中的配置，发现 cluster.name 这个与刚刚启动的不一致，ElasticSearch默认的cluster.name为elasticsearch，所以，这里需要进行修改。<br>
+首先进入容器。</p>
+<pre><code>docker exec -it es2 /bin/bash
+</code></pre>
+<p>我们需要对红框框圈中的文件&quot;elasticsearch.yml&quot;进行修改。</p>
+<p>这里使用vim和vi命令，都提示&quot;没有发现这个命令&quot;，这是因为Docker容器内部没有安装。所以，这里需要进行安装。</p>
+<p>apt-get update  # 获取最新的软件包<br>
+apt-get install vim   # 下载</p>
+<p>依次使用上面的命令即可安装成功，然后对&quot;elasticsearch.yml&quot;这个文件修改，增加如下内容。</p>
+<pre><code>cluster.name: &quot;qfcwx-cluster&quot;   
+network.host: 0.0.0.0
+http.cors.enabled: true
+http.cors.allow-origin: &quot;*&quot;
+</code></pre>
+<p>cluster.name：自定义集群名称。<br>
+network.host：当前es节点绑定的ip地址，默认127.0.0.1，如果需要开放对外访问这个属性必须设置。<br>
+http.cors.enabled：是否支持跨域，默认为false。<br>
+http.cors.allow-origin：当设置允许跨域，默认为*，表示支持所有域名，如果我们只是允许某些网站能访问，那么可以使用正则表达式。</p>
+<p>重启ElasticSearch容器<br>
+使用exit命令从容器内部退出。</p>
+<p>注意，这里是重启ElasticSearch容器，并不是重新启动一个新的容器。</p>
+<pre><code>docker restart es2
+使用浏览器进行访问。
+</code></pre>
+<p>可以看到集群的名称已经变成我们自己设置的了。</p>
+<p>查看ElasticSearch内部信息<br>
+如果没有指定版本号，就从Docker镜像仓库中拉取镜像的话，你是不知道版本号的。如果在Java中操作ElasticSearch，需要导入相应的约束或者jar包。这就需要和ElasticSearch版本号对应，不然就会报莫名的异常，所以，就需要查看当前ElasticSearch的本版号了，这里有两种方法。</p>
+<p>①、通过 ip+端口号 可以看到返回的json数据中，version下面的number就是版本号。<br>
+②、通过查看ElasticSearch容器内部信息。</p>
+<p>docker inspect 5acf0e8da90b     # 查看容器内部信息</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/l4YYAE4Ff/">
+              <span class="post-title">
+                 Docker安装单机Zookeeper&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">15 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/q3uH3ZKcZ/">
-            <h2 class="post-title">
-              Spring Boot 整合 apollo
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/FQJiWX7zK/">
-            <h2 class="post-title">
-              Spring Boot Admin 2.0 详解
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">24 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/2eZeFun_S/">
-            <h2 class="post-title">
-              SpringBoot 整合 ELK
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/ozUSZ8tBa/">
-            <h2 class="post-title">
-              SpringBoot 整合 docker
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/5Kswfs5K9/">
-            <h2 class="post-title">
-              SpringBoot 整合 elasticsearch
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/gra6AGClN/">
-            <h2 class="post-title">
-               SpringBoot 整合 Rabbitmq
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">12 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/68vxPD-UY/">
-            <h2 class="post-title">
-              SpringBoot 整合 spring cache
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/7YnmQAl3N/">
-            <h2 class="post-title">
-              SpringBoot 整合 mybatis-plus
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/BXn3b8xdV/">
-            <h2 class="post-title">
-              SpringBoot 自定义 starter
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/page/8/">&larr; 上一页</a>
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/10/">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -368,3 +253,4 @@
 
   </body>
 </html>
+
