@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>Redis 的几种数据导入导出方式 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Redis 的几种数据导入导出方式 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="Redis 的几种数据导入导出方式"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/ULzlrwcmM/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,226 +71,119 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/R2P-hE8zq/" class="tag">Redis</a>
+            
+        </span>
+            <h1>Redis 的几种数据导入导出方式</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-21，4 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/ULzlrwcmM/">
-            <h2 class="post-title">
-              Redis 的几种数据导入导出方式
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>环境说明：<br>
+202.102.221.11 redis 源实例<br>
+202.102.221.12 redis 目标实例<br>
+202.102.221.13 任意 linux 系统</p>
+<h2 id="一-redis-dump-方式">一、redis-dump 方式</h2>
+<p>1. 安装 redis-dump 工具</p>
+<pre><code>[root@202.102.221.13 ~]# yum install ruby rubygems ruby-devel -y
+</code></pre>
+<p>更改gem源</p>
+<pre><code>[root@202.102.221.13 ~]# gem sources -a http://ruby.taobao.org
+Error fetching http://ruby.taobao.org:
+bad response Not Found 404 (http://ruby.taobao.org/specs.4.8.gz)
+　　访问http://ruby.taobao.org，公告通知镜像维护站点已迁往Ruby China镜像
+
+#gem sources --add https://gems.ruby-china.org/ --remove https://rubygems.org/
+[root@202.102.221.13 ~]# gem sources --add http://gems.ruby-china.org/ --remove http://rubygems.org/
+http://gems.ruby-china.org/ added to sources
+source http://rubygems.org/ not present in cache
+[root@202.102.221.13 ~]# gem sources -l
+*** CURRENT SOURCES ***
+
+http://gems.ruby-china.org/
+[root@202.102.221.13 ~]# gem install redis-dump -V
+</code></pre>
+<p>2.redis-dump 导出</p>
+<pre><code>[root@202.102.221.13 ~]# redis-dump -u :password@202.102.221.11:6379 &gt; 202.102.221.11.json
+</code></pre>
+<p>3.redis-load 导入</p>
+<pre><code>[root@202.102.221.13 ~]# cat 202.102.221.11.json | redis-load -u :password@202.102.221.12:6379
+</code></pre>
+<h2 id="二-aof-导入方式">二、aof 导入方式</h2>
+<p>1. 源实例生成 aof 数据</p>
+<p>清空上文目标实例全部数据</p>
+<p>[root@202.102.221.11 ~]# redis-cli -h 202.102.221.12 -a password flushall<br>
+OK</p>
+<p>源实例开启aof功能，将在dir目录下生成appendonly.aof文件</p>
+<pre><code>[root@202.102.221.11 ~]# redis-cli -h 202.102.221.11 -a password config set appendonly yes
+OK
+</code></pre>
+<p>2. 目标实例导入 aof 数据</p>
+<p>假设appendonly.aof就在当前路径下</p>
+<pre><code>[root@202.102.221.11 ~]# redis-cli -h 202.102.221.12 -a password --pipe &lt; appendonly.aof
+All data transferred. Waiting for the last reply...
+Last reply received from server.
+errors: 0, replies: 5
+</code></pre>
+<p>源实例关闭aof功能</p>
+<pre><code>[root@202.102.221.11 ~]# redis-cli -h 202.102.221.11 -a password config set appendonly no
+OK
+</code></pre>
+<h2 id="三-rdb-文件迁移方式">三、rdb 文件迁移方式</h2>
+<p>（1）关闭要迁移到的服务器的 redis 的 aof 日志功能（我的要迁移到的是本机的 redis6380.conf）</p>
+<p>vim redis6380.conf，将 appendonly yes 修改为 appendonly no</p>
+<p>（2）我们先看一下当前 redis 的数据，并将数据用 save 命令固化到 rdb 文件中，我的 rdb 文件为 / var/rdb/dump6379.rdb</p>
+<p>（3）杀掉当前 redis 的进程，否则下一步的复制 rdb 文件，rdb 处于打开的状态，复制的文件，会占用同样的句柄</p>
+<p>（4）复制当前 redis 的 rdb 文件，名字为你要迁移的 redis 的 rdb 文件名（我的要迁移的 redis 的文件名为 /var/rdb/dump6380.rdb），记住，一定要杀掉当前 redis 的进程，还有关闭要迁移的服务器的 aof 功能（如果不关闭 aof，默认用 aof 文件来恢复数据）</p>
+<p>（5）启动 6380 的 redis，我们会发现，6380 多出了 name 的数据，这个数据，就是 6379 固化到 rdb 的数据</p>
+<p>以上就是在不同的 redis 之间进行 rdb 的数据迁移，思路就是，复制 rdb 文件，然后让要迁移的 redis 加载这个 rdb 文件就 ok 了</p>
+<h2 id="四-源实例-db0-迁移至目标实例-db1">四、源实例 db0 迁移至目标实例 db1</h2>
+<pre><code>[root@202.102.221.11 ~]# cat redis_mv.sh
+</code></pre>
+<pre><code>#!/bin/bash
+redis-cli -h 202.102.221.11 -p 6379 -a password -n 0 keys &quot;*&quot; | while read key
+do
+redis-cli -h 202.102.221.11 -p 6379 -a password -n 0 --raw dump $key | perl -pe 'chomp if eof' | redis-cli -h 202.102.221.12 -p 6379 -a password -n 1 -x restore $key 0
+echo &quot;migrate key $key&quot;
+done
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/Z8Vr3LKws/">
+              <span class="post-title">
+                Docker安装单机ElasticSearch&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/Z8Vr3LKws/">
-            <h2 class="post-title">
-              Docker安装单机ElasticSearch
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/l4YYAE4Ff/">
-            <h2 class="post-title">
-               Docker安装单机Zookeeper
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">1 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/J99Yr_kXB/">
-            <h2 class="post-title">
-               Docker运行Tomcat
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/H7ICBFQ_S/">
-            <h2 class="post-title">
-              containerd与安全沙箱的Kubernetes初体验
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-08</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/nR5vRQbNX/">
-            <h2 class="post-title">
-              Mysql 中主库跑太快，从库追不上怎么整？
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-08</span>
-             <span>,</span>
-             <span class="post-stats">6 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/0Jp-58n4n/">
-            <h2 class="post-title">
-              一个产品需求的研发流程是怎样的？
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-08</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/ZnsIzHFW_/">
-            <h2 class="post-title">
-              作为项目经理应该串联起哪些流程
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-07</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/6Bbv-e1gu/">
-            <h2 class="post-title">
-              vivo 全球商城：订单中心架构设计与实践
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-06</span>
-             <span>,</span>
-             <span class="post-stats">14 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/uhwmwJVB0/">
-            <h2 class="post-title">
-               Spring Boot Admin的使用
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-06</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/2">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -366,3 +265,4 @@
 
   </body>
 </html>
+

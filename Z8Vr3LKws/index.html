@@ -112,7 +112,7 @@
 <pre><code>docker images
 </code></pre>
 <p>运行容器</p>
-<pre><code>docker run -d --name es2 -p 9200:9200 -p 9300:9300 -e &quot;discovery.type=single-node&quot; elasticsearch
+<pre><code>docker run -d --name es2 -p 9200:9200 -p 9300:9300  --restart=always -e &quot;discovery.type=single-node&quot;  elasticsearch
 </code></pre>
 <p>通过镜像启动容器，然后查看容器。</p>
 <pre><code>docker ps   # 列出正在运行的容器
