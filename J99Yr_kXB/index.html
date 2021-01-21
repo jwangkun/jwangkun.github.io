@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title> Docker运行Tomcat | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title=" Docker运行Tomcat | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content=" Docker运行Tomcat"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/J99Yr_kXB/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,226 +71,84 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/ZwucxfWuM/" class="tag">Tomcat</a>
+            
+            <a href="https://blog.jwangkun.com/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1> Docker运行Tomcat</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-21，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/J99Yr_kXB/">
-            <h2 class="post-title">
-               Docker运行Tomcat
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>一. 首先在我们的服务器上安装Docker。<br>
+安装教程-任意门<br>
+我就罗列一下主要的几步：</p>
+<p>yum install -y yum-utils device-mapper-persistent-data lvm2<br>
+yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo<br>
+yum install docker-ce<br>
+yum install docker-ce-17.12.0.ce<br>
+systemctl start docker<br>
+systemctl enable docker<br>
+记住如果出现问题，就重复执行一步错误的命令</p>
+<p>二.搜索下载tomcat镜像</p>
+<p>下载镜像：docker pull tomcat<br>
+等待下载完成。。。下载会比较缓慢。。</p>
+<p>三. 运行我们的tomcat镜像：<br>
+docker run -d -p 8888:8080 -v /root/tomcat/:/usr/local/tomcat/webapps/ tomcat<br>
+参数说明：</p>
+<p>-d 后台运行<br>
+-p 指定访问主机的8888端口映射到8080端口。<br>
+-v 指定我们容器的/usr/local/tomcat/webapps/目录为/root/tomcat/主机目录，后续我们要对tomcat进行操作直接在主机这个目录操作即可。<br>
+在/root/tomcat/新建test目录，并在test目录下写入hello.html文件</p>
+<html>
+<head>Tomcat Run In Docker</head>
+<body>
+hello docker.
+</body>
+</html>
+<p>访问这个页面:<br>
+curl -i http://127.0.0.1:8888/test/hello.html</p>
+<p>最后<br>
+我们不能直接在tomcat目录下直接创建hello.html文件<br>
+curl -i http://127.0.0.1:8888/hello.html 访问的结果404.</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/H7ICBFQ_S/">
+              <span class="post-title">
+                containerd与安全沙箱的Kubernetes初体验&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/H7ICBFQ_S/">
-            <h2 class="post-title">
-              containerd与安全沙箱的Kubernetes初体验
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-08</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/nR5vRQbNX/">
-            <h2 class="post-title">
-              Mysql 中主库跑太快，从库追不上怎么整？
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-08</span>
-             <span>,</span>
-             <span class="post-stats">6 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/0Jp-58n4n/">
-            <h2 class="post-title">
-              一个产品需求的研发流程是怎样的？
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-08</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/ZnsIzHFW_/">
-            <h2 class="post-title">
-              作为项目经理应该串联起哪些流程
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-07</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/6Bbv-e1gu/">
-            <h2 class="post-title">
-              vivo 全球商城：订单中心架构设计与实践
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-06</span>
-             <span>,</span>
-             <span class="post-stats">14 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/uhwmwJVB0/">
-            <h2 class="post-title">
-               Spring Boot Admin的使用
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-06</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/yJFN7LOwj/">
-            <h2 class="post-title">
-              SpringBoot 配置 ELK 环境
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-06</span>
-             <span>,</span>
-             <span class="post-stats">13 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/zCVHQl6PG/">
-            <h2 class="post-title">
-               常用的 JVM 性能调优监控工具
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-06</span>
-             <span>,</span>
-             <span class="post-stats">13 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/u4xV9bWHm/">
-            <h2 class="post-title">
-              MyBatis Plus 讲解
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-06</span>
-             <span>,</span>
-             <span class="post-stats">26 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/2">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -366,3 +230,4 @@
 
   </body>
 </html>
+
