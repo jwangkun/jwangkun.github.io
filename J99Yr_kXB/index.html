@@ -115,12 +115,12 @@ systemctl enable docker<br>
 <p>下载镜像：docker pull tomcat<br>
 等待下载完成。。。下载会比较缓慢。。</p>
 <p>三. 运行我们的tomcat镜像：<br>
-docker run -d -p 8888:8080 -v /root/tomcat/:/usr/local/tomcat/webapps/ tomcat<br>
+docker run -d -p 8080:8080 -v /home/tomcat/webapps/:/usr/local/tomcat/webapps/ tomcat<br>
 参数说明：</p>
 <p>-d 后台运行<br>
--p 指定访问主机的8888端口映射到8080端口。<br>
--v 指定我们容器的/usr/local/tomcat/webapps/目录为/root/tomcat/主机目录，后续我们要对tomcat进行操作直接在主机这个目录操作即可。<br>
-在/root/tomcat/新建test目录，并在test目录下写入hello.html文件</p>
+-p 指定访问主机的8080端口映射到8080端口。<br>
+-v 指定我们容器的/usr/local/tomcat/webapps/目录为/home/tomcat/webapps/主机目录，后续我们要对tomcat进行操作直接在主机这个目录操作即可。<br>
+在/home/tomcat/webapps/新建test目录，并在test目录下写入hello.html文件</p>
 <html>
 <head>Tomcat Run In Docker</head>
 <body>
@@ -128,7 +128,7 @@ hello docker.
 </body>
 </html>
 <p>访问这个页面:<br>
-curl -i http://127.0.0.1:8888/test/hello.html</p>
+curl -i http://127.0.0.1:8080/test/hello.html</p>
 <p>最后<br>
 我们不能直接在tomcat目录下直接创建hello.html文件<br>
 curl -i http://127.0.0.1:8888/hello.html 访问的结果404.</p>
