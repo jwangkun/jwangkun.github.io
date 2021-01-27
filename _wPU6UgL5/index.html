@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>Clickhouse安装使用文档 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Clickhouse安装使用文档 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="Clickhouse安装使用文档"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/_wPU6UgL5/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,228 +71,149 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/FeZnbmX34/" class="tag">Clickhouse</a>
+            
+        </span>
+            <h1>Clickhouse安装使用文档</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-27，4 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/j8crmnX4t/">
-            <h2 class="post-title">
-              Centos7 优化
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="clickhouse简介">Clickhouse简介</h2>
+<h3 id="clickhouse是什么">Clickhouse是什么</h3>
+<ol>
+<li>
+<p>开源的列存储数据库管理系统</p>
+</li>
+<li>
+<p>支持线性扩展</p>
+</li>
+<li>
+<p>简单方便</p>
+</li>
+<li>
+<p>高可靠性</p>
+</li>
+<li>
+<p>容错（支持多主机异步复制，可以跨多个数据中心部署。 单个节点或整个数据中心的停机时间不会影响系统的读写可用性）</p>
+</li>
+</ol>
+<p>clickhouse架构及存储方式<br>
+clickhouse架构未开源</p>
+<h3 id="clickhouse特点">clickhouse特点</h3>
+<p>用于对干净，结构良好且不可变的事件或日志进行分析。建议将每个这样的流放入一个带有预加入尺寸的单一宽事实表中。</p>
+<h3 id="clickhouse使用场景">Clickhouse使用场景</h3>
+<p>可行的应用程序的一些例子：<br>
+Web和App分析<br>
+广告网络和RTB<br>
+电信<br>
+电子商务和金融<br>
+信息安全<br>
+监测和遥测<br>
+时间序列<br>
+商业智能<br>
+线上游戏<br>
+物联网<br>
+事务性工作负载（OLTP）<br>
+高请求率的键值访问<br>
+Blob或文档存储<br>
+超标准化的数据<br>
+不适用场景</p>
+<h2 id="clickhouse安装">clickhouse安装</h2>
+<p>系统要求<br>
+ClickHouse可以在任何具有x86_64，AArch64或PowerPC64LE CPU架构的Linux，FreeBSD或Mac OS X上运行。</p>
+<p>官方预构建的二进制文件通常针对x86_64进行编译，并利用SSE 4.2指令集，因此，除非另有说明，支持它的CPU使用将成为额外的系统需求。下面是检查当前CPU是否支持SSE 4.2的命令:</p>
+<pre><code>$ grep -q sse4_2 /proc/cpuinfo &amp;&amp; echo &quot;SSE 4.2 supported&quot; || echo &quot;SSE 4.2 not supported&quot;
+</code></pre>
+<p>要在不支持SSE 4.2或AArch64，PowerPC64LE架构的处理器上运行ClickHouse，您应该通过适当的配置调整从源代码构建ClickHouse。</p>
+<p>RPM安装</p>
+<pre><code>sudo yum install yum-utils
+sudo rpm --import https://repo.clickhouse.tech/CLICKHOUSE-KEY.GPG
+sudo yum-config-manager --add-repo https://repo.clickhouse.tech/rpm/stable/x86_64
+sudo yum install clickhouse-server clickhouse-client
+
+</code></pre>
+<p>你也可以从这里手动下载安装包：https://repo.yandex.ru/clickhouse/rpm/stable/x86_64/</p>
+<h2 id="clickhouse使用">clickhouse使用</h2>
+<p>简单的使用 服务起停</p>
+<p>停止：</p>
+<pre><code>service clickhouse-server stop
+</code></pre>
+<p>启动：</p>
+<pre><code>service clickhouse-server start
+</code></pre>
+<p>用clickhouse-client连接本机clickhouse-server服务器：</p>
+<pre><code>Clickhouse-client
+</code></pre>
+<p>用本机clickhouse-client连接远程clickhouse-server服务器：</p>
+<pre><code>clickhouse-client –host 192.168.3.54 –port 9000 –database default–user default –password “”
+</code></pre>
+<p><strong>DDL（data definition language）</strong><br>
+create table funtest(id UInt32, name String ,age UInt32,times Date)ENGINE=Log</p>
+<p>drop table funtest</p>
+<p>alter table ontime_all add COLUMN name String;</p>
+<p><strong>DML（data manipulation language）</strong></p>
+<p>insert into funtest values(3,'xiaoming',22,'2017-11-09')</p>
+<p>insert into funtest values(32,'xiaolan',33,'2017-11-08')</p>
+<p>insert into funtest values(35,'xiaotong',33,'2017-11-07')</p>
+<p>insert into funtest values(4,'xiaohuang',33,'2017-11-08')</p>
+<p>insert into funtest values(44,'xiaolvas',34,'2017-11-05')</p>
+<p>insert into funtest values(6,'xiaohuanasg',32,'2017-11-28')</p>
+<p>select *  from funtest</p>
+<p>select *  from funtest order by id</p>
+<p>select * from funtest order by  id desc</p>
+<p>select avg(age)  from funtest</p>
+<p>select count(name) from funtest</p>
+<p>select age from funtest group by age</p>
+<p>select round(age/3) FROM funtest</p>
+<p>select cast('2015-12-22' as date) from funtest</p>
+<p>select cast('2015-12-22' as date)+30 from funtest</p>
+<p>select stddev_samp(age) FROM funtest</p>
+<p>select upper('hhh') from funtest</p>
+<p>select upper(name) from funtest</p>
+<p>select abs(-1) from funtest</p>
+<p>select * FROM funtest where times =cast('2015-12-22' as date)</p>
+<p>select max(age) from funtest</p>
+<p>select case when name ='xiaoming' then concat(name,'dddd') else 'ddddfdfdfdf' end  from funtest</p>
+<p>select substring(name,1,3) from funtest</p>
+<p>select rand() from funtest</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/ULzlrwcmM/">
+              <span class="post-title">
+                Redis 的几种数据导入导出方式&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-23</span>
-             <span>,</span>
-             <span class="post-stats">37 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/ieXjrJ3_D/">
-            <h2 class="post-title">
-              Kubernetes - 集群备份和恢复
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-23</span>
-             <span>,</span>
-             <span class="post-stats">12 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/cbHCwLkry/">
-            <h2 class="post-title">
-              kubernetes集群证书更新
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-23</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/1v3c-Lt8W/">
-            <h2 class="post-title">
-              KubeSphere3.0启用k8s多集群 
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">7 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/TooJXXWJC/">
-            <h2 class="post-title">
-              在Kubernetes上部署Redis集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">9 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/M-uFfBC55/">
-            <h2 class="post-title">
-               Docker  安装 oracle-xe-11g
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/kms1F57yD/">
-            <h2 class="post-title">
-              使用 Docker -compose 部署多机 RabbitMQ 集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/tqnkelFHT/">
-            <h2 class="post-title">
-              Springcloud Eureka instance 配置项
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">17 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/JqFGb7It7/">
-            <h2 class="post-title">
-              CentOS7.4 系统内核升级
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-22</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/FJICN9yKv/">
-            <h2 class="post-title">
-              K8S部署eureka集群高可用
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-10-21</span>
-             <span>,</span>
-             <span class="post-stats">15 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/page/11/">&larr; 上一页</a>
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/13/">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -368,3 +295,4 @@
 
   </body>
 </html>
+
