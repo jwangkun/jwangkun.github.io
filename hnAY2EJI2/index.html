@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>ClickHouse读取Mysql引擎数据 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="ClickHouse读取Mysql引擎数据 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="ClickHouse读取Mysql引擎数据"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/hnAY2EJI2/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,226 +71,79 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/h5wliVAiz/" class="tag">ClickHouse</a>
+            
+        </span>
+            <h1>ClickHouse读取Mysql引擎数据</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-29，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/hnAY2EJI2/">
-            <h2 class="post-title">
-              ClickHouse读取Mysql引擎数据
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h1 id="简介">简介</h1>
+<p>ClickHouse有两个我认为非常好，且方便的功能。那就是读取mysql和kafka中的数据。</p>
+<p>这里介绍下如何读取Mysql引擎中的数据。</p>
+<h1 id="调用格式">调用格式</h1>
+<pre><code>MySQL(
+'host:port',
+ 'database',
+ 'table',
+ 'user',
+ 'password',[ replace_query, 'on_duplicate_clause']
+);
+</code></pre>
+<ul>
+<li>host:port — MySQL 服务器地址。</li>
+<li>database — 数据库的名称。</li>
+<li>table — 表名称。</li>
+<li>user — 数据库用户。</li>
+<li>password — 用户密码。</li>
+<li>replace_query — 将 INSERT INTO 查询是否替换为 REPLACE INTO 的标志。如果 replace_query=1，则替换查询</li>
+<li>'on_duplicate_clause' — 将 ON DUPLICATE KEY UPDATE 'on_duplicate_clause' 表达式添加到 INSERT 查询语句中。例如：impression = VALUES(impression) + impression。如果需要指定 'on_duplicate_clause'，则需要设置 replace_query=0。如果同时设置 replace_query = 1 和 'on_duplicate_clause'，则会抛出异常。</li>
+</ul>
+<p>此时，简单的 WHERE 子句（例如 =, !=, &gt;, &gt;=, &lt;, &lt;=）是在 MySQL 服务器上执行。其余条件以及 LIMIT 采样约束语句仅在对MySQL的查询完成后才在ClickHouse中执行。MySQL 引擎不支持 Nullable 数据类型，因此，当从MySQL表中读取数据时，NULL 将转换为指定列类型的默认值（通常为0或空字符串）。</p>
+<h1 id="example">Example</h1>
+<figure data-type="image" tabindex="1"><img src="https://p3-tt.byteimg.com/origin/pgc-image/6685dd06eea046c4b1ba156fb97804f6?from=pc" alt="ClickHouse读取Mysql引擎数据" loading="lazy"></figure>
+<p>mysql中的数据</p>
+<figure data-type="image" tabindex="2"><img src="https://p3-tt.byteimg.com/origin/pgc-image/7921f54230ff4049b4d4973dc8adcd4c?from=pc" alt="ClickHouse读取Mysql引擎数据" loading="lazy"></figure>
+<p>clickhouse查询的数据</p>
+<p>当然也可以查询之后 直接insert 或者create,方便至极！</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/LQWECHvzW/">
+              <span class="post-title">
+                完美排查入侵者的 10 个方法和 1 个解决思路&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-29</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/LQWECHvzW/">
-            <h2 class="post-title">
-              完美排查入侵者的 10 个方法和 1 个解决思路
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-27</span>
-             <span>,</span>
-             <span class="post-stats">11 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/gn2rRNL0W/">
-            <h2 class="post-title">
-              docker 安装 clickhouse 单机版
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-27</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/_wPU6UgL5/">
-            <h2 class="post-title">
-              Clickhouse安装使用文档
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-27</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/ULzlrwcmM/">
-            <h2 class="post-title">
-              Redis 的几种数据导入导出方式
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/Z8Vr3LKws/">
-            <h2 class="post-title">
-              Docker安装单机ElasticSearch
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/l4YYAE4Ff/">
-            <h2 class="post-title">
-               Docker安装单机Zookeeper
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">1 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/J99Yr_kXB/">
-            <h2 class="post-title">
-               Docker运行Tomcat
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/H7ICBFQ_S/">
-            <h2 class="post-title">
-              containerd与安全沙箱的Kubernetes初体验
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-08</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/nR5vRQbNX/">
-            <h2 class="post-title">
-              Mysql 中主库跑太快，从库追不上怎么整？
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-08</span>
-             <span>,</span>
-             <span class="post-stats">6 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/2">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -366,3 +225,4 @@
 
   </body>
 </html>
+
