@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>Docker 修改默认存储路径 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="Docker 修改默认存储路径 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="Docker 修改默认存储路径"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/W5QzDKg1U/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,226 +71,94 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>Docker 修改默认存储路径</h1>
+            <span class="meta">
+            	Posted on
+              2021-02-07，3 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/W5QzDKg1U/">
-            <h2 class="post-title">
-              Docker 修改默认存储路径
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>一、环境：<br>
+centos7.x 系统，已经装好 docker-ce 服务包</p>
+<p>二、查看当前 docker 的存储路径</p>
+<pre><code>[root@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 ~]$ docker info |grep Dir
+WARNING: bridge-nf-call-iptables is disabled
+WARNING: bridge-nf-call-ip6tables is disabled
+WARNING: the devicemapper storage-driver is deprecated, and will be removed in a future release.
+WARNING: devicemapper: usage of loopback devices is strongly discouraged for production use.
+         Use `--storage-opt dm.thinpooldev` to specify a custom block storage device.
+ Docker Root Dir: /var/lib/docker              ## docker默认的存储路径
+</code></pre>
+<p>三、关闭 docker 服务</p>
+<pre><code>[root@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 ~]$  systemctl stop docker            ## 关闭docker服务          [root@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 ~]$ systemctl status docker		  ## 查看docker服务状态
+
+
+</code></pre>
+<p>四、将原有数据迁移至新目录</p>
+<pre><code>[root@@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 local]# mkdir /home/service/docker -p
+
+[root@@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 local]# mv /var/lib/docker/*  /home/service/docker/
+</code></pre>
+<p>五、修改 docker.service 配置文件，使用 --graph 参数指定存储位置</p>
+<pre><code>[root@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 local]# vim /usr/lib/systemd/system/docker.service
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --graph  /home/service/docker
+</code></pre>
+<p>六、重新加载配置文件</p>
+<pre><code>[root@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 local]# systemctl daemon-reload
+
+</code></pre>
+<p>七、启动 docker 服务</p>
+<pre><code>[root@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 local]# systemctl start docker
+[root@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 local]# systemctl enable docker
+[root@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 local]# systemctl status docker
+</code></pre>
+<p>八、查看修改是否成功</p>
+<pre><code>[root@VM-13cb107e-b518-4d7b-a63f-3f0a5499ec76 ~]# docker info | grep Dir
+WARNING: bridge-nf-call-iptables is disabled
+WARNING: bridge-nf-call-ip6tables is disabled
+WARNING: the devicemapper storage-driver is deprecated, and will be removed in a future release.
+WARNING: devicemapper: usage of loopback devices is strongly discouraged for production use.
+         Use `--storage-opt dm.thinpooldev` to specify a custom block storage device.
+ Docker Root Dir: /data/docker   #查看修改成功
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/hnAY2EJI2/">
+              <span class="post-title">
+                ClickHouse读取Mysql引擎数据&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-02-07</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/hnAY2EJI2/">
-            <h2 class="post-title">
-              ClickHouse读取Mysql引擎数据
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-29</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/LQWECHvzW/">
-            <h2 class="post-title">
-              完美排查入侵者的 10 个方法和 1 个解决思路
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-27</span>
-             <span>,</span>
-             <span class="post-stats">11 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/gn2rRNL0W/">
-            <h2 class="post-title">
-              docker 安装 clickhouse 单机版
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-27</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/_wPU6UgL5/">
-            <h2 class="post-title">
-              Clickhouse安装使用文档
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-27</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/ULzlrwcmM/">
-            <h2 class="post-title">
-              Redis 的几种数据导入导出方式
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/Z8Vr3LKws/">
-            <h2 class="post-title">
-              Docker安装单机ElasticSearch
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/l4YYAE4Ff/">
-            <h2 class="post-title">
-               Docker安装单机Zookeeper
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">1 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/J99Yr_kXB/">
-            <h2 class="post-title">
-               Docker运行Tomcat
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-21</span>
-             <span>,</span>
-             <span class="post-stats">2 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/H7ICBFQ_S/">
-            <h2 class="post-title">
-              containerd与安全沙箱的Kubernetes初体验
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2021-01-08</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/2">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -366,3 +240,4 @@
 
   </body>
 </html>
+
