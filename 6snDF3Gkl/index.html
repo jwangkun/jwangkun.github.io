@@ -123,7 +123,8 @@ bash &lt;(curl -sSL https://raw.githubusercontent.com/instantbox/instantbox/mast
 
 docker-compose up -d
 </code></pre>
-<p>中途会要求你设定对外端口，按自己需求设定一个，然后记得防火墙放行此端口即可通过浏览器访问。</p>
+<p>如果访问不了，可以把raw.githubusercontent.com换成raw.staticdn.net<br>
+中途会要求你设定对外端口，按自己需求设定一个，然后记得防火墙放行此端口即可通过浏览器访问。</p>
 <p>网页本身支持英语和中文，右上角切换，选择一个所需的系统版本，即可在线体验。</p>
 <figure data-type="image" tabindex="2"><a href="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-instantbox.png"><img src="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-instantbox.png" alt="img" loading="lazy"></a></figure>
 <p>比如我这里选个 Ubuntu 19.04，设定 1g 内存，使用时长设定最大 24 小时，端口注意设定的是内部端口，程序本身会随机选用一个物理机端口对外进行映射。</p>
