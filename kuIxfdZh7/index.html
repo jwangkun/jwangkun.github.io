@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/kuIxfdZh7/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,228 +71,115 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/rl-VqPDNe/" class="tag">jiacrontab</a>
+            
+        </span>
+            <h1>jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务</h1>
+            <span class="meta">
+            	Posted on
+              2021-02-09，3 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/VqNvY1txA/">
-            <h2 class="post-title">
-              Keepalived搭建MySQL  主主从集群环境
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>jiacrontab是一款使用golang编写的定时任务（crontab）工具，在文章《<a href="https://www.xiaoz.me/archives/%E4%BD%BF%E7%94%A8jiacrontab%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%8F%AF%E8%A7%86%E5%8C%96%E7%9A%84%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1">使用jiacrontab搭建一个可视化的定时任务</a>》介绍过jiacrontab 1.4x版本，经过作者不断努力，2.x版本已开发完毕，功能更强大，界面更美观。如果你还在寻找可视化定时任务工具，jiacrontab 2.x是一个不错的选择。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.xiaoz.me/wp-content/uploads/2018/11/crontab.jpg" alt="img" loading="lazy"></figure>
+<h3 id="jiacrontab-2x说明">jiacrontab 2.x说明</h3>
+<p>jiacrontab 2.x版本，软件架构略微发生了变化，说明如下：</p>
+<ul>
+<li>jiacrontab 由 jiacrontab_admin，jiacrontabd 两部分构成，两者完全独立通过 rpc 通信</li>
+<li>jiacrontab_admin：管理后台向用户提供web操作界面</li>
+<li>jiacrontabd：负责job数据存储，任务调度</li>
+</ul>
+<h3 id="安装jiacrontab-2x">安装jiacrontab 2.x</h3>
+<p>jiacrontab官方编译好的二进制文件在：https://jiacrontab.iwannay.cn/download/ 可下载，不过官方提供的地址速度太慢了，这里用小z博客软件库来下载安装。</p>
+<pre><code class="language-bash">#下载jiacrontab
+wget http://soft.xiaoz.org/linux/jiacrontab-v2.0.3-linux-amd64.zip
+#解压
+unzip jiacrontab-v2.0.3-linux-amd64.zip
+#进入jiacrontab_admin目录
+cd jiacrontab_admin
+#运行jiacrontab_admin
+nohup ./jiacrontab_admin &amp;&gt; jiacrontab_admin.log &amp;
+#进入jiacrontabd目录
+cd jiacrontabd
+#运行jiacrontabd
+nohup ./jiacrontabd &amp;&gt; jiacrontabd.log &amp;
+</code></pre>
+<p>放行端口，jiacrontab服务端和客户端监听了20000 - 20003，输入下面的命令放行：</p>
+<pre><code class="language-bash">#firewalld放行端口
+firewall-cmd --zone=public --add-port=20000-20003/tcp --permanent
+firewall-cmd --reload
+#如果使用的iptables
+iptables -I INPUT -p tcp --dport 20000 -j ACCEPT
+iptables -I INPUT -p tcp --dport 20001 -j ACCEPT
+iptables -I INPUT -p tcp --dport 20002 -j ACCEPT
+iptables -I INPUT -p tcp --dport 20003 -j ACCEPT
+iptables save
+service iptables restart 
+</code></pre>
+<h3 id="初始化jiacrontab-2x">初始化jiacrontab 2.x</h3>
+<p>访问<code>http://IP:2000</code>可看到WEB界面，首次访问设置用户名、密码、邮箱，根据提示完成初始化完成即可登录后台。</p>
+<figure data-type="image" tabindex="2"><img src="https://cdn.xiaoz.me/wp-content/uploads/2019/08/snipaste_20190820_111353.png" alt="img" loading="lazy"></figure>
+<h3 id="nginx反向代理">nginx反向代理</h3>
+<p>如果你不喜欢用<code>http://IP:2000</code>IP + 端口的形式访问，可以使用nginx反向代理，通过域名的方式来访问，下方是xiaoz的nginx反向代理jiacrontab配置，仅供参考。</p>
+<pre><code>server
+    {
+    listen 80;
+    server_name     cron.ttt.sh;
+
+    charset utf-8,gbk;
+    location / {
+        proxy_pass http://127.0.0.1:20000;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+</code></pre>
+<h3 id="jiacrontab-2x的一些变化">jiacrontab 2.x的一些变化</h3>
+<p>jiacrontab 2.x相比1.4x版本界面更加清爽，增加了更多功能选项，同时还支持秒级定时任务，对于一些需要精确到秒的任务来说使用jiacrontab 2.x非常方便。</p>
+<figure data-type="image" tabindex="3"><img src="https://cdn.xiaoz.me/wp-content/uploads/2019/08/snipaste_20190820_112235.png" alt="img" loading="lazy"></figure>
+<h3 id="总结">总结</h3>
+<p>jiacrontab适合Linux运维人员或熟悉Linux命令的站长使用，不然可能搞不明白jiacrontab到底是干嘛的，jiacrontab还有更多特色功能，大家可自行发掘。</p>
+<ul>
+<li>演示地址：https://jiacrontab-spa.iwannay.cn/ （账号：test 密码：123456）</li>
+<li>项目地址：https://github.com/iwannay/jiacrontab</li>
+</ul>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/gOJjX82dR/">
+              <span class="post-title">
+                 CentOS 7安装Nano轻量级虚拟机管理软件&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">14 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/aXLFZey34/">
-            <h2 class="post-title">
-              MySQL  集群环境搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/O2hEa3Tlz/">
-            <h2 class="post-title">
-              Centos7.4 安装MySQL 教程
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-11</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/Pw8vFa6Zm/">
-            <h2 class="post-title">
-              SpringBoot实现邮件发送功能
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/cTw-2dnqX/">
-            <h2 class="post-title">
-              SpringBoot Quartz实现动态定时任务
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/TrR0hf0TL/">
-            <h2 class="post-title">
-              Spring Task实现简单定时任务
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/Y5VB2-e2s/">
-            <h2 class="post-title">
-              spring-boot-admin监控服务
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">3 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/tEGT1my1M/">
-            <h2 class="post-title">
-              spring-boot-adtuator监控应用
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">4 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/LfZXXhVqT/">
-            <h2 class="post-title">
-              SpringBoot使用aop记录操作日志
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/SsY627xmA/">
-            <h2 class="post-title">
-              SpringBoot使用logback生产日志文件
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-10</span>
-             <span>,</span>
-             <span class="post-stats">5 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/page/6/">&larr; 上一页</a>
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/8/">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -368,3 +261,4 @@
 
   </body>
 </html>
+
