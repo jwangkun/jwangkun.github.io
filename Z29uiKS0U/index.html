@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
   <head>
       <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -9,14 +9,14 @@
   <meta name="keywords" content="">
   <meta name="description" content="">
   <meta name="author" content="kveln">
-  <title>John Wong&#39;s Blog</title>
+  <title>将OneDrive等云盘文件同步到Fast.io提供直连下载 | John Wong&#39;s Blog</title>
   <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
   <!-- <link href="https://blog.jwangkun.com/media/css/bootstrap.min.css" rel="stylesheet"> -->
   <!--  <link href="https://blog.jwangkun.com/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
-  <link rel="alternate" type="application/rss+xml" title="John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
+  <link rel="alternate" type="application/rss+xml" title="将OneDrive等云盘文件同步到Fast.io提供直连下载 | John Wong&#39;s Blog » Feed" href="https://blog.jwangkun.com/atom.xml">
   <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
   <link href="https://blog.jwangkun.com/styles/main.css" rel="stylesheet">
   <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
@@ -25,9 +25,15 @@
   <script>hljs.initHighlightingOnLoad();</script>
   
 
+    <meta property="og:description" content="将OneDrive等云盘文件同步到Fast.io提供直连下载"/>
+    <meta property="og:url" content="https://blog.jwangkun.com/Z29uiKS0U/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
   </head>
   <body>
-     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="https://blog.jwangkun.com">John Wong&#39;s Blog</a>
       <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,228 +71,76 @@
       </div>
     </div>
   </nav>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <!-- Page Header -->
   <header class="masthead" style="background-image: url('https://blog.jwangkun.com/media/images/home-bg.jpg')">
     <div class="overlay"></div>
     <div class="container">
       <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-		  <!--
-            <h1>John Wong&#39;s Blog</h1>
-			-->
-            <span class="subheading">Never care about others's looks  ，Just do it ！</span>
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://blog.jwangkun.com/XfucciOcu/" class="tag">Fast.io</a>
+            
+            <a href="https://blog.jwangkun.com/4CiQWPmXPx/" class="tag">OneDrive</a>
+            
+        </span>
+            <h1>将OneDrive等云盘文件同步到Fast.io提供直连下载</h1>
+            <span class="meta">
+            	Posted on
+              2021-02-09，2 min read
+            </span>
           </div>
         </div>
       </div>
     </div>
   </header>
-      <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-md-10 mx-auto">
-       
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/BXn3b8xdV/">
-            <h2 class="post-title">
-              SpringBoot 自定义 starter
-            </h2>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h5 id=""></h5>
+<p>Fast.io可以自动将云盘文件同步到Fast.io的云中，并使用CloudFlare 和 Akamai进行CDN加速，同时提供直链下载，和Oneindex这类程序相似，不过Fast.io支持多种云盘，无需自行搭建，直接注册后即可使用。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_lrdwmVmcUs.png" alt="img" loading="lazy"></figure>
+<h3 id="注册fastio">注册Fast.io</h3>
+<p>Fast.io目前支持的云盘有GoogleDrive/Box/DropBox/OneDrive/MediaFile/Github，注册地址如下。</p>
+<ul>
+<li>注册地址：https://go.fast.io/signup/</li>
+</ul>
+<h3 id="fastio使用">Fast.io使用</h3>
+<p>在Fast.io后台创建一个二级域名，并选择需要连接的存储，xiaoz这里创建了一个二级域名<code>https://xiaoz.imfast.io/</code>并连接到了我的OneDrive</p>
+<figure data-type="image" tabindex="2"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_IFnQUCpU50.png" alt="img" loading="lazy"></figure>
+<p>这时会在OneDrive生成<code>Fast.io/xiaoz.imfast.io</code>文件夹，只需要将您的文件复制或上传到这个目录，会自动同步到Fast.io的云存储中。</p>
+<figure data-type="image" tabindex="3"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_sMHgVDcCaf.png" alt="img" loading="lazy"></figure>
+<p>访问Fast.io提供的二级域名，如https://xiaoz.imfast.io/就可以看到Onedrive里面的文件了，如下图。</p>
+<figure data-type="image" tabindex="4"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_AT80GGqNUc.png" alt="img" loading="lazy"></figure>
+<p>Fast.io提供的地址是可以直链下载的，这一点很方便，同时Fast.io使用了CloudFlare 和 Akamai进行CDN加速，xiaoz使用浏览器单线程下载，速度能达到<code>1.5Mb/s</code>，速度还是不错的。</p>
+<figure data-type="image" tabindex="5"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_JL6GNBr4Kf.png" alt="img" loading="lazy"></figure>
+<h3 id="一些限制">一些限制</h3>
+<p>Fast.io免费版支持5个站点，单个文件最大限制<code>500Mb</code>,每个月100Gb流量，收费版还支持密码保护和更大的单文件，套餐价格如下图。</p>
+<figure data-type="image" tabindex="6"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_yaXsEnYn3H.png" alt="img" loading="lazy"></figure>
+<h3 id="总结">总结</h3>
+<p>相比Oneindex这类网盘直链程序，Fast.io支持的网盘更加丰富，且无需自行搭建，但Fast.io免费版会受到单文件大小和流量方面的限制，总之选择自己最适合的即可。</p>
+<p>使用Fast.io可以很方便的让云盘提供直连下载，而且还可以拯救被墙的网盘，Fast.io还可以设置自定义域名等，有兴趣的同学可以注册后进一步摸索。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://blog.jwangkun.com/jZ4FQlx77/">
+              <span class="post-title">
+                将Docker目录迁移到其它分区&rarr;
+              </span>
             </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
+          </p>
         
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/_C0uB9Jcs/">
-            <h2 class="post-title">
-               SpringBoot 日志
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">11 min read</span>
-            </p>
+        <div class="comment">
+          
         </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/sY0ka1Vfs/">
-            <h2 class="post-title">
-              SpringBoot Profile多环境配置
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">1 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/duZ4RFDl-/">
-            <h2 class="post-title">
-               SpringBoot 配置文件详解
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/Mcc2pXo1i/">
-            <h2 class="post-title">
-              构建一个SpringBoot工程
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/FVtYeBnI5/">
-            <h2 class="post-title">
-              使用 Docker 搭建 ELK 环境
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">16 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/dtfeDBuT2/">
-            <h2 class="post-title">
-              搭建企业级ELK日志收集系统
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">24 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/ldWvjNELN/">
-            <h2 class="post-title">
-              HDFS完全分布式集群搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">10 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/fja0PWFwF/">
-            <h2 class="post-title">
-              elasticsearch集群
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        <div class="post-preview">
-          <a href="https://blog.jwangkun.com/bvYFbY7Mb/">
-            <h2 class="post-title">
-              RabbitMQ集群搭建
-            </h2>
-            </a>
-            <h3 class="post-subtitle">
-              
-            </h3>
-          <p class="post-meta">
-             <span class="time">2020-11-09</span>
-             <span>,</span>
-             <span class="post-stats">8 min read</span>
-            </p>
-        </div>
-        <hr>
-        <div class="clearfix">
-        </div>
-        
-        
-        <a class="btn btn-primary float-left" href="https://blog.jwangkun.com/page/10/">&larr; 上一页</a>
-        
-        
-        <a class="btn btn-primary float-right" href="https://blog.jwangkun.com/page/12/">下一页 &rarr;</a>
-        
       </div>
     </div>
-  </div>
-
-  
-    <!-- Footer -->
+  </article>
+ <!-- Footer -->
   <footer>
     <div class="container">
       <div class="row">
@@ -368,3 +222,4 @@
 
   </body>
 </html>
+
