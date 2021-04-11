@@ -1,82 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>http://localhost:4000</id>
+    <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2021-03-09T01:55:34.406Z</updated>
+    <updated>2021-04-11T08:27:05.974Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="http://localhost:4000"/>
-    <link rel="self" href="http://localhost:4000/atom.xml"/>
+    <link rel="alternate" href="https://blog.jwangkun.com"/>
+    <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
     <subtitle>Never care about others&apos;s looks  ，Just do it ！</subtitle>
-    <logo>http://localhost:4000/images/avatar.png</logo>
-    <icon>http://localhost:4000/favicon.ico</icon>
+    <logo>https://blog.jwangkun.com/images/avatar.png</logo>
+    <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2021, John Wong&apos;s Blog</rights>
     <entry>
         <title type="html"><![CDATA[Docker 部署Jira8.1.0]]></title>
-        <id>http://localhost:4000/uAEbfXDtD/</id>
-        <link href="http://localhost:4000/uAEbfXDtD/">
+        <id>https://blog.jwangkun.com/uAEbfXDtD/</id>
+        <link href="https://blog.jwangkun.com/uAEbfXDtD/">
         </link>
         <updated>2021-03-08T15:40:04.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[使用Docker运行SQL Server]]></title>
-        <id>http://localhost:4000/vc4o94rO6/</id>
-        <link href="http://localhost:4000/vc4o94rO6/">
+        <id>https://blog.jwangkun.com/vc4o94rO6/</id>
+        <link href="https://blog.jwangkun.com/vc4o94rO6/">
         </link>
         <updated>2021-03-08T15:29:18.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[ balenaEtcher for mac(U盘启动盘制作工具)]]></title>
-        <id>http://localhost:4000/fzOyrTbFG/</id>
-        <link href="http://localhost:4000/fzOyrTbFG/">
+        <id>https://blog.jwangkun.com/fzOyrTbFG/</id>
+        <link href="https://blog.jwangkun.com/fzOyrTbFG/">
         </link>
         <updated>2021-03-05T01:56:09.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[2021 年 Java 开发者生产力报告]]></title>
-        <id>http://localhost:4000/ypAAnS5jX/</id>
-        <link href="http://localhost:4000/ypAAnS5jX/">
+        <id>https://blog.jwangkun.com/ypAAnS5jX/</id>
+        <link href="https://blog.jwangkun.com/ypAAnS5jX/">
         </link>
         <updated>2021-02-26T06:09:58.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[CentOS 7部署FRP服务，实现内网穿透]]></title>
-        <id>http://localhost:4000/TC9dTDvDc/</id>
-        <link href="http://localhost:4000/TC9dTDvDc/">
+        <id>https://blog.jwangkun.com/TC9dTDvDc/</id>
+        <link href="https://blog.jwangkun.com/TC9dTDvDc/">
         </link>
         <updated>2021-02-09T06:50:43.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务]]></title>
-        <id>http://localhost:4000/kuIxfdZh7/</id>
-        <link href="http://localhost:4000/kuIxfdZh7/">
+        <id>https://blog.jwangkun.com/kuIxfdZh7/</id>
+        <link href="https://blog.jwangkun.com/kuIxfdZh7/">
         </link>
         <updated>2021-02-09T06:45:34.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[ CentOS 7安装Nano轻量级虚拟机管理软件]]></title>
-        <id>http://localhost:4000/gOJjX82dR/</id>
-        <link href="http://localhost:4000/gOJjX82dR/">
+        <id>https://blog.jwangkun.com/gOJjX82dR/</id>
+        <link href="https://blog.jwangkun.com/gOJjX82dR/">
         </link>
         <updated>2021-02-09T06:37:27.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[将OneDrive等云盘文件同步到Fast.io提供直连下载]]></title>
-        <id>http://localhost:4000/Z29uiKS0U/</id>
-        <link href="http://localhost:4000/Z29uiKS0U/">
+        <id>https://blog.jwangkun.com/Z29uiKS0U/</id>
+        <link href="https://blog.jwangkun.com/Z29uiKS0U/">
         </link>
         <updated>2021-02-09T06:29:18.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[将Docker目录迁移到其它分区]]></title>
-        <id>http://localhost:4000/jZ4FQlx77/</id>
-        <link href="http://localhost:4000/jZ4FQlx77/">
+        <id>https://blog.jwangkun.com/jZ4FQlx77/</id>
+        <link href="https://blog.jwangkun.com/jZ4FQlx77/">
         </link>
         <updated>2021-02-09T06:23:22.000Z</updated>
     </entry>
     <entry>
         <title type="html"><![CDATA[ 使用Next Terminal在浏览器中管理你的服务器]]></title>
-        <id>http://localhost:4000/YjQRK965H/</id>
-        <link href="http://localhost:4000/YjQRK965H/">
+        <id>https://blog.jwangkun.com/YjQRK965H/</id>
+        <link href="https://blog.jwangkun.com/YjQRK965H/">
         </link>
         <updated>2021-02-09T06:15:05.000Z</updated>
     </entry>
