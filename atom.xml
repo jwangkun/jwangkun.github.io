@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2021-05-19T05:45:53.451Z</updated>
+    <updated>2021-05-19T09:54:01.220Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2021, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[ Ceph集群的搭建与运维]]></title>
+        <id>https://blog.jwangkun.com/H6mPk4-w4/</id>
+        <link href="https://blog.jwangkun.com/H6mPk4-w4/">
+        </link>
+        <updated>2021-05-19T09:53:30.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Docker 部署Jira8.1.0]]></title>
         <id>https://blog.jwangkun.com/uAEbfXDtD/</id>
@@ -72,12 +79,5 @@
         <link href="https://blog.jwangkun.com/jZ4FQlx77/">
         </link>
         <updated>2021-02-09T06:23:22.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ 使用Next Terminal在浏览器中管理你的服务器]]></title>
-        <id>https://blog.jwangkun.com/YjQRK965H/</id>
-        <link href="https://blog.jwangkun.com/YjQRK965H/">
-        </link>
-        <updated>2021-02-09T06:15:05.000Z</updated>
     </entry>
 </feed>
