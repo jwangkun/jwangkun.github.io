@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://blog.jwangkun.com</id>
     <title>John Wong&apos;s Blog</title>
-    <updated>2021-05-19T10:02:45.140Z</updated>
+    <updated>2021-05-28T14:16:56.496Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://blog.jwangkun.com"/>
     <link rel="self" href="https://blog.jwangkun.com/atom.xml"/>
@@ -10,6 +10,13 @@
     <logo>https://blog.jwangkun.com/images/avatar.png</logo>
     <icon>https://blog.jwangkun.com/favicon.ico</icon>
     <rights>All rights reserved 2021, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[linux 系统分区 格式化及挂载磁盘]]></title>
+        <id>https://blog.jwangkun.com/-jMPY-rPe/</id>
+        <link href="https://blog.jwangkun.com/-jMPY-rPe/">
+        </link>
+        <updated>2021-05-28T14:16:05.000Z</updated>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Ceph 分布式存储使用指南]]></title>
         <id>https://blog.jwangkun.com/U0xUcFjpV/</id>
@@ -72,12 +79,5 @@
         <link href="https://blog.jwangkun.com/kuIxfdZh7/">
         </link>
         <updated>2021-02-09T06:45:34.000Z</updated>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ CentOS 7安装Nano轻量级虚拟机管理软件]]></title>
-        <id>https://blog.jwangkun.com/gOJjX82dR/</id>
-        <link href="https://blog.jwangkun.com/gOJjX82dR/">
-        </link>
-        <updated>2021-02-09T06:37:27.000Z</updated>
     </entry>
 </feed>
