@@ -86,7 +86,7 @@
             <h1>linux 系统分区 格式化及挂载磁盘</h1>
             <span class="meta">
             	Posted on
-              2021-05-28，7 min read
+              2021-05-28，6 min read
             </span>
           </div>
         </div>
@@ -126,7 +126,7 @@ Sector size (logical/physical): 512 bytes / 4096 bytes
 I/O size (minimum/optimal): 4096 bytes / 4096 bytes
 </code></pre>
 <p>2、可以看到红色标注的是10G的数据磁盘，我们现在执行分区，代码如下：</p>
-<pre><code># fdisk -S 56 /dev/sdb
+<pre><code># fdisk /dev/vdb 
 
 Welcome to fdisk (util-linux 2.23.2).
 
@@ -193,15 +193,13 @@ I/O size (minimum/optimal): 4096 bytes / 4096 bytes
 </code></pre>
 <p>4、可以查看/dev/sdb1已经被默认分区，现在开始格式化此分区。</p>
 <p>注意：以下有几种常用磁盘格式，如果你想格式化ext3格式,代码如下;</p>
-<pre><code># mkfs.ext3 /dev/sdb1
+<pre><code>格式化ext4格式，代码如下；
 
-格式化ext4格式，代码如下；
-
-# mkfs.ext4 /dev/sdb1
+# mke2fs -t ext4 /dev/vdb1 
 
 我这里采用的是xfs磁盘格式；代码如下；
 
-# mkfs.xfs -f /dev/sdb1
+# mke2fs -t ext4 /dev/vdb1 
 
 meta-data=/dev/sdb1 isize=512 agcount=4, agsize=655296 blks
 = sectsz=4096 attr=2, projid32bit=1
@@ -214,10 +212,10 @@ log =internal log bsize=4096 blocks=2560, version=2
 realtime =none extsz=4096 blocks=0, rtextents=0
 </code></pre>
 <p>5、已经格式化成功。将磁盘挂载信息写入到系统配置文件中，不然开机不会自动挂载，代码如下；</p>
-<pre><code># echo ‘/dev/sdb1 /www xfs defaults 0 0’ &gt;&gt; /etc/fstab
-# mkdir /www //新建挂载目录
-# mount -a //挂载磁盘
+<pre><code># mkdir  /data //新建挂载目录
+# mount  /dev/vdb1 /data//挂载磁盘
 # df -h //查看挂载是否成功
+# echo '/dev/vdb1 /data ext4       defaults        0 0' &gt;&gt; /etc/fstab
 
 Filesystem Size Used Avail Use% Mounted on
 /dev/mapper/cl-root 8.0G 3.1G 5.0G 39% /
@@ -228,27 +226,6 @@ tmpfs 916M 0 916M 0% /sys/fs/cgroup
 /dev/sda1 1014M 138M 877M 14% /boot
 tmpfs 184M 0 184M 0% /run/user/0
 /dev/sdb1 10G 33M 10G 1% /www
-</code></pre>
-<p>6、可以看到www目录已经挂载成功。</p>
-<p>扩展阅读，fdisk -S 56 /dev/sdb的时候输入m有帮助信息，下面就列举说明：</p>
-<pre><code>a、toggle a bootable flag //切换一个可启动的标志
-b、 edit bsd disklabel //编辑bsd disklabel
-c、 toggle the dos compatibility flag //切换dos兼容性模式
-d、 delete a partition //删除一个分区
-g、 create a new empty GPT partition table //创建一个新的空GPT分区表
-G 、create an IRIX (SGI) partition table //创建一个IRIX（SGI）分区表
-l 、list known partition types //列出已知的分区类型
-m、 print this menu //打印此菜单
-n、 add a new partition //添加一个新的分区
-o、 create a new empty DOS partition table //创建一个新的空DOS分区表
-p、 print the partition table //打印分区表
-q、 quit without saving changes //退出而不保存更改
-s、 create a new empty Sun disklabel //创建一个新的空的Sun磁盘标签
-t、 change a partition’s system id //更改分区的系统ID
-u、 change display/entry units //更改显示/输入单位
-v、 verify the partition table //验证分区表
-w、 write table to disk and exit //将表写入磁盘保存并退出
-x、extra functionality (experts only) //高级功能（仅限专家）
 </code></pre>
 
           
