@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>MySQL 高可用复制管理工具 —— Orchestrator 介绍 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="MySQL 高可用复制管理工具 —— Orchestrator 介绍 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="MySQL 高可用复制管理工具 —— Orchestrator 介绍"/>
+    <meta property="og:url" content="https://jwangkun.github.io/wD_JHQNwi/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/_JVrn2ZGG/" class="tag">MySQL</a>
+            
+            <a href="https://jwangkun.github.io/6at1zEuw1/" class="tag">Orchestrator</a>
+            
+        </span>
+            <h1>MySQL 高可用复制管理工具 —— Orchestrator 介绍</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-18，26 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="背景">背景</h2>
+<p>在 MySQL 高可用架构中，目前使用比较多的是 Percona 的 PXC，Galera 以及 MySQL 5.7 之后的 MGR 等，其他的还有的 <a href="https://github.com/yoshinorim/mha4mysql-manager">MHA</a>，今天介绍另一个比较好用的 MySQL 高可用复制管理工具：<a href="https://github.com/github/orchestrator">Orchestrator</a>（orch）。</p>
+<p><a href="https://github.com/github/orchestrator">Orchestrator</a>（orch）：go 编写的 MySQL 高可用性和复制拓扑管理工具，支持复制拓扑结构的调整，自动故障转移和手动主从切换等。后端数据库用 MySQL 或 SQLite 存储元数据，并提供 Web 界面展示 MySQL 复制的拓扑关系及状态，通过 Web 可更改 MySQL 实例的复制关系和部分配置信息，同时也提供命令行和 api 接口，方便运维管理。相对比 MHA 来看最重要的是解决了管理节点的单点问题，其通过 raft 协议保证本身的高可用。GitHub 的一部分管理也在用该工具进行管理。关于 <a href="https://github.com/github/orchestrator">Orchestrator</a> 更详细的介绍可以看 Github 的介绍，大致的特点有：</p>
+<p>① 自动发现 MySQL 的复制拓扑，并且在 web 上展示。</p>
+<p>② 重构复制关系，可以在 web 进行拖图来进行复制关系变更。</p>
+<p>③ 检测主异常，并可以自动或手动恢复，通过 Hooks 进行自定义脚本。</p>
+<p>④ 支持命令行和 web 界面管理复制。</p>
+<figure data-type="image" tabindex="1"><img src="https://img2018.cnblogs.com/blog/163084/201902/163084-20190216140527010-571190652.png" alt="img" loading="lazy"></figure>
+<h2 id="环境">环境：</h2>
+<pre><code>系统：
+Ubuntu 16.04
+
+三台主机：
+test1:192.168.163.131
+test2:192.168.163.132
+test3:192.168.163.133
+
+后端MySQL端口：3306
+测试MySQL端口：3307
+</code></pre>
+<h2 id="安装">安装</h2>
+<p>根据需要<a href="https://github.com/github/orchestrator/releases">下载</a>合适的包进行<a href="https://github.com/github/orchestrator/blob/master/docs/install.md">安装</a>，本文是基于 Ubuntu16.04 安装的，下载好 deb 包后，需要安装 jq 的依赖包（apt-get install jq）。安装完成之后，相应的目录为：</p>
+<pre><code>/usr/local/orchestrator -rwxr-xr-x 1 root root  20M 1月  16 21:49 orchestrator
+-rw-r--r-- 1 root root 5.1K 1月  16 21:49 orchestrator-sample.conf.json
+-rw-r--r-- 1 root root 4.4K 1月  16 21:49 orchestrator-sample-sqlite.conf.json
+drwxr-xr-x 7 root root 4.0K 2月  15 19:03 resources
+</code></pre>
+<p>orchestrator：应用程序</p>
+<p>*.json：默认的配置模板</p>
+<p>resources：orchestrator 相关的文件：client、web、伪 GTID 等相关文件。</p>
+<h2 id="配置">配置</h2>
+<p>配置的相关<a href="https://github.com/github/orchestrator/blob/master/go/config/config.go">参数</a>了解后，大致说明如下（可能会有偏差、后续不定时更新）：</p>
+<pre><code>        Debug:                                      false,  --设置debug模式
+        EnableSyslog:                               false, -- 是否把日志输出到系统日志里
+        ListenAddress:                              &quot;:3000&quot;, -- web http tpc 监听端口
+        ListenSocket:                               &quot;&quot;, -- 套接字文件，默认空，和ListenAddress互斥。
+        HTTPAdvertise:                              &quot;&quot;, --可选，为raft设置。通知相关http信息
+        AgentsServerPort:                           &quot;:3001&quot;,--回调接口
+        StatusEndpoint:                             &quot;/api/status&quot;,--状态查看，默认为'/ api / status'
+        StatusOUVerify:                             false,--如果为true，请尝试在Mutual TLS打开时验证OU。 默认为false
+        BackendDB:                                  &quot;mysql&quot;,--后端数据库类型，可选mysql或则sqlite3
+        SQLite3DataFile:                            &quot;&quot;, --sqlite3的数据文件
+        SkipOrchestratorDatabaseUpdate:             false,-- 如果为true，不检查后端数据库模式，也不尝试更新它。 当运行多个版本的orchestrator时很有用
+        PanicIfDifferentDatabaseDeploy:             false, --如果为true，此进程发现协调器后端的数据库由不同版本配置，则发生混乱
+        RaftBind:                                   &quot;127.0.0.1:10008&quot;,
+        RaftAdvertise:                              &quot;&quot;,
+        RaftDataDir:                                &quot;&quot;,
+        DefaultRaftPort:                            10008, --如果RaftNodes未指定端口，使用此端口
+        RaftNodes:                                  []string{}, --raft初始化连接
+        ExpectFailureAnalysisConcensus:             true,
+        MySQLOrchestratorMaxPoolConnections:        128, --限制后端数据库的并发数
+        MySQLOrchestratorPort:                      3306, --后端数据库端口
+        MySQLTopologyUseMutualTLS:                  false,--是否启用TLS身份验证
+        MySQLTopologyUseMixedTLS:                   true,--是否混合TLS和非TLS身份验证
+        MySQLOrchestratorUseMutualTLS:              false,--是否为Orchestrator MySQL实例启用TLS身份验证
+        MySQLConnectTimeoutSeconds:                 2,--数据库连接超时时间，秒。
+        MySQLOrchestratorReadTimeoutSeconds:        30,--读操作超时
+        MySQLDiscoveryReadTimeoutSeconds:           10,--发现查询的超时
+        MySQLTopologyReadTimeoutSeconds:            600,--发现查询之外查询的超时
+        MySQLConnectionLifetimeSeconds:             0,--活跃状态的的时间
+        DefaultInstancePort:                        3306,--数据库默认端口
+        TLSCacheTTLFactor:                          100,--为TLS信息缓存到期的InstancePollSeconds的因子
+        InstancePollSeconds:                        5,--实例之间读取间隔
+        InstanceWriteBufferSize:                    100,--实例写入缓冲区大小
+        BufferInstanceWrites:                       false,--在后端表上设置为“true”以进行写入优化，写入可能过时并覆盖非陈旧数据
+        InstanceFlushIntervalMilliseconds:          100,--实例写入缓冲区刷新之间的最大间隔时间
+        SkipMaxScaleCheck:                          false,--如果没有MaxScale BinlogServer，请将其设置为“true”以保存一些无意义的查询
+        UnseenInstanceForgetHours:                  240,--忽略不可见的实例的小时数
+        SnapshotTopologiesIntervalHours:            0,--快照拓扑调用之间的小时间隔。 默认值：0（禁用）
+        DiscoverByShowSlaveHosts:                   false,--在PROCESSLIST之前尝试SHOW SLAVE HOSTS
+        UseSuperReadOnly:                           false,--每当它设置read_only时，orchestrator应该是super_read_only
+        DiscoveryMaxConcurrency:                    300,--实例发现时go的最大进程数量。
+        DiscoveryQueueCapacity:                     100000,--发现队列的缓冲区大小。 应该大于发现的数据库实例的数量
+        DiscoveryQueueMaxStatisticsSize:            120,--发现队列的第二次统计数据的最大数量
+        DiscoveryCollectionRetentionSeconds:        120,--保留发现集合信息的秒数
+        InstanceBulkOperationsWaitTimeoutSeconds:   10,--在进行批量操作时等待单个实例的时间
+        HostnameResolveMethod:                      &quot;default&quot;,
+        MySQLHostnameResolveMethod:                 &quot;@@hostname&quot;,
+        SkipBinlogServerUnresolveCheck:             true, --跳过检查未解析的主机名是否解析为binlog服务器的相同主机名
+        ExpiryHostnameResolvesMinutes:              60, --主机名解析到期之前的分钟数
+        RejectHostnameResolvePattern:               &quot;&quot;,--不接受解析主机名的正则表达式。 这样做是为了避免因网络故障而存储错误
+        ReasonableReplicationLagSeconds:            10,--复制延迟高于该值表示异常
+        ProblemIgnoreHostnameFilters:               []string{},--将与给定的regexp过滤器匹配的主机名最小化问题
+        VerifyReplicationFilters:                   false, --在拓扑重构之前检查复制筛选器
+        ReasonableMaintenanceReplicationLagSeconds: 20,--高于此值会上移和下移
+        CandidateInstanceExpireMinutes:             60,--该时间之后，使用实例作为候选副本的建议已过期。
+        AuditLogFile:                               &quot;&quot;, --审计操作的日志文件名。 空的时候禁用。
+        AuditToSyslog:                              false, --审计日志是否写入到系统日志
+        AuditToBackendDB:                           false, --审计日志是否入库，表为audit，默认true
+        RemoveTextFromHostnameDisplay:              &quot;&quot;,--去除群集/群集页面上的主机名的文本
+        ReadOnly:                                   false,
+        AuthenticationMethod:                       &quot;&quot;,--身份验证类型。可选值有：
+&quot;&quot; for none, &quot;basic&quot; for BasicAuth,
+&quot;multi&quot; for advanced BasicAuth, 
+&quot;proxy&quot; for forwarded credentials via reverse proxy, 通过反向代理转发凭证
+&quot;token&quot; for token based access
+
+        HTTPAuthUser:                               &quot;&quot;, --HTTP基本身份验证的用户名，空表示禁用身份验证
+        HTTPAuthPassword:                           &quot;&quot;, --HTTP基本身份验证的密码，空表示禁用密码
+        AuthUserHeader:                             &quot;X-Forwarded-User&quot;,--当AuthenticationMethod为“proxy”时，HTTP标头指示auth用户
+        PowerAuthUsers:                             []string{&quot;*&quot;},--在AuthenticationMethod ==“proxy”上，可以更改的用户列表。 所有其他都是只读的
+        PowerAuthGroups:                            []string{},--经过身份验证的用户必须是unix组列表成员
+        AccessTokenUseExpirySeconds:                60,--必须使用已颁发token的时间
+        AccessTokenExpiryMinutes:                   1440,--访问的到期的时间
+        ClusterNameToAlias:                         make(map[string]string),
+        DetectClusterAliasQuery:                    &quot;&quot;,--可选查询（在拓扑实例上执行），返回集群的别名
+        DetectClusterDomainQuery:                   &quot;&quot;,--可选查询（在拓扑实例上执行），返回此集群主服务器的VIP / CNAME /别名/任何域名
+        DetectInstanceAliasQuery:                   &quot;&quot;,--可选查询（在拓扑实例上执行），返回实例的别名
+        DetectPromotionRuleQuery:                   &quot;&quot;,--可选查询（在拓扑实例上执行），返回实例的提升规则
+        DataCenterPattern:                          &quot;&quot;, --一个组的正则表达式模式，从主机名中提取数据中心名称
+        PhysicalEnvironmentPattern:                 &quot;&quot;,--一个组的正则表达式模式，从主机名中提取物理环境信息
+        DetectDataCenterQuery:                      &quot;&quot;,--可选查询（在拓扑实例上执行），返回实例的数据中心，覆盖DataCenterPattern，对无法通过主机名推断DC非常有用
+        DetectPhysicalEnvironmentQuery:      &quot;&quot;,--可选查询（在拓扑实例上执行），返回实例的物理环境。覆盖PhysicalEnvironmentPattern，对无法通过主机名推断出env非常有用
+        DetectSemiSyncEnforcedQuery:                &quot;&quot;,--可选查询（在拓扑实例上执行）以确定是否对主写入完全强制执行半同步
+        SupportFuzzyPoolHostnames:                  true,--应该“submit-pool-instances”命令能够传递模糊实例列表（模糊意味着非fqdn，但足够独特，可以识别）。 默认值为“true”，表示后端数据库上有更多查询
+        InstancePoolExpiryMinutes:                  60,--database_instance_pool的过期的时间
+        PromotionIgnoreHostnameFilters:             []string{},--不使用主机名匹配模式来提升副本
+        ServeAgentsHttp:                            false,--产生另一个专用于orchestrator-agent的HTTP接口
+        AgentsUseSSL:                               false,--当“true”orchestrator将使用SSL侦听代理端口以及通过SSL连接到代理时
+        AgentsUseMutualTLS:                         false,--当“true”时，使用相互TLS服务器与代理通信
+        AgentSSLValidOUs:                           []string{},--使用相互TLS与代理进行通信
+        AgentSSLSkipVerify:                         false,--为代理使用SSL
+        AgentSSLPrivateKeyFile:                     &quot;&quot;,
+        AgentSSLCertFile:                           &quot;&quot;,
+        AgentSSLCAFile:                             &quot;&quot;,
+        UseSSL:                                     false,--在Web端口上使用SSL
+        UseMutualTLS:                               false,--“true”时使用TLS作为服务器的Web和API连接
+        SSLValidOUs:                                []string{},--使用TLS交互
+        SSLSkipVerify:                              false,--使用SSL时，是否应忽略SSL认证错误
+        SSLPrivateKeyFile:                          &quot;&quot;,
+        SSLCertFile:                                &quot;&quot;,
+        SSLCAFile:                                  &quot;&quot;,
+        AgentPollMinutes:                           60,--代理轮询的分钟数
+        UnseenAgentForgetHours:                     6,--忘记不可见的代理的小时数
+        StaleSeedFailMinutes:                       60,--过时（无进展）被视为失败的分钟数
+        SeedAcceptableBytesDiff:                    8192,--种子源和目标数据大小之间的字节差异仍被视为成功复制
+        SeedWaitSecondsBeforeSend:                  2,--在代理上开始发送数据命令之前等待的秒数
+        AutoPseudoGTID:                             false, --是否自动将Pseudo-GTID条目注入主服务器
+        PseudoGTIDPattern:                          &quot;&quot;,--在二进制日志中查找的模式，用于创建唯一条目（伪GTID）。 为空时，禁用基于伪GTID的重构。
+        PseudoGTIDPatternIsFixedSubstring:          false,--如为true，则PseudoGTIDPattern不被视为正则表达式而是固定子字符串
+        PseudoGTIDMonotonicHint:                    &quot;&quot;,--Pseudo-GTID条目中的子字符串，表示Pseudo-GTID条目预计会单调递增
+        DetectPseudoGTIDQuery:                      &quot;&quot;,--可选查询，用于确定是否在实例上启用了伪gtid
+        BinlogEventsChunkSize:                      10000,--SHOW BINLOG | RELAYLOG EVENTS LIMIT的块大小。 较小意味着更少的锁定和工作要做
+        SkipBinlogEventsContaining:                 []string{},--扫描/比较Pseudo-GTID的binlog时，跳过包含给定文本的条目。 这些不是正则表达式（扫描binlog时会消耗太多的CPU），只需查找子字符串。
+        ReduceReplicationAnalysisCount:             true,--如果为true，则复制分析将报告可能首先处理问题的可能性的实例。 如果为false，则为每个已知实例提供一个条目
+        FailureDetectionPeriodBlockMinutes:         60,--实例的故障发现保持“活动”的时间，以避免实例失败的并发“发现”; 如果有的话，这会在任何恢复过程之前。
+        RecoveryPeriodBlockMinutes:                 60,--实例的恢复保持“活动”的时间，以避免并发恢复
+        RecoveryPeriodBlockSeconds:                 3600, --实例的恢复保持“活动”的时间，以避免并发恢复
+        RecoveryIgnoreHostnameFilters:              []string{},--恢复分析将完全忽略与给定模式匹配的主机
+        RecoverMasterClusterFilters:                []string{},--只对匹配这些正则表达式模式的集群进行主恢复（“*”模式匹配所有）
+        RecoverIntermediateMasterClusterFilters:    []string{},--只对匹配这些正则表达式模式的集群进行恢复（“*”模式匹配所有内容）
+        ProcessesShellCommand:                      &quot;bash&quot;,--执行命令脚本的Shell
+        OnFailureDetectionProcesses:                []string{},--检测故障转移方案时执行（在决定是否进行故障转移之前）。 可以并且应该使用其中一些占位符{failureType}，{failureDescription}，{command}，{failedHost}，{failureCluster}，{failureClusterAlias}，{failureClusterDomain}，{failedPort}，{successorHost}，{successorPort}，{ successorAlias}，{countReplicas}，{replicaHosts}，{isDowntimed}，{autoMasterRecovery}，{autoIntermediateMasterRecovery}
+        PreGracefulTakeoverProcesses:      []string{},--在主变为只读之前立即执行。 可以并且应该使用其中一些占位符：{failureType}，{failureDescription}，{command}，{failedHost}，{failureCluster}，{failureClusterAlias}，{failureClusterDomain}，{failedPort}，{successorHost}，{successorPort}，{ successorAlias}，{countReplicas}，{replicaHosts}，{isDowntimed}
+        PreFailoverProcesses:                       []string{},--在执行恢复操作之前立即执行。任何这些进程的失败（非零退出代码）都会中止恢复。提示：这使您有机会根据系统的某些内部状态中止恢复。 可以并且应该使用其中一些占位符：{failureType}，{failureDescription}，{command}，{failedHost}，{failureCluster}，{failureClusterAlias}，{failureClusterDomain}，{failedPort}，{successorHost}，{successorPort}，{ successorAlias}，{countReplicas}，{replicaHosts}，{isDowntimed}
+        PostMasterFailoverProcesses:                []string{},--在主恢复成功结束时执行（未定义的执行顺序）。 使用与PostFailoverProcesses相同的占位符
+        PostIntermediateMasterFailoverProcesses:    []string{},--在成功的中间主恢复结束时执行（未定义的执行顺序）。 使用与PostFailoverProcesses相同的占位符
+        PostFailoverProcesses:                      []string{},--在成功恢复结束时执行（包括并添加到上述两个）。 可以并且应该使用其中一些占位符：{failureType}，{failureDescription}，{command}，{failedHost}，{failureCluster}，{failureClusterAlias}，{failureClusterDomain}，{failedPort}，{successorHost}，{successorPort}，{ successorAlias}，{countReplicas}，{replicaHosts}，{isDowntimed}，{isSuccessful}，{lostReplicas}
+        PostUnsuccessfulFailoverProcesses:          []string{},--在任何不成功的恢复结束时执行。（未定义的执行顺序）。 可以并且应该使用其中一些占位符：{failureType}，{failureDescription}，{command}，{failedHost}，{failureCluster}，{failureClusterAlias}，{failureClusterDomain}，{failedPort}，{successorHost}，{successorPort}，{ successorAlias}，{countReplicas}，{replicaHosts}，{isDowntimed}，{isSuccessful}，{lostReplicas}
+        PostGracefulTakeoverProcesses:              []string{},--在旧主位于新晋升的主之后执行。 使用与PostFailoverProcesses相同的占位符
+        CoMasterRecoveryMustPromoteOtherCoMaster:   true,--当'false'时，任何都可以得到提升（候选人比其他人更受欢迎）。 当'true'时，将促进其他共同主人或否则失败
+        DetachLostSlavesAfterMasterFailover(DetachLostReplicasAfterMasterFailover):        true,--恢复过程中可能会丢失一些副本。如果为true，将通过detach-replica命令强制中断其复制，以确保没有人认为它们完全正常运行。
+        ApplyMySQLPromotionAfterMasterFailover:     true,--将重置slave all并在提升的master上设置read_only = 0，默认true。
+        PreventCrossDataCenterMasterFailover:       false,--如果为true（默认值：false），则不允许跨DC主故障转移，orchestrator将尽其所能仅在同一DC内进行故障转移，否则不进行故障转移。
+        MasterFailoverLostInstancesDowntimeMinutes: 0,--在主故障转移（包括失败的主副本和丢失的副本）之后丢失的任何服务器停机的分钟数。 0表示禁用
+        MasterFailoverDetachSlaveMasterHost(MasterFailoverDetachReplicaMasterHost):        false,--orchestrator是否应该在新升级的master上发出detach-replica-master-host（这样可以确保新master不会尝试复制旧的master，如果它恢复生命）。 默认为'false'。 如果ApplyMySQLPromotionAfterMasterFailover为'true'则无意义。
+
+        FailMasterPromotionIfSQLThreadNotUpToDate:  false,--如果为true，并且发生主故障转移，如果候选主服务器未消耗所有中继日志（延迟），则中止并显示错误
+        PostponeSlaveRecoveryOnLagMinutes（PostponeReplicaRecoveryOnLagMinutes）:          0,--在崩溃恢复时，滞后超过给定分钟的副本仅在主/ IM被选出并执行进程后才在恢复过程的后期复活。 值为0将禁用此功能
+        RemoteSSHForMasterFailover:                 false,--orchestrator是否应该在主故障转移时尝试远程-shsh relaylog-synching？ 需要RemoteSSHCommand
+        RemoteSSHCommand:                           &quot;&quot;,--一个`ssh`命令，由恢复进程用于读取/应用relaylogs。 如果提供，则此变量必须包含文本“{hostname}”。 远程SSH登录必须具有读/写中继日志的权限。 示例：“setuidgid remoteuser ssh {hostname}”
+        RemoteSSHCommandUseSudo:                    true,--是否orchestrator应该在SSH命令下在远程主机上应用'sudo'
+        OSCIgnoreHostnameFilters:                   []string{},--建议将忽略与给定模式匹配的副本主机名
+        GraphiteAddr:                               &quot;&quot;,
+        GraphitePath:                               &quot;&quot;,
+        GraphiteConvertHostnameDotsToUnderscores:   true,
+        GraphitePollSeconds:                        60,
+        URLPrefix:                                  &quot;&quot;,
+        DiscoveryIgnoreReplicaHostnameFilters: []string{},
+        ConsulAddress:                         &quot;&quot;,
+        ConsulAclToken:                        &quot;&quot;,
+        ZkAddress:                             &quot;&quot;,
+        KVClusterMasterPrefix:                 &quot;mysql/master&quot;,
+        WebMessage:                            &quot;&quot;,
+</code></pre>
+<p>按照本文的测试用例，定制了一个相关的<a href="https://github.com/github/orchestrator/blob/master/docs/configuration-sample.md">模板</a>（/etc/orchestrator.conf.json）：</p>
+<pre><code>{
+  &quot;Debug&quot;: true,
+  &quot;EnableSyslog&quot;: false,
+  &quot;ListenAddress&quot;: &quot;:3000&quot;,
+  &quot;MySQLTopologyUser&quot;: &quot;orchestrator&quot;,
+  &quot;MySQLTopologyPassword&quot;: &quot;Aa123456&quot;,
+  &quot;MySQLTopologyCredentialsConfigFile&quot;: &quot;&quot;,
+  &quot;MySQLTopologySSLPrivateKeyFile&quot;: &quot;&quot;,
+  &quot;MySQLTopologySSLCertFile&quot;: &quot;&quot;,
+  &quot;MySQLTopologySSLCAFile&quot;: &quot;&quot;,
+  &quot;MySQLTopologySSLSkipVerify&quot;: true,
+  &quot;MySQLTopologyUseMutualTLS&quot;: false,
+  &quot;MySQLOrchestratorHost&quot;: &quot;127.0.0.1&quot;,
+  &quot;MySQLOrchestratorPort&quot;: 3306,
+  &quot;MySQLOrchestratorDatabase&quot;: &quot;orchestrator&quot;,
+  &quot;MySQLOrchestratorUser&quot;: &quot;orchestrator&quot;,
+  &quot;MySQLOrchestratorPassword&quot;: &quot;123456&quot;,
+  &quot;MySQLOrchestratorCredentialsConfigFile&quot;: &quot;&quot;,
+  &quot;MySQLOrchestratorSSLPrivateKeyFile&quot;: &quot;&quot;,
+  &quot;MySQLOrchestratorSSLCertFile&quot;: &quot;&quot;,
+  &quot;MySQLOrchestratorSSLCAFile&quot;: &quot;&quot;,
+  &quot;MySQLOrchestratorSSLSkipVerify&quot;: true,
+  &quot;MySQLOrchestratorUseMutualTLS&quot;: false,
+  &quot;MySQLConnectTimeoutSeconds&quot;: 1,
+  &quot;MySQLTopologyReadTimeoutSeconds&quot;: 3,
+  &quot;MySQLDiscoveryReadTimeoutSeconds&quot;: 3,
+  &quot;DefaultInstancePort&quot;: 3306,
+  &quot;DiscoverByShowSlaveHosts&quot;: true,
+  &quot;InstancePollSeconds&quot;: 3,
+  &quot;UnseenInstanceForgetHours&quot;: 240,
+  &quot;SnapshotTopologiesIntervalHours&quot;: 0,
+  &quot;InstanceBulkOperationsWaitTimeoutSeconds&quot;: 10,
+  &quot;HostnameResolveMethod&quot;: &quot;default&quot;,
+  &quot;MySQLHostnameResolveMethod&quot;: &quot;@@hostname&quot;,
+  &quot;SkipBinlogServerUnresolveCheck&quot;: true,
+  &quot;SkipMaxScaleCheck&quot;:true,
+  &quot;ExpiryHostnameResolvesMinutes&quot;: 60,
+  &quot;RejectHostnameResolvePattern&quot;: &quot;&quot;,
+  &quot;ReasonableReplicationLagSeconds&quot;: 10,
+  &quot;ProblemIgnoreHostnameFilters&quot;: [],
+  &quot;VerifyReplicationFilters&quot;: false,
+  &quot;ReasonableMaintenanceReplicationLagSeconds&quot;: 20,
+  &quot;CandidateInstanceExpireMinutes&quot;: 1440,
+  &quot;AuditLogFile&quot;: &quot;&quot;,
+  &quot;AuditToSyslog&quot;: false,
+  &quot;RemoveTextFromHostnameDisplay&quot;: &quot;:3306&quot;,
+  &quot;ReadOnly&quot;: false,
+  &quot;AuthenticationMethod&quot;: &quot;&quot;,
+  &quot;HTTPAuthUser&quot;: &quot;&quot;,
+  &quot;HTTPAuthPassword&quot;: &quot;&quot;,
+  &quot;AuthUserHeader&quot;: &quot;&quot;,
+  &quot;PowerAuthUsers&quot;: [
+    &quot;*&quot;
+  ],
+  &quot;ClusterNameToAlias&quot;: {
+    &quot;127.0.0.1&quot;: &quot;test suite&quot;
+  },
+  &quot;SlaveLagQuery&quot;: &quot;&quot;,
+  &quot;DetectClusterAliasQuery&quot;:  &quot;SELECT cluster_name FROM meta.cluster WHERE cluster_name = left(@@hostname,4) &quot;,
+  &quot;DetectClusterDomainQuery&quot;: &quot;SELECT cluster_domain FROM meta.cluster WHERE cluster_name = left(@@hostname,4) &quot;,
+  &quot;DetectInstanceAliasQuery&quot;: &quot;SELECT @@hostname as instance_alias&quot;,
+  &quot;DetectPromotionRuleQuery&quot;: &quot;&quot;,
+  &quot;DetectDataCenterQuery&quot;: &quot;SELECT data_center FROM meta.cluster WHERE cluster_name = left(@@hostname,4) &quot;,
+  &quot;PhysicalEnvironmentPattern&quot;: &quot;&quot;,
+  &quot;PromotionIgnoreHostnameFilters&quot;: [],
+  &quot;DetachLostReplicasAfterMasterFailover&quot;: true,
+  &quot;DetectSemiSyncEnforcedQuery&quot;: &quot;SELECT 0 AS semisync FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM performance_schema.global_variables WHERE VARIABLE_NAME = 'rpl_semi_sync_master_wait_no_slave' AND VARIABLE_VALUE = 'ON') UNION SELECT 1 FROM DUAL WHERE EXISTS (SELECT 1 FROM performance_schema.global_variables WHERE VARIABLE_NAME = 'rpl_semi_sync_master_wait_no_slave' AND VARIABLE_VALUE = 'ON')&quot;,
+  &quot;ServeAgentsHttp&quot;: false,
+  &quot;AgentsServerPort&quot;: &quot;:3001&quot;,
+  &quot;AgentsUseSSL&quot;: false,
+  &quot;AgentsUseMutualTLS&quot;: false,
+  &quot;AgentSSLSkipVerify&quot;: false,
+  &quot;AgentSSLPrivateKeyFile&quot;: &quot;&quot;,
+  &quot;AgentSSLCertFile&quot;: &quot;&quot;,
+  &quot;AgentSSLCAFile&quot;: &quot;&quot;,
+  &quot;AgentSSLValidOUs&quot;: [],
+  &quot;UseSSL&quot;: false,
+  &quot;UseMutualTLS&quot;: false,
+  &quot;SSLSkipVerify&quot;: false,
+  &quot;SSLPrivateKeyFile&quot;: &quot;&quot;,
+  &quot;SSLCertFile&quot;: &quot;&quot;,
+  &quot;SSLCAFile&quot;: &quot;&quot;,
+  &quot;SSLValidOUs&quot;: [],
+  &quot;URLPrefix&quot;: &quot;&quot;,
+  &quot;StatusEndpoint&quot;: &quot;/api/status&quot;,
+  &quot;StatusSimpleHealth&quot;: true,
+  &quot;StatusOUVerify&quot;: false,
+  &quot;AgentPollMinutes&quot;: 60,
+  &quot;UnseenAgentForgetHours&quot;: 6,
+  &quot;StaleSeedFailMinutes&quot;: 60,
+  &quot;SeedAcceptableBytesDiff&quot;: 8192,
+  &quot;AutoPseudoGTID&quot;:true,
+  &quot;PseudoGTIDPattern&quot;: &quot;drop view if exists `meta`.`_pseudo_gtid_hint__asc:&quot;,
+  &quot;PseudoGTIDPatternIsFixedSubstring&quot;: true,
+  &quot;PseudoGTIDMonotonicHint&quot;: &quot;asc:&quot;,
+  &quot;DetectPseudoGTIDQuery&quot;: &quot;select count(*) as pseudo_gtid_exists from meta.pseudo_gtid_status where anchor = 1 and time_generated &gt; now() - interval 2 hour&quot;,
+  &quot;BinlogEventsChunkSize&quot;: 10000,
+  &quot;SkipBinlogEventsContaining&quot;: [],
+  &quot;ReduceReplicationAnalysisCount&quot;: true,
+  &quot;FailureDetectionPeriodBlockMinutes&quot;: 60,
+  &quot;RecoveryPeriodBlockSeconds&quot;: 31,
+  &quot;RecoveryIgnoreHostnameFilters&quot;: [],
+  &quot;RecoverMasterClusterFilters&quot;: [&quot;*&quot;],
+  &quot;RecoverIntermediateMasterClusterFilters&quot;: [&quot;*&quot;],
+  &quot;OnFailureDetectionProcesses&quot;: [
+    &quot;echo '②  Detected {failureType} on {failureCluster}. Affected replicas: {countSlaves}' &gt;&gt; /tmp/recovery.log&quot;
+  ],
+  &quot;PreGracefulTakeoverProcesses&quot;: [
+    &quot;echo '①   Planned takeover about to take place on {failureCluster}. Master will switch to read_only' &gt;&gt; /tmp/recovery.log&quot;
+  ],
+  &quot;PreFailoverProcesses&quot;: [
+    &quot;echo '③  Will recover from {failureType} on {failureCluster}' &gt;&gt; /tmp/recovery.log&quot;
+  ],
+  &quot;PostMasterFailoverProcesses&quot;: [
+    &quot;echo '④  Recovered from {failureType} on {failureCluster}. Failed: {failedHost}:{failedPort}; Promoted: {successorHost}:{successorPort}' &gt;&gt; /tmp/recovery.log&quot;
+  ],
+  &quot;PostFailoverProcesses&quot;: [
+    &quot;echo '⑤  (for all types) Recovered from {failureType} on {failureCluster}. Failed: {failedHost}:{failedPort}; Successor: {successorHost}:{successorPort}' &gt;&gt; /tmp/recovery.log&quot;
+  ],
+  &quot;PostUnsuccessfulFailoverProcesses&quot;: [
+    &quot;echo '⑧  &gt;&gt; /tmp/recovery.log'&quot;
+  ],
+  &quot;PostIntermediateMasterFailoverProcesses&quot;: [
+    &quot;echo '⑥ Recovered from {failureType} on {failureCluster}. Failed: {failedHost}:{failedPort}; Successor: {successorHost}:{successorPort}' &gt;&gt; /tmp/recovery.log&quot;
+  ],
+  &quot;PostGracefulTakeoverProcesses&quot;: [
+    &quot;echo '⑦ Planned takeover complete' &gt;&gt; /tmp/recovery.log&quot;
+  ],
+  &quot;CoMasterRecoveryMustPromoteOtherCoMaster&quot;: true,
+  &quot;DetachLostSlavesAfterMasterFailover&quot;: true,
+  &quot;ApplyMySQLPromotionAfterMasterFailover&quot;: true,
+  &quot;PreventCrossDataCenterMasterFailover&quot;: false,
+  &quot;MasterFailoverDetachSlaveMasterHost&quot;: false,
+  &quot;MasterFailoverLostInstancesDowntimeMinutes&quot;: 0,
+  &quot;PostponeSlaveRecoveryOnLagMinutes&quot;: 0,
+  &quot;OSCIgnoreHostnameFilters&quot;: [],
+  &quot;GraphiteAddr&quot;: &quot;&quot;,
+  &quot;GraphitePath&quot;: &quot;&quot;,
+  &quot;GraphiteConvertHostnameDotsToUnderscores&quot;: true,
+
+  &quot;RaftEnabled&quot;: true,
+  &quot;BackendDB&quot;: &quot;mysql&quot;,
+  &quot;RaftBind&quot;: &quot;192.168.163.131&quot;,
+  &quot;RaftDataDir&quot;: &quot;/var/lib/orchestrator&quot;,
+  &quot;DefaultRaftPort&quot;: 10008,
+  &quot;RaftNodes&quot;: [
+    &quot;192.168.163.131&quot;,
+    &quot;192.168.163.132&quot;,
+    &quot;192.168.163.133&quot;
+    ],
+ &quot;ConsulAddress&quot;: &quot;&quot;,
+ &quot;ConsulAclToken&quot;: &quot;&quot;
+}
+</code></pre>
+<p>这里列出说明几个比较重要的<a href="https://github.com/github/orchestrator/blob/master/docs/configuration.md">参数</a>：</p>
+<ul>
+<li>
+<p>ListenAddress：　　<br>
+web 界面的 http 端口</p>
+</li>
+<li>
+<p>MySQLOrchestratorHost<br>
+orch 后端数据库地址</p>
+</li>
+<li>
+<p>MySQLOrchestratorPort<br>
+orch 后端数据库端口</p>
+</li>
+<li>
+<p>MySQLOrchestratorDatabase<br>
+orch 后端数据库名</p>
+</li>
+<li>
+<p>MySQLOrchestratorUser<br>
+orch 后端数据库用户名（明文）</p>
+</li>
+<li>
+<p>MySQLOrchestratorPassword<br>
+orch 后端数据库密码（明文）</p>
+</li>
+<li>
+<p>MySQLOrchestratorCredentialsConfigFile<br>
+后端数据库用户名密码的配置文件「 &quot;MySQLOrchestratorCredentialsConfigFile&quot;: &quot;/etc/mysql/orchestrator-backend.cnf&quot; 」，格式：</p>
+<pre><code>[client]
+user=orchestrator_srv
+password=${ORCHESTRATOR_PASSWORD}
+</code></pre>
+<p>后端 MySQL 数据库的用户权限需要是：</p>
+<pre><code>CREATE USER 'orchestrator_srv'@'orc_host' IDENTIFIED BY 'orc_server_password';
+GRANT ALL ON orchestrator.* TO 'orchestrator_srv'@'orc_host';
+</code></pre>
+</li>
+<li>
+<p>MySQLTopologyUser<br>
+被管理的 MySQL 的用户（明文）</p>
+</li>
+<li>
+<p>MySQLTopologyPassword<br>
+被管理的 MySQL 的密码（密文）</p>
+</li>
+<li>
+<p>MySQLTopologyCredentialsConfigFile<br>
+被管理的 MySQL 的用户密码配置文件「&quot;/etc/mysql/orchestrator-topology.cnf&quot;」，格式：</p>
+<pre><code>[client]
+user=orchestrator_srv
+password=${ORCHESTRATOR_PASSWORD}
+</code></pre>
+</li>
+<li>
+<p>被管理 MySQL 数据库的用户权限需要是：</p>
+<pre><code>CREATE USER 'orchestrator'@'orc_host' IDENTIFIED BY 'orc_topology_password';
+GRANT SUPER, PROCESS, REPLICATION SLAVE, REPLICATION CLIENT, RELOAD ON *.* TO 'orchestrator'@'orc_host';
+GRANT SELECT ON meta.* TO 'orchestrator'@'orc_host';
+GRANT SELECT ON ndbinfo.processes TO 'orchestrator'@'orc_host'; -- Only for NDB Cluster
+</code></pre>
+</li>
+<li>
+<p>InstancePollSeconds<br>
+orch 探测 MySQL 的间隔秒数</p>
+</li>
+<li>
+<p>MySQLConnectTimeoutSeconds<br>
+orch 连接 MySQL 的超时时间</p>
+</li>
+<li>
+<p>MySQLOrchestratorReadTimeoutSeconds<br>
+后端 MySQL 读超时时间</p>
+</li>
+<li>
+<p>MySQLTopologyReadTimeoutSeconds<br>
+被管理 MySQL 读超时时间，用于除发现查询以外的所有查询</p>
+</li>
+<li>
+<p>MySQLDiscoveryReadTimeoutSeconds<br>
+被管理 MySQL 读超时时间，用于发现</p>
+</li>
+<li>
+<p>DefaultInstancePort<br>
+被管理 MySQL 的默认端口</p>
+</li>
+<li>
+<p>DiscoverByShowSlaveHosts<br>
+通过 show slave hosts 来发现拓扑结构</p>
+</li>
+<li>
+<p>UnseenInstanceForgetHours<br>
+忽略看不见的实例的小时数</p>
+</li>
+<li>
+<p>HostnameResolveMethod<br>
+解析主机名，使用主机名：default；不解析用 none，直接用 IP</p>
+</li>
+<li>
+<p>MySQLHostnameResolveMethod<br>
+解析主机名，发出 select @@hostname；发出 select @@report_host（需要配置 report_host）。不解析用 &quot;&quot;，直接用 IP。</p>
+</li>
+<li>
+<p>InstanceBulkOperationsWaitTimeoutSeconds<br>
+进行批量操作时等待单个实例的时间</p>
+</li>
+<li>
+<p>ReasonableReplicationLagSeconds<br>
+复制延迟高于该值表示异常</p>
+</li>
+<li>
+<p>VerifyReplicationFilters<br>
+在拓扑重构之前检查复制筛选器</p>
+</li>
+<li>
+<p>ReasonableMaintenanceReplicationLagSeconds<br>
+复制延迟高于该值会上下移动调整 MySQL 拓扑</p>
+</li>
+<li>
+<p>CandidateInstanceExpireMinutes<br>
+该时间之后，使用实例作为候选从库（在主故障转移时提升）的建议到期</p>
+</li>
+<li>
+<p>ReplicationLagQuery（SlaveLagQuery）<br>
+使用 SHOW SLAVE STATUS 进行延迟判断，力度为秒。使用 pt-heartbeat。这提供了亚秒级的力度，允许自己设置查询「 &quot;select absolute_lag from meta.heartbeat_view&quot;」</p>
+</li>
+<li>
+<p><a href="https://github.com/github/orchestrator/blob/master/docs/configuration-discovery-classifying.md">DetectClusterAliasQuery</a><br>
+查询集群别名的 query，信息放到每个被管理实例的 meta 库的 cluster 表中「&quot;select ifnull(max(cluster_name),'') as cluster_alias from meta.cluster where anchor=1&quot;」</p>
+</li>
+<li>
+<p>DetectClusterDomainQuery<br>
+查询集群 Domain 的 query，信息放到每个被管理实例的 meta 库的 cluster 表中「select ifnull(max(cluster_domain), '') as cluster_domain from meta.cluster where anchor=1」</p>
+</li>
+<li>
+<p>DetectInstanceAliasQuery<br>
+查询实例的别名</p>
+</li>
+<li>
+<p>DetectDataCenterQuery<br>
+查询数据中心的 query，信息放到每个被管理实例的 meta 库的 cluster 表中「&quot;select substring_index(substring_index(@@hostname,'-',3),'-', -1) as dc&quot;」</p>
+</li>
+<li>
+<p>DetachLostReplicasAfterMasterFailover（DetachLostSlavesAfterMasterFailover）<br>
+是否强制分离在主恢复中不会丢失的从库</p>
+</li>
+<li>
+<p>DetectSemiSyncEnforcedQuery<br>
+检测是否强制半同步</p>
+</li>
+<li>
+<p><a href="https://github.com/github/orchestrator/blob/master/docs/configuration-discovery-pseudo-gtid.md">AutoPseudoGTID</a><br>
+是否自动将 Pseudo-GTID 条目注入主服务器，对于没用 GTID 的复制推荐使用。要是使用了 GTID 的复制，设置 “false” 即可。</p>
+</li>
+<li>
+<p>RecoveryPeriodBlockSeconds<br>
+在该时间内再次出现故障，不会进行迁移，避免出现并发恢复和不稳定。</p>
+</li>
+<li>
+<p>FailureDetectionPeriodBlockMinutes<br>
+在该时间内再次出现故障，不会被多次发现。</p>
+</li>
+<li>
+<p>RecoverMasterClusterFilters<br>
+只对匹配这些正则表达式模式的集群进行主恢复（“*” 模式匹配所有）。</p>
+</li>
+<li>
+<p>RecoverIntermediateMasterClusterFilters<br>
+只对匹配这些正则表达式模式的集群进行主恢复（“*” 模式匹配所有）。</p>
+</li>
+<li>
+<p>OnFailureDetectionProcesses<br>
+检测故障转移时执行，属于 <a href="https://github.com/github/orchestrator/blob/master/docs/configuration-recovery.md#hooks">Hooks</a>。</p>
+</li>
+<li>
+<p>PreGracefulTakeoverProcesses<br>
+在主变为只读之前立即执行，属于 <a href="https://github.com/github/orchestrator/blob/master/docs/configuration-recovery.md#hooks">Hooks</a>。</p>
+</li>
+<li>
+<p>PreFailoverProcesses<br>
+在执行恢复操作之前立即执行，属于 <a href="https://github.com/github/orchestrator/blob/master/docs/configuration-recovery.md#hooks">Hooks</a>。</p>
+</li>
+<li>
+<p>PostMasterFailoverProcesses<br>
+在主恢复成功结束时执行，属于 <a href="https://github.com/github/orchestrator/blob/master/docs/configuration-recovery.md#hooks">Hooks</a>。</p>
+</li>
+<li>
+<p>PostFailoverProcesses<br>
+在成功恢复结束时执行，属于 <a href="https://github.com/github/orchestrator/blob/master/docs/configuration-recovery.md#hooks">Hooks</a>。</p>
+</li>
+<li>
+<p>PostUnsuccessfulFailoverProcesses<br>
+在任何不成功的恢复结束时执行，属于 <a href="https://github.com/github/orchestrator/blob/master/docs/configuration-recovery.md#hooks">Hooks</a>。</p>
+</li>
+<li>
+<p>PostIntermediateMasterFailoverProcesses<br>
+在成功的中间主恢复结束时执行，属于 <a href="https://github.com/github/orchestrator/blob/master/docs/configuration-recovery.md#hooks">Hooks</a>。</p>
+</li>
+<li>
+<p>PostGracefulTakeoverProcesses<br>
+在旧主位于新晋升的主之后执行，属于 <a href="https://github.com/github/orchestrator/blob/master/docs/configuration-recovery.md#hooks">Hooks</a>。</p>
+</li>
+<li>
+<p>CoMasterRecoveryMustPromoteOtherCoMaster<br>
+当'false'时，任何实例都可以得到提升； 当'true'时，将提升共同主人否则失败。</p>
+</li>
+<li>
+<p>ApplyMySQLPromotionAfterMasterFailover<br>
+将重置 slave all 并在提升的 master 上设置 read_only = 0，默认 true</p>
+</li>
+<li>
+<p>PreventCrossDataCenterMasterFailover<br>
+如果为 true（默认值：false），则不允许跨 DC 主故障转移，orchestrator 将尽其所能仅在同一 DC 内进行故障转移，否则不进行故障转移。</p>
+</li>
+<li>
+<p>MasterFailoverDetachReplicaMasterHost（MasterFailoverDetachSlaveMasterHost）<br>
+否应该在新升级的 master 上发出 detach-replica-master-host，这样可以确保新 master 不会尝试复制正常之后的旧的 master。如果参数 ApplyMySQLPromotionAfterMasterFailover 为 True，则该参数无意义。</p>
+</li>
+<li>
+<p>MasterFailoverLostInstancesDowntimeMinutes<br>
+主故障转移后丢失的任何服务器停机的分钟数（包括失败的主和丢失的从）。 0 表示禁用。</p>
+</li>
+<li>
+<p>PostponeReplicaRecoveryOnLagMinutes（PostponeSlaveRecoveryOnLagMinutes）<br>
+在崩溃恢复时，延迟超过给定分钟的从库在主被选出后才复活。 值为 0 将禁用此功能。</p>
+</li>
+<li>
+<p>BackendDB<br>
+后端数据库类型。</p>
+</li>
+<li>
+<p><a href="https://github.com/github/orchestrator/blob/master/docs/configuration-raft.md">RaftEnabled</a><br>
+是否开启 Raft，保证 orch 的高可用。</p>
+</li>
+<li>
+<p><a href="https://github.com/github/orchestrator/blob/master/docs/configuration-raft.md">RaftDataDir</a><br>
+Raft 的数据目录。</p>
+</li>
+<li>
+<p><a href="https://github.com/github/orchestrator/blob/master/docs/configuration-raft.md">RaftBind</a><br>
+Raft 的 bind 地址。</p>
+</li>
+<li>
+<p><a href="https://github.com/github/orchestrator/blob/master/docs/configuration-raft.md">DefaultRaftPort</a><br>
+Raft 的端口。</p>
+</li>
+<li>
+<p><a href="https://github.com/github/orchestrator/blob/master/docs/configuration-raft.md">RaftNodes</a><br>
+Raft 的节点。</p>
+</li>
+<li>
+<p>[ConsulAddress</p>
+<p>](https://github.com/github/orchestrator/blob/master/docs/configuration-kv.md)Consul 的地址。</p>
+</li>
+<li>
+<p>[ConsulAclToken</p>
+<p>](https://github.com/github/orchestrator/blob/master/docs/configuration-kv.md)Consul 的 token。</p>
+</li>
+</ul>
+<h2 id="运行部署">运行部署</h2>
+<h3 id="环境-2"><strong>环境：</strong></h3>
+<p>在三台测试机上各自安装 MySQL2 个实例：orch 用的后端 MySQL（3306）和被 orch 管理的 MySQL（3307）。按照给出的配置模板，首先在后端数据库的实例上创建账号：</p>
+<pre><code>CREATE USER 'orchestrator'@'127.0.0.1' IDENTIFIED BY '123456';
+GRANT ALL ON orchestrator.* TO 'orchestrator'@'127.0.0.1'; 
+</code></pre>
+<p>再在被管理的 MySQL（3307）实例上 创建账号：</p>
+<pre><code>CREATE USER 'orchestrator'@'%' IDENTIFIED BY 'Aa123456';
+GRANT SUPER, PROCESS, REPLICATION SLAVE, RELOAD ON *.* TO 'orchestrator'@'%';
+GRANT SELECT ON mysql.slave_master_info TO 'orchestrator'@'%';
+GRANT SELECT ON meta.* TO 'orchestrator'@'orc_host';
+</code></pre>
+<p>其中 <a href="https://github.com/github/orchestrator/blob/622e979722bf433232ae267727933ba055cdbfed/resources/pseudo-gtid/pseudo-gtid.sql">meta</a> 库的作用是自己的 query 所用到的，如：<a href="https://github.com/github/orchestrator/blob/622e979722bf433232ae267727933ba055cdbfed/docs/configuration-discovery-classifying.md">cluster</a>、<a href="https://github.com/github/orchestrator/blob/622e979722bf433232ae267727933ba055cdbfed/resources/pseudo-gtid/pseudo-gtid.sql">pseudo_gtid_status</a> 等，后面会有相关说明。</p>
+<p>到此，关于 orch 的环境已经准备完毕，最后只需要把被管理的 3 台 MySQL 部署成一主二从即可（rep）:</p>
+<pre><code>Master：192.168.163.131:3307
+Slave  ：192.168.163.132:3307
+Slave  ：192.168.163.133:3307
+</code></pre>
+<p>最后，因为配置文件里写的是域名 (hostname)，所以需要修改三台被管理 MySQL 的 hosts。即：</p>
+<pre><code>192.168.163.131 test1
+192.168.163.132 test2
+192.168.163.133 test3
+</code></pre>
+<h3 id="安装-2">安装：</h3>
+<p><strong>1.</strong> <a href="https://github.com/github/orchestrator/blob/master/docs/execution.md">开启 orchestrator</a></p>
+<pre><code>./orchestrator --debug --config=/etc/orchestrator.conf.json http
+</code></pre>
+<p><strong>2.</strong> 把配置好的复制实例加入到 orchestrator，因为 orch 可以自动发现整个拓扑的所有实例，所以只需要添加任意一台实例即可，如果没有发现的话可以再添加。</p>
+<p>在 web 上添加（导航里的 Clusters -&gt; Discover）：</p>
+<figure data-type="image" tabindex="2"><img src="https://img2018.cnblogs.com/blog/163084/201902/163084-20190218104614096-762182805.png" alt="img" loading="lazy"></figure>
+<p>添加完成之后，最终的结构图如下：</p>
+<figure data-type="image" tabindex="3"><img src="https://img2018.cnblogs.com/blog/163084/201902/163084-20190218105045870-72472962.png" alt="img" loading="lazy"></figure>
+<h2 id="参考文档">参考文档：</h2>
+<p>https://github.com/github/orchestrator</p>
+<p>https://www.percona.com/blog/2016/03/08/orchestrator-mysql-replication-topology-manager/</p>
+<p>原文链接   https://www.cnblogs.com/zhoujinyi/p/10387581.html</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/hvauG2ZhN/">
+              <span class="post-title">
+                Docker overlay2 占用大量磁盘空间处理方法 &rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

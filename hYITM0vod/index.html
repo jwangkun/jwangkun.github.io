@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>在Docker中安装使用MySQL 高可用之MGR（多主同时写入） | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="在Docker中安装使用MySQL 高可用之MGR（多主同时写入） | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="在Docker中安装使用MySQL 高可用之MGR（多主同时写入）"/>
+    <meta property="og:url" content="https://jwangkun.github.io/hYITM0vod/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/_JVrn2ZGG/" class="tag">MySQL</a>
+            
+            <a href="https://jwangkun.github.io/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>在Docker中安装使用MySQL 高可用之MGR（多主同时写入）</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-11，19 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>一、创建3台MySQL环境<br>
+二、修改MySQL参数<br>
+三、重启MySQL环境<br>
+四、安装MGR插件（所有节点执行）<br>
+五、设置复制账号（所有节点执行）<br>
+六、启动MGR单主模式<br>
+6.1、启动MGR，在主库(172.72.0.15)上执行<br>
+6.2、其他节点加入MGR，在从库（172.72.0.16，172.72.0.17）上执行<br>
+七、多主和单主模式切换<br>
+7.1、查询当前模式<br>
+7.2、函数实现多主和单主切换<br>
+7.2.1、单主切多主模式<br>
+7.2.2、多主切单主模式<br>
+7.3、手动切换<br>
+7.3.1、单主切多主模式<br>
+7.3.2、多主切单主模式<br>
+八、测试同步<br>
+九、MGR新增节点<br>
+9.1、创建新MySQL节点<br>
+9.2、新节点安装MGR插件<br>
+9.3、新节点设置复制账号<br>
+9.4、在原3节点执行修改参数<br>
+9.5、新节点加入<br>
+9.6、查看所有节点<br>
+十、重置MGR配置</p>
+<h1 id="一-创建3台mysql环境">一、创建3台MySQL环境</h1>
+<pre><code> # 拉取镜像
+ docker pull mysql:8.0.20
+ # 创建专用网络
+ docker network create --subnet=172.72.0.0/24 mysql-network
+ 
+ # 创建目录存储数据
+ mkdir -p /usr/local/mysql/lhrmgr15/conf.d
+ mkdir -p /usr/local/mysql/lhrmgr15/data
+ mkdir -p /usr/local/mysql/lhrmgr16/conf.d
+ mkdir -p /usr/local/mysql/lhrmgr16/data
+ mkdir -p /usr/local/mysql/lhrmgr17/conf.d
+ mkdir -p /usr/local/mysql/lhrmgr17/data
+
+# 创建3个节点的MySQL
+docker run -d --name mysql8020mgr33065 \
+   -h lhrmgr15 -p 33065:3306 --net=mysql-network --ip 172.72.0.15 \
+   -v /usr/local/mysql/lhrmgr15/conf.d:/etc/mysql/conf.d -v /usr/local/mysql/lhrmgr15/data:/var/lib/mysql/ \
+   -e MYSQL_ROOT_PASSWORD=lhr \
+   -e TZ=Asia/Shanghai \
+   mysql:8.0.20
+
+docker run -d --name mysql8020mgr33066 \
+   -h lhrmgr16 -p 33066:3306 --net=mysql-network --ip 172.72.0.16 \
+   -v /usr/local/mysql/lhrmgr16/conf.d:/etc/mysql/conf.d -v /usr/local/mysql/lhrmgr16/data:/var/lib/mysql/ \
+   -e MYSQL_ROOT_PASSWORD=lhr \
+   -e TZ=Asia/Shanghai \
+   mysql:8.0.20
+
+docker run -d --name mysql8020mgr33067 \
+   -h lhrmgr17 -p 33067:3306 --net=mysql-network --ip 172.72.0.17 \
+   -v /usr/local/mysql/lhrmgr17/conf.d:/etc/mysql/conf.d -v /usr/local/mysql/lhrmgr17/data:/var/lib/mysql/ \
+   -e MYSQL_ROOT_PASSWORD=lhr \
+   -e TZ=Asia/Shanghai \
+   mysql:8.0.20
+</code></pre>
+<h1 id="二-修改mysql参数">二、修改MySQL参数</h1>
+<pre><code>  cat &gt; /usr/local/mysql/lhrmgr15/conf.d/my.cnf &lt;&lt;&quot;EOF&quot;
+  [mysqld]
+  user=mysql
+  port=3306
+  character_set_server=utf8mb4
+  secure_file_priv=''
+  server-id = 802033065
+  default-time-zone = '+8:00'
+  log_timestamps = SYSTEM
+  log-bin = 
+  binlog_format=row
+  binlog_checksum=NONE
+  log-slave-updates=1
+  skip-name-resolve
+  auto-increment-increment=2
+  auto-increment-offset=1
+  gtid-mode=ON
+  enforce-gtid-consistency=on
+  default_authentication_plugin=mysql_native_password
+  max_allowed_packet = 500M
+ 
+  master_info_repository=TABLE
+  relay_log_info_repository=TABLE
+ relay_log=lhrmgr15-relay-bin-ip15
+ 
+ 
+  transaction_write_set_extraction=XXHASH64
+  loose-group_replication_group_name=&quot;aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa&quot;
+  loose-group_replication_start_on_boot=OFF
+  loose-group_replication_local_address= &quot;172.72.0.15:33061&quot;
+  loose-group_replication_group_seeds= &quot;172.72.0.15:33061,172.72.0.16:33062,172.72.0.17:33063&quot;
+  loose-group_replication_bootstrap_group=OFF
+  loose-group_replication_ip_whitelist=&quot;172.72.0.15,172.72.0.16,172.72.0.17&quot;
+  
+  report_host=172.72.0.15
+  report_port=3306
+ 
+ EOF
+
+  cat &gt;  /usr/local/mysql/lhrmgr16/conf.d/my.cnf &lt;&lt;&quot;EOF&quot;
+  [mysqld]
+  user=mysql
+  port=3306
+  character_set_server=utf8mb4
+  secure_file_priv=''
+  server-id = 802033066
+  default-time-zone = '+8:00'
+  log_timestamps = SYSTEM
+  log-bin = 
+  binlog_format=row
+  binlog_checksum=NONE
+  log-slave-updates=1
+  gtid-mode=ON
+  enforce-gtid-consistency=ON
+  skip_name_resolve
+  default_authentication_plugin=mysql_native_password
+  max_allowed_packet = 500M
+  
+  master_info_repository=TABLE
+  relay_log_info_repository=TABLE
+  relay_log=lhrmgr16-relay-bin-ip16
+
+  transaction_write_set_extraction=XXHASH64
+  loose-group_replication_group_name=&quot;aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa&quot;
+  loose-group_replication_local_address= &quot;172.72.0.16:33062&quot;
+  loose-group_replication_group_seeds= &quot;172.72.0.15:33061,172.72.0.16:33062,172.72.0.17:33063&quot;
+  loose-group_replication_bootstrap_group=OFF
+  loose-group_replication_ip_whitelist=&quot;172.72.0.15,172.72.0.16,172.72.0.17&quot;
+  
+  report_host=172.72.0.16
+  report_port=3306
+  
+  EOF
+ 
+ 
+  cat &gt; /usr/local/mysql/lhrmgr17/conf.d/my.cnf &lt;&lt;&quot;EOF&quot;
+  [mysqld]
+  user=mysql
+  port=3306
+  character_set_server=utf8mb4
+  secure_file_priv=''
+  server-id = 802033067
+  default-time-zone = '+8:00'
+  log_timestamps = SYSTEM
+  log-bin = 
+  binlog_format=row
+  binlog_checksum=NONE
+  log-slave-updates=1
+  gtid-mode=ON
+  enforce-gtid-consistency=ON
+  skip_name_resolve
+  default_authentication_plugin=mysql_native_password
+  max_allowed_packet = 500M
+
+  master_info_repository=TABLE
+  relay_log_info_repository=TABLE
+  relay_log=lhrmgr16-relay-bin-ip16
+ 
+ transaction_write_set_extraction=XXHASH64
+ loose-group_replication_group_name=&quot;aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa&quot;
+ loose-group_replication_start_on_boot=OFF
+ loose-group_replication_local_address= &quot;172.72.0.17:33063&quot;
+ loose-group_replication_group_seeds= &quot;172.72.0.15:33061,172.72.0.16:33062,172.72.0.17:33063&quot;
+ loose-group_replication_bootstrap_group=OFF
+ loose-group_replication_ip_whitelist=&quot;172.72.0.15,172.72.0.16,172.72.0.17&quot;
+ 
+ report_host=172.72.0.17
+ report_port=3306
+ 
+ EOF
+</code></pre>
+<h1 id="三-重启mysql环境">三、重启MySQL环境</h1>
+<pre><code>  # 重启MySQL
+  docker restart mysql8020mgr33065 mysql8020mgr33066 mysql8020mgr33067
+  docker ps
+  
+  # 进入MySQL
+  docker exec -it mysql8020mgr33065 bash
+  docker exec -it mysql8020mgr33065 mysql -uroot -plhr
+ 
+  #远程连接MySQL
+ mysql -uroot -plhr -h192.168.1.35 -P33065 
+ mysql -uroot -plhr -h192.168.1.35 -P33066 
+ mysql -uroot -plhr -h192.168.1.35 -P33067 
+ 
+ # 查看MySQL日志
+ docker logs -f --tail 10 mysql8020mgr33065
+ docker logs -f --tail 10 mysql8020mgr33066
+ docker logs -f --tail 10 mysql8020mgr33067
+  
+ # 查看MySQL的主机名、server_id和server_uuid
+ mysql -uroot -plhr -h192.168.1.35 -P33065 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+ mysql -uroot -plhr -h192.168.1.35 -P33066 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+ mysql -uroot -plhr -h192.168.1.35 -P33067 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+</code></pre>
+<p>结果：</p>
+<pre><code>[root@docker35 ~]# mysql -uroot -plhr -h192.168.1.35 -P33065 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+ mysql: [Warning] Using a password on the command line interface can be insecure.
+ +------------+-------------+--------------------------------------+
+ | @@hostname | @@server_id | @@server_uuid                        |
+ +------------+-------------+--------------------------------------+
+ | lhrmgr15   |   802033065 | 611717fe-d785-11ea-9342-0242ac48000f |
+ +------------+-------------+--------------------------------------+
+ [root@docker35 ~]# mysql -uroot -plhr -h192.168.1.35 -P33066 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+ mysql: [Warning] Using a password on the command line interface can be insecure.
+ +------------+-------------+--------------------------------------+
+ | @@hostname | @@server_id | @@server_uuid                        |
+ +------------+-------------+--------------------------------------+
+| lhrmgr16   |   802033066 | 67090f47-d785-11ea-b76c-0242ac480010 |
++------------+-------------+--------------------------------------+
+[root@docker35 ~]# mysql -uroot -plhr -h192.168.1.35 -P33067 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+mysql: [Warning] Using a password on the command line interface can be insecure.
++------------+-------------+--------------------------------------+
+| @@hostname | @@server_id | @@server_uuid                        |
++------------+-------------+--------------------------------------+
+| lhrmgr17   |   802033067 | 678cf064-d785-11ea-b8ce-0242ac480011 |
++------------+-------------+--------------------------------------+
+[root@docker35 ~]# 
+</code></pre>
+<h1 id="四-安装mgr插件所有节点执行">四、安装MGR插件（所有节点执行）</h1>
+<pre><code> MySQL [(none)]&gt; INSTALL PLUGIN group_replication SONAME 'group_replication.so';
+ Query OK, 0 rows affected (0.23 sec)
+ 
+ MySQL [(none)]&gt; show plugins;
+ +---------------------------------+----------+--------------------+----------------------+---------+
+ | Name                            | Status   | Type               | Library              | License |
+ +---------------------------------+----------+--------------------+----------------------+---------+
+ | group_replication               | ACTIVE   | GROUP REPLICATION  | group_replication.so | GPL     |
+ +---------------------------------+----------+--------------------+----------------------+---------+
+45 rows in set (0.00 sec)
+</code></pre>
+<h1 id="五-设置复制账号所有节点执行">五、设置复制账号（所有节点执行）</h1>
+<pre><code>SET SQL_LOG_BIN=0;
+CREATE USER repl@'%' IDENTIFIED BY 'lhr';
+GRANT REPLICATION SLAVE ON *.* TO repl@'%';
+FLUSH PRIVILEGES;
+SET SQL_LOG_BIN=1;
+CHANGE MASTER TO MASTER_USER='repl', MASTER_PASSWORD='lhr' FOR CHANNEL 'group_replication_recovery';
+</code></pre>
+<p>执行过程：</p>
+<pre><code>MySQL [(none)]&gt; SET SQL_LOG_BIN=0;
+Query OK, 0 rows affected (0.00 sec)
+ 
+MySQL [(none)]&gt; CREATE USER repl@'%' IDENTIFIED BY 'lhr';
+Query OK, 0 rows affected (0.01 sec)
+ 
+MySQL [(none)]&gt; GRANT REPLICATION SLAVE ON *.* TO repl@'%';
+Query OK, 0 rows affected (0.00 sec)
+ 
+MySQL [(none)]&gt; FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.00 sec)
+
+MySQL [(none)]&gt; SET SQL_LOG_BIN=1;
+Query OK, 0 rows affected (0.00 sec)
+
+MySQL [(none)]&gt; CHANGE MASTER TO MASTER_USER='repl', MASTER_PASSWORD='lhr' FOR CHANNEL 'group_replication_recovery';
+Query OK, 0 rows affected, 1 warning (0.04 sec)
+</code></pre>
+<h1 id="六-启动mgr单主模式">六、启动MGR单主模式</h1>
+<h2 id="61-启动mgr在主库17272015上执行">6.1、启动MGR，在主库(172.72.0.15)上执行</h2>
+<pre><code>SET GLOBAL group_replication_bootstrap_group=ON;
+START GROUP_REPLICATION;
+SET GLOBAL group_replication_bootstrap_group=OFF;
+-- 查看MGR组信息 
+SELECT * FROM performance_schema.replication_group_members;
+</code></pre>
+<p>执行过程：</p>
+<pre><code> MySQL [(none)]&gt; SET GLOBAL group_replication_bootstrap_group=ON;
+ Query OK, 0 rows affected (0.00 sec)
+ 
+ MySQL [(none)]&gt; START GROUP_REPLICATION;
+ Query OK, 0 rows affected (3.49 sec)
+ 
+ MySQL [(none)]&gt; SET GLOBAL group_replication_bootstrap_group=OFF;
+ Query OK, 0 rows affected (0.00 sec)
+ 
+ MySQL [(none)]&gt; SELECT * FROM performance_schema.replication_group_members;
+ +---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+ | CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |
+ +---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+ | group_replication_applier | 611717fe-d785-11ea-9342-0242ac48000f | 172.72.0.15 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+ +---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+1 row in set (0.01 sec)
+</code></pre>
+<h2 id="62-其他节点加入mgr在从库1727201617272017上执行">6.2、其他节点加入MGR，在从库（172.72.0.16，172.72.0.17）上执行</h2>
+<pre><code>START GROUP_REPLICATION;
+-- 查看MGR组信息
+SELECT * FROM performance_schema.replication_group_members;
+</code></pre>
+<p>执行结果：</p>
+<pre><code>MySQL [(none)]&gt; SELECT * FROM performance_schema.replication_group_members;
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| group_replication_applier | 611717fe-d785-11ea-9342-0242ac48000f | 172.72.0.15 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+| group_replication_applier | 67090f47-d785-11ea-b76c-0242ac480010 | 172.72.0.16 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
+| group_replication_applier | 678cf064-d785-11ea-b8ce-0242ac480011 | 172.72.0.17 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+3 rows in set (0.01 sec)
+</code></pre>
+<p>可以看到，3个节点状态为online，并且主节点为172.72.0.15，只有主节点可以写入，其他节点只读，MGR单主模式搭建成功。</p>
+<h1 id="七-多主和单主模式切换">七、多主和单主模式切换</h1>
+<h2 id="71-查询当前模式">7.1、查询当前模式</h2>
+<pre><code> 1MySQL [(none)]&gt;  show variables like '%group_replication_single_primary_mode%';
+ | Variable_name                         | Value |
+ +---------------------------------------+-------+
+ | group_replication_single_primary_mode | ON    |
+ +---------------------------------------+-------+
+ 1 row in set (0.01 sec)
+ 
+ MySQL [(none)]&gt; SELECT @@group_replication_single_primary_mode;
+ +-----------------------------------------+
+ | @@group_replication_single_primary_mode |
+ +-----------------------------------------+
+ |                                       1 |
+ +-----------------------------------------+
+ 1 row in set (0.00 sec)
+</code></pre>
+<p>参数group_replication_single_primary_mode为ON，表示单主模式。</p>
+<h2 id="72-函数实现多主和单主切换">7.2、函数实现多主和单主切换</h2>
+<p>函数切换：从MySQL 8.0.13开始，可以使用函数进行在线修改MGR模式。</p>
+<pre><code>-- 单主切多主
+select group_replication_switch_to_multi_primary_mode(); 
+-- 多主切单主，入参需要传入主库的server_uuid
+select group_replication_switch_to_single_primary_mode('@@server_uuid') ;
+
+-- 查看组信息
+SELECT * FROM performance_schema.replication_group_members;
+</code></pre>
+<h3 id="721-单主切多主模式">7.2.1、单主切多主模式</h3>
+<pre><code> MySQL [(none)]&gt; SELECT @@group_replication_single_primary_mode;
+ +-----------------------------------------+
+ | @@group_replication_single_primary_mode |
+ +-----------------------------------------+
+ |                                       1 |
+ +-----------------------------------------+
+ 1 row in set (0.00 sec)
+ 
+ MySQL [(none)]&gt; SELECT * FROM performance_schema.replication_group_members;
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| group_replication_applier | 611717fe-d785-11ea-9342-0242ac48000f | 172.72.0.15 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+| group_replication_applier | 67090f47-d785-11ea-b76c-0242ac480010 | 172.72.0.16 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
+| group_replication_applier | 678cf064-d785-11ea-b8ce-0242ac480011 | 172.72.0.17 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+3 rows in set (0.00 sec)
+
+MySQL [(none)]&gt; select group_replication_switch_to_multi_primary_mode();
++--------------------------------------------------+
+| group_replication_switch_to_multi_primary_mode() |
++--------------------------------------------------+
+| Mode switched to multi-primary successfully.     |
++--------------------------------------------------+
+1 row in set (1.01 sec)
+
+MySQL [(none)]&gt; SELECT * FROM performance_schema.replication_group_members;
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| group_replication_applier | 611717fe-d785-11ea-9342-0242ac48000f | 172.72.0.15 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+| group_replication_applier | 67090f47-d785-11ea-b76c-0242ac480010 | 172.72.0.16 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+| group_replication_applier | 678cf064-d785-11ea-b8ce-0242ac480011 | 172.72.0.17 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+3 rows in set (0.00 sec)
+MySQL [(none)]&gt; SELECT @@group_replication_single_primary_mode;
++-----------------------------------------+
+| @@group_replication_single_primary_mode |
++-----------------------------------------+
+|                                       0 |
++-----------------------------------------+
+</code></pre>
+<h3 id="722-多主切单主模式">7.2.2、多主切单主模式</h3>
+<pre><code> MySQL [(none)]&gt; SELECT @@group_replication_single_primary_mode;
+ +-----------------------------------------+
+ | @@group_replication_single_primary_mode |
+ +-----------------------------------------+
+ |                                       0 |
+ +-----------------------------------------+
+ 1 row in set (0.00 sec)
+ 
+ MySQL [(none)]&gt; select group_replication_switch_to_single_primary_mode('67090f47-d785-11ea-b76c-0242ac480010') ;
+ +-----------------------------------------------------------------------------------------+
+ | group_replication_switch_to_single_primary_mode('67090f47-d785-11ea-b76c-0242ac480010') |
+ +-----------------------------------------------------------------------------------------+
+ | Mode switched to single-primary successfully.                                           |
+ +-----------------------------------------------------------------------------------------+
+ 1 row in set (1.02 sec)
+ 
+ MySQL [(none)]&gt; SELECT * FROM performance_schema.replication_group_members;
+ +---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+ | CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |
+ +---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+ | group_replication_applier | 611717fe-d785-11ea-9342-0242ac48000f | 172.72.0.15 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
+ | group_replication_applier | 67090f47-d785-11ea-b76c-0242ac480010 | 172.72.0.16 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+ | group_replication_applier | 678cf064-d785-11ea-b8ce-0242ac480011 | 172.72.0.17 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
+ +---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+ 3 rows in set (0.00 sec)
+ 
+ MySQL [(none)]&gt; SELECT @@group_replication_single_primary_mode;
+ +-----------------------------------------+
+ | @@group_replication_single_primary_mode |
+ +-----------------------------------------+
+ |                                       1 |
+ +-----------------------------------------+
+ 1 row in set (0.00 sec)
+</code></pre>
+<h2 id="73-手动切换">7.3、手动切换</h2>
+<p>MGR切换模式需要重新启动组复制，因些需要在所有节点上先关闭组复制，设置 group_replication_single_primary_mode=OFF 等参数，再启动组复制。</p>
+<h3 id="731-单主切多主模式">7.3.1、单主切多主模式</h3>
+<p>1、停止组复制(所有节点执行)：</p>
+<pre><code>stop group_replication;
+set global group_replication_single_primary_mode=OFF;
+set global group_replication_enforce_update_everywhere_checks=ON;
+</code></pre>
+<p>2、随便选择某个节点执行</p>
+<pre><code>SET GLOBAL group_replication_bootstrap_group=ON; 
+START GROUP_REPLICATION; 
+SET GLOBAL group_replication_bootstrap_group=OFF;
+</code></pre>
+<p>3、其他节点执行</p>
+<pre><code>START GROUP_REPLICATION; 
+</code></pre>
+<p>4、查看组信息，所有节点的 MEMBER_ROLE 都为 PRIMARY</p>
+<pre><code>MySQL [(none)]&gt; SELECT * FROM performance_schema.replication_group_members;
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| group_replication_applier | 611717fe-d785-11ea-9342-0242ac48000f | 172.72.0.15 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+| group_replication_applier | 67090f47-d785-11ea-b76c-0242ac480010 | 172.72.0.16 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+| group_replication_applier | 678cf064-d785-11ea-b8ce-0242ac480011 | 172.72.0.17 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+3 rows in set (0.00 sec)
+</code></pre>
+<p>可以看到所有节点状态都是online，角色都是PRIMARY，MGR多主模式切换成功。</p>
+<h3 id="732-多主切单主模式">7.3.2、多主切单主模式</h3>
+<p>1、所有节点执行</p>
+<pre><code>stop group_replication;
+set global group_replication_enforce_update_everywhere_checks=OFF;
+set global group_replication_single_primary_mode=ON;
+</code></pre>
+<p>2、主节点（172.72.0.16）执行</p>
+<pre><code>SET GLOBAL group_replication_bootstrap_group=ON; 
+START GROUP_REPLICATION; 
+SET GLOBAL group_replication_bootstrap_group=OFF;
+</code></pre>
+<p>3、从节点（172.72.0.15、172.72.0.17）执行</p>
+<pre><code>START GROUP_REPLICATION; 
+</code></pre>
+<p>4、查看MGR组信息</p>
+<pre><code>MySQL [(none)]&gt; SELECT * FROM performance_schema.replication_group_members;
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+| group_replication_applier | 611717fe-d785-11ea-9342-0242ac48000f | 172.72.0.15 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
+| group_replication_applier | 67090f47-d785-11ea-b76c-0242ac480010 | 172.72.0.16 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+| group_replication_applier | 678cf064-d785-11ea-b8ce-0242ac480011 | 172.72.0.17 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
++---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+3 rows in set (0.00 sec)
+</code></pre>
+<h1 id="八-测试同步">八、测试同步</h1>
+<p>在主节点上执行以下命令，然后在其它节点查询：</p>
+<pre><code> create database lhrdb;
+ CREATE TABLE lhrdb.`tb1` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `hostname` varchar(100) DEFAULT NULL,
+  `server_id` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+ ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+ 
+ 
+insert into lhrdb.tb1(hostname,server_id) select @@hostname,@@server_id;
+select * from lhrdb.tb1;
+
+-- 3个节点查询出来的值一样
+MySQL [(none)]&gt; select * from lhrdb.tb1;
++----+----------+-----------+
+| id | hostname | server_id |
++----+----------+-----------+
+|  1 | lhrmgr16 | 802033066 |
++----+----------+-----------+
+201 row in set (0.02 sec)
+</code></pre>
+<h1 id="九-mgr新增节点">九、MGR新增节点</h1>
+<h2 id="91-创建新mysql节点">9.1、创建新MySQL节点</h2>
+<pre><code> mkdir -p /usr/local/mysql/lhrmgr18/conf.d
+ mkdir -p /usr/local/mysql/lhrmgr18/data
+ 
+ docker run -d --name mysql8020mgr33068 \
+   -h lhrmgr18 -p 33068:3306 --net=mysql-network --ip 172.72.0.18 \
+   -v /usr/local/mysql/lhrmgr18/conf.d:/etc/mysql/conf.d -v /usr/local/mysql/lhrmgr18/data:/var/lib/mysql/ \
+   -e MYSQL_ROOT_PASSWORD=lhr \
+   -e TZ=Asia/Shanghai \
+    mysql:8.0.20
+
+cat &gt; /usr/local/mysql/lhrmgr18/conf.d/my.cnf &lt;&lt;&quot;EOF&quot;
+[mysqld]
+user=mysql
+port=3306
+character_set_server=utf8mb4
+secure_file_priv=''
+server-id = 802033068
+log-bin = 
+binlog_format=row
+binlog_checksum=NONE
+log-slave-updates=1
+skip-name-resolve
+auto-increment-increment=2
+auto-increment-offset=1
+gtid-mode=ON
+enforce-gtid-consistency=on
+default_authentication_plugin=mysql_native_password
+max_allowed_packet = 500M
+log_slave_updates=on
+
+master_info_repository=TABLE
+relay_log_info_repository=TABLE
+relay_log=lhrmgr18-relay-bin-ip18
+
+transaction_write_set_extraction=XXHASH64
+loose-group_replication_group_name=&quot;aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa&quot;
+loose-group_replication_start_on_boot=OFF
+loose-group_replication_local_address= &quot;172.72.0.18:33064&quot;
+loose-group_replication_group_seeds= &quot;172.72.0.15:33061,172.72.0.16:33062,172.72.0.17:33063,172.72.0.18:33064&quot;
+loose-group_replication_bootstrap_group=OFF
+loose-group_replication_ip_whitelist=&quot;172.72.0.15,172.72.0.16,172.72.0.17,172.72.0.18&quot;
+report_host=172.72.0.18
+report_port=3306
+
+EOF
+
+docker restart mysql8020mgr33068
+
+docker ps
+mysql -uroot -plhr -h192.168.1.35 -P33065 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+mysql -uroot -plhr -h192.168.1.35 -P33066 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+mysql -uroot -plhr -h192.168.1.35 -P33067 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+mysql -uroot -plhr -h192.168.1.35 -P33068 -e &quot;select @@hostname,@@server_id,@@server_uuid&quot;
+mysql -uroot -plhr -h192.168.1.35 -P33065 
+mysql -uroot -plhr -h192.168.1.35 -P33066 
+mysql -uroot -plhr -h192.168.1.35 -P33067 
+mysql -uroot -plhr -h192.168.1.35 -P33068 
+docker logs -f --tail 10 mysql8020mgr33065
+docker logs -f --tail 10 mysql8020mgr33066
+docker logs -f --tail 10 mysql8020mgr33067
+docker logs -f --tail 10 mysql8020mgr33068
+</code></pre>
+<h2 id="92-新节点安装mgr插件">9.2、新节点安装MGR插件</h2>
+<pre><code>-- 安装MGR插件（新增节点执行）
+INSTALL PLUGIN group_replication SONAME 'group_replication.so';
+show plugins;
+</code></pre>
+<h2 id="93-新节点设置复制账号">9.3、新节点设置复制账号</h2>
+<pre><code> -- 设置复制账号（新增节点执行）
+ SET SQL_LOG_BIN=0;
+ CREATE USER repl@'%' IDENTIFIED BY 'lhr';
+ GRANT REPLICATION SLAVE ON *.* TO repl@'%';
+ FLUSH PRIVILEGES;
+ SET SQL_LOG_BIN=1;
+ CHANGE MASTER TO MASTER_USER='repl', MASTER_PASSWORD='lhr' FOR CHANNEL 'group_replication_recovery';
+</code></pre>
+<h2 id="94-在原3节点执行修改参数">9.4、在原3节点执行修改参数</h2>
+<pre><code> set global group_replication_group_seeds='172.72.0.15:33061,172.72.0.16:33062,172.72.0.17:33063,172.72.0.18:33064';
+ stop group_replication;
+ set global group_replication_ip_whitelist=&quot;172.72.0.15,172.72.0.16,172.72.0.17,172.72.0.18&quot;;
+ start group_replication;
+</code></pre>
+<h2 id="95-新节点加入">9.5、新节点加入</h2>
+<pre><code>  -- 4个节点需要保证以下2个参数的值一致
+ 2MySQL [(none)]&gt; select @@group_replication_enforce_update_everywhere_checks,@@group_replication_single_primary_mode;
+  +------------------------------------------------------+-----------------------------------------+
+  | @@group_replication_enforce_update_everywhere_checks | @@group_replication_single_primary_mode |
+  +------------------------------------------------------+-----------------------------------------+
+  |                                                    0 |                                       1 |
+  +------------------------------------------------------+-----------------------------------------+
+ 
+  -- 如果不一致，那么需要修改
+ set global group_replication_single_primary_mode=ON;
+ set global group_replication_enforce_update_everywhere_checks=OFF;
+ CHANGE MASTER TO MASTER_USER='repl', MASTER_PASSWORD='lhr' FOR CHANNEL 'group_replication_recovery';
+
+-- 新节点加入
+ start group_replication;
+</code></pre>
+<h2 id="96-查看所有节点">9.6、查看所有节点</h2>
+<pre><code> MySQL [lhrdb]&gt; SELECT * FROM performance_schema.replication_group_members;
+ +---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+ | CHANNEL_NAME              | MEMBER_ID                            | MEMBER_HOST | MEMBER_PORT | MEMBER_STATE | MEMBER_ROLE | MEMBER_VERSION |
+ +---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+ | group_replication_applier | 611717fe-d785-11ea-9342-0242ac48000f | 172.72.0.15 |        3306 | ONLINE       | PRIMARY     | 8.0.20         |
+ | group_replication_applier | 67090f47-d785-11ea-b76c-0242ac480010 | 172.72.0.16 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
+ | group_replication_applier | 678cf064-d785-11ea-b8ce-0242ac480011 | 172.72.0.17 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
+ | group_replication_applier | e4d6bf4b-d78d-11ea-b1b6-0242ac480012 | 172.72.0.18 |        3306 | ONLINE       | SECONDARY   | 8.0.20         |
+ +---------------------------+--------------------------------------+-------------+-------------+--------------+-------------+----------------+
+104 rows in set (0.31 sec)
+</code></pre>
+<h1 id="十-重置mgr配置">十、重置MGR配置</h1>
+<p>如果需要重置，那么需要执行如下命令：</p>
+<pre><code>1STOP GROUP_REPLICATION;
+2reset master;
+3SET SQL_LOG_BIN=1;
+4CHANGE MASTER TO MASTER_USER='repl', MASTER_PASSWORD='lhr' FOR CHANNEL 'group_replication_recovery';
+5start GROUP_REPLICATION;
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/UeXsJbzPP/">
+              <span class="post-title">
+                MySQL 解除死锁状态&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

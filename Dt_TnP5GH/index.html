@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Harbor搭建私有Docker仓库 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Harbor搭建私有Docker仓库 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Harbor搭建私有Docker仓库"/>
+    <meta property="og:url" content="https://jwangkun.github.io/Dt_TnP5GH/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/9IyfXdfX6/" class="tag">Docker</a>
+            
+            <a href="https://jwangkun.github.io/CMrQd0atvo/" class="tag">Harbor</a>
+            
+        </span>
+            <h1>Harbor搭建私有Docker仓库</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p><strong>安装环境：</strong></p>
+<table>
+<thead>
+<tr>
+<th>环境</th>
+<th>版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cnetos</td>
+<td>V 7.6</td>
+</tr>
+<tr>
+<td>docker</td>
+<td>V 19.03.9</td>
+</tr>
+<tr>
+<td>harbor</td>
+<td>V 2.3.3</td>
+</tr>
+<tr>
+<td>docker-compose</td>
+<td>V 2.0.1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-根据-harbor-的版本安装对应版本的-docker-服务">1. 根据 harbor 的版本，安装对应版本的 docker 服务。</h3>
+<p>** 注意：** 不要直接安装 docker 服务，因为直接安装的 docker 服务可能与 harbor 版本对不上，导致安装失败。直接执行 harbor 安装，根据报错输出选择安装对应的 docker 服务。<br>
+** 注意：** 需要关闭 selinux</p>
+<h3 id="2-根据-harbor-的版本安装对应版本的-docker-compose-服务">2. 根据 harbor 的版本，安装对应版本的 docker-compose 服务。</h3>
+<p>** 注意：** 不要直接安装 docker-compose 服务，因为直接安装的 docker-compose 服务可能与 harbor 版本对不上，导致安装失败。直接执行 harbor 安装，根据报错输出选择安装对应的 docker-compose 服务。</p>
+<p><strong>安装步骤如下：</strong><br>
+2.1 去 github 手动下载文件：https://github.com/docker/compose/releases/tag/1.25.0-rc4<br>
+[外链图片转存失败, 源站可能有防盗链机制, 建议将图片保存下来直接上传 (img-r7wjyuUq-1634181898388)(./1634123377060.png)]</p>
+<p>2.2 将文件上传到<code>/usr/local/bin/</code> 目录下，重命名为 docker-compose ，修改文件权限：</p>
+<pre><code># 重命名
+mv docker-compose-linux-x86_64 docker-compose
+# 修改文件权限
+chmod +x /usr/local/bin/docker-compose
+</code></pre>
+<p>2.3 查看版本</p>
+<pre><code>docker-compose -v
+</code></pre>
+<h3 id="3-安装-harbor">3. 安装 harbor</h3>
+<p>3.1 解压安装包</p>
+<pre><code>tar -xvf harbor-offline-installer-v2.3.3.tgz -C /opt/
+</code></pre>
+<p>3.2 修改 harbor.yml.tmpl 文件</p>
+<p>hostname : xxxxxxxxx 改成自己的 ip<br>
+https: 这一大项全部用 #注释掉，不然还需要搞证书<br>
+harbor_admin_password database-&gt;password 根据自己需要更改</p>
+<p>3.3 重命名 harbor.yml.tmpl 文件为 harbor.yml</p>
+<pre><code>mv harbor.yml.tmpl harbor.yml　　
+</code></pre>
+<p>3.4 创建 harbor 日志存放目录<br>
+mkdir -p /var/log/harbor</p>
+<p>注意：如果出现报错 <code>invalid mount config for type &quot;bind&quot;: bind source path does not exist: /var/log/harbor/</code></p>
+<p>3.5 执行安装</p>
+<pre><code>./install.sh 
+
+./prepare
+
+docker-compose up 
+
+</code></pre>
+<h3 id="4-登录访问">4. 登录访问</h3>
+<p>地址：http://192.168.1.200/<br>
+用户名 / 密码：admin/Harbor12345</p>
+<p><strong>成功访问如下：</strong></p>
+<figure data-type="image" tabindex="1"><img src="https://img-blog.csdnimg.cn/6b13d16fa8584c7a98d4d7c4cded779a.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA6L-Q57u0LeaZk-afjw==,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="img" loading="lazy"></figure>
+<p><strong>主界面</strong></p>
+<figure data-type="image" tabindex="2"><img src="https://img-blog.csdnimg.cn/8efb7d02f6ef446e9f4b32c241ce6420.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBA6L-Q57u0LeaZk-afjw==,size_20,color_FFFFFF,t_70,g_se,x_16#pic_center" alt="img" loading="lazy"></figure>
+<h3 id="5-启动停止">5. 启动停止</h3>
+<ol>
+<li>进入到 harbor 目录下</li>
+</ol>
+<pre><code>cd /opt/harbor
+</code></pre>
+<ol>
+<li>启动</li>
+</ol>
+<pre><code>docker-compose start
+</code></pre>
+<p>2.停止</p>
+<pre><code>docker-compose stop
+</code></pre>
+<h2 id="harbor-使用">harbor 使用</h2>
+<h3 id="1-登录仓库">1. 登录仓库</h3>
+<pre><code>docker login 192.168.1.200 -u admin -p Harbor12345
+</code></pre>
+<h3 id="2-上传镜像">2. 上传镜像</h3>
+<ol>
+<li>将构建好的镜像打上 “harbor 访问地址 / 项目” 前缀格式的标签</li>
+</ol>
+<pre><code>docker tag gateway:1.2 192.168.1.200/database/gateway:1.2
+</code></pre>
+<ol>
+<li>上传镜像到 harbor 仓库</li>
+</ol>
+<pre><code>docker push 192.168.1.200/database/gateway:1.2
+</code></pre>
+<h3 id="3-镜像拉取">3. 镜像拉取</h3>
+<pre><code>docker pull 192.168.1.200/database/gateway:1.2
+</code></pre>
+<h2 id="faq">FAQ</h2>
+<h3 id="1-连接报错-443">1. 连接报错 “443”</h3>
+<p>Docker 自从 1.3.X 之后 docker registry 交互默认使用的是 HTTPS，但是搭建私有镜像默认使用的是 HTTP 服务，所以与私有镜像交时出现以上错误。</p>
+<p><strong>解决方法一：</strong><br>
+在 <code>/etc/docker</code> 下创建 <code>daemon.json</code> 文件，写入：</p>
+<pre><code>{
+ &quot;insecure-registries&quot; : [&quot;192.168.1.200&quot;]
+}
+</code></pre>
+<p>或者通过以下命令添加：</p>
+<pre><code>echo ‘{ “insecure-registries”:[“192.168.0.8:5000”] }’ &gt; /etc/docker/daemon.json
+</code></pre>
+<p>重启 <code>docker</code> 服务</p>
+<pre><code>systemctl restart docker
+</code></pre>
+<p><strong>解决方法二：</strong></p>
+<ol>
+<li>修改启动文件</li>
+</ol>
+<pre><code>vi /usr/lib/systemd/system/docker.service
+ExecStart=/usr/bin/dockerd --insecure-registry www.harbor2.com
+#修改此处并且后边添加IP地址或者域名
+</code></pre>
+<p>2、重新启动 docker</p>
+<pre><code>systemctl daemon-reload
+systemctl restart docker
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/meYDSyEo3/">
+              <span class="post-title">
+                Kubernetes Volume(持久化卷)&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

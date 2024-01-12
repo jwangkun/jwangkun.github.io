@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Kubernetes Ingress | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes Ingress | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Kubernetes Ingress"/>
+    <meta property="og:url" content="https://jwangkun.github.io/59eFp4SaS/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Kubernetes Ingress</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-13，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Ingress**也是Kubernetes项目里的一种 <strong>API</strong> 对象，它公开了从集群外部到集群内<code>Service</code>的 <strong>HTTP</strong> 和 <strong>HTTPS</strong> 路由，这些路由由 Ingress 资源上定义的规则控制。</p>
+<!-- more -->
+<pre><code>    internet
+        |
+   [ Ingress ]
+   --|-----|--
+   [ Services ]
+</code></pre>
+<p>如果用一句话概况<code>Ingress</code>的话就是：<code>Ingress</code>是<code>Service</code>们的反向代理。通过看<code>Ingress</code>对象的定义你会感觉自己在看<code>Nginx</code>的配置文件一样。</p>
+<p><code>Ingress</code>资源对象的<code>YAML</code>定义。与大多数Kubernetes资源一样，也需要<code>apiVersion</code>，<code>Kind</code>，<code>Metadata</code>和<code>Spec</code> 这些组成部分。</p>
+<p>一个典型的<code>Ingress</code>对象的定义如下所示：</p>
+<pre><code>apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: app-ingress
+spec:
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: app-service
+              servicePort: 80
+          - path: /v2
+            backend:
+              serviceName: app-service-v2
+              servicePort: 80
+</code></pre>
+<p>在上面这个<code>Ingress</code>的<code>YAML</code>定义中，最值得我们关注的，是<strong>spec.rules</strong> 字段。在 Kubernetes 里，这个字段叫作：<strong>IngressRule</strong>。</p>
+<p><code>IngressRule</code> 里面 <strong>host</strong> 字段定义的值，就是这个<code>Ingress</code>的入口。当访问 <code>app.example.com</code> 的时候，实际上访问到的是这个 <code>Ingress</code> 对象。这样就能使用 IngressRule 来对请求进行下一步转发。</p>
+<p><code>IngressRule</code> 的定义，主要依赖于<code>path</code>字段。可以简单地理解为，这里的每一个<code>path</code>都对应一个后端 <code>Service</code>。上面的例子里，定义了两个<code>path</code>，它们分别对应：<strong>app-service</strong>和<strong>app-service-v2</strong> 两个后端<code>Service</code>。通过<code>Service</code>，流量最终会到达<code>Service</code>后面的<code>Pod</code>。</p>
+<p><strong>servicePort</strong>字段指定的端口值就是在<code>Service</code>的定义里<code>port</code>字段的值，上一篇讲Service的文章里已经科普了一下<code>Service</code>定义里的<code>nodePort</code>，<code>port</code>和<code>targetPort</code>都是什么意思，感觉到懵圈（我自己都有点懵）的读者大大可以翻阅一下文章《<a href="https://mp.weixin.qq.com/s?__biz=MzUzNTY5MzU2MA==&amp;mid=2247486082&amp;idx=1&amp;sn=42a9bc8fcfc9da09445e9e2f4cf2fb96&amp;chksm=fa80db15cdf752039494992f71a3bc488cf386841bd1aaaa44115f5e7f155ba55ce468ec89ee&amp;token=1964476830&amp;lang=zh_CN&amp;scene=21#wechat_redirect">学练结合，快速掌握Kubernetes Service</a>》里的这部分内容。</p>
+<p>所以 <code>Ingress</code> 对象，其实就是 <code>Kubernetes</code> 项目对**&quot;反向代理&quot;**的一种抽象。一个 <code>Ingress</code>对象的主要内容，实际上就是一个&quot;反向代理&quot;服务的配置文件的描述。而这个代理服务对应的转发规则，就是 <code>IngressRule</code>。这就是为什么在每条 <code>IngressRule</code> 里，需要有一个 <strong>host</strong> 字段来作为这条 <code>IngressRule</code> 的入口，然后还需要有一系列 <code>path</code> 字段来声明具体的转发策略。</p>
+<p>有了<code>Ingress</code>后我们还需要<code>Ingress Controller</code>，它会根据你定义的<code>Ingress</code>对象，提供对应的代理能力。目前，业界常用的各种反向代理项目，比如 Nginx、Envoy 等，都已经为 Kubernetes 专门维护了对应的 Ingress Controller。</p>
+<p>下面我就用最常用的Nginx Ingress Controller给这个系列教程一直以来用的Demo实践应用一下Ingress</p>
+<h2 id="安装ingress-controller">安装Ingress Controller</h2>
+<p>因为<code>Minikube</code>里边内置了Nginx Ingress Controller这个插件， 默认没有启用，所以如果是在<code>Minikube</code>这个单节点集群里实践的话只需要执行下面的命令：</p>
+<pre><code>minikube addons enable ingress
+</code></pre>
+<p>检查验证 Nginx Ingress 控制器处于运行状态：</p>
+<pre><code>kubectl get pods -n kube-system --filed-selector=Running
+</code></pre>
+<p>有下图红框里的<code>Pod</code>就证明已经安装成功了：</p>
+<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_png/z4pQ0O5h0f7Cibmniccgicp2LOuOxgpXxicZ3QGjssI5jSX23qjj8BNPddYtehC9vonXtoL4nQUXYnF2LmOvaZwk7w/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<blockquote>
+<p>因为这个Pod用的官方镜像是在红帽软件的镜像库里，所以安装时间可能会有点长，也可能会失败，如果网络条件允许的话可以在准备阶段先执行 docker pull http://quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.32.0 把镜像下载到本地。</p>
+</blockquote>
+<p>此外还有不少安装<code>Nginx Ingress Controller</code>的方式，比如用Kubernetes的包管理工具<strong>Helm</strong>安装，这些安装方式可以参考<strong>官方的部署指南</strong>[1]。</p>
+<h2 id="创建ingress">创建Ingress</h2>
+<p>因为我们之前给应用<code>Pod</code>创建的<code>Service</code>名字叫<strong>app-service</strong>，<code>port</code>字段指定的是端口80</p>
+<pre><code>➜  ~ kubectl get svc
+NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+app-service   NodePort    10.108.26.155   &lt;none&gt;        80:30080/TCP   6d16h
+kubernetes    ClusterIP   10.96.0.1       &lt;none&gt;        443/TCP        96d
+
+➜  ~ kubectl describe svc app-service
+Name:                     app-service
+Namespace:                default
+Labels:                   &lt;none&gt;
+Annotations:              &lt;none&gt;
+Selector:                 app=go-app
+Type:                     NodePort
+IP:                       10.108.26.155
+Port:                     http  80/TCP
+TargetPort:               3000/TCP
+NodePort:                 http  30080/TCP
+Endpoints:                10.1.0.24:3000,10.1.0.25:3000
+</code></pre>
+<p>这就确定了我们要创建建的<code>Ingress</code>对象，第一个<code>path</code> 里要设置的<strong>backend.serviceName</strong>和<strong>backend.servicePort</strong>字段的值，Ingress对象的<code>YAML</code>定义如下：</p>
+<pre><code># app-ingress.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: app-ingress
+spec:
+  rules:
+    - host: app.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: app-service
+              servicePort: 80
+</code></pre>
+<blockquote>
+<p>说明：因为目前为止我们只创建了一个Service，所以在Ingress里也只能设置一个path。</p>
+</blockquote>
+<p>这个Ingress定义里设置的<code>IngressRules</code>是把所有对app.example.com入口的请求都路由到<code>app-service</code>这个<code>Service</code>的80端口。</p>
+<p>定义好<code>Ingress</code>对象后，也是执行<strong>kubectl apply -f</strong>创建对象，可以看到所有的对象的创建和更新都可以用<strong>apply</strong>操作搞定，这就是<code>Kubernetes</code>项目声明式定义的好处。</p>
+<pre><code>kubectl apply -f app-ingress.yaml --record
+
+# 执行后的输出
+ingress.networking.k8s.io/app-ingress created
+</code></pre>
+<h2 id="验证ingress">验证Ingress</h2>
+<p>查询Ingress是否创建成功，使用通用的<strong>kubectl get</strong>命令：</p>
+<pre><code>➜  ~ kubectl get ingress
+NAME          CLASS    HOSTS             ADDRESS        PORTS   AGE
+app-ingress   &lt;none&gt;   app.example.com   192.168.64.4   80      20s
+</code></pre>
+<blockquote>
+<p>有可能需要在提交创建操作几分钟后才能在集群里查询到Ingress</p>
+</blockquote>
+<p>在集群里查询到Ingress后，就可以通过<strong>kubctl describe ingress</strong>命令查看<code>Ingress</code>对象是否按照我们的定义成功代理了<code>app-service</code>这个<code>Service</code>：</p>
+<pre><code>➜  ~ kubectl describe ingress app-ingress
+Name:             app-ingress
+Namespace:        default
+Address:          192.168.64.4
+Default backend:  default-http-backend:80 (&lt;error: endpoints &quot;default-http-backend&quot; not found&gt;)
+Rules:
+  Host             Path  Backends
+  ----             ----  --------
+  app.example.com
+                   /   app-service:80 (10.1.0.24:3000,10.1.0.25:3000)
+Annotations:       kubernetes.io/change-cause: kubectl apply --filename=app-ingress.yaml --record=true
+Events:            &lt;none&gt;
+</code></pre>
+<p>上面输出里的<code>Rlues</code>部分可以清楚的看到，把<strong>Host:  app.example.com</strong>所有请求（定义了Path是/）都代理到了后端<code>app-service</code>的80端口，Service后面的<code>Pod</code>正是它的<code>Endpoints</code>，与上面的<strong>kubctl describe svc app-service</strong>命令输出里的<code>Endpoints</code>信息一致。</p>
+<p>接下来在<code>/etc/hosts</code>文件里追加下面的内容，就能通过域名访问我们的服务了：</p>
+<pre><code>192.168.64.4 app.example.com
+</code></pre>
+<p>你们在练习的时候，可以自己尝试新增一个<code>Service</code>，然后更新Ingress，再指定一个<code>/v2</code>之类的Path，让所有匹配这个规则的请求都能路由给新的Service。</p>
+<h2 id="接下来">接下来</h2>
+<p><code>Ingress</code>还有很多其他的配置，想要简单的讲完，还是挺难的。最常用的比如怎么设置TLS私钥和证书这些配置在<strong>Kubernetes官方文档-Ingress</strong>[2] 部分都有提到，后面自己练习的时候可以试试给<code>Ingress</code>启用<code>HTTPs</code>访问的功能。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/NDmieJqbU/">
+              <span class="post-title">
+                 Kubernetes 集群升级指南：从理论到实践&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

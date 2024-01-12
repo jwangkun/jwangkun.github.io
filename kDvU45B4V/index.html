@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot 使用 JSR303 实现参数验证 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot 使用 JSR303 实现参数验证 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot 使用 JSR303 实现参数验证"/>
+    <meta property="og:url" content="https://jwangkun.github.io/kDvU45B4V/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/2pU0KbC0x/" class="tag">参数验证</a>
+            
+            <a href="https://jwangkun.github.io/bfpLXNr66/" class="tag">JSR303</a>
+            
+        </span>
+            <h1>SpringBoot 使用 JSR303 实现参数验证</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="简介">简介</h2>
+<p>JSR-303 是 JAVA EE 6 中的一项子规范，叫做 Bean Validation。</p>
+<p>在任何时候，当你要处理一个应用程序的业务逻辑，数据校验是你必须要考虑和面对的事情。应用程序必须通过某种手段来确保输入进来的数据从语义上来讲是正确的。在通常的情况下，应用程序是分层的，不同的层由不同的开发人员来完成。很多时候同样的数据验证逻辑会出现在不同的层，这样就会导致代码冗余和一些管理的问题，比如说语义的一致性等。为了避免这样的情况发生，最好是将验证逻辑与相应的域模型进行绑定。</p>
+<p>Bean Validation 为 JavaBean 验证定义了相应的元数据模型和 API。缺省的元数据是 Java Annotations，通过使用 XML 可以对原有的元数据信息进行覆盖和扩展。在应用程序中，通过使用 Bean Validation 或是你自己定义的 constraint，例如 @NotNull, @Max, @ZipCode， 就可以确保数据模型（JavaBean）的正确性。constraint 可以附加到字段，getter 方法，类或者接口上面。对于一些特定的需求，用户可以很容易的开发定制化的 constraint。Bean Validation 是一个运行时的数据验证框架，在验证之后验证的错误信息会被马上返回。</p>
+<h2 id="bean-validation-规范内嵌的约束注解">Bean Validation 规范内嵌的约束注解</h2>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-20/1.png" alt="img" loading="lazy"></figure>
+<h2 id="实例">实例</h2>
+<h3 id="基本应用">基本应用</h3>
+<p>引入依赖</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-validation&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>给参数对象添加校验注解</p>
+<pre><code class="language-java">@Data
+public class User {
+    
+    private Integer id;
+    @NotBlank(message = &quot;用户名不能为空&quot;)
+    private String username;
+    @Pattern(regexp = &quot;^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,16}$&quot;, message = &quot;密码必须为8~16个字母和数字组合&quot;)
+    private String password;
+    @Email
+    private String email;
+    private Integer gender;
+
+}
+</code></pre>
+<p>Controller 中需要校验的参数Bean前添加 @Valid 开启校验功能，紧跟在校验的Bean后添加一个BindingResult，BindingResult封装了前面Bean的校验结果。</p>
+<pre><code class="language-java">@RestController
+@RequestMapping(&quot;/user&quot;)
+public class UserController {
+
+    @PostMapping(&quot;&quot;)
+    public Result save (@Valid User user , BindingResult bindingResult)  {
+        if (bindingResult.hasErrors()) {
+            Map&lt;String , String&gt; map = new HashMap&lt;&gt;();
+            bindingResult.getFieldErrors().forEach( (item) -&gt; {
+                String message = item.getDefaultMessage();
+                String field = item.getField();
+                map.put( field , message );
+            } );
+            return Result.build( 400 , &quot;非法参数 !&quot; , map);
+        }
+        return Result.ok();
+    }
+
+}
+</code></pre>
+<p>测试如下：</p>
+<figure data-type="image" tabindex="2"><img src="http://image.itwolfed.com/springboot-20/2.png" alt="img" loading="lazy"></figure>
+<h3 id="异常的统一处理">异常的统一处理</h3>
+<p>参数校验不通过时，会抛出 BingBindException 异常，可以在统一异常处理中，做统一处理，这样就不用在每个需要参数校验的地方都用 BindingResult 获取校验结果了。</p>
+<pre><code class="language-java">@Slf4j
+@RestControllerAdvice(basePackages = &quot;com.itwolfed.controller&quot;)
+public class GlobalExceptionControllerAdvice {
+
+    @ExceptionHandler(value= {MethodArgumentNotValidException.class , BindException.class})
+    public Result handleVaildException(Exception e){
+        BindingResult bindingResult = null;
+        if (e instanceof MethodArgumentNotValidException) {
+            bindingResult = ((MethodArgumentNotValidException)e).getBindingResult();
+        } else if (e instanceof BindException) {
+            bindingResult = ((BindException)e).getBindingResult();
+        }
+        Map&lt;String,String&gt; errorMap = new HashMap&lt;&gt;(16);
+        bindingResult.getFieldErrors().forEach((fieldError)-&gt;
+                errorMap.put(fieldError.getField(),fieldError.getDefaultMessage())
+        );
+        return Result.build(400 , &quot;非法参数 !&quot; , errorMap);
+    }
+
+}
+</code></pre>
+<h3 id="分组解决校验">分组解决校验</h3>
+<p>新增和修改对于实体的校验规则是不同的，例如id是自增的时，新增时id要为空，修改则必须不为空；新增和修改，若用的恰好又是同一种实体，那就需要用到分组校验。</p>
+<p>校验注解都有一个groups属性，可以将校验注解分组，我们看下@NotNull的源码：</p>
+<pre><code class="language-java">@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
+@Retention(RUNTIME)
+@Repeatable(List.class)
+@Documented
+@Constraint(validatedBy = { })
+public @interface NotNull {
+
+	String message() default &quot;{javax.validation.constraints.NotNull.message}&quot;;
+
+	Class&lt;?&gt;[] groups() default { };
+
+	Class&lt;? extends Payload&gt;[] payload() default { };
+
+	@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
+	@Retention(RUNTIME)
+	@Documented
+	@interface List {
+
+		NotNull[] value();
+	}
+}
+</code></pre>
+<p>从源码可以看出 groups 是一个Class&lt;?&gt;类型的数组，那么就可以创建一个Groups.</p>
+<pre><code class="language-java">public class Groups {
+    public interface Add{}
+    public interface  Update{}
+}
+</code></pre>
+<p>给参数对象的校验注解添加分组</p>
+<pre><code class="language-java">@Data
+public class User {
+
+    @Null(message = &quot;新增不需要指定id&quot; , groups = Groups.Add.class)
+    @NotNull(message = &quot;修改需要指定id&quot; , groups = Groups.Update.class)
+    private Integer id;
+    @NotBlank(message = &quot;用户名不能为空&quot;)
+    @NotNull
+    private String username;
+    @Pattern(regexp = &quot;^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,16}$&quot;, message = &quot;密码必须为8~16个字母和数字组合&quot;)
+    private String password;
+    @Email
+    private String email;
+    private Integer gender;
+
+}
+</code></pre>
+<p>Controller 中原先的@Valid不能指定分组 ，需要替换成@Validated</p>
+<pre><code class="language-java">@RestController
+@RequestMapping(&quot;/user&quot;)
+public class UserController {
+
+    @PostMapping(&quot;&quot;)
+    public Result save (@Validated(Groups.Add.class) User user)  {
+        return Result.ok();
+    }
+
+}
+</code></pre>
+<p>测试如下：</p>
+<figure data-type="image" tabindex="3"><img src="http://image.itwolfed.com/springboot-20/3.png" alt="img" loading="lazy"></figure>
+<h3 id="自定义校验注解">自定义校验注解</h3>
+<p>虽然JSR303和springboot-validator 已经提供了很多校验注解，但是当面对复杂参数校验时，还是不能满足我们的要求，这时候我们就需要 自定义校验注解。</p>
+<p>例如User中的gender，用 1代表男 2代表女，我们自定义一个校验注解@ListValue，指定取值只能1和2。</p>
+<h4 id="创建约束规则">创建约束规则</h4>
+<pre><code class="language-java">@Documented
+@Constraint(validatedBy = { ListValueConstraintValidator.class })
+@Target({ METHOD, FIELD, ANNOTATION_TYPE })
+@Retention(RUNTIME)
+public @interface ListValue {
+    String message() default &quot;&quot;;
+
+    Class&lt;?&gt;[] groups() default { };
+
+    Class&lt;? extends Payload&gt;[] payload() default { };
+
+    int[] vals() default { };
+}
+</code></pre>
+<p>一个标注(annotation) 是通过@interface关键字来定义的. 这个标注中的属性是声明成类似方法 的样式的. 根据Bean Validation API 规范的要求：</p>
+<ul>
+<li>message属性, 这个属性被用来定义默认得消息模版, 当这个约束条件被验证失败的时候,通过 此属性来输出错误信息。</li>
+<li>groups 属性, 用于指定这个约束条件属于哪(些)个校验组. 这个的默认值必须是Class&lt;?&gt;类型数组。</li>
+<li>payload 属性, Bean Validation API 的使用者可以通过此属性来给约束条件指定严重级别. 这个属性并不被API自身所使用。</li>
+</ul>
+<p>除了这三个强制性要求的属性(message, groups 和 payload) 之外, 我们还添 加了一个属性用来指定所要求的值. 此属性的名称vals在annotation的定义中比较特 殊, 如果只有这个属性被赋值了的话, 那么, 在使用此annotation到时候可以忽略此属性名称.</p>
+<p>另外, 我们还给这个annotation标注了一些元标注( meta annotatioins)：</p>
+<ul>
+<li>@Target({ METHOD, FIELD, ANNOTATION_TYPE }): 表示此注解可以被用在方法, 字段或者 annotation声明上。</li>
+<li>@Retention(RUNTIME): 表示这个标注信息是在运行期通过反射被读取的.</li>
+<li>@Constraint(validatedBy = ListValueConstraintValidator.class): 指明使用哪个校验器(类) 去校验使用了此标注的元素.</li>
+<li>@Documented: 表示在对使用了该注解的类进行javadoc操作到时候, 这个标注会被添加到 javadoc当中.</li>
+</ul>
+<h4 id="创建约束校验器">创建约束校验器</h4>
+<pre><code class="language-java">import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import java.util.HashSet;
+import java.util.Set;
+
+public class ListValueConstraintValidator implements ConstraintValidator&lt;ListValue,Integer&gt; {
+
+    private Set&lt;Integer&gt; set = new HashSet&lt;&gt;();
+    /**
+     * 初始化方法
+     */
+    @Override
+    public void initialize(ListValue constraintAnnotation) {
+
+        int[] vals = constraintAnnotation.vals();
+        for (int val : vals) {
+            set.add(val);
+        }
+
+    }
+
+    /**
+     * 判断是否校验成功
+     *
+     * @param value 需要校验的值
+     * @param context
+     * @return
+     */
+    @Override
+    public boolean isValid(Integer value, ConstraintValidatorContext context) {
+
+        return set.contains(value);
+    }
+}
+</code></pre>
+<p>ListValueConstraintValidator定义了两个泛型参数, 第一个是这个校验器所服务到标注类型(在我们的例子中即ListValue), 第二个这个校验器所支持到被校验元素的类型 (即Integer)。</p>
+<p>如果一个约束标注支持多种类型的被校验元素的话, 那么需要为每个所支持的类型定义一个ConstraintValidator,并且注册到约束标注中。</p>
+<p>这个验证器的实现就很平常了, initialize() 方法传进来一个所要验证的标注类型的实例, 在本 例中, 我们通过此实例来获取其vals属性的值,并将其保存为Set集合中供下一步使 用。</p>
+<p>isValid()是实现真正的校验逻辑的地方, 判断一个给定的int对于@ListValue这个约束条件来说 是否是合法的。</p>
+<p>在参数对象中使用@ListValue注解。</p>
+<pre><code class="language-java">@Data
+public class User {
+
+    @Null(message = &quot;新增不需要指定id&quot; , groups = Groups.Add.class)
+    @NotNull(message = &quot;修改需要指定id&quot; , groups = Groups.Update.class)
+    private Integer id;
+    @NotBlank(message = &quot;用户名不能为空&quot;)
+    @NotNull
+    private String username;
+    @Pattern(regexp = &quot;^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,16}$&quot;, message = &quot;密码必须为8~16个字母和数字组合&quot;)
+    private String password;
+    @Email
+    private String email;
+    @ListValue( message = &quot;性别应指定相应的值&quot; , vals = {1,2} , groups = {Groups.Add.class , Groups.Update.class})
+    private Integer gender;
+
+}
+</code></pre>
+<p>测试如下：</p>
+<figure data-type="image" tabindex="4"><img src="http://image.itwolfed.com/springboot-20/4.png" alt="img" loading="lazy"></figure>
+<h2 id="源码地址">源码地址</h2>
+<p>https://github.com/gf-huanchupk/SpringBootLearning</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/HWuqcvUQz/">
+              <span class="post-title">
+                 SpringBoot 集成 Seata 解决分布式事务问题&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Ceph 分布式存储使用指南 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Ceph 分布式存储使用指南 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Ceph 分布式存储使用指南"/>
+    <meta property="og:url" content="https://jwangkun.github.io/U0xUcFjpV/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/NuKABzdBlt/" class="tag">Ceph</a>
+            
+        </span>
+            <h1>Ceph 分布式存储使用指南</h1>
+            <span class="meta">
+            	Posted on
+              2021-05-19，19 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>*注意：本文大部分参考官方文档<code>https://docs.ceph.com/docs/octopus/</code>，因为网络原因，部署命令和官网有些许出入，更符合现在条件一些，且官方已经抛弃ceph-deploy 部署工具改用cephadm，不要傻傻看使用ceph-deploy的老古董啦。</p>
+<h3 id="1-了解">1. 了解</h3>
+<p>Ceph 是一个统一的分布式存储系统，设计初衷是提供较好的性能、可靠性和可扩展性。</p>
+<h5 id="11-特点">1.1 特点</h5>
+<ul>
+<li>高性能<br>
+a. 摒弃了传统的集中式存储元数据寻址的方案，采用 CRUSH 算法，数据分布均衡，并行度高。<br>
+b. 考虑了容灾域的隔离，能够实现各类负载的副本放置规则，例如跨机房、机架感知等。<br>
+c. 能够支持上千个存储节点的规模，支持 TB 到 PB 级的数据。</li>
+<li>高可用性<br>
+a. 副本数可以灵活控制。<br>
+b. 支持故障域分隔，数据强一致性。<br>
+c. 多种故障场景自动进行修复自愈。<br>
+d. 没有单点故障，自动管理。</li>
+<li>高可扩展性<br>
+a. 去中心化。<br>
+b. 扩展灵活。<br>
+c. 随着节点增加而线性增长。</li>
+<li>特性丰富<br>
+a. 支持三种存储接口：块存储、文件存储、对象存储。<br>
+b. 支持自定义接口，支持多种语言驱动。</li>
+</ul>
+<h3 id="2-架构">2. 架构</h3>
+<h5 id="21-ceph-核心组件及概念介绍">2.1 Ceph 核心组件及概念介绍</h5>
+<ul>
+<li>Monitor<br>
+一个 Ceph 集群需要多个 Monitor 组成的小集群，它们通过 Paxos 同步数据，用来保存 OSD 的元数据。</li>
+<li>OSD<br>
+OSD 全称 Object Storage Device，也就是负责响应客户端请求返回具体数据的进程。一个 Ceph 集群一般都有很多个 OSD。</li>
+<li>MDS<br>
+MDS 全称 Ceph Metadata Server，是 CephFS 服务依赖的元数据服务。</li>
+<li>Object<br>
+Ceph 最底层的存储单元是 Object 对象，每个 Object 包含元数据和原始数据。</li>
+<li>PG<br>
+PG 全称 Placement Grouops，是一个逻辑的概念，一个 PG 包含多个 OSD。引入 PG 这一层其实是为了更好的分配数据和定位数据。</li>
+<li>RADOS<br>
+RADOS 全称 Reliable Autonomic Distributed Object Store，是 Ceph 集群的精华，用户实现数据分配、Failover 等集群操作。</li>
+<li>Libradio<br>
+Librados 是 Rados 提供库，因为 RADOS 是协议很难直接访问，因此上层的 RBD、RGW 和 CephFS 都是通过 librados 访问的，目前提供 PHP、Ruby、Java、Python、C 和 C++ 支持。</li>
+<li>CRUSH<br>
+CRUSH 是 Ceph 使用的数据分布算法，类似一致性哈希，让数据分配到预期的地方。</li>
+<li>RBD<br>
+RBD 全称 RADOS block device，是 Ceph 对外提供的块设备服务。</li>
+<li>RGW<br>
+RGW 全称 RADOS gateway，是 Ceph 对外提供的对象存储服务，接口与 S3 和 Swift 兼容。</li>
+<li>CephFS<br>
+CephFS 全称 Ceph File System，是 Ceph 对外提供的文件系统服务。</li>
+</ul>
+<h3 id="3-集群部署">3. 集群部署</h3>
+<h5 id="31-部署工具">3.1 部署工具</h5>
+<p>网上随便搜一个集群部署教程都是教你用ceph-deploy进行部署的，而官网上用红色的方框标注了一段话<code>ceph-deploy is no longer actively maintained. It is not tested on versions of Ceph newer than Nautilus. It does not support RHEL8, CentOS 8, or newer operating systems.</code> ceph最新的稳定版已经到了octopus，所以ceph-deploy就不再适用。</p>
+<p>贴心的是，在octopus版本，官方为我们提供了一个全新的工具:<code>cephadm</code>，通过它就可以很简单的部署一个集群，下面让我们开始吧</p>
+<h5 id="32-环境准备">3.2 环境准备</h5>
+<p>本次部署我用了三台Ubuntu 18.04 虚拟机，因为中间2G内存部署遇到过内存不足的情况，所以推荐配置为4核8G。每台虚拟机拥有两块20G硬盘，一块作为系统盘，一块用来作为ceph的硬盘来使用。之后三台机器全部安装docker。然后我修改了主机名，因为没有dns，所以在三台设备hosts中指定了：</p>
+<pre><code class="language-shell">192.168.3.4 ceph-master
+192.168.3.5 ceph-node1
+192.168.3.6 ceph-node21.2.3.
+</code></pre>
+<h5 id="33-基础环境安装">3.3 基础环境安装</h5>
+<p>下载cephadm，并给予执行权限，检查一下可用性。</p>
+<pre><code class="language-shell">$ curl  --remote-name --location https://github.com/ceph/ceph/raw/octopus/src/cephadm/cephadm
+$ chmod u+x ./cephadm
+$ ./cephadm -h1.2.3.
+</code></pre>
+<p>没有问题的话，下一步添加ceph的官方软件源。</p>
+<pre><code class="language-shell">$ ./cephadm add-repo --release octopus1.
+</code></pre>
+<p>这里要注意了，官方源的服务器在国外，用这个源安装可能需要一晚上，所以我们要修改成国内的镜像源</p>
+<pre><code class="language-shell">$ vim /etc/apt/sources.list.d/ceph.list
+原来是：deb https://download.ceph.com/debian-octopus/ bionic main
+修改成：deb https://mirrors.aliyun.com/ceph/debian-octopus/ bionic main
+保存退出，执行：apt update1.2.3.4.
+</code></pre>
+<p>不出意外此时会报错，原因是这个镜像源的key没有经过认证，这时候我们手动添加一下，然后重新update</p>
+<pre><code class="language-shell">$ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys *把key写在这
+$ rm -f /etc/apt/trusted.gpg.d/ceph.release.gpg #干掉这个空白的密钥
+$ apt update    1.2.3.
+</code></pre>
+<p>然后安装cephadm到系统，其实就是调用apt进行了一个安装</p>
+<pre><code class="language-shell">$ ./cephadm install
+$ which cephadm  #检查安装结果1.2.
+</code></pre>
+<h5 id="34-开始部署集群">3.4 开始部署集群</h5>
+<p>首先创建一个ceph的配置文件存放地点，这里要提示的一点就是以前的版本很多配置都需要写到配置文件里，现在这个版本配置文件只有很少的东西，全是用命令进行配置。</p>
+<pre><code class="language-shell">$ mkdir -p /etc/ceph1.
+</code></pre>
+<p>官网上的指导到这里就可以进行部署了，不过我们这里还需要进行一步操作：拉取docker镜像。拉取镜像的过程其实是在这个部署流程里的，可是由于网络原因，所以我们需要手动从国内源拉取。还要注意的是，你的docker镜像加速器可能并不好用，原因就不在这说了，我们要这样拉取：</p>
+<pre><code class="language-shell">$ docker pull dockerhub.azk8s.cn/ceph/ceph:v151.
+</code></pre>
+<p>拉取完成后就开始进行集群的正式部署了</p>
+<pre><code class="language-shell">$ cephadm bootstrap --mon-ip *&lt;mon-ip&gt;*  #&lt;mon-ip&gt;是你的master节点IP地址 例如：
+# ./cephadm bootstrap --mon-ip 192.168.3.61.2.
+</code></pre>
+<p>等待结束后，会给你一个用户名和密码，访问一下这个地址，发现已经部署好了。</p>
+<h5 id="35-添加节点">3.5 添加节点</h5>
+<p>既然是分布式存储，只有一台master节点是万万不能的，我们需要添加节点</p>
+<p>添加节点很简单，先用部署过程中生成的key配置免密登陆：</p>
+<pre><code class="language-shell">$ ssh-copy-id -f -i /etc/ceph/ceph.pub root@ceph-node1
+$ ssh-copy-id -f -i /etc/ceph/ceph.pub root@ceph-node21.2.
+</code></pre>
+<p>然后添加节点</p>
+<pre><code class="language-shell">$ ceph orch host add ceph-node1
+$ ceph orch host add ceph-node21.2.
+</code></pre>
+<p>至此我们的集群就部署完成了，下一节会说OSD的相关东西。</p>
+<h3 id="4-osd的创建管理与使用">4. OSD的创建管理与使用</h3>
+<h5 id="41-osd是什么">4.1 OSD是什么</h5>
+<p><strong>ceph-osd</strong> 是 Ceph 分布式对象存储系统的对象存储守护进程。它负责把对象存储到本地文件系统，并使之通过网络可访问。说白了就是通过这个进程可以让你节点上的硬盘可以在ceph里用。再说白了，添加OSD就是把你的硬盘添加到ceph集群。</p>
+<h5 id="42-查看有哪些可用的osd">4.2 查看有哪些可用的osd</h5>
+<p>使用这条命令，就可以查看，True的就是可以用来添加的。官网对OSD的要求是：</p>
+<ul>
+<li>设备必须没有分区。</li>
+<li>设备不得具有任何LVM状态。</li>
+<li>不得安装设备。</li>
+<li>该设备不得包含文件系统。</li>
+<li>该设备不得包含Ceph BlueStore OSD。</li>
+<li>设备必须大于5 GB。</li>
+</ul>
+<pre><code class="language-shell">root@ceph-master:~# ceph orch device ls
+HOST         PATH      TYPE   SIZE  DEVICE  AVAIL  REJECT REASONS
+ceph-master  /dev/vda  hdd   20.0G          False  Insufficient space (&lt;5GB) on vgs, LVM detected, locked
+ceph-master  /dev/vdb  hdd   20.0G          False  Insufficient space (&lt;5GB) on vgs, LVM detected, locked
+ceph-node1   /dev/vda  hdd   20.0G          False  locked, LVM detected, Insufficient space (&lt;5GB) on vgs
+ceph-node1   /dev/vdb  hdd   20.0G          False  locked, LVM detected, Insufficient space (&lt;5GB) on vgs
+ceph-node2   /dev/vdb  hdd   20.0G          True
+ceph-node2   /dev/vda  hdd   20.0G          False  Insufficient space (&lt;5GB) on vgs, LVM detected, locked1.2.3.4.5.6.7.8.
+</code></pre>
+<h5 id="43-添加osd">4.3 添加osd</h5>
+<p>添加OSD官方给了三个方法，但是我这里只前两种，原因是这两种比较简单而且有效。需要注意的是，添加了OSD之后子节点会启动一个docker的OSD进程。所以，这儿又有个坑，你要添加osd的子节点每台都要从官方拉取docker镜像，速度可想而知，所以在添加之前在每台节点上都用国内镜像源拉取下来。</p>
+<p>第一种：添加全部可用存储设备，这个操作可以一键添加你所有节点的可用存储，简单有效：</p>
+<pre><code class="language-shell">$ ceph orch apply osd --all-available-devices  1.
+</code></pre>
+<p>第二种：单个添加，指定要添加的设备，在有些特殊情况下，比如上边所示的false的vdb硬盘，是我之前对硬盘进行了一些操作，导致ceph识别为不可用，但是我知道这块盘是没有问题的，就可以手动添加进去：</p>
+<pre><code class="language-shell">$ ceph orch daemon add osd *&lt;host&gt;*:*&lt;device-path&gt;*
+# example:
+$ ceph orch daemon add osd ceph-node1:/dev/vdb1.2.3.
+</code></pre>
+<h5 id="44-删除osd">4.4 删除osd</h5>
+<p>osd的添加很容易，但是删除就没那么简单了因为添加过程会有一系列的创建过程自动执行，而删除每一条都需要我们手动干掉，以下是删除步骤：</p>
+<p>1.删除 CRUSH 图的对应 OSD 条目，它就不再接收数据了。</p>
+<pre><code class="language-shell">   $ ceph osd crush remove {name}1.
+</code></pre>
+<p>2.删除 OSD 认证密钥：</p>
+<pre><code class="language-shell">   $ ceph auth del osd.{osd-num}1.
+</code></pre>
+<p><code>ceph-{osd-num}</code> 路径里的 <code>ceph</code> 值是 <code>$cluster-$id</code> ，如果集群名字不是 <code>ceph</code> ，这里要更改。</p>
+<p>3.停止正在运行的osd</p>
+<pre><code class="language-shell">   $ ceph osd stop {osd-num}1.
+</code></pre>
+<p>4.删除 OSD 。</p>
+<pre><code class="language-shell">   $ ceph osd rm {osd-num}
+   #example
+   $ ceph osd rm 11.2.3.
+</code></pre>
+<h3 id="5pool的创建管理与使用">5.Pool的创建，管理与使用</h3>
+<p>在创建pool之前，要了解两个概念 Pool和PG：</p>
+<pre><code>Pool是一个抽象的存储池，它是PG之上的一层逻辑
+它规定了数据冗余的类型以及对应的副本分布策略。目前实现了两种pool类型：replicated类型和Erasure Code类型。
+关系说明：
+(1) 一个pool由多个PG构成，一个PG只能属于一个POOL
+(2) 同一个Pool中的PG具有相同的类型，比如，如Pool为副本类型，则Pool中所有的PG都是多副本的
+
+简单来说，pool就是ceph存储数据时的逻辑分区
+PG是OSD之上的一层逻辑，可视其为一个逻辑概念。从名字可理解PG是一个放置策略组，它是对象的集合，该集合里的所有对象都具有相同的放置策略：对象的副本都分布在相同的OSD列表上。
+关系说明：
+(1) PG有主从之分，对于多副本而言，一个PG的主从副本分布在不同的OSD上；
+(2) 一个对象只能属于一个PG，一个PG包含很多个对象
+(3) 一个PG对应于一个OSD列表，PG的所有对象对存放在对应的OSD列表上
+这里的对象是rados object,而非用户对象
+</code></pre>
+<h5 id="51-pool创建">5.1 Pool创建</h5>
+<p>理解了Pool和PG的概念以后（可能有点不好理解，但是理不理解都行，不耽误使用），我们就可以进行创建了：</p>
+<p>创建pool有很多选项，我只挑目前我用得到的来说：</p>
+<pre><code class="language-shell">$ ceph osd pool create test_data
+$ ceph osd pool create test_metadata 32 321.2.
+</code></pre>
+<p>这样就创建了两个pool，如果你愿意的话呢，后边可以跟上两个数字，两个数字就代表的是PG的数量和PGP的数量了，默认是32，一般不需要修改，根据我有限的条件下测试，不影响性能。</p>
+<h5 id="52-删除pool">5.2 删除pool</h5>
+<p>删除pool也是比较坑的，默认规则不让删除，网上查的都是写配置文件里，实测没用。</p>
+<p>首先要打开允许删除pool的开关，然后试着删除发现不让删，要重复两遍pool的名字再写保证书再删除就可以了，删除完以后记得把允许删除关闭，防止误删除后数据丢失。</p>
+<pre><code class="language-shell">root@ceph-master:~# ceph tell mon.\* injectargs '--mon-allow-pool-delete=true'
+mon.ceph-master: mon_allow_pool_delete = 'true'
+mon.ceph-master: {}
+mon.ceph-node1: mon_allow_pool_delete = 'true'
+mon.ceph-node1: {}
+mon.ceph-node2: mon_allow_pool_delete = 'true'
+mon.ceph-node2: {}
+
+root@ceph-master:~# ceph osd pool rm test_data
+Error EPERM: WARNING: this will *PERMANENTLY DESTROY* all data stored in pool speedtest.  If you are *ABSOLUTELY CERTAIN* that is what you want, pass the pool name *twice*, followed by --yes-i-really-really-mean-it.
+
+root@ceph-master:~# ceph osd pool rm test_data test_data --yes-i-really-really-mean-it
+pool 'speedtest' removed
+root@ceph-master:~# ceph tell mon.\* injectargs '--mon-allow-pool-delete=false'1.2.3.4.5.6.7.8.9.10.11.12.13.14.
+</code></pre>
+<h5 id="53-性能测试">5.3 性能测试</h5>
+<pre><code class="language-shell">$ rados bench -p $poolname 60  write  [ --no-cleanup ]  #测试写性能，不删除写入的数据用来测试读取性能
+$ rados bench -p $poolname 60  [ seq | rand ]  #测试读取性能
+$ rados -p $poolname cleanup #清理测试写性能时写入的数据1.2.3.
+</code></pre>
+<h5 id="54-pool调优">5.4 pool调优</h5>
+<p>这个地方差点把我折腾死，研究了一天半，因为速度始终达不到期望值。后来我发现是两个原因导致的：</p>
+<ol>
+<li>硬盘自身原因，ceph对写入的硬盘是没有操作系统缓存的，开始我是用dd测试硬盘速度的时候没关缓存，得到了200m/s的惊人写入速度，后来关掉了缓存测了一下，实际速度差不了多少，不过这个地方还需要后研究。</li>
+<li>副本数设置，默认是3份副本，实际上会占用大量的写入，这也是ceph的特性，所以目前想达到原来的速度只有一个办法，那就是如下所示设置副本数为1，也就是没有备份，听起来相当不安全但是确实速度提升到了硬盘速度</li>
+</ol>
+<pre><code class="language-shell">$ ceph osd pool set $poolname size 1 设置副本数量
+$ ceph osd pool set $poolname min_size 1 设置副本数量最小值，低于这个值不写入1.2.
+</code></pre>
+<p>到了这里我们就完成了基本的基础环境部署，接下来就可以按照自己的需求进行使用了。</p>
+<h3 id="6cephfs的创建-管理与使用">6.CEPHFS的创建、管理与使用</h3>
+<p>Ceph文件系统或<strong>CephFS</strong>是在Ceph的分布式对象存储<strong>RADOS</strong>之上构建的POSIX兼容文件系统</p>
+<h5 id="61-创建cephfs">6.1 创建cephfs</h5>
+<p>创建池后，可以使用以下命令启用文件系统：<code>fs new</code></p>
+<pre><code class="language-shell">$ ceph fs new &lt;fs_name&gt; &lt;metadata&gt; &lt;data&gt;1.
+</code></pre>
+<p>例如创建一个名字叫fstest的fs，元数据用fstest_metadata，数据存在fstest_data：</p>
+<pre><code class="language-shell">$ ceph fs new fstest fstest_metadata fstest_data
+$ ceph fs ls
+name: fstest, metadata pool: fstest_metadata, data pools: [fstest_data ]1.2.3.
+</code></pre>
+<p>这样我们的fs就创建完成了，可能有的做到这ls出来的结果跟我的不一样，那你就是没有启动MDS，你可以多等一会，只要docker镜像拉下来在本地，会自己启动的。</p>
+<pre><code class="language-shell">$ ceph orch apply mds &lt;fs_name&gt;1.
+</code></pre>
+<p>如果在本地存在ceph docker镜像的情况下，一段时间后仍未启动MDS，使用以上命令手动启动MDS，可以通过在集群各服务器上执行<code>docker ps |grep mds</code>查看MDS容器是否运行。<br>
+这里又引申出一个概念MDS</p>
+<h5 id="62-ceph-mds">6.2 ceph-mds</h5>
+<p><strong>ceph-mds</strong> 是 Ceph 分布式文件系统的元数据服务器守护进程。一或多个 ceph-mds 例程协作着管理文件系统的命名空间、协调到共享 OSD 集群的访问。一张图看懂mds是怎么回事</p>
+<figure data-type="image" tabindex="1"><img src="https://docs.ceph.com/docs/octopus/_images/cephfs-architecture.svg" alt="../_images/cephfs-architecture.svg" loading="lazy"></figure>
+<h5 id="63-身份验证">6.3 身份验证</h5>
+<p>要仅授予rw访问指定目录的权限，我们在使用以下语法为客户端创建密钥以及控制权限。</p>
+<pre><code class="language-shell">$ ceph fs authorize *file_system_name* client.*client_name* /*specified_directory* rw1.
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-shell">root@ceph-master:~# ceph fs authorize fstest client.node2 / rw
+[client.node2]
+    key = AQDwqoZeSVKiCBAASIdy3DAYnCXKwoTTnuZASA==1.2.3.
+</code></pre>
+<h5 id="64-挂载cephfs">6.4 挂载cephfs</h5>
+<p>创建完成后就需要进行挂载了，挂载有两种方式，一种是用Linux自带的mount进行挂载，另一种是用fuse提供的挂载工具，官方说mount挂载性能高，fuse比较简单，所以我这里写用mount挂载</p>
+<p>mount默认是不支持ceph的，所以这里需要安装ceph插件</p>
+<pre><code class="language-shell">$ apt install ceph-common -y  #安装
+$ which mount.ceph            #检查1.2.
+</code></pre>
+<p>安装完成后就可以用你的密钥对和用户在节点进行挂载了</p>
+<pre><code class="language-shell">$ mount -t ceph 192.168.3.6:6789:/ /mnt/fstest -o name=node2,secret=AQDwqoZeSVKiCBAASIdy3DAYnCXKwoTTnuZASA==1.
+</code></pre>
+<p>挂载完成测试</p>
+<h5 id="65-为fs增加和删除pool">6.5 为fs增加和删除pool</h5>
+<pre><code class="language-shell">$ ceph fs add_data_pool &lt;file system name&gt; &lt;pool name/id&gt;1.
+$ ceph fs rm_data_pool &lt;file system name&gt; &lt;pool name/id&gt;1.
+</code></pre>
+<h5 id="66-删除fs">6.6 删除fs</h5>
+<p>先去节点上关闭所有mds再删除，待补充</p>
+<h3 id="7-块设备的创建-管理与使用">7. 块设备的创建、管理与使用</h3>
+<h5 id="71-创建块存储pool">7.1 创建块存储Pool</h5>
+<p>先创建一个Pool，再转换成块存储Pool</p>
+<pre><code class="language-shell">$ ceph osd pool create &lt;pool-name&gt;
+$ rbd pool init &lt;pool-name&gt;1.2.
+</code></pre>
+<h5 id="72-创建块设备映像">7.2 创建块设备映像</h5>
+<p>必须先在]创建映像，然后才能将块设备添加到节点。要创建块设备映像，请执行以下操作：</p>
+<pre><code class="language-shell">$ rbd create --size {megabytes} {pool-name}/{image-name}1.
+</code></pre>
+<p>例如，要创建一个名为10GB的映像<code>ubuntu.qcow2</code>，该映像将信息存储在<code>images</code> Pool中，请执行以下操作：</p>
+<pre><code class="language-shell">$ rbd create --size 1024 ubuntu.qcow2/images1.
+</code></pre>
+<h5 id="73-创建块存储pool用户">7.3 创建块存储Pool用户</h5>
+<pre><code class="language-shell">ceph auth get-or-create client.libvirt mon 'profile rbd' osd 'profile rbd pool=images'1.
+</code></pre>
+<h5 id="74-联动kvm">7.4 联动kvm</h5>
+<pre><code class="language-xml">    &lt;disk type='network' device='disk'&gt;
+      &lt;driver name='qemu'/&gt;
+      &lt;auth username='libvirt'&gt;
+        &lt;secret type='ceph' uuid='186367af-91ba-4de6-a2d0-233dbfa722c4'/&gt;
+      &lt;/auth&gt;
+      &lt;source protocol='rbd' name='images_data/ubuntu.qcow2'&gt;
+        &lt;host name='192.168.3.4' port='6789'/&gt;
+      &lt;/source&gt;
+      &lt;target dev='vdc' bus='virtio'/&gt;
+      &lt;address type='pci' domain='000' bus='0' slot='a' function=''/&gt;
+    &lt;/disk&gt;1.2.3.4.5.6.7.8.9.10.11.
+</code></pre>
+<h3 id="8-总结">8 总结</h3>
+<p>花了五天时间学习，踩坑，终于完成了。我做了一个测试，创建了一个集群，用块存储给集群节点当第二块盘，这块盘又当成了OSD创建了cephfs挂载在master上，相当于套了个娃，但是也证明这个东西是没啥问题的，不过光在性能上就花费了两天时间，高性能还是要大集群才能发挥威力。</p>
+<h3 id="遇到的坑和解决办法">遇到的坑和解决办法</h3>
+<p>这些解决的方法在教程里都已经写得很清楚了，只是单独列出来注意一下。</p>
+<ol>
+<li>外网速度慢的问题：key的问题，docker pull慢的问题</li>
+<li>添加OSD慢的问题</li>
+<li>kernel挂载出错的问题</li>
+<li>pool删除的问题<code>ceph tell mon.\* injectargs '--mon-allow-pool-delete=true'</code></li>
+<li>速度慢的问题</li>
+</ol>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/WoYrnvGiH/">
+              <span class="post-title">
+                Ceph搭建硬件建议详解&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

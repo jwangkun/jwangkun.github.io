@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Centos7.4 安装MySQL 教程 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Centos7.4 安装MySQL 教程 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Centos7.4 安装MySQL 教程"/>
+    <meta property="og:url" content="https://jwangkun.github.io/O2hEa3Tlz/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/_JVrn2ZGG/" class="tag">MySQL</a>
+            
+            <a href="https://jwangkun.github.io/l-lwQxp4GJ/" class="tag">Centos</a>
+            
+        </span>
+            <h1>Centos7.4 安装MySQL 教程</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-11，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>1、卸载mariadb</p>
+<pre><code>[root@VM_0_4_centos ~]# rpm -qa | grep mariadb
+
+mariadb-libs-5.5.52-1.el7.x86_64
+
+[root@VM_0_4_centos ~]# rpm -e mariadb-libs --nodeps
+
+warning: /etc/my.cnf saved as /etc/my.cnf.rpmsave
+
+[root@VM_0_4_centos ~]# rpm -qa | grep mariadb
+</code></pre>
+<p>2、下载MySQL安装包</p>
+<pre><code>[root@VM_0_4_centos ~]# cd /usr/local
+
+[root@VM_0_4_centos local]# wget https://mirrors.huaweicloud.com/mysql/Downloads/MySQL-8.0/mysql-8.0.17-linux-glibc2.12-x86_64.tar.xz 
+
+[root@VM_0_4_centos local]# tar xvJf mysql-8.0.17-linux-glibc2.12-x86_64.tar.xz
+
+[root@VM_0_4_centos local]# mv mysql-8.0.17-linux-glibc2.12-x86_64/ mysql80/
+
+[root@VM_0_4_centos local]# mv mysql80/ /usr/local/
+</code></pre>
+<p>3、配置文件</p>
+<pre><code>[root@VM_0_4_centos mysql80]# touch /etc/my.cnf
+</code></pre>
+<p>修改/etc/my.cnf内容</p>
+<pre><code>[mysqld]
+
+user=mysql
+
+server_id=3
+
+port=3306
+
+mysqlx_port=33060
+
+mysqlx_socket=/home/mysql80/sock/mysqlx.sock #放到大磁盘里，下同
+
+basedir=/usr/local/mysql80
+
+datadir=/home/mysql80/data
+
+socket=/home/mysql80/sock/mysql.sock
+
+pid-file=/home/mysql80/pid/mysqld.pid
+
+log-error=/home/mysql80/logs/error.log
+
+# slow-query-log=0
+
+# slow-query-log-file=/home/mysql80/logs/slow.log
+
+# long_query_time=2
+
+# log_output=TABLE
+
+log-bin=/home/mysql80/logs/bin.log
+
+relay-log=/home/mysql80/logs/relay.log
+
+binlog_format=ROW
+
+relay_log_recovery=1
+
+character-set-client-handshake=FALSE
+
+character-set-server=utf8mb4
+
+collation-server=utf8mb4_unicode_ci
+
+init_connect ='SET NAMES utf8mb4'
+
+default-time-zone='+8:00'
+
+innodb_buffer_pool_size=1G
+
+join_buffer_size=128M
+
+sort_buffer_size=2M
+
+read_rnd_buffer_size=2M
+
+log_timestamps = SYSTEM
+
+lower_case_table_names = 1
+
+explicit_defaults_for_timestamp = OFF
+
+default-authentication-plugin=mysql_native_password
+
+sql_mode=STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION
+
+max_connections=1000
+
+#skip-grant-tables
+
+auto_increment_offset = 1
+
+auto_increment_increment = 2
+
+log-slave-updates = true #多主多从时保证数据一致
+
+max_binlog_size=5120M #binlog文件最大容量
+
+replicate-ignore-db = mysql #忽略mysql库同步，下同
+
+replicate-ignore-db = information_schema
+
+replicate-ignore-db = performance_schema
+
+replicate-ignore-db = sys
+
+replicate-ignore-table = pmsdb.bs_syrmx_his #忽略pmsdb.bs_syrmx_his表同步，下同
+
+replicate-ignore-table = pmsdb.bs_syrmx_text
+
+[mysql]
+
+socket=/home/mysql80/sock/mysql.sock
+
+[client]
+
+socket=/home/mysql80/sock/mysql.sock
+</code></pre>
+<p>4、创建用户及目录</p>
+<pre><code>[root@VM_0_4_centos data]# useradd mysql
+
+[root@VM_0_4_centos data]# mkdir -p /home/mysql80/data
+
+[root@VM_0_4_centos data]# mkdir -p /home/mysql80/logs
+
+[root@VM_0_4_centos data]# mkdir -p /home/mysql80/pid
+
+[root@VM_0_4_centos data]# mkdir -p /home/mysql80/sock
+
+
+
+chown -R mysql:mysql /home/mysql80
+</code></pre>
+<p>5、初始化</p>
+<pre><code>[root@VM_0_4_centos bin]# cd /usr/local/mysql80/bin
+
+[root@VM_0_4_centos bin]# ./mysqld  --initialize
+
+[root@VM_0_4_centos bin]# cd ../support-files
+
+[root@VM_0_4_centos support-files]# ./mysql.server start
+
+Starting MySQL.. SUCCESS!
+</code></pre>
+<p>6、注册服务</p>
+<pre><code>[root@VM_0_4_centos mysql80]# cp  /usr/local/mysql80/support-files/mysql.server /etc/init.d/mysqld
+
+[root@VM_0_4_centos mysql80]# service mysqld status
+
+ SUCCESS! MySQL running (26360)
+</code></pre>
+<p>7、配置环境变量</p>
+<p>vim /etc/profile</p>
+<pre><code>export MYSQL_HOME
+MYSQL_HOME=/usr/local/mysql80
+export PATH=$PATH:$MYSQL_HOME/lib:$MYSQL_HOME/binxxxxxxxxxx export MYSQL_HOMEMYSQL_HOME=/usr/local/mysql80export PATH=$PATH:$MYSQL_HOME/lib:$MYSQL_HOME/binMYSQL_HOME=/usr/local/mysql80PATH=$PATH:$HOME/bin:$MYSQL_HOME/bin
+</code></pre>
+<p>source /etc/profile</p>
+<p>8、改密</p>
+<p>查看初始密码::</p>
+<pre><code>grep &quot;temporary password&quot; /home/mysql80/logs/error.log
+
+2020-04-29T19:46:58.392030+08:00 5 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: 0QFs0!mhlYua
+</code></pre>
+<p>以上面查到的密码登录mysql修改root密码</p>
+<pre><code>mysql&gt; ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+
+Query OK, 0 rows affected (0.01 sec)
+</code></pre>
+<p>设置远程访问</p>
+<pre><code>mysql&gt; CREATE USER 'root'@'%' IDENTIFIED BY '123456';
+
+Query OK, 0 rows affected (0.01 sec)
+
+ 
+
+mysql&gt; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%'  WITH GRANT OPTION;
+
+Query OK, 0 rows affected (0.01 sec)
+
+ 
+
+mysql&gt; flush privileges;
+
+Query OK, 0 rows affected (0.01 sec)
+
+ 
+</code></pre>
+<p>9、开放端口</p>
+<pre><code>firewall-cmd --zone=public --add-port=3306/tcp --permanent
+
+firewall-cmd --reload
+</code></pre>
+<p>10、开机启动</p>
+<pre><code>[root@VM_0_4_centos mysql80]# cp /usr/local/mysql80/support-files/mysql.server /etc/rc.d/init.d/mysqld
+
+[root@VM_0_4_centos mysql80]# chmod u+x /etc/init.d/mysqld
+
+[root@dhcjrbdb init.d]# chkconfig --add mysqld
+
+[root@dhcjrbdb init.d]# chkconfig --list
+
+ 
+
+Note: This output shows SysV services only and does not include native
+
+​    systemd services. SysV configuration data might be overridden by native
+
+​    systemd configuration.
+
+ 
+
+​    If you want to list systemd services use 'systemctl list-unit-files'.
+
+​    To see services enabled on particular target use
+
+​    'systemctl list-dependencies [target]'.
+
+ 
+
+db2autostart      0:off     1:off     2:on     3:on     4:on     5:on     6:off
+
+mysqld         0:off     1:off     2:on     3:on     4:on     5:on     6:off
+
+netconsole       0:off     1:off     2:off     3:off     4:off     5:off     6:off
+
+network         0:off     1:off     2:on     3:on     4:on     5:on     6:off
+</code></pre>
+<p>看到3、4、5状态为开或者为 on 则表示成功。如果是 关或者 off 则执行一下：chkconfig --level 345 mysqld on</p>
+<p>重启计算机:reboot</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Pw8vFa6Zm/">
+              <span class="post-title">
+                SpringBoot实现邮件发送功能&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

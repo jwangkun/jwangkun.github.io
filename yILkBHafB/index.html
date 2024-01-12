@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Kubernetes是如何工作的 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes是如何工作的 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Kubernetes是如何工作的"/>
+    <meta property="og:url" content="https://jwangkun.github.io/yILkBHafB/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Kubernetes是如何工作的</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-14，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>文章译自 <strong>HOW DOES KUBERNETES WORK?</strong>[1]，作者 <em>Janakiram MSV</em>。</p>
+<hr>
+<p><em>以下内容节选自 The New Stack 新书《<strong>The State of the Kubernetes Ecosystem</strong>[2]》。</em></p>
+<blockquote>
+<p>需要该书的朋友可以访问原网站下载，或加译者微信 <strong>youmoolee</strong> 索取。</p>
+</blockquote>
+<p>当代的应用程序，通常会被打包进一组容器，并以微服务方式来部署。它需要一个足够强大的基础设施来处理集群的需求和动态协调的压力。这样的基础架构应该为跨主机的容器调度、监控、升级和迁移提供基本原语(<strong>primitives</strong>)。它必须能将底层算力(<strong>compute</strong>)、存储(<strong>storage</strong>)和网络(<strong>network</strong>)原语处理为资源池。每个容器化了的工作负载(<strong>workload</strong>)都应能利用暴露给它的资源，包括CPU核心(<strong>CPU cores</strong>)、存储单元(<strong>storage units</strong>)和网络(<strong>networks</strong>)。</p>
+<p>Kubernetes 是一个<strong>开源的分布式系统</strong>[3]，它抽象了底层的物理基础设施，使其更容易大规模地运行容器化应用。一个由 Kubernetes 管理整个生命周期的应用，是由一组容器聚集在一起，并协调成一个单元。一个高效的集群管理器层(<strong>cluster manager layer</strong>)可以让 Kubernetes 将应用与支撑它的基础设施有效地解耦，如下面图一所示。一旦 Kubernetes 基础设施完全配置完毕，DevOps团队就可以专注于管理部署的工作负载，而不是处理底层的资源池--CPU和内存--它们将由 Kubernetes 处理。</p>
+<h2 id="kubernetes-works-like-an-operating-system">Kubernetes Works Like an Operating System</h2>
+<p>Kubernetes 工作起来像一个操作系统。</p>
+<p>Kubernetes 是一个架构良好的分布式系统的例子。它将集群中的所有机器视为一个单一的资源池。它承担了分布式操作系统的角色，有效地管理调度、分配资源、监控基础设施的健康状况，甚至维护基础设施和工作负载的期望状态(<strong>desired state</strong>)。Kubernetes 是一个能够在云服务和私有数据中心环境上跨多个集群和基础设施运行现代应用程序的操作系统。</p>
+<p>和其他成熟的分布式系统一样，Kubernetes 分为两层，包括头节点(<strong>head nodes</strong>)和工作节点(<strong>worker nodes</strong>)。头节点通常运行控制平面(<strong>control plane</strong>)，负责调度和管理工作负载的生命周期。工作节点作为运行应用(<strong>applications</strong>)的工作主力。头节点和工作节点的集合构成一个集群。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/YOzn5GIBjhJtLfOO8B7WgcHrzDzCN4ETTPrMweU0vhkOib6FDfpae5JIHYM27d858uibnORPeTic75cq2SkmYrWJg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">Caption: The big picture of a Kubernetes cluster. Source: Janakiram MSV.</p>
+<p>管理集群的DevOps团队通过命令行(CLI)或第三方工具与控制平面(<strong>control plane</strong>)的API进行对话。用户访问运行在工作节点上的应用程序。应用程序由一个或多个容器镜像组成，这些镜像存储在一个可访问的镜像注册中心(<strong>image registry</strong>)中。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/YOzn5GIBjhJtLfOO8B7WgcHrzDzCN4ETYnL7747qia1PkIh12QzKQZplzxDqUaibNrIFeibkYJpXNw0EYQzicX1CbQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">Caption: The role of Head Node in Kubernetes architecture. Source: Janakiram MSV.</p>
+<h2 id="the-kubernetes-control-plane-控制平面">The Kubernetes Control Plane (控制平面)</h2>
+<p>控制平面运行着提供核心功能的 Kubernetes 组件：暴露 Kubernetes API、调度部署工作负载、管理集群以及指导整个系统的通信。如第二张图所描述的那样，头节点监控着每个节点中运行的容器以及所有注册节点的健康状况。容器镜像作为可部署的部件(<strong>deployable artifacts</strong>)，必须对 Kubernetes 集群可用，不管是通过私有还是公共的镜像注册中心。负责调度和运行应用程序的节点通过容器运行时(<strong>container runtime</strong>)从注册中心访问镜像。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/YOzn5GIBjhJtLfOO8B7WgcHrzDzCN4ETlCwFLCXlZ9Eiah2y6ZCBdBq2wLduBiaNBJa9HGAlh8PE7toYleApBDRg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">Caption: Components of the head node. Source: Janakiram MSV.</p>
+<p>Kubernetes头节点运行以下组件，它们一起构成了控制平面：</p>
+<h3 id="etcd">etcd</h3>
+<p>etcd 由 CoreOS 开发，后者后来被红帽收购，它是一个持久化、轻量、分布式的键值数据存储仓库，被用来维护集群配置数据。它代表了集群在任何给定时间点的整体状态，充当了唯一的真相来源(<strong>single source of truth</strong>)。其他各种组件和服务监听 etcd 存储的变化，以维持应用程序的期望状态。该状态由声明性策略(<strong>declarative policy</strong>)定义；实际上，它是一个为应用声明最佳环境的文档，编排器(<strong>orchestrator</strong>)根据它来努力实现环境要求。该策略定义了编排器如何处理应用程序的各种属性，如实例数量、存储要求和资源分配。</p>
+<p>etcd 数据库只能通过 API server 访问。集群中任何需要读写 etcd 的组件都是通过 API server 进行的。</p>
+<h3 id="api-server">API Server</h3>
+<p>API server 通过基于HTTP协议的JSON接口来暴露 Kubernetes API，为编排器的内部和外部端点(<strong>endpoints</strong>)提供REST接口。CLI、Web界面(UI)或其他工具可以向 API server 发送请求。API server 处理并验证该请求，然后更新 etcd 中 API对象的状态。这使得客户端能够跨工作节点配置工作负载和容器。</p>
+<h3 id="scheduler-调度器">Scheduler (调度器)</h3>
+<p>调度器根据其对资源可用性的评估选择每个工作负载应该运行的节点，然后跟踪资源利用率，以确保 pod 的资源消耗不超过其配额。它维护和跟踪资源需求、资源可用性以及各种其他用户提供的约束和策略指令；例如，服务质量(quality of service <strong>QoS</strong>)、亲和/反亲和要求以及数据本地性(<strong>data locality</strong>)。运维团队可以声明式地定义资源模型。调度器会将这些声明解释为为每个工作负载提供和分配正确资源集的指令。</p>
+<h3 id="controller-manager-控制器-管理器">Controller-Manager (控制器-管理器)</h3>
+<p>Kubernetes 架构中赋予其多功能性的部分是控制器-管理器，它是头节点的一部分。控制器-管理器的职责是通过定义好的控制器，确保集群一直保持期望的应用状态。控制器是一个控制循环(<strong>control loop</strong>)，它通过 API server 监视集群的共享状态，并在需要时做出改变，尝试将当前状态向期望状态移动。</p>
+<p>控制器通过不断监控集群的健康状况和部署在该集群上的工作负载，来维持节点和 pods 的稳定状态。例如，当一个节点变得不健康时，运行在该节点上的 pod 可能会变得不可访问。在这种情况下，控制器的工作就是在另外的节点上调度相同数量的新 pod。这项活动确保集群在任何给定的时间点都能保持预期的状态。</p>
+<p>Kubernetes 有一套内置的控制器，运行在 controller-manager 内部。这些控制器提供了与某一类工作负载相一致的原语，如stateless、stateful、scheduled cron jobs 和 run-to-completion jobs。在 Kubernetes 中打包和部署应用程序时，开发人员和操作人员可以利用这些原语。</p>
+<p>本系列接下来的文章将更详细地探讨 Kubernetes 架构，包括工作节点和工作负载的关键组件；服务和服务发现；以及网络和存储。</p>
+<p>文章来自公众账号：nineteen84</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/IAsJxqkro/">
+              <span class="post-title">
+                Maven插件构建Docker镜像并推送到镜像仓库&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

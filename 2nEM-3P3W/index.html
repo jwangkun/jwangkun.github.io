@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Docker 实战总结 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Docker 实战总结 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Docker 实战总结"/>
+    <meta property="og:url" content="https://jwangkun.github.io/2nEM-3P3W/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>Docker 实战总结</h1>
+            <span class="meta">
+            	Posted on
+              2020-09-09，15 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <figure data-type="image" tabindex="1"><img src="https://sponsor.segmentfault.com/lg.php?bannerid=0&amp;campaignid=0&amp;zoneid=25&amp;loc=https%3A%2F%2Fsegmentfault.com%2Fa%2F1190000037762279&amp;referer=https%3A%2F%2Fsegmentfault.com%2F&amp;cb=368db73f31" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><a href="https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&amp;album_id=1479950328543444997&amp;__biz=MzI0MDQ4MTM5NQ==#wechat_redirect"><img src="https://segmentfault.com/img/remote/1460000037762283" alt="img" loading="lazy"></a></figure>
+<h3 id="docker简介">Docker简介</h3>
+<p>Docker是一个开源的应用容器引擎，开发者可以打包自己的应用到容器里面，然后迁移到其他机器的docker应用中，可以实现快速部署。</p>
+<p>简单的理解，docker就是一个软件集装箱化平台，就像船只、火车、卡车运输集装箱而不论其内部的货物一样，软件容器充当软件部署的标准单元，其中可以包含不同的代码和依赖项。</p>
+<p>按照这种方式容器化软件，开发人员和 IT 专业人员只需进行极少修改或不修改，即可将其部署到不同的环境，如果出现的故障，也可以通过镜像，快速恢复服务。<img src="https://segmentfault.com/img/remote/1460000037762282" alt="img" loading="lazy"></p>
+<h3 id="docker优势">Docker优势</h3>
+<p>1.特性优势<img src="https://segmentfault.com/img/remote/1460000037762284" alt="img" loading="lazy">2.资源优势<img src="https://segmentfault.com/img/remote/1460000037762286" alt="img" loading="lazy"></p>
+<h3 id="docker基本概念">Docker基本概念</h3>
+<p><strong>Client（客户端）</strong>：是Docker的用户端，可以接受用户命令和配置标识，并与Docker daemon通信。</p>
+<p><strong>Images（镜像）</strong>：是一个只读模板，含创建Docker容器的说明，它与操作系统的安装光盘有点像。</p>
+<p><strong>Containers（容器）</strong>：镜像的运行实例，镜像与容器的关系类比面向对象中的类和对象。</p>
+<p><strong>Registry（仓库）</strong>：是一个集中存储与分发镜像的服务。最常用的Registry是官方的Docker Hub 。<img src="https://segmentfault.com/img/remote/1460000037762287" alt="img" loading="lazy"></p>
+<h3 id="docker改变了什么">Docker改变了什么？</h3>
+<p>Docker改变了云服务，使云服务的共融共通的理想逐步成为了可能。并且Docker 已经是云策略的一部分，许多开发者正在计划使用 Docker 将业务迁移到云端。另外，为了避免被云服务供应商绑定，Docker成为很多开发者的首选。</p>
+<p>Docker改变了产品交付，为产品的整个生命周期提供了一整套的解决方案和流程。</p>
+<p>Docker改变了开发方式，提供了简化的环境配置、封装的运行环境以及统一的环境。并且提供了快速部署的方式。</p>
+<p>Docker改变了测试，多版本测试变得极为方便，快速构建测试环境也变得更加简单并且无需开发人员干预或者搭建。</p>
+<p>Docker改变了运维，环境的一致性让运维变得更加简单，同时热更新的支持让运维不再需要半夜加班部署更新，更新可以随时进行。当出现重大问题时，还能快速回滚到指定版本。</p>
+<p>Docker改变了架构，自动化扩容支持让架构变得更加简单，分布式系统也更加易于搭建和支持。同时遗留的单体应用也很易于转变为现代应用。<img src="https://segmentfault.com/img/remote/1460000037762285" alt="img" loading="lazy"></p>
+<p>总之，在某种程度上，Docker改变了产品开发中的一些游戏规则。虽然Docker是一项技术，但是它也带来了新的思维，新的流程和工作方法，Docker在推动行业的发展，Docker已经在改变世界，并且在逐步的变为事实……关注民工哥技术之路公众号，回复1024获取2TB资料一份，助力大家更好的学习技术。</p>
+<h3 id="docker安装使用">Docker安装使用</h3>
+<p>操作系统：CentOS 7</p>
+<p>1、安装依赖</p>
+<pre><code>yum install -y yum-utils device-mapper-persistent-data lvm2
+</code></pre>
+<p>2、添加软件源</p>
+<pre><code>yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo  # 指定阿里云镜像源
+</code></pre>
+<p>3、安装docker-ce（对系统内核有一定要求，centos6不支持）</p>
+<pre><code>yum clean all  yum makecache fast        # 重新生成缓存
+yum -y install docker-ce docker-ce-cli containerd.io
+</code></pre>
+<p>4、设置自启并启动</p>
+<pre><code>systemctl enable docker
+systemctl start docker
+</code></pre>
+<p>5、查看版本</p>
+<pre><code>docker version
+</code></pre>
+<p>运行示例：Nginx</p>
+<p>1、搜索并下载镜像</p>
+<pre><code>docker search nginx
+docker pull nginx
+</code></pre>
+<p><img src="" alt="img" loading="lazy">2、启动一个容器并映射端口到本地</p>
+<pre><code>docker run -d -p 8080:80 --name Nginx nginx    # 参数详解见下文
+</code></pre>
+<p><img src="https://segmentfault.com/img/remote/1460000037762292" alt="img" loading="lazy">3、访问本地映射端口<img src="https://segmentfault.com/img/remote/1460000037762288" alt="img" loading="lazy"></p>
+<h3 id="docker常用命令">Docker常用命令</h3>
+<p>1.镜像控制</p>
+<pre><code>搜索镜像：docker  search  [OPTIONS]  TERM
+上传镜像：docker  push  [OPTIONS]  NAME[:TAG]
+下载镜像：docker  pull  [OPTIONS]  NAME[:TAG]
+提交镜像：docker  commit [OPTIONS]  CONTAINER  NAME[:TAG]
+构建镜像：docker  build  [OPTIONS]  PATH
+删除镜像：docker  rmi [OPTIONS]  IMAGE  [IMAGE...]
+增加镜像标签：docker  tag  SOURCE_IMAGE[:TAG]  TARGET_IMAGE[:TAG]
+查看所有镜像：docker  images  [OPTIONS]  [REPOSITORY[:TAG]]
+</code></pre>
+<p><img src="" alt="img" loading="lazy">2.容器控制</p>
+<pre><code>启动/重启容器：docker start/restart CONTAINER
+停止/强停容器：docker stop/ kill CONTAINER
+删除容器：docker rm [OPTIONS] CONTAINER [CONTAINER...]
+重命名容器：docker rename CONTAINER CONTAINER_NEW
+进入容器：docker attach CONTAINER
+执行容器命令：docker exec CONTAINER COMMAND
+查看容器日志：docker logs [OPTIONS] CONTAINER
+查看容器列表：docker ps [OPTIONS]
+</code></pre>
+<p><img src="https://segmentfault.com/img/remote/1460000037762290" alt="img" loading="lazy">3.容器启动</p>
+<pre><code>docker  run  [OPTIONS]  IMAGE  [COMMAND]  [ARG...]
+-d : 后台运行容器，并返回容器ID
+-i：以交互模式运行容器，通常与 -t 同时使用
+-t：为容器重新分配一个伪输入终端，通常与 -i 同时使用
+-v：绑定挂载目录
+--name=&quot;mycontainer&quot;: 为容器指定一个名称
+--net=&quot;bridge&quot;: 指定容器的网络连接类型，支持如下：
+     bridge / host / none / container:&lt;name|id&gt;
+-p/-P :端口映射，格式如图：
+</code></pre>
+<p><img src="https://segmentfault.com/img/remote/1460000037762289" alt="img" loading="lazy">4.其他命令</p>
+<pre><code>查看docker信息：docker info
+docker命令帮助：docker run --help
+复制文件到容器：docker cp custom.conf Nginx:/etc/nginx/conf.d/
+更新容器启动项：docker container update --restart=always nginx
+查看docker日志：tail -f /var/log/messages
+</code></pre>
+<p>参考：<a href="http://mp.weixin.qq.com/s?__biz=MzI0MDQ4MTM5NQ==&amp;mid=2247485839&amp;idx=1&amp;sn=842a3d5ef663ac07d9397d0d0cff8ebb&amp;chksm=e91b6c93de6ce585418d974dcc6991c23df1bb24a1c1f65b66260055cbcebdd634184a848141&amp;scene=21#wechat_redirect">这20个Docker Command，有几个是你会的？</a><img src="https://segmentfault.com/img/remote/1460000037762291" alt="img" loading="lazy">更多可以参考官网：<a href="https://docs.docker.com/engine/reference/commandline/cli/">https://docs.docker.com/engin...</a><img src="https://segmentfault.com/img/remote/1460000037762294" alt="img" loading="lazy"></p>
+<h3 id="docker镜像构建">Docker镜像构建</h3>
+<p>1.Docker commit（1运行2修改3保存）</p>
+<pre><code>#运行容器
+docker run -dit -p 8080:80 --name Nginx nginx
+#修改容器（这里我只是做个演示，所以就复制一下文件，具体修改需要根据你实际情况）
+docker cp custom.conf Nginx:/etc/nginx/conf.d/
+#将容器保存为新的镜像
+docker commit Nginx zwx/nginx
+</code></pre>
+<p><img src="https://segmentfault.com/img/remote/1460000037762293" alt="img" loading="lazy">2.Dockerfile（1编写2构建）</p>
+<pre><code>#编写Dockerfile文件
+vim Dockerfile
+#执行Dockerfile文件
+docker build -t zwx/nginx . #后面有个点，代表当前目录下dockerfile文件
+</code></pre>
+<p><img src="https://segmentfault.com/img/remote/1460000037762295" alt="img" loading="lazy">3.Dockerfile 常用指令<img src="https://segmentfault.com/img/remote/1460000037762298" alt="img" loading="lazy">更多可以参考：<a href="http://mp.weixin.qq.com/s?__biz=MzI0MDQ4MTM5NQ==&amp;mid=2247486864&amp;idx=1&amp;sn=4e4a252aada8dfdb0de4e5e92de02058&amp;chksm=e91b688cde6ce19af4f61b42454759c701bf2e250a46563948d6962be3a1883d63bd9c57beaf&amp;scene=21#wechat_redirect">Dockerfile文件详解</a></p>
+<h3 id="docker本地仓库">Docker本地仓库</h3>
+<p>1、拉取镜像仓库</p>
+<pre><code>docker search registry
+docker pull registry
+</code></pre>
+<p>2、启动镜像服务</p>
+<pre><code>docker run -dit 
+--name=Registry   # 指定容器名称
+-p 5000:5000     # 仓库默认端口是5000，映射到宿主机，这样可以使用宿主机地址访问
+--restart=always    # 自动重启，这样每次docker重启后仓库容器也会自动启动
+--privileged=true   # 增加安全权限，一般可不加
+-v /usr/local/my_registry:/var/lib/registry      # 把仓库镜像数据保存到宿主机
+registry
+</code></pre>
+<p>3、注册https协议（需要通过本地仓库下载镜像，均需要配置）</p>
+<pre><code>vim /etc/docker/daemon.json # 默认无此文件，需自行添加，有则追加一下内容。
+   { &quot;insecure-registries&quot;:[&quot; xx.xx.xx.xx:5000&quot;] 
+   }  #指定ip地址或域名
+</code></pre>
+<p>4、新增tag指明仓库地址</p>
+<pre><code>docker tag zwx/nginx x.xx.xx.xx:5000/zwx/nginx  # 如果构建时已经指定仓库地址，则可以省略
+</code></pre>
+<p>5、上传镜像到本地仓库</p>
+<pre><code>docker push x.xx.xx.xx:5000/zwx/nginx
+</code></pre>
+<p>6、查看本地仓库</p>
+<pre><code>curl -XGET http://x.xx.xx.xx:5000/v2/_catalog
+</code></pre>
+<figure data-type="image" tabindex="3"><img src="https://segmentfault.com/img/remote/1460000037762296" alt="img" loading="lazy"></figure>
+<p>更多可以参考：<a href="http://mp.weixin.qq.com/s?__biz=MzI0MDQ4MTM5NQ==&amp;mid=2247487199&amp;idx=1&amp;sn=c67f88f8a4be597054120e4750bfc4ea&amp;chksm=e91b6bc3de6ce2d50bec65dbcd868d2e86666acb006207edbb49ddcd6bfa3a82e35b2181f34a&amp;scene=21#wechat_redirect">docker搭建本地私有仓库</a></p>
+<h3 id="docker与图形管理工具portainer">Docker与图形管理工具Portainer</h3>
+<p>1.简介 Portainer是Docker的图形化管理工具，提供状态显示面板、应用模板快速部署、容器镜像网络数据卷的基本操作（包括上传下载镜像，创建容器等操作）。</p>
+<p>事件日志显示、容器控制台操作、Swarm集群和服务等集中管理和操作、登录用户管理和控制等功能。功能十分全面，基本能满足中小型单位对容器管理的全部需求。<img src="" alt="img" loading="lazy">更多可以参考：<a href="http://mp.weixin.qq.com/s?__biz=MzI0MDQ4MTM5NQ==&amp;mid=2247493129&amp;idx=2&amp;sn=2667f7f3a17103941236959f6d173bb3&amp;chksm=e9188315de6f0a03fd8cc13a66f8247cd65e1cbf9f5475ec4f4a996e57f782a429d0eb6c8933&amp;scene=21#wechat_redirect">docker可视化管理工具推荐</a></p>
+<p>2.安装使用</p>
+<pre><code>#搜索并下载镜像
+docker search portainer
+docker pull portainer/portainer
+#单机方式运行
+docker run -d 
+-p 9000:9000  # portainer默认端口是9000，映射到本地9000端口，通过本地地址访问
+--restart=always   # 设置自动重启
+-v /var/run/docker.sock:/var/run/docker.sock   # 单机必须指定docker.sock
+--name Prtainer portainer/portainer
+</code></pre>
+<p>访问<a href="http://localhost/">http://localhost</a>:9000,首次登陆需要注册用户，给admin用户设置密码，然后单机版选择local连接即可。<img src="https://segmentfault.com/img/remote/1460000037762297" alt="img" loading="lazy">控制管理<img src="https://segmentfault.com/img/remote/1460000037762299" alt="img" loading="lazy"></p>
+<h3 id="docker与集群管理工具swarm">Docker与集群管理工具Swarm</h3>
+<p>1.简介</p>
+<p>Swarm是Docker官方提供的一款集群管理工具，其主要作用是把若干台Docker主机抽象为一个整体，并且通过一个入口统一管理这些Docker主机上的各种Docker资源。<img src="https://segmentfault.com/img/remote/1460000037762301" alt="img" loading="lazy">2.安装使用</p>
+<p>Swarm 在 Docker 1.12 版本之前属于一个独立的项目，在 Docker 1.12 版本发布之后，该项目合并到了 Docker 中，成为 Docker 的一个子命令。</p>
+<p>启动swarm集群只需要执行初始化命令即可：</p>
+<pre><code>docker swarm init        # 默认初始化节点为管理节点
+--advertise-addr xx.xx.xx.xx    #指定使用的ip
+--listen-addr xx.xx.xx.xx:2377   #指定监听ip和port，默认为2377
+</code></pre>
+<p>设置manager节点</p>
+<pre><code>docker swarm join-token manager  #获取管理节点token，放入下面命令
+docker swarm join 
+--advertise-addr xx.xx.xx.xx 
+--listen-addr xx.xx.xx.xx:2377 
+--token SWMTKN-1-29ynh5uyfiiospy4fsm4pd4xucyji2rn0oj4b4ak4s7a37syf9-ajkrv2ctjr5cmxzuij75tbrmz 
+xx.xx.xx.xx:2377
+</code></pre>
+<p>设置worker节点</p>
+<pre><code>docker swarm join-token worker  #获取工作节点token，放入下面命令
+docker swarm join 
+--advertise-addr xx.xx.xx.xx 
+--listen-addr xx.xx.xx.xx:2377 
+--token SWMTKN-1-29ynh5uyfiiospy4fsm4pd4xucyji2rn0oj4b4ak4s7a37syf9-ajkrv2ctjr5cmxzuij75tbrmz 
+xx.xx.xx.xx:2377
+</code></pre>
+<p>查看节点</p>
+<pre><code>docker node ls
+</code></pre>
+<p>创建服务</p>
+<pre><code>docker service create [OPTIONS] IMAGE [COMMAND] [ARG...]
+--detach , -d:  指定容器运行于前台还是后台，默认为false
+--name:  服务名称
+--network:  网络连接
+--publish , -p:  端口映射
+--env , -e:  设置环境变量
+--tty , -t:  分配tty设备，该可以支持终端登录
+--mount:  文件挂载
+--replicas:  指定任务数量
+</code></pre>
+<p>更多参考：<a href="http://mp.weixin.qq.com/s?__biz=MzI0MDQ4MTM5NQ==&amp;mid=2247487131&amp;idx=1&amp;sn=ab26a01288355ca29fe16a50346ec8cd&amp;chksm=e91b6b87de6ce291af3ad05d9842b6ad45e62d9f9d86d7474a3f38f7ba8cc4feea9817d22060&amp;scene=21#wechat_redirect">Docker Swarm集群部署实践</a></p>
+<h3 id="对比k8s究竟有何异同">对比K8s究竟有何异同?</h3>
+<ul>
+<li>a）出生不同</li>
+</ul>
+<p>Google根据其在Linux上容器管理经验，改造到docker管理上，就是kubernetes。他的在许多方面表现良好,最重要的是构造于Google多年的宝贵经验只上。</p>
+<p>kubernetes并不是为了docker写的,kubernetes把集群带到了一个全新的高度，代价是学习曲线比较陡。docker-swarm 使用了一个不同的方式,它是docker原生的集群工具。</p>
+<p>最方便的部分是它暴露了docker标准的编程接口，意味着你之前一直在使用的任何与docker沟通的工具（docker CLI, docker compose等），都可以无缝的在docker swarm上使用。</p>
+<ul>
+<li>b）安装配置不同</li>
+</ul>
+<p>安装设置swarm非常简单，简单明了并且很灵活。我们需要做的就是安装一个服务发现工具，然后在所有的节点上安装swarm容器。</p>
+<p>相比较而言，kubernetes的安装就有点复杂晦涩了。不同的操作系统上安装都不同。每个操作系统都有自己的独立安装指令。</p>
+<ul>
+<li>c）运行方式不同</li>
+</ul>
+<p>使用Swarm和使用容器没有什么不同。比如，你习惯于使用Docker CLI（命令行接口），你可以继续使用几乎相同的命令。</p>
+<p>如果你习惯于使用Docker Componse来运行容器，你可以继续在Swarm集群中使用。不管你之前习惯于怎么使用容器，你仍旧可以使用，只是在更大级别的集群中使用。</p>
+<p>Kubernetes要求你去学习它自己的CLI（命令行接口）和配置。你不能使用你之前创建的docker-compose.yml配置，你必须要去新建与Kubernetes对应的配置。</p>
+<p>你也不能使用之前学习的Docker CLI（命令行接口）。你必须要去学习 Kubernetes CLI（命令行接口）</p>
+<p>最后，当需要在Docker Swarm 和 Kubernetes做出选择时，可以考虑如下几点：</p>
+<ul>
+<li>你是否想依赖于Docker自己来解决集群的问题。如果是，选择Swarm。如果某些功能在Docker中不支持，那它也非常可能在Swarm中找不到，因为Swarm是依赖于Docker API的。</li>
+<li>另外一方面，如果你想要一个工具可以解决Docker的限制，Kubernetes将是不错的选择。Kubernetes不是基于Docker，而是基于Google多年对于管理容器的经验。它是按照自己的方式来行事。</li>
+</ul>
+<h3 id="docker运维流程图">Docker运维流程图</h3>
+<figure data-type="image" tabindex="4"><img src="https://segmentfault.com/img/remote/1460000037762300" alt="img" loading="lazy"></figure>
+<h3 id="docker配置管理">Docker配置管理</h3>
+<ul>
+<li>1.用了容器以后，还需要配置管理吗？</li>
+</ul>
+<p>起初我们跟Docker官方一样，属于理想主义派。天真的认为容器就应该是inmutable的，当需要配置变更的时候，重新构建镜像重新部署。</p>
+<p>基于这一思路，我们在cSphere中添加了个镜像自动构建模块，用户可以配置代码仓库的地址。服务的配置文件保存于Git或者SVN库中，需要配置变更时，向版本库中Push一下，自动通过hook触发镜像构建，并自动完成线上容器的重建。</p>
+<p>通过这套系统，用户可以非常方便的批量更新线上的服务，并不局限于配置文件的变更，代码的变更也天生支持。经过实际使用，这套系统能够很好的满足开发和测试环境的需求，提升工作效率。</p>
+<p>但是，在生产环境中使用的时候，我们发现这种流程其实并不那么完美，主要表现在：镜像构建和部署虽然自动化了，但构建是针对VCS中的某个仓库的，改一行配置就得整体重新构建一下，在更新容器时还需要把镜像重新分发到所有机器上，配置变更速度太慢。这种方式的配置变更会涉及到服务的重启，这在生产环境某些场景下是不可接受的 ，有可能引起短暂的服务中断。</p>
+<ul>
+<li>2.应用配置文件应该需要做到什么？</li>
+</ul>
+<p>Docker应用配置文件能够保持能够支持针对不同环境作出更改。另外配置文件支持在线更改，重启就生效。一般分为以下两种方式。</p>
+<p><strong>a）Docker环境变量</strong></p>
+<p>需要在制作镜像的时候就需要提前想好，有哪些参数是部署容器的时候会经常更改， 然后把这些参数抽出来做成容器的环境变量，然后在部署的容器的时候填入不同的参数即可。但是如果后续发现有一些参数不同场景下部署的时候也会修改，那就需要再重新制作镜像了。</p>
+<p><strong>b）应用配置文件</strong></p>
+<p>上述的管理方式不太灵活，灵活的管理方式是将配置文件和镜像剥离开，这样就不会被镜像给绑定了。</p>
+<blockquote>
+<p><em>出处：<a href="https://www.cnblogs.com/leozhanggg/p/12039953.html">https://www.cnblogs.com/leozh...</a></em><br>
+<em>作者：LeoZhanggg</em></p>
+</blockquote>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/3mPSlrjuV/">
+              <span class="post-title">
+                Docker 安装&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

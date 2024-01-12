@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>在Kubernetes上部署Redis集群 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="在Kubernetes上部署Redis集群 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="在Kubernetes上部署Redis集群"/>
+    <meta property="og:url" content="https://jwangkun.github.io/TooJXXWJC/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/2eFiGOtFN/" class="tag">k8s</a>
+            
+            <a href="https://jwangkun.github.io/D4VSgzm12/" class="tag">redis集群</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>在Kubernetes上部署Redis集群</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-22，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="介绍">介绍</h2>
+<p>Redis（代表REmote DIctionary Server）是一种开源的内存中数据存储，通常用作数据库，缓存或消息代理。它可以存储和操作高级数据类型，例如列表，地图，集合和排序集合。由于Redis接受多种格式的密钥，因此可以在服务器上执行操作，从而减少了客户端的工作量。它仅将磁盘用于持久性，而将数据库完全保存在内存中。Redis是一种流行的数据存储解决方案，并被GitHub，Pinterest，Snapchat，Twitter，StackOverflow，Flickr等技术巨头所使用。</p>
+<h2 id="为什么要使用redis">为什么要使用Redis？</h2>
+<ul>
+<li>它的速度非常快。它是用ANSI C编写的，并且可以在POSIX系统上运行，例如Linux，Mac OS X和Solaris。</li>
+<li>Redis通常被排名为最流行的键/值数据库和最流行的与容器一起使用的NoSQL数据库。</li>
+<li>其缓存解决方案减少了对云数据库后端的调用次数。</li>
+<li>应用程序可以通过其客户端API库对其进行访问。</li>
+<li>所有流行的编程语言都支持Redis。</li>
+<li>它是开源且稳定的。</li>
+</ul>
+<h2 id="什么是redis群集">什么是Redis群集？</h2>
+<p><strong>Redis Cluster</strong>是一组Redis实例，旨在通过对数据库进行分区来扩展数据库，从而使其更具弹性。群集中的每个成员（无论是主副本还是辅助副本）都管理哈希槽的子集。如果主机无法访问，则其从机将升级为主机。在由三个主节点组成的最小Redis群集中，每个主节点都有一个从节点（以实现最小的故障转移），每个主节点都分配有一个介于0到16,383之间的哈希槽范围。节点A包含从0到5000的哈希槽，节点B从5001到10000，节点C从10001到16383。群集内部的通信是通过内部总线进行的，使用八卦协议传播有关群集的信息或发现新节点。</p>
+<figure data-type="image" tabindex="1"><img src="http://ww1.sinaimg.cn/large/006bW9ocly1g8wiwlf6zqj30lm0ffacx.jpg" alt="undefined" loading="lazy"></figure>
+<h2 id="在kubernetes中部署redis集群">在Kubernetes中部署Redis集群</h2>
+<p>在<code>Kubernetes</code>中部署Redis集群面临挑战，因为每个Redis实例都依赖于一个配置文件，该文件可以跟踪其他集群实例及其角色。为此，我们需要结合使用<code>Kubernetes</code> <code>StatefulSets</code>和<code>PersistentVolumes</code>。</p>
+<h3 id="部署redis">部署Redis</h3>
+<blockquote>
+<p>我把资源清单上传到了我的Github上</p>
+</blockquote>
+<pre><code>$ git clone https://github.com/jwangkun/redis-sts.git
+</code></pre>
+<ol>
+<li>创建pv</li>
+</ol>
+<pre><code>$ kubectl apply -f redis-pv.yml
+persistentvolume/redis-pv1 created
+persistentvolume/redis-pv2 created
+persistentvolume/redis-pv3 created
+persistentvolume/redis-pv4 created
+persistentvolume/redis-pv5 created
+persistentvolume/redis-pv6 created
+$ kubectl get pv
+NAME        CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS    REASON   AGE
+redis-pv1   5Gi        RWO            Recycle          Available           redis-cluster            71s
+redis-pv2   5Gi        RWO            Recycle          Available           redis-cluster            71s
+redis-pv3   5Gi        RWO            Recycle          Available           redis-cluster            71s
+redis-pv4   5Gi        RWO            Recycle          Available           redis-cluster            71s
+redis-pv5   5Gi        RWO            Recycle          Available           redis-cluster            71s
+redis-pv6   5Gi        RWO            Recycle          Available           redis-cluster            71s
+</code></pre>
+<ol>
+<li>创建statefulset</li>
+</ol>
+<pre><code>$ kubectl apply -f redis-sts.yml
+configmap/redis-cluster created
+statefulset.apps/redis-cluster created
+$ kubectl get pods -l app=redis-cluster
+NAME              READY   STATUS    RESTARTS   AGE
+redis-cluster-0   1/1     Running   0          53s
+redis-cluster-1   1/1     Running   0          49s
+redis-cluster-2   1/1     Running   0          46s
+redis-cluster-3   1/1     Running   0          42s
+redis-cluster-4   1/1     Running   0          38s
+redis-cluster-5   1/1     Running   0          34s
+</code></pre>
+<ol>
+<li>创建service</li>
+</ol>
+<pre><code>$ kubectl apply -f redis-svc.yml
+service/redis-cluster created
+$ kubectl get svc redis-cluster
+NAME            TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)              AGE
+redis-cluster   ClusterIP   10.1.0.106   &lt;none&gt;        6379/TCP,16379/TCP   35s
+</code></pre>
+<h3 id="部署redis-cluster">部署Redis Cluster</h3>
+<p>下一步是形成Redis集群。为此，我们运行以下命令并键入<code>yes</code>以接受配置。前三个节点成为主节点，后三个节点成为从节点。</p>
+<pre><code>$ kubectl exec -it redis-cluster-0 -- redis-cli --cluster create --cluster-replicas 1 $(kubectl get pods -l app=redis-cluster -o jsonpath='{range.items[*]}{.status.podIP}:6379 ')
+
+$ kubectl exec -it redis-cluster-0 -- redis-cli --cluster create --cluster-replicas 1 $(kubectl get pods -l app=redis-cluster -o jsonpath='{range.items[*]}{.status.podIP}:6379 ')
+
+&gt;&gt;&gt; Performing hash slots allocation on 6 nodes...
+Master[0] -&gt; Slots 0 - 5460
+Master[1] -&gt; Slots 5461 - 10922
+Master[2] -&gt; Slots 10923 - 16383
+Adding replica 10.2.1.16:6379 to 10.2.0.32:6379
+Adding replica 10.2.2.17:6379 to 10.2.1.15:6379
+Adding replica 10.2.0.33:6379 to 10.2.2.16:6379
+M: 6ceaf0ac8ea5f0db95a9c0ad73ee27f9eb9f87aa 10.2.0.32:6379
+   slots:[0-5460] (5461 slots) master
+M: 71635c5b9476582d7a0ba851785ce8b25c09b7a0 10.2.1.15:6379
+   slots:[5461-10922] (5462 slots) master
+M: 526011f63b5196fcdefda225f031f05e1ae25de3 10.2.2.16:6379
+   slots:[10923-16383] (5461 slots) master
+S: e66ccd638f128e870109bef35ea851322a7d9593 10.2.0.33:6379
+   replicates 526011f63b5196fcdefda225f031f05e1ae25de3
+S: 8d0df4ad828cfb85a7d424fd59d0a21edaf3c476 10.2.1.16:6379
+   replicates 6ceaf0ac8ea5f0db95a9c0ad73ee27f9eb9f87aa
+S: e46feec2e68aa297c22cbb90739a8334219b6f4c 10.2.2.17:6379
+   replicates 71635c5b9476582d7a0ba851785ce8b25c09b7a0
+Can I set the above configuration? (type 'yes' to accept): yes
+&gt;&gt;&gt; Nodes configuration updated
+&gt;&gt;&gt; Assign a different config epoch to each node
+&gt;&gt;&gt; Sending CLUSTER MEET messages to join the cluster
+Waiting for the cluster to join
+.....
+&gt;&gt;&gt; Performing Cluster Check (using node 10.2.0.32:6379)
+M: 6ceaf0ac8ea5f0db95a9c0ad73ee27f9eb9f87aa 10.2.0.32:6379
+   slots:[0-5460] (5461 slots) master
+   1 additional replica(s)
+M: 71635c5b9476582d7a0ba851785ce8b25c09b7a0 10.2.1.15:6379
+   slots:[5461-10922] (5462 slots) master
+   1 additional replica(s)
+S: e46feec2e68aa297c22cbb90739a8334219b6f4c 10.2.2.17:6379
+   slots: (0 slots) slave
+   replicates 71635c5b9476582d7a0ba851785ce8b25c09b7a0
+M: 526011f63b5196fcdefda225f031f05e1ae25de3 10.2.2.16:6379
+   slots:[10923-16383] (5461 slots) master
+   1 additional replica(s)
+S: e66ccd638f128e870109bef35ea851322a7d9593 10.2.0.33:6379
+   slots: (0 slots) slave
+   replicates 526011f63b5196fcdefda225f031f05e1ae25de3
+S: 8d0df4ad828cfb85a7d424fd59d0a21edaf3c476 10.2.1.16:6379
+   slots: (0 slots) slave
+   replicates 6ceaf0ac8ea5f0db95a9c0ad73ee27f9eb9f87aa
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check for open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All 16384 slots covered.
+</code></pre>
+<h4 id="验证集群部署">验证集群部署</h4>
+<p>检查群集详细信息以及每个成员的角色。</p>
+<pre><code class="language-bash">$ kubectl exec -it redis-cluster-0 -- redis-cli cluster info
+
+cluster_state:ok
+cluster_slots_assigned:16384
+cluster_slots_ok:16384
+cluster_slots_pfail:0
+cluster_slots_fail:0
+cluster_known_nodes:6
+cluster_size:3
+cluster_current_epoch:6
+cluster_my_epoch:1
+cluster_stats_messages_ping_sent:69
+cluster_stats_messages_pong_sent:79
+cluster_stats_messages_sent:148
+cluster_stats_messages_ping_received:74
+cluster_stats_messages_pong_received:69
+cluster_stats_messages_meet_received:5
+cluster_stats_messages_received:148
+$ for x in $(seq 0 5); do echo &quot;redis-cluster-$x&quot;; kubectl exec redis-cluster-$x -- redis-cli role; echo; done
+
+redis-cluster-0
+master
+112
+10.2.1.16
+6379
+112
+
+redis-cluster-1
+master
+112
+10.2.2.17
+6379
+112
+
+redis-cluster-2
+master
+112
+10.2.0.33
+6379
+112
+
+redis-cluster-3
+slave
+10.2.2.16
+6379
+connected
+112
+
+redis-cluster-4
+slave
+10.2.0.32
+6379
+connected
+112
+
+redis-cluster-5
+slave
+10.2.1.15
+6379
+connected
+112
+</code></pre>
+<h3 id="测试redis集群">测试Redis集群</h3>
+<p>我们想使用集群，然后模拟节点的故障。对于前一项任务，我们将部署一个简单的Python应用程序，而对于后者，我们将删除一个节点并观察集群行为。</p>
+<h4 id="部署点击计数器应用">部署点击计数器应用</h4>
+<p>我们将一个简单的应用程序部署到集群中，并在其前面放置一个负载平衡器。此应用程序的目的是在将计数器值作为HTTP响应返回之前，增加计数器并将其存储在Redis集群中。</p>
+<pre><code>$ kubectl apply -f app-deployment-service.yml
+service/hit-counter-lb created
+deployment.apps/hit-counter-app created
+</code></pre>
+<p>在此过程中，如果我们继续加载页面，计数器将继续增加，并且在删除<code>Pod</code>之后，我们看到没有数据丢失。</p>
+<pre><code class="language-bash">$  curl `kubectl get svc hit-counter-lb -o json|jq -r .spec.clusterIP`
+I have been hit 20 times since deployment.
+$  curl `kubectl get svc hit-counter-lb -o json|jq -r .spec.clusterIP`
+I have been hit 21 times since deployment.
+$ curl `kubectl get svc hit-counter-lb -o json|jq -r .spec.clusterIP`
+I have been hit 22 times since deployment.
+$ kubectl delete pods redis-cluster-0
+pod &quot;redis-cluster-0&quot; deleted
+$ kubectl delete pods redis-cluster-1
+pod &quot;redis-cluster-1&quot; deleted
+$  curl `kubectl get svc hit-counter-lb -o json|jq -r .spec.clusterIP`
+I have been hit 23 times since deployment.
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/M-uFfBC55/">
+              <span class="post-title">
+                 Docker  安装 oracle-xe-11g&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

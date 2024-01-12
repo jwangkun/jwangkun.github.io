@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>instantbox：获得开箱即用的临时 Linux 环境 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="instantbox：获得开箱即用的临时 Linux 环境 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="instantbox：获得开箱即用的临时 Linux 环境"/>
+    <meta property="og:url" content="https://jwangkun.github.io/6snDF3Gkl/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/k5G8Pdh2_/" class="tag">instantbox</a>
+            
+        </span>
+            <h1>instantbox：获得开箱即用的临时 Linux 环境</h1>
+            <span class="meta">
+            	Posted on
+              2021-02-09，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <figure data-type="image" tabindex="1"><a href="https://lishuma.com/wp-content/uploads/2019/12/53613565-6237a500-3ba4-11e9-9e39-8ea48cee73ee.png"><img src="https://lishuma.com/wp-content/uploads/2019/12/53613565-6237a500-3ba4-11e9-9e39-8ea48cee73ee.png" alt="img" loading="lazy"></a></figure>
+<p>instantbox 是一套用于快速创建临时 Linux 系统环境的程序，基于 Docker，可以实现在网页上快速体验 Ubuntu、CentOS、Debian、Alpine 等常见系统 ，快速创建一个开箱即用的 Linux 系统，可以调整配置、使用时长，不用了可以直接删掉，方便临时测试等需求。</p>
+<p>因为程序本身依赖 Docker，因此安装此程序的话，需要先安装 Docker。</p>
+<p>在 CentOS 7 下，可以依次运行以下命令进行 Docker 安装：</p>
+<pre><code>#安装依赖软件包
+yum install -y yum-utils device-mapper-persistent-data lvm2
+#设置 Docker 的 yum 源
+yum-config-manager --add-repo http://download.docker.com/linux/centos/docker-ce.repo 
+#安装 Docker 社区版
+yum -y install docker-ce
+#设定开机自启并启动 Docker 服务
+systemctl enable docker &amp;&amp; systemctl start docker
+#查看程序版本，检测是否安装成功
+docker -version 
+</code></pre>
+<hr>
+<p>项目中文地址为：https://github.com/instantbox/instantbox/blob/master/docs/README-zh_cn.md</p>
+<p>程序安装非常简单，就三行命令：</p>
+<pre><code>mkdir instantbox &amp;&amp; cd $_
+
+bash &lt;(curl -sSL https://raw.githubusercontent.com/instantbox/instantbox/master/init.sh)
+
+docker-compose up -d
+</code></pre>
+<p>如果访问不了，可以把raw.githubusercontent.com换成raw.staticdn.net<br>
+中途会要求你设定对外端口，按自己需求设定一个，然后记得防火墙放行此端口即可通过浏览器访问。</p>
+<p>网页本身支持英语和中文，右上角切换，选择一个所需的系统版本，即可在线体验。</p>
+<figure data-type="image" tabindex="2"><a href="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-instantbox.png"><img src="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-instantbox.png" alt="img" loading="lazy"></a></figure>
+<p>比如我这里选个 Ubuntu 19.04，设定 1g 内存，使用时长设定最大 24 小时，端口注意设定的是内部端口，程序本身会随机选用一个物理机端口对外进行映射。</p>
+<figure data-type="image" tabindex="3"><a href="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-instantbox-1.png"><img src="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-instantbox-1.png" alt="img" loading="lazy"></a></figure>
+<figure data-type="image" tabindex="4"><a href="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-instantbox-2.png"><img src="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-instantbox-2.png" alt="img" loading="lazy"></a></figure>
+<p>创建完成的后可以看到系统信息以及随机生成的外部端口，容器里创建的应用想要访问的话，就需要用物理机 IP+这个外部端口。</p>
+<p>点击打开的话，就可以直接在线操作命令行了：</p>
+<figure data-type="image" tabindex="5"><a href="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-root-instantbox_managed_7jti42zafdexugy1-home-bash-instantbox_managed_7jti42zafdexugy1.png"><img src="https://lishuma.com/wp-content/uploads/2019/12/Screenshot_2019-12-24-root-instantbox_managed_7jti42zafdexugy1-home-bash-instantbox_managed_7jti42zafdexugy1.png" alt="img" loading="lazy"></a></figure>
+<p>实际这个程序就是把 docker 的容器创建流程全自动化了，选择系统后就自动拉取对应版本镜像，创建对应容器并以网页端的形式展现容器的内部操作。所以第一次创建某个版本的系统会慢一些，因为要下载镜像文件，第二次就会是瞬间创建完成了。</p>
+<p>查看 docer 容器和镜像都可以看到对应的：</p>
+<figure data-type="image" tabindex="6"><a href="https://lishuma.com/wp-content/uploads/2019/12/12240922.jpg"><img src="https://lishuma.com/wp-content/uploads/2019/12/12240922.jpg" alt="img" loading="lazy"></a></figure>
+<p>总的来说如果有需求的话，这套在线体验各种 Linux 版本的程序还是比较实用的，搭建也挺简单。不过因为基于 Docker，所以一些缺点也是不可避免的，诸如端口设定只能一个，小部分涉及系统的指令无法执行等，按需选用吧。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/HSyn5iRMZ/">
+              <span class="post-title">
+                深入kubernetes调度之NodeSelector&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot Controller接收参数的几种方式 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot Controller接收参数的几种方式 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot Controller接收参数的几种方式"/>
+    <meta property="og:url" content="https://jwangkun.github.io/OJLvAYA8a/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1>SpringBoot Controller接收参数的几种方式</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，2 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <figure data-type="image" tabindex="1"><img src="https://sponsor.segmentfault.com/lg.php?bannerid=0&amp;campaignid=0&amp;zoneid=25&amp;loc=https%3A%2F%2Fsegmentfault.com%2Fa%2F1190000025188239&amp;referer=https%3A%2F%2Fsegmentfault.com%2Fa%2F1190000025188239&amp;cb=d8a5bcf845" alt="img" loading="lazy"></figure>
+<p>Controller接收参数的常用方式总体可以分为三类。第一类是Get请求通过拼接url进行传递，第二类是Post请求通过请求体进行传递，第三类是通过请求头部进行参数传递。</p>
+<h3 id="1-pathvariable接收参数">1 @PathVariable接收参数</h3>
+<p>请求方式：localhost:7001/param/123</p>
+<p>请求示例：</p>
+<figure data-type="image" tabindex="2"><img src="https://segmentfault.com/img/remote/1460000025188242" alt="img" loading="lazy"></figure>
+<p>代码示例：</p>
+<pre><code>@GetMapping(&quot;{id}&quot;)
+public String getPathVariable(@PathVariable String id){
+    return &quot;id=&quot;+id;
+}
+</code></pre>
+<h3 id="2-requestparam接收参数">2 @RequestParam接收参数</h3>
+<p>使用这个注解需要注意两个点，一是加了这个参数后则请求中必须传递这个参数，二是@RequestParam这个注解可以指定名字，请求参数必须和指定的这个名字相同，如果不指定，则默认为具体参数名。</p>
+<p>请求方式：localhost:7001/param/getParam?myId=18</p>
+<p>请求示例：</p>
+<figure data-type="image" tabindex="3"><img src="https://segmentfault.com/img/remote/1460000025188243" alt="img" loading="lazy"></figure>
+<p>代码示例：</p>
+<pre><code>@GetMapping(&quot;getParam&quot;)
+public String getRequestParam(@RequestParam(&quot;myId&quot;) String id){
+    return &quot;id=&quot;+id;
+}
+</code></pre>
+<h3 id="3-无注解传参">3 无注解传参</h3>
+<p>这种方式和2对比，最大的区别就是这个参数不是必传的，请求路径上可以不传递。</p>
+<p>请求方式：localhost:7001/param/getString?id=18</p>
+<p>请求示例：</p>
+<figure data-type="image" tabindex="4"><img src="https://segmentfault.com/img/remote/1460000025188245" alt="img" loading="lazy"></figure>
+<p>代码示例：</p>
+<pre><code>@GetMapping(&quot;getString&quot;)
+public String getString(String id){
+    return &quot;id=&quot;+id;
+}
+</code></pre>
+<h3 id="4-httpservletrequest接收参数">4 HttpServletRequest接收参数</h3>
+<p>请求方式：localhost:7001/param/getRequest?id=18</p>
+<p>请求示例：</p>
+<figure data-type="image" tabindex="5"><img src="https://segmentfault.com/img/remote/1460000025188244" alt="img" loading="lazy"></figure>
+<p>代码示例：</p>
+<pre><code>@GetMapping(&quot;getRequest&quot;)
+public String getRequest(HttpServletRequest request){
+    String id = request.getParameter(&quot;id&quot;);
+    return &quot;id=&quot;+id;
+}
+</code></pre>
+<h3 id="5-requestbody接收请求体参数">5 @RequestBody接收请求体参数</h3>
+<p>这种方式一般用来传递实体对象，加了这个注解后，参数也是必传的。</p>
+<p>请求方式：{&quot;id&quot;:18}</p>
+<p>请求示例：</p>
+<figure data-type="image" tabindex="6"><img src="https://segmentfault.com/img/remote/1460000025188247" alt="img" loading="lazy"></figure>
+<p>代码示例：</p>
+<pre><code>@PostMapping(&quot;getBody&quot;)
+public String getBody(@RequestBody String id){
+    return &quot;id=&quot;+id;
+}
+</code></pre>
+<h3 id="6-requestheader接收请求头参数">6 @RequestHeader接收请求头参数</h3>
+<p>请求示例：</p>
+<figure data-type="image" tabindex="7"><img src="https://segmentfault.com/img/remote/1460000025188246" alt="img" loading="lazy"></figure>
+<p>代码示例：</p>
+<pre><code>@PostMapping(&quot;getHeader&quot;)
+public String getHeader(@RequestHeader String id){
+    return &quot;id=&quot;+id;
+}
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/rj_EpFpeo/">
+              <span class="post-title">
+                docsify部署及配置&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

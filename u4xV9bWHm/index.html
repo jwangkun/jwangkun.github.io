@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>MyBatis Plus 讲解 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="MyBatis Plus 讲解 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="MyBatis Plus 讲解"/>
+    <meta property="og:url" content="https://jwangkun.github.io/u4xV9bWHm/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/BJ0pctAsa/" class="tag">MyBatis Plus</a>
+            
+        </span>
+            <h1>MyBatis Plus 讲解</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-06，26 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>如果你每天还在重复写<strong>CRUD</strong>的<strong>SQL</strong>，如果你对这些<strong>SQL</strong>已经不耐烦了，那么你何不花费一些时间来阅读这篇文章，然后对已有的老项目进行改造，必有收获！</p>
+<h2 id="一-mp-是什么">一、MP 是什么</h2>
+<p><strong>MP</strong>全称<strong>Mybatis-Plus</strong>，套用官方的解释便是成为 MyBatis 最好的搭档,简称<strong>基友</strong>。它是在<strong>MyBatis</strong>的基础上只做增强不做改变，为简化开发、提高效率而生。</p>
+<h3 id="1-三大特性">1. 三大特性</h3>
+<h4 id="1润物无声">1）润物无声</h4>
+<p>只做增强不做改变，引入它不会对现有工程产生影响，如丝般顺滑。</p>
+<h4 id="2效率至上">2）效率至上</h4>
+<p>只需简单配置，即可快速进行单表 CRUD 操作，从而节省大量时间。</p>
+<h4 id="3丰富功能">3）丰富功能</h4>
+<p>代码生成、物理分页、性能分析等功能一应俱全。</p>
+<h3 id="2-支持数据库">2. 支持数据库</h3>
+<ul>
+<li><strong>mysql</strong>、<strong>mariadb</strong>、<strong>oracle</strong>、<strong>db2</strong>、<strong>h2</strong>、<strong>hsql</strong>、<strong>sqlite</strong>、<strong>postgresql</strong>、<strong>sqlserver</strong>、<strong>presto</strong>、<strong>Gauss</strong>、<strong>Firebird</strong></li>
+<li><strong>Phoenix</strong>、<strong>clickhouse</strong>、<strong>Sybase ASE</strong>、<strong>OceanBase</strong>、达梦数据库 、虚谷数据库 、人大金仓数据库 、南大通用数据库</li>
+</ul>
+<h3 id="3-框架结构">3. 框架结构</h3>
+<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/P7WuIzkp9iaVmeo0oMwmYlpby81N5kEubYKiaoiaRcrOAyXSxkSyiaTWEUJ2icYHHh1S4t2nd4Nm1HnslrBcC9iaqeHQ/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<p>实话说，以上这些内容只要你打开官网也能看到，那么我们接下来就先来实际操作一番！</p>
+<figure data-type="image" tabindex="2"><img src="https://mmbiz.qpic.cn/mmbiz_gif/P7WuIzkp9iaVmeo0oMwmYlpby81N5kEub38XIvzm2p1PE2DBIu6ialUdZibDLBXO4MDTUoaGETILdlEVzfMdMKqLw/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="图片" loading="lazy"></figure>
+<h2 id="二-mp实战">二、MP实战</h2>
+<h3 id="1-手摸手式项目练习">1. 手摸手式项目练习</h3>
+<h4 id="1数据库及表准备">1）数据库及表准备</h4>
+<p><strong>sql 语句：</strong></p>
+<pre><code>use test;
+CREATE TABLE `student`  (
+  `id` int(0) NOT NULL AUTO_INCREMENT,
+  `dept_id` int(0) NULL DEFAULT NULL,
+  `name` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
+  `remark` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;
+-- ----------------------------
+-- Records of student
+-- ----------------------------
+INSERT INTO `student` VALUES (1, 1, '小菜', '关注小菜不迷路！');
+INSERT INTO `student` VALUES (2, 2, '小明', '好好学习，天天向上！');
+</code></pre>
+<h4 id="2pom-依赖">2）pom 依赖</h4>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!--lombok--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+    &lt;artifactId&gt;lombok&lt;/artifactId&gt;
+    &lt;version&gt;1.16.16&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!--MP插件--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.baomidou&lt;/groupId&gt;
+    &lt;artifactId&gt;mybatis-plus-boot-starter&lt;/artifactId&gt;
+    &lt;version&gt;3.2.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!--Mysql--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;mysql&lt;/groupId&gt;
+    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+    &lt;version&gt;8.0.21&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- 连接池 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+    &lt;artifactId&gt;druid&lt;/artifactId&gt;
+    &lt;version&gt;1.2.1&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!--JUNIT--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;junit&lt;/groupId&gt;
+    &lt;artifactId&gt;junit&lt;/artifactId&gt;
+    &lt;version&gt;4.13.1&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h4 id="3配置文件">3）配置文件</h4>
+<pre><code>spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/test
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+</code></pre>
+<h4 id="4实体类">4）实体类</h4>
+<pre><code>@Data
+@Builder
+@TableName(&quot;student&quot;)
+public class User {
+
+    @TableId(type = IdType.AUTO)
+    private Integer id;
+
+    private Integer deptId;
+
+    private String name;
+
+    private String remark;
+}
+</code></pre>
+<h4 id="5mapper">5）Mapper</h4>
+<pre><code>public interface UserMapper extends BaseMapper&lt;User&gt; {}
+</code></pre>
+<h4 id="6测试类">6）测试类</h4>
+<pre><code>@RunWith(SpringRunner.class)
+@SpringBootTest
+public class MapperTest {
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Test
+    public void getAll() {
+        List&lt;User&gt; users = userMapper.selectList(null);
+        users.forEach(System.out::println);
+    }
+}
+/** OUTPUT:
+User(id=1, deptId=1, name=小菜, remark=关注小菜不迷路！)
+User(id=2, deptId=1, name=小明, remark=好好学习，天天向上！)
+**/
+</code></pre>
+<p><strong>小菜结：</strong></p>
+<p>在以上的结果，我们可以看到已经打印出了数据库中的全部数据（两条）。而并没有看到平时我们需要写的<strong>mapper.xml</strong>文件，只是用到了<strong>usermapper</strong>中的<strong>selectList()<strong>方法，而</strong>UserMapper</strong>继承了<strong>BaseMapper</strong>这个接口，这个接口便是<strong>MybatisPlus</strong>提供给我们的，我们再来看下这个接口给我们提供了哪些方法。</p>
+<h3 id="2-crud-基操">2.  CRUD 基操</h3>
+<h4 id="1insert">1）insert</h4>
+<pre><code>@Test
+public void insert() {
+    //这里使用了 lombok 中的建造者模式构建对象
+    User user = User.builder().deptId(1).name(&quot;小华&quot;).remark(&quot;小华爱学习&quot;).build();
+    int insertFlag = userMapper.insert(user);
+    log.info(&quot;插入影响行数,{} | 小华的ID: {}&quot;, insertFlag, user.getId());
+}
+/** OUTPUT:
+插入影响行数,1 | 小华的ID: 8
+**/
+</code></pre>
+<p>可以看到我们不仅插入了数据，而且还获取到了插入数据的<strong>ID</strong>，但是值得注意的是这里的<strong>ID</strong>虽然是自增的，但并非是<strong>MP</strong>默认的<strong>ID生成策略</strong>，而是我们在实体类中指定的：</p>
+<figure data-type="image" tabindex="3"><img src="https://mmbiz.qpic.cn/mmbiz_png/P7WuIzkp9iaVmeo0oMwmYlpby81N5kEubCMbMiaMibjg0KvZDxqgzrNZOpaD5BysodYWFYJgw5iaDlnMbzwKUnRzJg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<p>在<strong>MP</strong>中支持的主键生成策略有以下几种：</p>
+<figure data-type="image" tabindex="4"><img src="https://mmbiz.qpic.cn/mmbiz_png/P7WuIzkp9iaVmeo0oMwmYlpby81N5kEubqOib1OVT07XU5k05yL04ich1ibVG0zCkRT6Hc6vt8YAmmXePr20E3KRiaQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<p>我们既然已经看到了**@TableId<strong>这个注解，那我们再来关注一个常用注解</strong>@TableField**</p>
+<p>从注解名上我们就可以看出，<strong>@TableId</strong>是用来标记主键<strong>ID</strong>的，而**@TableField**是用来标记其他字段的。</p>
+<figure data-type="image" tabindex="5"><img src="https://mmbiz.qpic.cn/mmbiz_png/P7WuIzkp9iaVmeo0oMwmYlpby81N5kEubSn7QMIzMq50xG37XcPJ0UBY0vGBJhTnX1svy6bhSjY2pRklCXouPPA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<p>可以看得出来这个注解中存在的值还是比较多的，下面介绍几个常用的值：</p>
+<ul>
+<li><strong>value</strong></li>
+</ul>
+<p>用于解决字段名不一致问题和驼峰命名，比如实体类中属性名为<strong>remark</strong>，但是表中的字段名为<strong>describe</strong>，这个时候就可以使用<code>@TableField(value=&quot;describe&quot;)</code>来进行转换。驼峰转换如果在全局中有配置驼峰命名，这个地方可不写。</p>
+<ul>
+<li><strong>exist</strong></li>
+</ul>
+<p>用于在数据表中不存在的字段，我们可以使用<code>@TableField(exist = false)</code>来进行标记</p>
+<ul>
+<li><strong>condition</strong></li>
+</ul>
+<p>用在预处理<strong>WHERE</strong>实体条件自定义运算规则，比如我配置了<code>@TableField(condition = SqlCondition.LIKE)</code>，输出<strong>SQL</strong>为：<code>select 表 where name LIKE CONCAT('%',值,'%')</code>，其中<strong>SqlCondition</strong>值如下：</p>
+<figure data-type="image" tabindex="6"><img src="https://mmbiz.qpic.cn/mmbiz_png/P7WuIzkp9iaVmeo0oMwmYlpby81N5kEubTFGcppws5AJuUHszFjePpZ6LJgibOG3MN2OkUI2qJDb7iap7G613D9NQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<ul>
+<li><strong>update</strong></li>
+</ul>
+<p>用在预处理<strong>set</strong>字段自定义注入，比如我配置了<code>@TableField(update = &quot;%s+1&quot;)</code>，其中**%s<strong>会填充字段，输出</strong>SQL**为：<code>update 表名 set 字段 = 字段+1 where 条件</code></p>
+<ul>
+<li><strong>select</strong></li>
+</ul>
+<p>用于是否查询时约束，如果我们有个字段<strong>remark</strong>是<strong>text</strong>类型的，查询的时候不想查询该字段，那么就可以使用<code>@TableField(select = false)</code>来约束查询的时候不查询该字段</p>
+<h4 id="2update">2）update</h4>
+<p><strong>MybatisPlus</strong>的更新操作存在两种：</p>
+<pre><code>int updateById(Param(&quot;et&quot;) T entity);
+
+int update(@Param(&quot;et&quot;) T entity, @Param(&quot;ew&quot;) Wrapper&lt;T&gt; updateWrapper);
+</code></pre>
+<h5 id="根据-id-更新">根据 ID 更新</h5>
+<pre><code>@Test
+public void update() {
+    User user = User.builder().id(3).name(&quot;小华&quot;).remark(&quot;小华爱玩游戏&quot;).build();
+    userMapper.updateById(user);
+}
+/** 更新结果:
+User(id=3, deptId=1, name=小华, remark=小华爱玩游戏)
+**/
+</code></pre>
+<h5 id="根据条件更新">根据条件更新</h5>
+<pre><code>@Test
+public void update() {
+    UpdateWrapper&lt;User&gt; updateWrapper = new UpdateWrapper&lt;&gt;();
+    updateWrapper.eq(&quot;name&quot;,&quot;小华&quot;).set(&quot;remark&quot;,&quot;小华爱下棋&quot;);
+    userMapper.update(null, updateWrapper);
+}
+/** 更新结果:
+User(id=3, deptId=1, name=小华, remark=小华爱下棋)
+**/
+</code></pre>
+<p>我们也可以将要更新的条件放进<strong>user 对象</strong>里面：</p>
+<pre><code>@Test
+public void update() {
+    UpdateWrapper&lt;User&gt; updateWrapper = new UpdateWrapper&lt;&gt;();
+    updateWrapper.eq(&quot;name&quot;,&quot;小华&quot;);
+    User user = User.builder().remark(&quot;小华爱游泳&quot;).build();
+    userMapper.update(user, updateWrapper);
+}
+/** 更新结果:
+User(id=3, deptId=1, name=小华, remark=小华爱游泳)
+**/
+</code></pre>
+<h4 id="3delete">3）delete</h4>
+<p>在<strong>MybatisPlus</strong>中删除的方式相对于更新多，总共有四种：</p>
+<pre><code>int deleteById(Serializable id);
+
+int deleteByMap(@Param(&quot;cm&quot;) Map&lt;String, Object&gt; columnMap);
+
+int delete(@Param(&quot;ew&quot;) Wrapper&lt;T&gt; wrapper);
+
+int deleteBatchIds(@Param(&quot;coll&quot;) Collection&lt;? extends Serializable&gt; idList);
+</code></pre>
+<h5 id="根据-id-删除">根据 ID 删除</h5>
+<pre><code>@Test
+public void deleteById() {
+    userMapper.deleteById(3);
+}
+/** SQL语句：
+DELETE FROM student WHERE id = 3;
+**/
+</code></pre>
+<h5 id="根据-map-删除">根据 Map 删除</h5>
+<pre><code>@Test
+public void deleteByMap() {
+    HashMap&lt;String, Object&gt; columnMap = new HashMap&lt;&gt;();
+    columnMap.put(&quot;name&quot;,&quot;小华&quot;);
+    columnMap.put(&quot;remark&quot;,&quot;小华爱游泳&quot;);
+    userMapper.deleteByMap(columnMap);
+}
+/** SQL语句：
+DELETE FROM student WHRE name = '小华' AND remark = '小华爱游泳';
+**/
+</code></pre>
+<h5 id="根据-wrapper-删除">根据 Wrapper 删除</h5>
+<pre><code>@Test
+public void delete() {
+    UpdateWrapper&lt;User&gt; wrapper = new UpdateWrapper&lt;&gt;();
+    wrapper.eq(&quot;remark&quot;,&quot;小华爱下棋&quot;);
+    userMapper.delete(wrapper);
+}
+/** SQL语句：
+DELETE FROM student WHRE remark = '小华爱下棋';
+**/
+</code></pre>
+<p>根据<strong>Wrapper</strong>删除还有另外一种方式，直接将实体类放入<strong>Wrapper</strong>中包装：</p>
+<pre><code>@Test
+public void delete() {
+    User user = User.builder().remark(&quot;小华爱下棋&quot;).build();
+    UpdateWrapper&lt;User&gt; wrapper = new UpdateWrapper&lt;&gt;(user);
+    userMapper.delete(wrapper);
+}
+/** SQL语句：
+DELETE FROM student WHRE remark = '小华爱下棋';
+**/
+</code></pre>
+<h5 id="根据-id-批量删除">根据 ID 批量删除</h5>
+<pre><code>@Test
+public void deleteBatchIds() {
+    List&lt;Integer&gt; idList = new ArrayList&lt;&gt;();
+    idList.add(4);
+    idList.add(7);
+    userMapper.deleteBatchIds(idList);
+}
+/** SQL语句：
+DELETE FROM student WHERE id In (4,7)
+**/
+</code></pre>
+<h4 id="4select">4）select</h4>
+<p>查询操作在我们开发中是最经常用到的，也是重中之重。<strong>MybatisPlus</strong>中支持查询的方法也比较多，如下：</p>
+<pre><code>T selectById(Serializable id);
+
+List&lt;T&gt; selectBatchIds(@Param(&quot;coll&quot;) Collection&lt;? extends Serializable&gt; idList);
+
+List&lt;T&gt; selectByMap(@Param(&quot;cm&quot;) Map&lt;String, Object&gt; columnMap);
+
+T selectOne(@Param(&quot;ew&quot;) Wrapper&lt;T&gt; queryWrapper);
+
+Integer selectCount(@Param(&quot;ew&quot;) Wrapper&lt;T&gt; queryWrapper);
+
+List&lt;T&gt; selectList(@Param(&quot;ew&quot;) Wrapper&lt;T&gt; queryWrapper);
+
+List&lt;Map&lt;String, Object&gt;&gt; selectMaps(@Param(&quot;ew&quot;) Wrapper&lt;T&gt; queryWrapper);
+
+List&lt;Object&gt; selectObjs(@aram(&quot;ew&quot;) Wrapper&lt;T&gt; queryWrapper);
+
+IPage&lt;T&gt; selectPage(IPage&lt;T&gt; page, @Param(&quot;ew&quot;) Wrapper&lt;T&gt; queryWrapper);
+
+IPage&lt;Map&lt;String, Object&gt;&gt; selectMapsPage(IPage&lt;T&gt; page, @Param(&quot;ew&quot;) Wrapper&lt;T&gt; queryWrapper);
+</code></pre>
+<p>可以看到总共有<strong>10</strong>个方法，我们接下来一个一个测试</p>
+<h5 id="查询所有">查询所有</h5>
+<pre><code>@Test
+public void selectList() {
+    List&lt;User&gt; users = userMapper.selectList(null);
+    users.forEach(System.out::println);
+}
+/** 
+ OUTPUT:
+User(id=1, deptId=1, name=小菜, remark=关注小菜不迷路！)
+User(id=2, deptId=1, name=小明, remark=好好学习，天天向上！)
+ SQL语句:
+SELECT id, dept_id, name, remark FROM student;
+**/
+</code></pre>
+<h5 id="查询数量">查询数量</h5>
+<pre><code>@Test
+public void selectCount() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    queryWrapper.like(&quot;name&quot;,&quot;小&quot;);
+    System.out.println(userMapper.selectCount(queryWrapper));
+}
+/** 
+ OUTPUT:
+2
+ SQL语句:
+SELECT COUNT( 1 ) FROM student WHERE (name LIKE '%小%');
+**/
+</code></pre>
+<h5 id="根据-id-查询">根据 ID 查询</h5>
+<pre><code>@Test
+public void selectById() {
+    User user = userMapper.selectById(1);
+    System.out.println(user);
+}
+/** 
+ OUTPUT:
+User(id=1, deptId=1, name=小菜, remark=关注小菜不迷路！)
+ SQL语句:
+SELECT id, dept_id, name, remark FROM student WHERE ID = 1;
+**/
+</code></pre>
+<h5 id="根据-id-批量查询">根据 ID 批量查询</h5>
+<pre><code>@Test
+public void selectBatchIds() {
+    List&lt;User&gt; users = userMapper.selectBatchIds(Arrays.asList(1, 2));
+    users.forEach(System.out::println);
+}
+/** 
+ OUTPUT:
+User(id=1, deptId=1, name=小菜, remark=关注小菜不迷路！)
+User(id=2, deptId=1, name=小明, remark=好好学习，天天向上！)
+ SQL语句:
+SELECT id, dept_id, name, remark FROM student WHERE ID IN (1, 2);
+**/
+</code></pre>
+<h5 id="根据条件查询单条">根据条件查询单条</h5>
+<pre><code>@Test
+public void selectOne() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    queryWrapper.eq(&quot;name&quot;,&quot;小菜&quot;);
+    User user = userMapper.selectOne(queryWrapper);
+    System.out.println(user);
+}
+/**
+ OUTPUT:
+User(id=1, deptId=1, name=小菜, remark=关注小菜不迷路！)
+ SQL语句:
+ SELECT id, name, dept_id, remark FROM student WHERE (name = '小菜');
+**/
+</code></pre>
+<h5 id="根据条件查询多条">根据条件查询多条</h5>
+<p>通过<strong>map</strong>传递参数，不是通过<strong>LIKE</strong>查询，而是通过**=**查询</p>
+<pre><code>@Test
+public void selectByMap() {
+    HashMap&lt;String, Object&gt; columnMap = new HashMap&lt;&gt;();
+    columnMap.put(&quot;name&quot;,&quot;小&quot;);
+    List&lt;User&gt; users = userMapper.selectByMap(columnMap);
+    users.forEach(System.out::println);
+}
+/**
+ OUTPUT:
+null
+ SQL语句:
+SELECT id, name, dept_id, remark FROM student WHERE name = '小';
+**/
+</code></pre>
+<p>如果我们没有新建实体类进行结果封装，我们还可以用<strong>Map</strong>来接收结果集：</p>
+<pre><code>@Test
+public void selectMaps() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    queryWrapper.like(&quot;name&quot;,&quot;小&quot;);
+    List&lt;Map&lt;String, Object&gt;&gt; maps = userMapper.selectMaps(queryWrapper);
+    maps.forEach(System.out::println);
+}
+/**
+ OUTPUT:
+{name=小菜, remark=关注小菜不迷路！, id=1, dept_id=1}
+{name=小明, remark=好好学习，天天向上！, id=2, dept_id=1}
+ SQL语句：
+SELECT id, name, dept_id, remark FROM student WHERE (name LIKE '%小%');
+**/
+</code></pre>
+<p>也可以用<strong>Object</strong>对象来接收结果集：</p>
+<pre><code>@Test
+public void selectObjs() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    queryWrapper.like(&quot;name&quot;, &quot;小&quot;);
+    List&lt;Object&gt; objects = userMapper.selectObjs(queryWrapper);
+}
+/**
+ OUTPUT:
+{name=小菜, remark=关注小菜不迷路！, id=1, dept_id=1}
+{name=小明, remark=好好学习，天天向上！, id=2, dept_id=1}
+ SQL语句：
+SELECT id, name, dept_id, remark FROM student WHERE (name LIKE '%小%');
+**/
+</code></pre>
+<h5 id="分页查询">分页查询</h5>
+<pre><code>@Test
+public void selectPage() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    queryWrapper.like(&quot;name&quot;, &quot;小&quot;);
+    Page&lt;User&gt; page = new Page&lt;&gt;(1, 1);
+    IPage&lt;User&gt; userIPage = userMapper.selectPage(page, queryWrapper);
+    System.out.println(&quot;数据总数:&quot; + userIPage.getTotal());
+    System.out.println(&quot;总页数:&quot; + userIPage.getPages());
+    System.out.println(&quot;当前页:&quot; + userIPage.getCurrent());
+    System.out.println(&quot;页大小:&quot; + userIPage.getSize());
+    userIPage.getRecords().forEach(System.out::println);
+}
+/**
+ OUTPUT:
+数据总数:2
+总页数:2
+当前页:1
+页大小:1
+User(id=1, deptId=1, name=小菜, remark=关注小菜不迷路！)
+ SQL语句：
+ SELECT id, name, dept_id, remark
+ FROM student
+ WHERE (name LIKE '%小%')
+ LIMIT 0,1;
+**/
+</code></pre>
+<h3 id="3-条件构造器">3. 条件构造器</h3>
+<figure data-type="image" tabindex="7"><img src="https://mmbiz.qpic.cn/mmbiz_png/P7WuIzkp9iaVmeo0oMwmYlpby81N5kEubEaiauzrRic2EoozxFWf3ZaiavcI4nK5mPsSNkxsFPHWoVxPqUCUUMsuXA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<p>在<strong>CRUD</strong>的基本操作中，我们想要通过条件查询都是通过<strong>Wrapper</strong>类进行封装的，上面只是简单的用到<strong>eq</strong>和<strong>like</strong>操作。事实上这个类十分强大，我们在下面会详细进行介绍。</p>
+<h4 id="1alleq">1）allEq</h4>
+<p>全部<strong>eq</strong>或个别<strong>isNull</strong></p>
+<pre><code>allEq(Map&lt;R, V&gt; params)
+allEq(Map&lt;R, V&gt; params, boolean null2IsNull)
+allEq(boolean condition, Map&lt;R, V&gt; params, boolean null2IsNull)
+    
+allEq(BiPredicate&lt;R, V&gt; filter, Map&lt;R, V&gt; params)
+allEq(BiPredicate&lt;R, V&gt; filter, Map&lt;R, V&gt; params, boolean null2IsNull)
+allEq(boolean condition, BiPredicate&lt;R, V&gt; filter, Map&lt;R, V&gt; params, boolean null2IsNull) 
+</code></pre>
+<p><strong>参数说明：</strong></p>
+<blockquote>
+<p>**param：**key 为数据库字段名，value 为字段值</p>
+<p><strong>nullsIsNull：<strong>为 true 则在 map 的 value 为 null 时调用</strong>isNull</strong>方法，为 false时则忽略 value 为 null 时不调用<strong>isNull</strong>方法</p>
+<p>**filter：**过滤函数，判断是否允许字段传入比对条件中</p>
+</blockquote>
+<p><strong>使用示例：</strong></p>
+<ul>
+<li><code>allEq(Map&lt;R, V&gt; params)</code></li>
+</ul>
+<pre><code>@Test
+public void testAllEq() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    Map&lt;String,Object&gt; params = new HashMap&lt;&gt;();
+    params.put(&quot;name&quot;,&quot;小菜&quot;);
+    params.put(&quot;dept_id&quot;,1);
+    params.put(&quot;remark&quot;,null);
+    queryWrapper.allEq(params); //会调用 isNull 方法
+    userMapper.selectList(queryWrapper);
+}
+/** 
+ 结果:
+｛｝
+ SQL语句:
+ SELECT id,name,dept_id,remark
+ FROM student
+ WHERE (name = '小菜' AND dept_id = 1 AND remark IS NULL);
+ **/
+</code></pre>
+<ul>
+<li><code>allEq(Map&lt;R, V&gt; params, boolean null2IsNull)</code></li>
+</ul>
+<pre><code>@Test
+public void testAllEq() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    Map&lt;String,Object&gt; params = new HashMap&lt;&gt;();
+    params.put(&quot;name&quot;,&quot;小菜&quot;);
+    params.put(&quot;dept_id&quot;,1);
+    params.put(&quot;remark&quot;,null);
+    queryWrapper.allEq(params, false); //不会调用 isNull 方法
+    userMapper.selectList(queryWrapper);
+}
+/** 
+ 结果:
+User(id=1, deptId=1, name=小菜, remark=关注小菜不迷路！)
+ SQL语句:
+ SELECT id,name,dept_id,remark
+ FROM student
+ WHERE (name = '小菜' AND dept_id = 1);
+ **/
+</code></pre>
+<ul>
+<li><code>allEq(boolean condition, Map&lt;R, V&gt; params, boolean null2IsNull)</code></li>
+</ul>
+<pre><code>@Test
+public void testAllEq() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    Map&lt;String,Object&gt; params = new HashMap&lt;&gt;();
+    params.put(&quot;name&quot;,&quot;小菜&quot;);
+    params.put(&quot;dept_id&quot;,1);
+    params.put(&quot;remark&quot;,null);
+    queryWrapper.allEq(false,params,false); //不会带入条件进行查询
+    userMapper.selectList(queryWrapper);
+}
+/** 
+ 结果:
+{name=小菜, remark=关注小菜不迷路！, id=1, dept_id=1}
+{name=小明, remark=好好学习，天天向上！, id=2, dept_id=1}
+ SQL语句:
+ SELECT id,name,dept_id,remark
+ FROM student;
+ **/
+</code></pre>
+<ul>
+<li><code>allEq(BiPredicate&lt;R, V&gt; filter, Map&lt;R, V&gt; params)</code></li>
+</ul>
+<pre><code>@Test
+public void testAllEq() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    Map&lt;String, Object&gt; params = new HashMap&lt;&gt;();
+    params.put(&quot;name&quot;, &quot;小菜&quot;);
+    params.put(&quot;dept_id&quot;, 1);
+    params.put(&quot;remark&quot;, null);
+    //只有 key 中含有 “m” 才会用作条件判断
+    queryWrapper.allEq((k, v) -&gt; (k.contains(&quot;m&quot;)), params);
+    userMapper.selectList(queryWrapper);
+}
+/** 
+ 结果:
+0
+ SQL语句:
+ SELECT id,name,dept_id,remark
+ FROM student
+ WHERE (name = '小菜' AND remark IS NULL);
+ **/
+</code></pre>
+<h4 id="2比较操作">2）比较操作</h4>
+<ul>
+<li>**eq：**相当于<code>=</code></li>
+<li>**ne：**相当于<code>!=</code></li>
+<li><strong>gt：</strong> 相当于<code>&gt;</code></li>
+<li>**ge：**相当于<code>&gt;=</code></li>
+<li><strong>lt：</strong> 相当于<code>&lt;</code></li>
+<li><strong>le：</strong> 相当于<code>&lt;=</code></li>
+<li><strong>between：</strong> 相当于<code>between ... and ...</code></li>
+<li><strong>notBetween：</strong> 相当于<code>not between ... and ...</code></li>
+<li><strong>in：</strong> 相当于<code>in(.., .., ..)</code></li>
+<li><strong>notIn：</strong> 相当于<code>not in(.., .., ..)</code></li>
+</ul>
+<h4 id="3模糊查询">3）模糊查询</h4>
+<ul>
+<li><strong>like：</strong><code>like(&quot;name&quot;,&quot;小菜&quot;) --&gt; name like &quot;%小菜%&quot;</code></li>
+<li><strong>notLike：</strong><code>notLike(&quot;name&quot;,&quot;小菜&quot;) --&gt; name not like &quot;%小菜%&quot;</code></li>
+<li><strong>likeLeft：</strong> <code>like(&quot;name&quot;,&quot;小菜&quot;) --&gt; name like &quot;%小菜&quot;</code></li>
+<li><strong>likeRight：</strong><code>like(&quot;name&quot;,&quot;小菜&quot;) --&gt; name like &quot;小菜%&quot;</code></li>
+</ul>
+<h4 id="4排序">4）排序</h4>
+<ul>
+<li><strong>orderBy：</strong></li>
+</ul>
+<pre><code>orderBy(boolean condition, boolean isAsc, R... columns)
+orderBy(true, true, &quot;id&quot;, &quot;name&quot;) --&gt; order by id ASC, name ASC
+</code></pre>
+<ul>
+<li><strong>orderByAsc：</strong></li>
+</ul>
+<pre><code>orderByAsc(&quot;id&quot;,&quot;name&quot;) --&gt; order by id ASC, name ASC
+</code></pre>
+<ul>
+<li><strong>orderByDesc：</strong></li>
+</ul>
+<pre><code>orderByDesc(&quot;id&quot;,&quot;name) --&gt; order by id Desc, name Desc
+</code></pre>
+<h4 id="5逻辑查询">5）逻辑查询</h4>
+<ul>
+<li><strong>or：</strong></li>
+</ul>
+<p>拼接：主动调用<strong>or</strong>表示紧接着下一个方法不是用<strong>and</strong>连接!(不调用<strong>or</strong>则默认为使用<strong>and</strong>连接)，<code>eq(&quot;id&quot;,1).or().eq(&quot;name&quot;,&quot;老王&quot;)</code></p>
+<p>嵌套：<code>or(i -&gt; i.eq(&quot;name&quot;, &quot;李白&quot;).ne(&quot;status&quot;, &quot;活着&quot;))</code></p>
+<ul>
+<li><strong>and：</strong></li>
+</ul>
+<p>嵌套：<code>and(i -&gt; i.eq(&quot;name&quot;, &quot;李白&quot;).ne(&quot;status&quot;, &quot;活着&quot;))</code></p>
+<h4 id="6select">6）select</h4>
+<p>在MP查询中，默认查询所有的字段，如果有需要也可以通过select方法进行指定字段，如<code>select(&quot;id&quot;, &quot;name&quot;)</code></p>
+<h3 id="4-配置讲解">4. 配置讲解</h3>
+<h4 id="1基本配置">1）基本配置</h4>
+<ul>
+<li><strong>configLocation</strong></li>
+</ul>
+<p>用于指明 <strong>MyBatis ** 配置文件的位置，如果我们有</strong>MyBatis<strong>的配置文件，需将配置文件的路径配置到</strong>configLocation**中</p>
+<p><strong>SpringBoot：</strong></p>
+<pre><code>mybatis-plus.config-location = classpath:mybatis-config.xml
+</code></pre>
+<p><strong>SpringMvc：</strong></p>
+<pre><code>&lt;bean id=&quot;sqlSessionFactory&quot;
+class=&quot;com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean&quot;&gt;
+&lt;property name=&quot;configLocation&quot; value=&quot;classpath:mybatis-config.xml&quot;/&gt;
+&lt;/bean
+</code></pre>
+<ul>
+<li><strong>mapperLocations</strong></li>
+</ul>
+<p>用于指明<strong>Mapper</strong>所对应的<strong>XML</strong>的文件位置，我们在<strong>通用 CRUD</strong>中用到的<strong>Mapper</strong>是直接继承<strong>MP</strong>提供的<strong>BaseMapper</strong>，我们也可以自定义方法，然后在<strong>XML</strong>文件中自定义<strong>SQL</strong>，而这时我们需要告诉<strong>Mapper</strong>所对应<strong>XML</strong>文件的位置</p>
+<p><strong>SpringBoot：</strong></p>
+<pre><code>mybatis-plus.mapper-locations = classpath*:mybatis/*.xml
+</code></pre>
+<p><strong>SpringMVC：</strong></p>
+<pre><code>&lt;bean id=&quot;sqlSessionFactory&quot;
+class=&quot;com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean&quot;&gt;
+&lt;property name=&quot;mapperLocations&quot; value=&quot;classpath*:mybatis/*.xml&quot;/&gt;
+&lt;/bean&gt;
+</code></pre>
+<ul>
+<li><strong>typeAliasesPackage</strong></li>
+</ul>
+<p>用于<strong>MyBatis</strong> 别名包扫描路径，通过该属性可以给包中的类注册别名，注册后在<strong>Mapper</strong>对应的<strong>XML</strong>文件中可以直接使用类名，而不用使用全限定的类名</p>
+<p><strong>SpringBoot：</strong></p>
+<pre><code>mybatis-plus.type-aliases-package = cbuc.life.bean
+</code></pre>
+<p><strong>SpringMVC：</strong></p>
+<pre><code>&lt;bean id=&quot;sqlSessionFactory&quot;
+class=&quot;com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean&quot;&gt;
+&lt;property name=&quot;typeAliasesPackage&quot;
+value=&quot;com.baomidou.mybatisplus.samples.quickstart.entity&quot;/&gt;
+&lt;/bean&gt;
+</code></pre>
+<h4 id="2进阶配置">2）进阶配置</h4>
+<ul>
+<li><strong>mapUnderScoreToCamelCase</strong></li>
+</ul>
+<p>是否开启自动驼峰命名规则映射，这个配置的默认值是<strong>true</strong>，但是这个属性在<strong>MyBatis</strong>中的默认值是<strong>false</strong>，所以在我们平时的开发中都会将这个配置开启。</p>
+<pre><code>#关闭自动驼峰映射，该参数不能和mybatis-plus.config-location同时存在
+mybatis-plus.configuration.map-underscore-to-camel-case = false
+</code></pre>
+<ul>
+<li><strong>cacheEnabled</strong></li>
+</ul>
+<p>全局地开启或关闭配置文件中的所有映射器已经配置的任何缓存，默认为<strong>true</strong>。</p>
+<pre><code>mybatis-plus.configuration.cache-enabled = false
+</code></pre>
+<h4 id="3db-策略配置">3）DB 策略配置</h4>
+<ul>
+<li><strong>idType</strong></li>
+</ul>
+<p>全局默认主键类型，设置后，即可省略实体对象中的<code>@TableId(type = IdType.AUTO)</code>配置。该配置的默认值为<strong>ID_WORKER</strong></p>
+<p><strong>SpringBoot：</strong></p>
+<pre><code>mybatis-plus.global-config.db-config.id-type = auto
+</code></pre>
+<p><strong>SpringMVC：</strong></p>
+<pre><code>&lt;bean id=&quot;sqlSessionFactory&quot;
+class=&quot;com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean&quot;&gt;
+ &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;/&gt;
+    &lt;property name=&quot;globalConfig&quot;&gt;
+        &lt;bean class=&quot;com.baomidou.mybatisplus.core.config.GlobalConfig&quot;&gt;
+            &lt;property name=&quot;dbConfig&quot;&gt;
+                &lt;bean         class=&quot;com.baomidou.mybatisplus.core.config.GlobalConfig$DbConfig&quot;&gt;
+                 &lt;property name=&quot;idType&quot; value=&quot;AUTO&quot;/&gt;
+                &lt;/bean&gt;
+            &lt;/property&gt;
+        &lt;/bean&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+<ul>
+<li><strong>tablePrefix</strong></li>
+</ul>
+<p>表名前缀，全局配置后可省略<code>@TableName()</code>配置。该配置的默认值为<strong>null</strong></p>
+<p><strong>SpringBoot：</strong></p>
+<pre><code>mybatis-plus.global-config.db-config.table-prefix = yq_
+</code></pre>
+<p><strong>SpringMVC：</strong></p>
+<pre><code>&lt;bean id=&quot;sqlSessionFactory&quot;
+class=&quot;com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean&quot;&gt;
+    &lt;property name=&quot;dataSource&quot; ref=&quot;dataSource&quot;/&gt;
+    &lt;property name=&quot;globalConfig&quot;&gt;
+        &lt;bean class=&quot;com.baomidou.mybatisplus.core.config.GlobalConfig&quot;&gt;
+            &lt;property name=&quot;dbConfig&quot;&gt;
+                &lt;bean            class=&quot;com.baomidou.mybatisplus.core.config.GlobalConfig$DbConfig&quot;&gt;
+                 &lt;property name=&quot;idType&quot; value=&quot;AUTO&quot;/&gt;
+                 &lt;property name=&quot;tablePrefix&quot; value=&quot;yq_&quot;/&gt;
+                &lt;/bean&gt;
+            &lt;/property&gt;
+        &lt;/bean&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+</code></pre>
+<h3 id="5-其他扩展">5. 其他扩展</h3>
+<h4 id="1自动填充">1）自动填充</h4>
+<p>有时候我们在插入或更新数据的时候，希望有些字段可以自动填充。比如我们平时数据表里面会有个<strong>插入时间</strong>或者<strong>更新时间</strong>这种字段，我们会默认以当前时间填充，在<strong>MP</strong>中我们也可以进行配置。</p>
+<p>首先我们需要借助<code>@TableField(fill = FieldFill.INSERT)</code>这个注解，在插入时进行填充。</p>
+<pre><code>@TableField(fill = FieldFill.INSERT)
+private String remark;
+</code></pre>
+<p>其中自动填充的模式如下：</p>
+<pre><code>public enum FieldFill {
+    /**
+    * 默认不处理
+    */
+    DEFAULT,
+    /**
+    * 插入时填充字段
+    */
+    INSERT,
+    /**
+    * 更新时填充字段
+    */
+    UPDATE,
+    /**
+    * 插入和更新时填充字段
+    */
+    INSERT_UPDATE
+}
+</code></pre>
+<p>然后我们再编写自定义的填充处理模式：</p>
+<pre><code>@Component
+public class MyMetaObjectHandler implements MetaObjectHandler {
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        Object remark = getFieldValByName(&quot;remark&quot;, metaObject);
+        if (null == remark) {
+            setFieldValByName(&quot;remark&quot;, &quot;好好学习&quot;, metaObject);
+        }
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+  //自定义更新时填充
+    }
+}
+</code></pre>
+<p>测试：</p>
+<pre><code>@Test
+public void testObjectHandler() {
+    User user = User.builder().deptId(1).name(&quot;小明&quot;).build();
+    userMapper.insert(user);
+}
+/**
+ SQL语句：
+INSERT INTO student ( name, dept_id, remark )
+VALUES ( '小明', 1, '好好学习' );
+**/
+</code></pre>
+<p>可以看到插入时，已经自动将我们填充的字段合并进去。</p>
+<h4 id="2逻辑删除">2）逻辑删除</h4>
+<p>在开发中，很多时候我们删除数据并不需要真正意义上的物理删除，而是使用逻辑删除，这样子查询的时候需要状态条件，确保被标记的数据不被查询到。<strong>MP</strong>当然也支持这样的功能。</p>
+<p>我们需要先为<strong>student</strong>表添加一个字段<code>status</code>来声明数据是否被删除，<strong>0 表示被删除，1表示未删除</strong>，然后也需要在实体类上增加这个属性：</p>
+<pre><code>@TableLogic
+private Integer status;
+</code></pre>
+<p>在<code>application.yaml</code>中配置：</p>
+<pre><code>mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-value: 0
+      logic-not-delete-value: 1
+</code></pre>
+<p>测试：</p>
+<pre><code>@Test
+public void testLogicDelete() {
+    userMapper.deleteById(1);
+}
+/**
+ SQL语句：
+UPDATE student SET status=0
+WHERE id=1 AND status=1;
+**/
+</code></pre>
+<p>可以看出这段<strong>SQL</strong>并没有真正删除，而是进行了逻辑删除，只是更新了删除标识</p>
+<h4 id="3通用枚举">3）通用枚举</h4>
+<p>如果有性别之类的字段，我们通常会用<strong>0</strong>和<strong>1</strong>来表示，但是查出来我们得进行值转换，这个时候我们就可以使用枚举来解决这个问题：</p>
+<p>首先为<strong>student</strong>表添加一个<strong>sex</strong>字段来表示性别，<strong>0 表示女性，1 表示男性</strong>，然后定义一个枚举类：</p>
+<pre><code>public enum SexEnum implements IEnum&lt;Integer&gt; {
+    MAN(1, &quot;男&quot;),
+    WOMEN(0, &quot;女&quot;);
+
+    private int code;
+
+    private String value;
+
+    SexEnum(int code, String value) {
+        this.code = code;
+        this.value = value;
+    }
+
+    @Override
+    public Integer getValue() {
+        return this.code;
+    }
+    
+    //注意要重写此方法，不然会将值转换成 ‘MAN’，而不是 ‘男’
+    @Override
+    public String toString() {
+        return this.value;
+    }
+}
+</code></pre>
+<p>然后在实体类中添加对应属性：</p>
+<pre><code>private SexEnum sex;
+</code></pre>
+<p>在<code>application.yaml</code>中配置：</p>
+<pre><code>mybatis-plus:
+  type-enums-package: cbuc.life.enums
+</code></pre>
+<p><strong>测试：</strong></p>
+<pre><code>@Test
+public void selectOne() {
+    QueryWrapper&lt;User&gt; queryWrapper = new QueryWrapper&lt;&gt;();
+    queryWrapper.eq(&quot;name&quot;, &quot;小菜&quot;);
+    User user = userMapper.selectOne(queryWrapper);
+    System.out.println(user);
+}
+/**
+ 输出结果：
+User(id=1, deptId=1, name=小菜, remark=关注小菜不迷路！, status=1, sex=男)
+ SQL语句：
+ SELECT id,sex,name,dept_id,remark,status
+ FROM student
+ WHERE status=1 AND (name = '小菜');
+**/
+</code></pre>
+<p><strong>END</strong></p>
+<p>这篇文章写到这里就告一段落了哦，内容有点长，不过如果能完整看下来，我相信你肯定能够很好的使用<strong>MybatisPlus</strong>啦！路漫漫，小菜与你一同求索！</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/yN2DvTcwT/">
+              <span class="post-title">
+                一份超详细的Java问题排查工具单&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

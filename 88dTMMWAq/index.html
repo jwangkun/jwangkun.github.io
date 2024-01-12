@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Keepalived高可用集群（双主） | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Keepalived高可用集群（双主） | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Keepalived高可用集群（双主）"/>
+    <meta property="og:url" content="https://jwangkun.github.io/88dTMMWAq/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/D38-UU1Yr/" class="tag">Keepalived</a>
+            
+        </span>
+            <h1>Keepalived高可用集群（双主）</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-11，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="介绍">介绍</h3>
+<p>Keepalived软件起初是专门为LVS负载均衡软件设计的用来管理并监控LVS集群系统中各个服务节点的状态，后来又加入了可以实现高可用的VRRP功能。因此，Keepalived除了能够管理LVS软件外，还可以作为其他服务的高可用解决方案软件。</p>
+<p>Keepalived软件主要是通过VRRP协议实现高可用功能的,VRRP是Virtual Router Redundancy Protocol（虚拟路由器冗余协议）的缩写.VRRP出现的目的就是为了解决静态路由单点故障问题的</p>
+<h3 id="vrrp原理">VRRP原理</h3>
+<figure data-type="image" tabindex="1"><img src="https://images2018.cnblogs.com/blog/1450900/201808/1450900-20180815163751196-53264566.png" alt="img" loading="lazy"></figure>
+<p>1.master在工作状态会不断群发一个广播包(内涵优先参数)</p>
+<p>2.其他路由收到收到广播后会和自己的优先参数作对比,如果优先参数小于自己则什么都不执行,如果优先参数大于自己则开启争抢机制</p>
+<p>3.如果启动了争抢机制,他就会群发自己的优先参数,最终优先参数最小的称为master路由.</p>
+<h3 id="keepalived的三个核心模块">keepalived的三个核心模块</h3>
+<p>core核心模块 chech健康监测 vrrp虚拟路由冗余协议</p>
+<h3 id="keepalived服务的三个重要功能">Keepalived服务的三个重要功能</h3>
+<p>1.管理LVS　　　　2.对LVS集群节点检查　　　　　　3.作为系统网络服务的高可用功能</p>
+<p>#其中3高可用可作为任意网络功能</p>
+<h3 id="keepalived高可用故障切换转移原理">Keepalived高可用故障切换转移原理</h3>
+<p>Keepalived高可用故障切换，是通过VRRP虚拟路由器冗余协议来实现的。</p>
+<p>在Keepalived服务正常工作时，主Master节点会不断地向备节点发送（多播的方式）心跳消息，用以告诉备Backup节点自己还活着，当主Master节点发生故障时，就无法发送心跳消息，备节点无法检测到来自主Master节点心跳了，于是调用自身的接管程序，接管主Master节点的IP资源及服务。而当主Master节点恢复时，备Backup节点又会释放主节点故障时自身接管的IP资源及服务，恢复到原来的备用角色。</p>
+<figure data-type="image" tabindex="2"><img src="https://images2018.cnblogs.com/blog/1450900/201808/1450900-20180815165810795-821344206.png" alt="img" loading="lazy"></figure>
+<h3 id="keepalived搭建">keepalived搭建</h3>
+<pre><code>yum -y install keepalived　　　　　　　　　　　　　　　　#安装keepalived 
+vim /etc/keepalived/keepalived.conf　　　　　　　　　　#修改主keepalived配置文件
+yum -y install openssh-clients　　　　　　　　　　　　　#安装scp　
+scp /etc/keepalived/keepalived.conf root@192.168.50.149:/etc/keepalived/　　　　#发从给从
+/etc/init.d/keepalived start　　　　　　　　　　　　　　#启动keepalived
+</code></pre>
+<h3 id="keepalived配置文件说明">Keepalived配置文件说明</h3>
+<h3 id="主">主</h3>
+<pre><code>! Configuration File for keepalived              
+
+global_defs {                        #全局定义部分
+   notification_email {              #设置警报邮箱
+     acassen@firewall.loc            #邮箱
+     failover@firewall.loc
+     sysadmin@firewall.loc
+   }
+   notification_email_from Alexandre.Cassen@firewall.loc      #设置发件人地址
+   smtp_server 192.168.50.1        #设置smtp server地址
+   smtp_connect_timeout 30          #设置smtp超时连接时间    以上参数可以不配置
+   router_id LVS_DEVEL               #是Keepalived服务器的路由标识在一个局域网内，这个标识（router_id）是唯一的
+}
+
+vrrp_instance VI_1 {      #VRRP实例定义区块名字是VI_1
+    state MASTER          #表示当前实例VI_1的角色状态这个状态只能有MASTER和BACKUP两种状态，并且需要大写这些字符ASTER为正式工作的状态，BACKUP为备用的状态
+    interface eth0       
+    virtual_router_id 51 #虚拟路由ID标识,这个标识最好是一个数字,在一个keepalived.conf配置中是唯一的, MASTER和BACKUP配置中相同实例的virtual_router_id必须是一致的.
+    priority 100                #priority为优先级 越大越优先
+    advert_int 1               #为同步通知间隔。MASTER与BACKUP之间通信检查的时间间隔，单位为秒，默认为1.
+    authentication {           #authentication为权限认证配置不要改动,同一vrrp实例的MASTER与BACKUP使用相同的密码才能正常通信。
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {         #设置虚拟IP地址
+        192.168.50.16         #此格式ip a显示 ifconfig不显示
+        192.168.50.17/24 dev eth0 label eth0:1    #绑定接口为eth0，别名为eth0：1
+   }
+#至此为止以上为实现高可用配置,如只需使用高可用功能下边配置可删除
+#以下为虚拟服务器定义部分
+virtual_server 192.168.50.16 80 {      #设置虚拟服务器,指定虚拟IP和端口
+    delay_loop 6                           #健康检查时间为6秒
+    lb_algo rr                               #设置负载调度算法 rr算法
+    lb_kind NAT                            #设置负载均衡机制 #有NAT,TUN和DR三种模式可选
+    nat_mask 255.255.255.0         #非NAT模式注释掉此行  注释用!号
+    persistence_timeout 50           #连接保留时间,50秒无响应则重新分配节点
+    protocol TCP                           #指定转发协议为TCP 
+    real_server 192.168.5.150 80 {      #RS节点1
+        weight 1                #权重
+        TCP_CHECK {             #节点健康检查
+        connect_timeout 8       #延迟超时时间
+        nb_get_retry 3          #重试次数
+        delay_before_retry 3    #延迟重试次数
+        connect_port 80         #利用80端口检查
+    }
+    }
+    real_server 192.168.50.149 80 {      #RS节点2
+        weight 1
+        TCP_CHECK {
+        connect_timeout 8
+        nb_get_retry 3
+        delay_before_retry 3
+        connect_port 80 
+    }
+    }
+}  
+</code></pre>
+<p>配置完毕后启动keepalived 并检测是否有虚拟端口</p>
+<pre><code>/etc/init.d/keepalived start
+ip a | grep 192.168.50.16            #出现上述带有vip:192.168.50.16行的结果表示lb01的Keepalived服务单实例配置成功
+</code></pre>
+<h3 id="从">从</h3>
+<pre><code>! Configuration File for keepalived
+global_defs {
+   notification_email {
+    215379068@qq.com
+   }
+   notification_email_from Alexandre.Cassen@firewall.loc
+   smtp_server 127.0.0.1
+   smtp_connect_timeout 30
+   router_id lb02               #此参数和lb01 MASTER不同
+}
+vrrp_instance VI_1 {            #和lb01 MASTER相同
+    state BACKUP                #此参数和lb01 MASTER不同
+    interface eth0              #和lb01 MASTER相同
+    virtual_router_id 55        #和lb01 MASTER相同
+    priority 90                 #此参数和lb01 MASTER不同
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+    192.168.50.17/24 dev eth0 label eth0:1
+    }
+}　　　　　　　　　　　　#以下都相同
+</code></pre>
+<p>配置完成后，启动Keepalived服务 并模拟实验 主从vip漂移(只需开启关闭主 .关闭主,主VIP消失从显示VIP ,开启主 从VIP消失,主VIP显示)</p>
+<h3 id="keepalived单实例与多实例">Keepalived单实例与多实例</h3>
+<h4 id="单实主备配置文件的不同">单实主备配置文件的不同</h4>
+<p>router_id dd1        router_id dd2　　　路由标识</p>
+<p>state MASTER　　　 state BACKUP     主备状态</p>
+<p>priority 100　　　　　 priority 90        优先级</p>
+<p><strong>Keepalived双实例双主模式配置</strong></p>
+<figure data-type="image" tabindex="3"><img src="https://images2018.cnblogs.com/blog/1450900/201808/1450900-20180815184149227-1565866652.png" alt="img" loading="lazy"></figure>
+<p>启动两个vrrp  vrrp_instance VI_1和vrrp_instance VI_2  让他俩互为主从.</p>
+<figure data-type="image" tabindex="4"><img src="https://images2018.cnblogs.com/blog/1450900/201808/1450900-20180815185308964-205452876.png" alt="img" loading="lazy"></figure>
+<h2 id="解决高可用服务只针对物理服务器的问题">解决高可用服务只针对物理服务器的问题</h2>
+<p>Keepalived软件仅仅在对方机器宕机或Keepalived停掉的时候才会接管业务。但在实际工作中，有业务服务停止而Keepalived服务还在工作的情况，这就会导致用户访问的VIP无法找到对应的服务</p>
+<p>实现方法1.可以写守护进程脚本来处理,。当服务有问题时，就停掉本地的Keepalived服务，实现IP漂移到对端继续提供服务。</p>
+<p>例 nginx高可用</p>
+<pre><code>#!/bin/sh
+while true
+do
+    if [ `netstat -antup | grep nginx | wc -l` -ne 1 ];then
+        /etc/init.d/keepalived stop
+    fi
+    sleep 5
+done
+#此脚本的基本思想是若没有80端口存在，就停掉Keepalived服务实现释放本地的VIP。在后台执行上述脚本并检查：
+</code></pre>
+<p>第二个方法：可以使用Keepalived的配置文件参数触发写好的监测服务脚本。首先要开发检测服务脚本，注意这个脚本与上一个脚本的不同。</p>
+<pre><code>#!/bin/bash
+if [ `netstat -antup | grep nginx | wc -l` -ne 1 ];then
+    /etc/init.d/keepalived stop
+fi
+</code></pre>
+<p>在keepalived的配置文件加入以下模块</p>
+<pre><code>vrrp_script chk_nginx_proxy {       #定义vrrp脚本，检测HTTP端口
+    script &quot;/server/scripts/chk_nginx_proxy.sh&quot;     #执行脚本，当Nginx服务有问题，就停掉Keepalived服务
+    interval 2          #间隔2秒
+    weight 2
+</code></pre>
+<h2 id="解决多组keepalived服务器在一个局域网的冲突问题">解决多组Keepalived服务器在一个局域网的冲突问题</h2>
+<p>当在同一个局域网内部署了多组Keepalived服务器对，而又未使用专门的心跳线通信时，可能会发生高可用接管的严重故障问题。之前已经讲解过Keepalived高可用功能是通过VRRP协议实现的，VRRP协议默认通过IP多播的形式实现高可用对之间的通信，如果同一个局域网内存在多组Keepalived服务器对，就会造成IP多播地址冲突问题，导致接管错乱，不同组的Keepalived都会使用默认的224.0.0.18作为多播地址。此时的解决办法是，在同组的Keepalived服务器所有的配置文件里指定独一无二的多播地址，配置如下：</p>
+<pre><code>global_defs {                                    #全局配置
+router_id LVS_19                              #服务标识
+vrrp_mcast_group4 224.0.0.19    #这个就是指定多播地址的配置
+}
+#提示：
+1）不同实例的通信认证密码也最好不同，以确保接管正常。
+2）另一款高可用软件Heartbeat，如果采用多播方式实现主备通信，同样会有多播地址冲突问题。    
+</code></pre>
+<h2 id="开发检测keepalived裂脑的脚本">开发检测Keepalived裂脑的脚本</h2>
+<p>在备节点上执行脚本，如果可以ping通主节点并且备节点有VIP就报警，让人员介入检查是否裂脑。</p>
+<pre><code>#!/bin/bash
+lb01_vip=192.168.0.240
+lb01_ip=192.168.0.221
+while true
+do
+    ping -c 2 -W 3 $lb01_ip &amp;&gt;/dev/null
+    if [ $? -eq 0 -a `ip a | grep &quot;$lb01_vip&quot; | wc -l` -eq 1 ];then
+        echo &quot;ha is split brain.warning.&quot;
+    else
+        echo &quot;ha is OK&quot;
+    fi
+    sleep 5
+done
+</code></pre>
+<p>可以将此脚本整合到Nagios或Zabbix监控服务里，进行监控报警。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/lV9LJXd56/">
+              <span class="post-title">
+                Keepalived + Nginx 实现高可用 Web 负载均衡&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

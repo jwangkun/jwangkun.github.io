@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Ansible 以及 Ansible-playbook介绍 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Ansible 以及 Ansible-playbook介绍 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Ansible 以及 Ansible-playbook介绍"/>
+    <meta property="og:url" content="https://jwangkun.github.io/W0k7jH8wF/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/jNrNKPnDJ/" class="tag">Ansible-playbook</a>
+            
+            <a href="https://jwangkun.github.io/X83V7mjQ7/" class="tag">Ansible</a>
+            
+        </span>
+            <h1>Ansible 以及 Ansible-playbook介绍</h1>
+            <span class="meta">
+            	Posted on
+              2021-12-04，49 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Anasible 是基于Python2-Paramiko 模块开发的自动化维护工具，实现了批量系统配置、部署、运行等功能。Ansible是基于模块工作的，本身不具备批量部署的功能，如果想要实现批量自动化部署，是Ansible自身的各种模块的集合。</p>
+<p><strong>可以与 Ansible 同台竞技的运维工具（ pupet、cfengine、chef、func、fabric、saltstack ）</strong></p>
+<ul>
+<li>
+<p>Ansible 发展史</p>
+</li>
+<li>
+<ul>
+<li>ansible 作者: <code>Michael DeHaan</code> 同时他也是 <code>Cobbler 与 Func</code> 作者。</li>
+<li>2012-03-09 发布 0.0.1 版本。</li>
+<li>2015-10-17 被 <code>Red Hat</code> 收购。</li>
+<li>GitHub</li>
+</ul>
+</li>
+<li>
+<p>ansible 特性</p>
+</li>
+<li>
+<ul>
+<li>Python 开发</li>
+<li>模块化: 调用特定的模块(如: Paramiko、PyYAML、jinja2 等), 完成特定的任务。</li>
+<li>自定义模块</li>
+<li>简单部署</li>
+<li>支持编排任务（PlayBook）</li>
+<li>冥等性: 任务重复执行等于只执行一次, 不会重复执行多次相同命令。</li>
+<li>支持多语言编写模块</li>
+<li>YAML 格式编排任务,支持丰富的数据结构.</li>
+</ul>
+</li>
+</ul>
+<h2 id="ansible-架构与执行流程">Ansible 架构与执行流程</h2>
+<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_png/hBBhGOkMVjiaglbsu3zQicDyHXo9S1ibmaico17MGAlCUraHSlqibtO5xibFr8VxDmLIkicQvUwE1ONHGKus5sYz4uymw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<p>ansible-arch</p>
+<figure data-type="image" tabindex="2"><img src="https://mmbiz.qpic.cn/mmbiz_png/hBBhGOkMVjiaglbsu3zQicDyHXo9S1ibmaice1Dvjy8iazyREM0xRENRMsHSkzkkSic86vfHAlLydKibJ9aLFMPvBf5MA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<p>ansible-flow</p>
+<p><code>ansible</code> 主要组成部分:</p>
+<ul>
+<li><strong>Users:</strong> 管理 Ansible Playbook 和 Ansible 引擎。</li>
+<li><strong>Ansible playbook:</strong> Ansible 引擎和CMDB做交互。</li>
+<li><strong>Public or Private cloud:</strong> 便于所有模块 和 API 以及云的交互。</li>
+<li><strong>Inventory:</strong> Ansible 执行主机的列表清单，默认读取配置为/etc/ansible/hosts。</li>
+<li><strong>API:</strong> 提供端到端交互的API接口。</li>
+<li><strong>Modules:</strong> Ansible 执行命令的功能模块, 一般为 Ansible 内置模块, 也可以自定义第三方模块。</li>
+<li><strong>Plugins:</strong> 用于补充模块的功能，可以自行编写插件。</li>
+</ul>
+<h2 id="ansible-安装">Ansible 安装</h2>
+<pre><code># Centos
+yum -y install ansible
+
+# Ubuntu
+apt install -y ansible
+
+# 源码安装
+git clone https://github.com/ansible/ansible 
+
+# 使用 pip 命令安装
+pip install ansible
+</code></pre>
+<h2 id="ansible-配置说明">Ansible 配置说明:</h2>
+<p><code>/etc/ansible/ansible.cfg</code> 主配置文件, 配置<code>ansible</code>的工作特性.</p>
+<p><code>/etc/ansible/hosts</code> 主机列表清单.</p>
+<p><code>/etc/ansible/roles/</code> 存放(roles)角色的目录.</p>
+<p><code>/usr/local/bin/ansible</code> 二进制执行文件, <code>ansible</code> 主程序.</p>
+<p><code>/usr/local/bin/ansilbe-doc</code> 配置文档, 模块功能查看工具.</p>
+<p><code>/usr/local/bin/ansible-galaxy</code> 用于上传/下载 <code>roles</code> 模块到官方平台的工具.</p>
+<p><code>/usr/local/bin/ansible-playbook</code> 自动化任务、编排剧本工具<code>/usr/bin/ansible-pull</code> 远程执行命令的工具.</p>
+<p><code>/usr/local/bin/ansible-vault</code> 文件(如: playbook 文件) 加密工具.</p>
+<p><code>/usr/local/bin/ansible-console</code> 基于 界面的用户交互执行工具.</p>
+<h3 id="etcansiblehosts">/etc/ansible/hosts</h3>
+<blockquote>
+<p>创建SSH秘钥</p>
+<pre><code>ssh-keygen -t rsa -C &quot;deniss.wang&quot;
+</code></pre>
+<p>拷贝公钥到其他被服务器</p>
+<pre><code>ssh-copy-id -i ubuntu@ubuntu20-bj01
+</code></pre>
+</blockquote>
+<pre><code>hosts
+[codo-cluster]
+demo.opendevops.cn ansible_ssh_user=root
+www.opendevops.cn ansible_ssh_user=root
+[k3s-cluster]
+ubuntu20-bj01 ansible_user=ubuntu
+ubuntu20-bj02 ansible_user=ubuntu
+ubuntu20-bj03 ansible_user=ubuntu
+ubuntu20-sh04 ansible_user=ubuntu
+</code></pre>
+<p><code>-m</code> 指定模块执行。如：ping、yum、copy、file等，此处使用模块ping测试。</p>
+<p><code>-k</code> 使用密码方式，默认是使用SSH-KEY登录。</p>
+<p>基本示例：</p>
+<pre><code># ansible 通过 单主机进行操作 ( -k 为用户密码方式, 默认为 ssh-key )
+ansible 10.0.8.2 -m ping -k
+
+# ansible 通过 ':' 组合进行操作
+ansible &quot;10.0.8.2:10.0.8.3&quot; -m ping -k
+
+# ansible 通过 通配符加主机 进行操作
+ansible 10.0.8.* -m ping -k
+
+# ansible 通过 hosts 组名称 进行操作
+ansible codo -m ping -k
+
+# ansible 通过 ':' 组合组进行操作
+ansible 'codo-cluster:k3s-cluster' -m ping -k
+
+# ansible 通过 通配符 进行操作
+ansible '*-cluster' -m ping -k
+
+# ansible 通过 ':&amp;' 逻辑与 (两个组中都包含的主机)
+ansible 'codo-cluster:&amp;k3s-cluster' -m ping -k
+
+# ansible 通过 ':!' 逻辑非 (codo-cluster 但不在 k3s-cluster的主机)
+ansible 'codo-cluster:!k3s-cluster' -m ping -k
+
+# ansible 也支持多逻辑的组合
+ansible 'webservers:dbserver:&amp;appserver:!ftpservers' -m ping -k
+
+# ansible 也支持正则表达式
+ansible '~(codo|k3s)-cluster' -m ping -k
+
+# ansible 通过 all 对 hosts 清单下所有主机进行操作
+ansible all -m ping -k
+
+# ansible 通过 通配符 对 hosts 清单下所有主机进行操作
+ansible '*' -m ping -k
+</code></pre>
+<p>执行结果：</p>
+<pre><code># ansible k3s -m 'ping'                                                                                     
+ubuntu20-bj03 | SUCCESS =&gt; {
+    &quot;ansible_facts&quot;: {
+        &quot;discovered_interpreter_python&quot;: &quot;/usr/bin/python&quot;
+    },
+    &quot;changed&quot;: false,
+    &quot;ping&quot;: &quot;pong&quot;
+}
+ubuntu20-bj02 | SUCCESS =&gt; {
+    &quot;ansible_facts&quot;: {
+        &quot;discovered_interpreter_python&quot;: &quot;/usr/bin/python&quot;
+    },
+    &quot;changed&quot;: false,
+    &quot;ping&quot;: &quot;pong&quot;
+}
+ubuntu20-bj01 | SUCCESS =&gt; {
+    &quot;ansible_facts&quot;: {
+        &quot;discovered_interpreter_python&quot;: &quot;/usr/bin/python&quot;
+    },
+    &quot;changed&quot;: false,
+    &quot;ping&quot;: &quot;pong&quot;
+}
+ubuntu20-sh04 | SUCCESS =&gt; {
+    &quot;ansible_facts&quot;: {
+        &quot;discovered_interpreter_python&quot;: &quot;/usr/bin/python&quot;
+    },
+    &quot;changed&quot;: false,
+    &quot;ping&quot;: &quot;pong&quot;
+}
+</code></pre>
+<h3 id="etcansibleansiblecfg">/etc/ansible/ansible.cfg</h3>
+<pre><code># defaults 为默认配置
+[defaults]
+
+# 主机清单的路径, 默认为如下
+# inventory = /etc/ansible/hosts
+
+# 模块存放的路径 
+# library = /usr/share/my_modules/
+
+# utils 模块存放路径
+# module_utils = /usr/share/my_module_utils/
+
+# 远程主机脚本临时存放目录
+# remote_tmp = ~/.ansible/tmp
+
+# 管理节点脚本临时存放目录 
+# local_tmp = ~/.ansible/tmp
+
+# 插件的配置文件路径
+# plugin_filters_cfg = /etc/ansible/plugin_filters.yml
+
+# 执行并发数
+# forks = 5
+
+# 异步任务查询间隔 单位秒
+# poll_interval  = 15
+
+# sudo 指定用户
+# sudo_user = root
+
+# 运行 ansible 是否提示输入sudo密码
+# ask_sudo_pass = True
+
+# 运行 ansible 是否提示输入密码 同 -k
+# ask_pass = True
+
+# 远程传输模式
+# transport = smart
+
+# SSH 默认端口
+# remote_port = 22
+
+# 模块运行默认语言环境
+# module_lang = C
+
+# roles 存放路径
+# roles_path = /etc/ansible/roles
+
+# 不检查 /root/.ssh/known_hosts 文件 建议取消
+# host_key_checking = False
+
+# ansible 操作日志路径 建议打开
+# log_path = /var/log/ansible.log
+</code></pre>
+<p>ansible执行过程</p>
+<ol>
+<li>
+<p>load配置文件 /etc/ansible/ansible.cfg</p>
+</li>
+<li>
+<p>Load 模块配置文件</p>
+</li>
+<li>
+<p>通过 Ansible 将调用的模块或PlayBook生成对应的临时 py文件, 并将该临时文件传输至远程服务器的对的执行用户目录下 <code>$HOME/.ansible/tmp/ansible-tmp-2123/xxxxxxx.py</code> &gt;文件.</p>
+</li>
+<li>
+<p>对生成的文件添加可执行权限.</p>
+</li>
+<li>
+<p>执行生成文件，并返回对应的结果.</p>
+</li>
+<li>
+<p>删除生成文件，退出.</p>
+<p>执行返回状态：</p>
+</li>
+<li>
+<ul>
+<li>绿色：执行成功，无更改操作。如 ping模块</li>
+<li>黄色：执行成功，更新过主机的操作。如执行shell模块执行ifconfig命令。</li>
+<li>红色：执行失败返回结果。如FAILED、UNREACHABLE状态。</li>
+</ul>
+</li>
+</ol>
+<h3 id="ansible-doc">Ansible-Doc</h3>
+<p>显示帮助信息</p>
+<p>使用参数：</p>
+<p><code>-l --list</code> 显示可用模块</p>
+<p><code>-s --snippet</code> 显示指定模块的 <code>playbook</code> 阶段</p>
+<p><strong>Demo</strong></p>
+<pre><code># Demo
+ansible-doc -l
+# ...略过
+ansible-doc ping
+# 模块ping显示文档
+ansible-doc -s ping
+</code></pre>
+<h3 id="ansible">Ansible</h3>
+<pre><code>ansible &lt;host-pattern&gt; [-m module_name] [-a args]
+</code></pre>
+<ul>
+<li><code>host-pattern</code>: 主机ip、主机名、主机组。</li>
+<li><code>module_name</code>: 模块的名称。默认为 <code>-m command</code> 。</li>
+<li><code>args</code>: 模块的参数, 需要加上 <code>-a</code> 进行指定模块的参数。如: `ansible all -a ‘hostname’</li>
+<li><code>-v、-vv、-vvv</code>: 显示详细的命令输出日志, v 越多越详细。如: <code>ansible all -m ping -vvv</code></li>
+<li><code>--list</code>: 显示主机的列表。如: <code>ansible all --list</code></li>
+<li><code>-k / --ask-pass</code>: 提示输入ssh连接密码, 默认为 ssh-key 认证。如: <code>ansible all -m ping -k</code></li>
+<li><code>-K / --ask-become-pass</code>: 提示输入 sudo 的密码。</li>
+<li><code>-C / --check</code>: 检查命令操作, 并不会执行。如: <code>ansible all -m ping -C</code></li>
+<li><code>-T / --timeout</code>: 执行命令的超时时间, 默认为 10s。如: <code>ansible all -m ping -T=2</code></li>
+<li><code>-u / --user</code>: 执行远程操作的用户. 如: <code>ansible all -m ping -u=root</code></li>
+<li><code>-b / --become</code>: 代替旧版的 <code>sudo</code> 切换。</li>
+</ul>
+<h3 id="ansible-常用模块">ansible 常用模块</h3>
+<blockquote>
+<p>截止 2021-10-12 ansible 模块为 6006 个. 不可谓不强大！人生苦短，我用Python！</p>
+</blockquote>
+<hr>
+<h4 id="command-模块">command 模块</h4>
+<p>在远程主机上执行命令, 支持条件判断. ansible 默认模块, 可忽略 <code>-m</code> 参数直接操作.</p>
+<p><strong>注意: <code>command</code> 模块 不支持 <code>$VARNAME</code> <code>&lt;</code> <code>&gt;</code> <code>|</code> <code>;</code> <code>&amp;</code> 等符号.</strong></p>
+<p><strong>Demo</strong></p>
+<pre><code># 停止docker服务
+
+ansible k3s-cluster -m command -a 'systemctl stop docker'
+
+# 查看所有docker镜像
+
+ansible k3s-cluster -a 'docker ps -a'
+
+# 如果 /opt/ansible 不存在 就不执行 df -h 操作, 如果 /opt/ansible 存在, 就执行 df -h 操作.
+
+ansible k3s-cluster -a 'removes=/mnt/ansible df -h'
+
+
+# 如果 /opt/ansible 不存在 就执行 df -h 操作, 如果存在 /opt/ansible 就不执行 df -h 操作.
+
+ansible k3s-cluster -a 'creates=/mnt/ansible df -h'
+
+# 切换目录, 等同于 cd /mtn &amp;&amp; ls -lt 操作
+
+ansible k3s-cluster -a 'chdir=/mnt ls -lt'
+</code></pre>
+<h4 id="shell-模块">shell 模块</h4>
+<p><code>shell</code> 模块: shell 模块支持 command 所有的操作, 而且支持 <code>$VARNAME</code> <code>&lt;</code> <code>&gt;</code> <code>|</code> <code>;</code> <code>&amp;</code> 等符号操作.</p>
+<p><strong>Demo:</strong></p>
+<pre><code># 查看docker进程
+ansible k3s-cluster -m shell -a 'ps -ef|grep docker'
+</code></pre>
+<h4 id="scripts-模块">scripts 模块</h4>
+<p><code>script</code> 模块: 执行脚本. 只需要调用 ansible 的宿主机存放的脚本文件就可以在选择主机上面执行脚本.</p>
+<p><strong>Demo</strong></p>
+<pre><code># shell
+cat /tmp/deniss.sh                                                                                                                               
+#!/bin/bash
+echo &quot;测试 shell&quot;
+ansible k3s-cluster -m script -a '/tmp/deniss.sh'
+
+# python
+cat /tmp/deniss.py
+#!/usr/bin/python
+import sys
+
+print ('Deniss_Wang' )
+print (sys.version)
+ansible k3s-cluster -m script -a '/tmp/deniss.py'
+
+# 其他脚本也是可以的，只需要配置好环境语言解释即可。 
+</code></pre>
+<h4 id="copy-模块">copy 模块</h4>
+<p><code>copy</code> 模块: 复制ansible宿主机文件到目标主机.</p>
+<p><strong>Demo</strong></p>
+<pre><code># src=&quot;&quot; 宿主机路径 dest=&quot;&quot; 目标主机路径 backup=yes 如果目标主机文件存在, 会备份, 再覆盖.
+ansible k3s-cluster -m copy -a ‘src=/tmp/deniss.py dest=/tmp/deniss.py backup=yes
+
+# mode=&quot;&quot; 修改权限， owner=&quot;&quot; 修改用户， group=&quot;&quot; 修改用户组
+ansible k3s-cluster -m copy -a 'src=/root/deniss.py dest=/root/deniss.py mode=0644 owner=deniss group=deniss'
+
+# content=&quot;&quot; 将内容写入到目标文件中
+ansible k3s-cluster -m copy -a 'content=&quot;hello\nworld\n&quot; dest=/tmp/deniss.txt'
+</code></pre>
+<h4 id="fetch-模块">Fetch 模块</h4>
+<p><code>fetch</code> 模块: 将目标远程主机的文件, 下载到本地, 下载成功会存放在以 IP/NAME的目录中, 包含原文件的整体路径.</p>
+<p>注意：只能下载单个文件, 不支持目录, 想下载完整路径，可以压缩后在下载。</p>
+<p><strong>Demo</strong></p>
+<pre><code># src=&quot;&quot; 目标远程主机的文件路径 dest=&quot;&quot; 本地目录
+ansible k3s-cluster -m fetch -a 'src=/var/log/syslog dest=/tmp/'
+</code></pre>
+<h4 id="file-模块">file 模块</h4>
+<p><code>file</code> 模块: 操作远程目标主机的文件. 如: <code>touch</code>、 <code>absent</code> 等.</p>
+<p><strong>Demo</strong></p>
+<pre><code># mode=&quot;&quot; 修改权限 owner=&quot;&quot; 修改用户 group=&quot;&quot; 修改用户组 recurse=yes 递归授权
+ansible k3s-cluster -m file -a 'name=/tmp/deniss.txt owner=ubuntu group=ubuntu mode=0755 recurse=yes'
+
+# dest、name、path: 指定远程主机的文件路径，state: 文件操作类型,默认为 absent，touch: 创建空文件. 
+ansible k3s-cluster -m file -a 'name=/tmp/deniss.txt state=touch'
+
+# directory: 创建文件夹， absent: 递归删除文件夹/文件，link: 创建软连接.
+ansible k3s-cluster -m file -a 'src=/tmp/deniss.txt dest=/tmp/deniss.link state=link'
+</code></pre>
+<h4 id="cron-模块">Cron 模块</h4>
+<p><code>cron</code> 模块: 为远程主机添加定时任务</p>
+<ul>
+<li><code>day</code>: 表示 天. 支持 ( 1-31, *, */2 ) 写法</li>
+<li><code>hour</code>: 表示 小时. 支持 ( 0-23, *, */2 ) 写法</li>
+<li><code>minute</code>: 表示 分钟. 支持 ( 0-59, *, */2 ) 写法</li>
+<li><code>month</code>: 表示 月. 支持 ( 1-12, *, */2 ) 写法</li>
+<li><code>weekday</code>: 表示 星期. 支持 ( 0-6, Sunday-Saturday, * )写法</li>
+<li><code>job</code>: 表示 计划任务的内容.</li>
+<li><code>name</code>: 表示 计划任务名称. 相同的计划任务名称会覆盖.</li>
+</ul>
+<p><strong>Demo</strong></p>
+<pre><code># day: 表示 天. 支持 ( 1-31, *, */2 ) 写法
+# hour: 表示 小时. 支持 ( 0-23, *, */2 ) 写法
+# minute: 表示 分钟. 支持 ( 0-59, *, */2 ) 写法
+# month: 表示 月. 支持 ( 1-12, *, */2 ) 写法
+# weekday: 表示 星期. 支持 ( 0-6, Sunday-Saturday, * )写法
+# job: 表示 计划任务的内容.
+# name: 表示 计划任务名称. 相同的计划任务名称会覆盖.
+ansible k3s-cluster -m cron -a 'weekday=1-5 job=&quot;echodate&gt;&gt; /tmp/1.txt&quot; name=echocron'
+
+# disabled= (true/false、yes/no)注释掉计划任务 关闭、启动计划任务 必须指定job和name.
+ansible k3s-cluster -m cron -a 'disabled=true job=&quot;echodate&gt;&gt; /root/1.txt&quot; name=echocron'
+
+# state=absent 删除计划任务。
+ansible k3s-cluster -m cron -a 'name=echocron state=absent'
+</code></pre>
+<h4 id="yum-模块">Yum 模块</h4>
+<p><code>yum</code> 模块: 利用 yum 操作软件包, 如 安装、查询、卸载等.</p>
+<p><strong>Demo</strong></p>
+<pre><code># name: 软件包的名称, 或者rpm包, 远程服务器必须存在 rpm 包. 安装多个软件使用 ,号隔开. 如 name=nginx,php,mysql
+
+# state=&quot;present/installed/absent/removed&quot;
+# present、installed: 安装软件.
+# absent、removed: 卸载/删除软件.
+# update_cache=yes: 更新 yum 缓存后 在安装软件 disable_gpg_check=yes: 禁用 gpg 检查.
+ansible k3s-cluster -m yum -a 'name=mysql state=present'
+ansible k3s-cluster -m yum -a 'name=/tmp/nginx-xx.x.x-x.x.x86_64.rpm'
+ansible k3s-cluster -m yum -a 'name=nginx update_cache=yes disable_gpg_check=yes'
+
+# list=&quot;updates/installed/available/repos&quot; 指定获取状态
+# 状态释义: installed: 已安装的软件 updates: 可以升级的软件 available: 可以安装的软件 repos: yum 源
+ansible k3s-cluster -m yum -a 'list=installed'
+</code></pre>
+<h4 id="service-模块">Service 模块</h4>
+<p><code>service</code>: 软件服务管理模块. 启动、关闭、重启 等操作.</p>
+<pre><code># name=&quot;&quot;，安装名字 
+# state=&quot;started/stopped/restarted/reloaded&quot; 启动、停止、重启、重载
+# enable=&quot;yes/no、true/false&quot; 设置是否开机自启
+ansible k3s-cluster -m service -a 'name=nginx state=started enabled=yes'
+</code></pre>
+<h4 id="user-模块">User 模块</h4>
+<p><code>user</code>: 管理系统用户的模块</p>
+<p><strong>Demo</strong></p>
+<pre><code># name&quot;&quot; 用户名
+# shell=&quot;&quot; 指定用户的shell类型
+# system=&quot;yes/no&quot; 指定是否为 系统用户
+# home=&quot;&quot; 指定用户额外的home目录, 默认/home/user .
+# groups=&quot;&quot; 用户额外的 groups 组.
+# uid=&quot;&quot; 指定用户的UID.
+# comment=&quot;&quot; 用户描述
+ansible k3s-cluster -m user -a 'name=deniss shell=/sbin/nologin system=yes home=/tmp/deniss groups=root uid=777 comment=&quot;deniss user&quot;'
+# state=&quot;present/absent&quot; 
+# present: 创建用户 (默认为present) absent: 删除用户
+ansible k3s-cluster -m user -a 'name=deniss state=absent remove=yes'
+ansible k3s-cluster -m user -a 'name=nginx state=absent remove=yes'
+</code></pre>
+<h4 id="group-模块">Group 模块</h4>
+<p><code>group</code>: 管理系统用户组的模块.</p>
+<p><strong>Demo</strong></p>
+<pre><code># name&quot;&quot; 用户名
+# system=&quot;yes/no&quot; 指定是否为 系统用户
+# home=&quot;&quot; 指定用户额外的home目录, 默认/home/user .
+# gid=&quot;&quot; 指定GID.
+# state=&quot;present/absent&quot; 
+# present: 创建用户组 (默认为present) absent: 删除用户组
+# 创建
+ansible all -m group -a 'name=deniss system=yes gid=777'
+# 删除
+ansible all -m group -a 'name=deniss state=absent'
+</code></pre>
+<h3 id="ansible-galaxy">ansible-galaxy</h3>
+<p>官网 https://galaxy.ansible.com/</p>
+<p><strong>ansible-galaxy 工具用于下载对应的<code>roles</code></strong></p>
+<pre><code># list 查看本地的 roles 角色。
+ansible-galaxy list geerlingguy.nginx
+
+# install 下载 roles 角色存放到$HOME/.ansible/roles/目录下。
+ansible-galaxy install geerlingguy.nginx
+
+# remove 删除已下载的 roles 角色，也可以在存放目录中删除。
+ansible-galaxy remove geerlingguy.nginx
+</code></pre>
+<h1 id="任务中心之ansible进阶篇">任务中心之Ansible进阶篇</h1>
+<h2 id="ansible-playbook">ansible-playbook</h2>
+<h4 id="playbook-yml-说明">playbook &amp; yml 说明</h4>
+<ul>
+<li>
+<p><code>playbook</code> 由一个或多个 <code>play</code> 组成.</p>
+</li>
+<li>
+<p><code>playbook</code> 中 每个<code>play</code> 必须包含 <code>hosts</code> 和 <code>tasks</code>.</p>
+</li>
+<li>
+<p><code>playbook</code> 以 <code>yaml</code> 语法编写.</p>
+</li>
+<li>
+<ul>
+<li>可读性强</li>
+<li>脚本语言交互性能力强</li>
+<li>使用实现语言的数据类型</li>
+<li>一致性的信息模型</li>
+<li>易于实现</li>
+<li>基于流模式处理</li>
+<li>表达能力好, 扩展性强</li>
+<li><code>YAML</code> 约定以 <code>---</code> 开头 和 开始不同的 <code>play</code> .</li>
+<li><code>YAML</code> 以 <code>#</code> 作为注释.</li>
+<li><code>YAML</code> 必须统一缩进, 空格 与 <code>tab</code> 不能混用, 缩进的级别也必须相同, 同级缩进代表同样的级别.</li>
+<li><code>YAML</code> 文件内容 是大小写敏感的, 跟 Linux 一样区分大小写.</li>
+<li><code>YAML</code> key/value 形式可写在同一行也可以换行写. 同行使用 <code>:</code> 隔开.</li>
+<li><code>YAML</code> 一个完整的代码块功能最少包含2个元素. 如 name: task</li>
+<li><code>YAML</code> 一个 name 下只能包含一个 task</li>
+<li><code>YAML</code> <code>-</code> 开头的为列表, <code>key/value</code> 形式的为字典.</li>
+<li><code>YAML</code> 特性</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="playbook-核心元素">playbook 核心元素</h4>
+<ul>
+<li>
+<p><code>hosts</code> <strong>远程主机列表 ( ip_addr/hostname/groupname )</strong></p>
+</li>
+<li>
+<p><code>tasks</code> <strong>任务集, 任务列表, 有两种写法。</strong></p>
+</li>
+<li>
+<ul>
+<li><code>action: module args</code> <strong>action 参数。</strong></li>
+<li><code>module: args</code> <strong>参数 (一般使用这种)。</strong></li>
+<li><code>ignore_errors: True</code> <strong>当前 task 出错时仍然会向下执行。</strong></li>
+</ul>
+</li>
+<li>
+<p><code>varniables</code> <strong>内置变量或自定义变量在 <code>playbook</code> 文件中调用。</strong></p>
+</li>
+<li>
+<p><code>templates</code> <strong>模板，可替换模板文件中的变量并实现一些简单逻辑的文件。</strong></p>
+</li>
+<li>
+<p><code>handles</code> <strong>与 <code>notity</code> 结合使用, 由特定条件触发的操作, 满足条件执行, 否则不执行。</strong></p>
+</li>
+<li>
+<p><code>tags</code> <strong>标签 指定任务执行, 用于执行一个 <code>playbook</code> 中的部分代码. 主要用于测试ansible的语法与执行验证。</strong></p>
+</li>
+</ul>
+<hr>
+<h4 id="ansible-playbook-命令">ansible-playbook 命令</h4>
+<ul>
+<li>
+<p><code>ansible-playbook</code></p>
+</li>
+<li>
+<ul>
+<li><code>-C --check</code> <strong>Check 检查脚本运行情况, 不会在远程服务器里运行。</strong></li>
+<li><code>--list-hosts</code> <strong>列出执行此任务的主机。</strong></li>
+<li><code>--list-tasks</code> <strong>列出任务组的具体任务列表。</strong></li>
+<li><code>--limit</code> <strong>只对主机列表中的某台主机执行。</strong></li>
+<li><code>-v -vv -vvv</code> <strong>显示详细的执行DEBUG信息过程, 多个<code>v</code>参数等于DEBUG信息的叠加，显示更为详细。</strong></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="ansible-playbook-setup">ansible-playbook setup</h4>
+<ul>
+<li>
+<p>介绍: 这个模块默认会被playbooks自动调用，用于收集远程主机的相关变量信息，获取到变量信息可以被playbooks调用。针对 setup模块，我们经常使用的是 <code>fact</code> ，在此只对 <code>fact</code>做详细讲解，其他的就不过多叙述了，如果想了解详细信息，可以访问官方文档获取帮助。</p>
+</li>
+<li>
+<ul>
+<li>fact 是ansible模块setup的功能，主要用于获取相关信息作为变量继承给playbook子任务调用。</li>
+<li>gather_facts:</li>
+</ul>
+</li>
+</ul>
+<pre><code># ansible k3s-cluster -m setup
+ubuntu20-bj03 | SUCCESS =&gt; {
+    &quot;ansible_facts&quot;: {
+        &quot;ansible_all_ipv4_addresses&quot;: [
+            &quot;10.0.16.4&quot;
+        ],
+        &quot;ansible_all_ipv6_addresses&quot;: [
+            &quot;fe80::5054:ff:fed6:42a8&quot;
+        ],
+        &quot;ansible_apparmor&quot;: {
+            &quot;status&quot;: &quot;enabled&quot;
+        },
+        &quot;ansible_architecture&quot;: &quot;x86_64&quot;,
+        &quot;ansible_bios_date&quot;: &quot;04/01/2014&quot;,
+        &quot;ansible_bios_vendor&quot;: &quot;SeaBIOS&quot;,
+        &quot;ansible_bios_version&quot;: &quot;seabios-1.9.1-qemu-project.org&quot;,
+        &quot;ansible_board_asset_tag&quot;: &quot;NA&quot;,
+        &quot;ansible_board_name&quot;: &quot;NA&quot;,
+        &quot;ansible_board_serial&quot;: &quot;NA&quot;,
+        &quot;ansible_board_vendor&quot;: &quot;NA&quot;,
+        &quot;ansible_board_version&quot;: &quot;NA&quot;,
+        &quot;ansible_chassis_asset_tag&quot;: &quot;NA&quot;,
+        &quot;ansible_chassis_serial&quot;: &quot;NA&quot;,
+        &quot;ansible_chassis_vendor&quot;: &quot;Smdbmds&quot;,
+        &quot;ansible_chassis_version&quot;: &quot;3.0&quot;,
+        
+        # 多余的冗余信息就不放了，自己可以执行验证下。
+        # setup获得变量信息，都可以用于继承给playbook调用。
+}
+</code></pre>
+<ul>
+<li>
+<p>自定义Fact</p>
+<p>手动设置:</p>
+<p>ansible除了能获取到内置的fact的变量信息，还可以手动为某个主机组或者主机定制 本地<code>fact</code>。</p>
+<p>本地 <code>fact</code> 默认存放宿主机的<code>/etc/ansible/facts.d</code>目录下，支持的文件格式为ini、json。</p>
+<p>加载后的fact的key是ansible_local的特殊变量。</p>
+</li>
+</ul>
+<p>denis_test.fact</p>
+<pre><code>[general]
+package = vsftpd
+service = vsftpd
+state = starte
+</code></pre>
+<p>setup_facts.yaml</p>
+<pre><code>---
+- name: Install Remote Facts
+  hosts: k3s-cluster
+  vars: 
+    remote_dir: /etc/ansible/facts.d
+    facts_file: denis_test.fact
+  tasks:
+    - name: Create Directory
+      file:
+        state: directory
+        recurse: yes
+        path: &quot;{{ remote_dir }}&quot;
+    - name: Install the new facts
+      copy:
+        src: &quot;{{ facts_file }}&quot;
+        dest: &quot;{{ remote_dir }}&quot;
+</code></pre>
+<p>执行测试</p>
+<pre><code># ansible-playbook setup_facts.yaml
+# ansible test -m setup        
+ubuntu20-bj03 | SUCCESS =&gt; {
+    &quot;ansible_facts&quot;: {
+    
+        # -----分隔符-----
+        
+        &quot;ansible_local&quot;: {
+            &quot;custom&quot;: {
+                &quot;general&quot;: {
+                    &quot;package&quot;: &quot;vsftpd&quot;,
+                    &quot;service&quot;: &quot;vsftpd&quot;,
+                    &quot;state&quot;: &quot;started&quot;
+                }
+            }
+        },
+
+        # -----分隔符-----
+  
+}
+</code></pre>
+<p>调用测试</p>
+<p>deniss_test.yaml</p>
+<pre><code>- name: Install Apache and starts the service
+  hosts: k3s-cluster
+  tasks:
+    - name: Install Package
+      yum: 
+        name: &quot;{{ ansible_facts.ansible_local.custom.general.package }}&quot;
+        state: latest
+    - name: Start Service
+      service: 
+        name: &quot;{{ ansible_facts.ansible_local.custom.general.service }}&quot;
+        state: &quot;{{ ansible_facts.ansible_local.custom.general.state }}&quot;
+</code></pre>
+<h4 id="ansible-playbook-set_fact">ansible-playbook set_fact</h4>
+<ul>
+<li>
+<p>使用set_fact设置新的变量</p>
+<p>set_fact 可以自定义变量通过template或者变量的方式在playbook中继承使用。</p>
+<p>如：假设你需要获取一个进程使用的内存的使用率，必须通过set_fact来进行计算之后得出结果，并将其值在playbook中继承使用。</p>
+</li>
+</ul>
+<p>deniss_fact_demo.yaml</p>
+<pre><code>- name: set_fact demo
+  hosts: k3s-cluster
+  tasks:
+    - name: Calculate InnoDB buffer pool size
+      set_fact: innodb_buffer_pool_size_mb=&quot;{{ ansible_memtotal_mb / 2 |int }}&quot;      
+    - debug: var=innodb_buffer_pool_size_mb
+</code></pre>
+<p>执行测试</p>
+<pre><code># ansible-playbook deniss_fact_demo.yaml 
+PLAY [set_fact demo] *****************************************************************************************************************************************************
+
+TASK [Gathering Facts] ******************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [Calculate InnoDB buffer pool size] ************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [debug] ****************************************************************************************************************************************************************
+ok: [ubuntu20-bj03] =&gt; {
+    &quot;innodb_buffer_pool_size_mb&quot;: &quot;2911.2&quot;
+}
+
+PLAY RECAP ******************************************************************************************************************************************************************
+ubuntu20-bj03                : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+</code></pre>
+<ul>
+<li>
+<p>手动采集 fact</p>
+<p>我们在运行playbook的时候，Ansible会先ssh连接被控端采集fact，如果被控制端的ssh还没有完成运行，就会导致整个playbook执行失败。解决这个问题，可以先在配置中关闭fact采集，然后在task中通过wait_for探测被控端ssh端口是否正常监听，然后在task中在手动setup模块来采集fact。</p>
+</li>
+</ul>
+<pre><code>- hosts: k3s-cluster
+  name: test demo 
+  gather_facts: False
+  tasks：
+    - name: wait for ssh to be running
+      local_action: wait_for port=22 host=&quot;{{ inventory_hostname }}&quot; search_regex=OpenSSH
+    - name: gather facts
+      setup:
+</code></pre>
+<ul>
+<li>
+<p>fact缓存</p>
+<p>如果在playbook中需要继承fact，可启用fact缓存来提高效率。</p>
+<p>fact支持缓存 <strong>json、memcached、redis</strong></p>
+<p>ansible.cfg中的配置说明:</p>
+<p>json <strong>以json格式文件作为fact缓存后端，ansible将会把采集的fact写入到宿主机的本地目录，最好是SSD硬盘。</strong></p>
+<p>redis <strong>使用redis做缓存。</strong></p>
+<p>memcached <strong>使用memcached做缓存。</strong></p>
+</li>
+<li>
+<ul>
+<li>smart <strong>表示默认收集 facts，但 facts 已有的情况下不会收集，即使用缓存 facts；</strong></li>
+<li>implicit <strong>表示默认收集 facts，要禁止收集，必须使用 <code>gather_facts: False</code>；</strong></li>
+<li>explicit <strong>则表示默认不收集，要显式收集，必须使用 <code>gather_facts: Ture</code>。</strong></li>
+</ul>
+</li>
+</ul>
+<pre><code>[defaults]
+gathering = smart
+# 缓存时间
+fact_caching_timeout = 86400    
+fact_caching = {jsonfile/redis/memcached}
+# 指定ansible包含fact的json文件位置，如果目录不存在，会自动创建
+# local
+fact_caching_connection = /tmp/ansible_fact_cache
+# redis
+fact_caching_connection = 127.0.0.1:6379:admin
+# memcached
+fact_caching_connection = ['127.0.0.1:11211']
+</code></pre>
+<ul>
+<li>
+<p>关闭fact（提高执行效率）</p>
+<p>在配置中关闭fact，整个playbookfact变量将不会在显示，可以提高执行效率，但是有时候又需要使用 facts 中的信息，这时候可以按照上述设置 facts 的缓存，在空闲的时候收集 facts，缓存下来，在需要的时候直接读取缓存进行引用。</p>
+</li>
+</ul>
+<pre><code># playbook 配置
+- hosts: k3s-cluster
+  gather_facts: no
+# ansible.cfg 配置  
+[defaults]
+gathering = explicit
+</code></pre>
+<hr>
+<h4 id="ansible-playbook-变量">ansible-playbook 变量</h4>
+<ul>
+<li>
+<p>变量名要求: 只允许使用 <code>字母</code> 、<code>数字</code> 、 <code>_</code> 组成, 而且只能以 <code>字母</code>开头。</p>
+</li>
+<li>
+<p>内置的公共变量:</p>
+</li>
+<li>
+<ul>
+<li><code>ansible k3s-cluster -m setup -a 'filter=*addresses*'</code> <strong>可使用 filter 参数进行过滤</strong></li>
+<li>使用 <code>ansible k3s-cluster -m setup</code> <strong>可以获取到主机的系统变量名称</strong></li>
+</ul>
+</li>
+<li>
+<p>通过文件自定义变量:</p>
+</li>
+<li>
+<ul>
+<li>对主机组中的主机单独定义变量, 优先级高于公共变量。</li>
+<li>对主机组中的所有主机定义统一变量, 优先级低于对单独主机定义的变量。</li>
+<li><code>/etc/ansible/hosts</code> 文件中定义</li>
+</ul>
+</li>
+</ul>
+<pre><code>[appserver]
+# 定义变量 node_id
+10.0.8.2 node_id=17
+
+# 对主机组 定义统一变量 domain_name
+[k3s-cluster:vars]
+domain_name=deniss.wang
+</code></pre>
+<ul>
+<li>使用变量灵活配置不同主机的 <code>hostname</code></li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: set hostname
+      hostname: name={{ node_id }}.{{ domain_name }}
+</code></pre>
+<ul>
+<li>
+<p>通过命令行定义变量: 通过命令行定义的变量优先级是最高的</p>
+<pre><code>ansible-playbook -e varname=valur
+</code></pre>
+</li>
+<li>
+<p>在 <code>playbook</code> 文件里 定义变量.</p>
+</li>
+<li>
+<ul>
+<li>通过 <code>{{ 变量名 }}</code> 使用变量，另外需要注意的是，如果有中文，需要使用&quot;&quot;把变量括起来。</li>
+<li>通过 <code>vars:</code> 列表 定义多个 变量.</li>
+</ul>
+</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  remote_user: root
+
+  # 定义变量
+  vars:
+    - pkg_name: httpd
+    - env_name: prod
+
+  tasks:
+    - name: {{ env_name }} install {{ pkg_name }}
+      yum: name={{ pkg_name }}
+</code></pre>
+<ul>
+<li>
+<p>通过定义单独的变量文件 用于统一存放变量, 可避免变量的重复定义。</p>
+</li>
+<li>
+<ul>
+<li>定义单独的 变量文件, 只需要将所有变量以 <code>key: value</code> 形式写入到 <code>yaml</code> 文件中既可。</li>
+<li>在 <code>playbook</code> 文件中, 只需要使用 <code>vars_files:</code> 指定 <code>yaml</code> 文件路径既可。</li>
+</ul>
+</li>
+<li>
+<p>vars.yaml 变量文件</p>
+</li>
+</ul>
+<pre><code>---
+pkg_name: httpd
+file_name: deniss.wang
+</code></pre>
+<ul>
+<li>install.yaml</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  remote_user: root
+
+  # 配置模板文件
+  vars_files:
+    # 指定文件的路径
+    - vars.yaml
+
+  tasks:
+    - name: install {{ pkg_name }}
+      yum: name={{ pkg_name }}
+    - name: create {{ file_name }} file
+      file: name=/tmp/{{ file_name }}.txt state=touch
+</code></pre>
+<ul>
+<li>执行 playbook 操作</li>
+</ul>
+<pre><code># ansible-playbook install.yaml
+PLAY [k3s-cluster] *******************************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************************
+ok: [10.0.8.2]
+
+TASK [install httpd] *********************************************************************************************
+changed: [10.0.8.2]
+
+TASK [create deniss.wang file] **************************************************************************************
+changed: [10.0.8.2]
+
+PLAY RECAP *******************************************************************************************************
+10.0.8.2                  : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+</code></pre>
+<hr>
+<h4 id="ansible-playbook-template">ansible-playbook template</h4>
+<ul>
+<li>
+<p>template 是ansible-playbook一个模块，用于存放生成配置的模板，使用jinja2语言编写，后缀为<code>xx.j2</code>，只能用于 playbook。</p>
+</li>
+<li>
+<p><code>templates</code> 文件, 可嵌套引用脚本。</p>
+</li>
+<li>
+<ul>
+<li>字符串: 使用单引号或双引号.</li>
+<li>数字: 整数, 浮点数.</li>
+<li>列表: [A1, A2, …]</li>
+<li>元组: (B1, B2, …)</li>
+<li>字典: {key1:value1, key2:value2, …}</li>
+<li>布尔值: true/false</li>
+<li>算术运算: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>//</code>, <code>%</code>, <code>**</code></li>
+<li>比较操作: <code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code></li>
+<li>逻辑运算: and, or, not</li>
+<li>流表达式: for, if, when</li>
+<li><code>Jinja2</code> 语法：</li>
+</ul>
+</li>
+<li>
+<p><code>templates</code> 根据模板块文件动态生成对应的配置文件</p>
+</li>
+<li>
+<ul>
+<li><code>templates</code>的模板文件必须存放于 templates 目录下, 并且以 <code>.j2</code> 为后缀。</li>
+<li>templates 目录需要与 <code>playbook</code> 的 <code>yaml</code> 文件在同级目录中。</li>
+</ul>
+</li>
+</ul>
+<pre><code># tree nginx/
+|-- nginx.yaml
+|-- templates   
+    |-- nginx.conf.j2
+</code></pre>
+<blockquote>
+<p>“</p>
+<p>算术运算</p>
+</blockquote>
+<ul>
+<li>nginx.conf.j2</li>
+</ul>
+<pre><code>user nginx;
+# 这里使用 环境变量 vcpus * 2，会根据操作系统CPU自动生成。
+worker_processes {{ ansible_processor_vcpus * 2 }};
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 10240;
+}
+
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] &quot;$request&quot; '
+                      '$status $body_bytes_sent &quot;$http_referer&quot; '
+                      '&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 2048;
+
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+
+    include /etc/nginx/conf.d/*.conf;
+
+    server {
+        listen       80 default_server;
+        listen       [::]:80 default_server;
+        server_name  _;
+        root         /usr/share/nginx/html;
+
+        # Load configuration files for the default server block.
+        include /etc/nginx/default.d/*.conf;
+
+        location / {
+        }
+
+        error_page 404 /404.html;
+            location = /40x.html {
+        }
+
+        error_page 500 502 503 504 /50x.html;
+            location = /50x.html {
+        }
+    }
+}
+</code></pre>
+<ul>
+<li>nginx.yaml</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: install nginx
+      yum: name=nginx
+    - name: nginx template conf
+      # 如果yaml与templates在同一目录, src直接写.j2文件
+      template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+      notify:
+        - restart nginx
+    - name: start nginx
+      service: name=nginx state=started enabled=yes
+
+  handlers:
+    - name: restart nginx
+      service: name=nginx state=restarted
+</code></pre>
+<blockquote>
+<p>“</p>
+<p>when 条件语句</p>
+</blockquote>
+<ul>
+<li><code>when</code> 条件语句 例子</li>
+</ul>
+<pre><code># tree nginx
+|-- nginx.yaml
+|-- templates   
+    |-- nginx.conf.centos7.j2   
+    |-- nginx.conf.centos8.j2
+</code></pre>
+<ul>
+<li><code>playbook</code> 文件</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: install nginx
+      yum: name=nginx
+    - name: template centos 7 conf
+      # 如果 yaml 与 templates 在同一目录, src 直接写.j2 文件。
+      template: src=nginx.conf.centos7.j2 dest=/etc/nginx/nginx.conf
+      # 使用 when 语句进行判断 如果变量为 &quot;7&quot; 执行以下操作
+      when: ansible_distribution_major_version == &quot;7&quot;
+      notify:
+        - restart nginx
+    - name: template centos 8 conf
+      # 同上
+      template: src=nginx.conf.centos8.j2 dest=/etc/nginx/nginx.conf
+      # 使用 when 语句进行判断 如果变量为 'Ubuntu' 且版本为20 执行以下操作
+   when: (ansible_distribution == &quot;Ubuntu&quot; and ansible_distribution_major_version == &quot;20&quot;
+      notify:
+        - restart nginx
+    - name: start nginx
+      service: name=nginx state=started enabled=yes
+
+  handlers:
+    - name: restart nginx
+      service: name=nginx state=restarted
+</code></pre>
+<ul>
+<li>
+<p>执行 playbook 文件</p>
+</li>
+<li>
+<ul>
+<li><code>skipping</code> 状态表示跳过执行这个 TASK。</li>
+</ul>
+</li>
+</ul>
+<pre><code># ansible-playbook nginx.yml
+
+PLAY [k3s-cluster] *******************************************************************************************
+
+TASK [Gathering Facts] *******************************************************************************
+ok: [10.0.8.2]
+
+TASK [install nginx] *********************************************************************************
+ok: [10.0.8.2]
+
+TASK [template centos 7 conf] ************************************************************************
+changed: [10.0.8.2]
+
+TASK [template centos 8 conf] ************************************************************************
+skipping: [10.0.8.2]
+
+TASK [start nginx] ***********************************************************************************
+ok: [10.0.8.2]
+
+RUNNING HANDLER [restart nginx] **********************************************************************
+changed: [10.0.3.13]
+
+PLAY RECAP *******************************************************************************************
+10.0.8.2      : ok=5    changed=2    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0
+</code></pre>
+<blockquote>
+<p>“</p>
+<p>迭代变量 <code>with_tiems</code></p>
+</blockquote>
+<ul>
+<li>
+<p>迭代 <code>with_items</code> 执行重复任务。</p>
+</li>
+<li>
+<p>对于迭代选项, 固定变量名为 <code>item</code> 。</p>
+</li>
+<li>
+<p>在 <code>task</code> 中使用 <code>with_items</code> 指定需要迭代的元素列表。</p>
+</li>
+<li>
+<ul>
+<li>元素列表 支持 <code>字符串</code> 和 <code>字典</code> 。</li>
+</ul>
+</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: create multi files
+      # {{ item }} 为内置特殊变量, 代表 with_items 列表中的内容
+      file: name=/tmp/{{ item }} state=touch
+      with_items:
+        - file_one
+        - file_two
+        - file_three
+        - file_four
+    - name: install multi software
+      yum: name={{ item }}
+      with_items:
+        - vsftpd
+        - net-tools
+        - iftop
+</code></pre>
+<blockquote>
+<p>“</p>
+<p>代嵌套子变量 (字典)</p>
+</blockquote>
+<ul>
+<li>
+<p>迭代嵌套子变量.</p>
+</li>
+<li>
+<ul>
+<li>对迭代中的变量进行嵌套关联的操作.</li>
+</ul>
+</li>
+<li>
+<p><code>playbook</code> 文件</p>
+</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: create some files
+      # {{ item }} 为特殊变量, 代表 with_itmes 列表中的内容
+      file: name=/tmp/{{ item }} state=touch
+      with_items:
+        - file_one
+        - file_two
+        - file_three
+        - file_four
+
+    - name: create multi group
+      group: name={{ item }}
+      with_items:
+        - jinja2_file1
+        - jinja2_file2
+        - jinja2_file3
+        - jinja2_file4
+
+    - name: create multi user
+      # 使用 item.key值 进行引用
+      user: name={{ item.name }} group={{ item.group }}
+      # 使用 字典 定义 嵌套的子 变量
+      with_items:
+        - { name: 'file_one', group: 'jinja2_file1' }
+        - { name: 'file_two', group: 'jinja2_file2' }
+        - { name: 'file_three', group: 'jinja2_file3' }
+        - { name: 'file_four', group: 'jinja2_file4' }
+
+    - name: permission multi files
+      file: name=/tmp/{{ item.name }} owner={{ item.name }} group={{ item.group }}
+      with_items:
+        - { file: 'file_one', name: 'file_one', group: 'jinja2_file1' }
+        - { file: 'file_two', name: 'file_two', group: 'jinja2_file2' }
+        - { file: 'file_three', name: 'file_three', group: 'jinja2_file3' }
+        - { file: 'file_four', name: 'file_four', group: 'jinja2_file4' }
+</code></pre>
+<ul>
+<li>执行 <code>playbook</code> 文件</li>
+</ul>
+<pre><code># ansible-playbook file.yml
+
+PLAY [k3s-cluster] *****************************************************************************************
+
+TASK [Gathering Facts] *****************************************************************************
+ok: [10.0.8.2]
+
+TASK [create multi files] ***************************************************************************
+changed: [10.0.8.2] =&gt; (item=file_one)
+changed: [10.0.8.2] =&gt; (item=file_two)
+changed: [10.0.8.2] =&gt; (item=file_three)
+changed: [10.0.8.2] =&gt; (item=file_four)
+
+TASK [create multi group] ***************************************************************************
+changed: [10.0.8.2] =&gt; (item=jinja2_file1)
+changed: [10.0.8.2] =&gt; (item=jinja2_file2)
+changed: [10.0.8.2] =&gt; (item=jinja2_file3)
+changed: [10.0.8.2] =&gt; (item=jinja2_file4)
+
+TASK [create multi user] ****************************************************************************
+changed: [10.0.8.2] =&gt; (item={u'group': u'jinja2_file1', u'name': u'file_one'})
+changed: [10.0.8.2] =&gt; (item={u'group': u'jinja2_file2', u'name': u'file_two'})
+changed: [10.0.8.2] =&gt; (item={u'group': u'jinja2_file3', u'name': u'file_three'})
+changed: [10.0.8.2] =&gt; (item={u'group': u'jinja2_file4', u'name': u'file_four'})
+
+TASK [permission multi files] ***********************************************************************
+changed: [10.0.8.2] =&gt; (item={u'group': u'jinja2_file1', u'name': u'file_one', u'file': u'file1'})
+changed: [10.0.8.2] =&gt; (item={u'group': u'jinja2_file2', u'name': u'file_two', u'file': u'file2'})
+changed: [10.0.8.2] =&gt; (item={u'group': u'jinja2_file3', u'name': u'file_three', u'file': u'file3'})
+changed: [10.0.8.2] =&gt; (item={u'group': u'jinja2_file4', u'name': u'file_four', u'file': u'file4'})
+
+PLAY RECAP *****************************************************************************************
+10.0.8.2    : ok=5    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+</code></pre>
+<blockquote>
+<p>“</p>
+<p>流程控制、循环 for 与 if</p>
+</blockquote>
+<ul>
+<li>
+<p>for 循环</p>
+</li>
+<li>
+<ul>
+<li><code>{% for 语句块 %} ... {% endfor %}</code></li>
+</ul>
+</li>
+<li>
+<p>ansible-playbook 文件</p>
+</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+  vars:
+    # 列表
+    listen_port:
+      - 80
+      - 81
+      - 82
+    # 字典
+    service:
+      - name: web1
+        domain: deniss.wang
+        port: 9090
+        user: nginx
+        path: /var/www/html 
+      - name: web2
+        domain: deniss.wang
+        port: 9091
+        user: nginx
+        path: /var/www/html
+      - name: web3
+        domain: deniss.wang
+        port: 9092
+        user: nginx
+        path: /var/www/html
+
+  tasks:
+    - name: copy template conf
+      template: src=for.conf.j2 dest=/tmp/for.conf
+</code></pre>
+<ul>
+<li>
+<p>for.conf.j2 文件</p>
+</li>
+<li>
+<ul>
+<li><code>{% for port in listen_port %}</code> 语句 <code>listen_port</code> 为 playbook 中定义的 <code>vars</code> 。</li>
+</ul>
+</li>
+</ul>
+<pre><code>{% for port in listen_port %}
+
+server {
+   listen {{ port }}
+}
+
+{% endfor %}
+</code></pre>
+<ul>
+<li>查看生成 for.conf 文件</li>
+</ul>
+<pre><code># cat /root/for.conf
+
+server {
+   listen 80
+}
+
+
+server {
+   listen 81
+}
+
+
+server {
+   listen 82
+}
+</code></pre>
+<ul>
+<li>
+<p>字典形式</p>
+<p>nginx.yaml</p>
+</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+  vars:
+    # 字典的形式
+    service:
+      - name: web1
+        domain: deniss.wang
+        port: 9090
+        user: nginx
+        path: /var/www/html
+      - name: web2
+        domain: deniss.wang
+        port: 9091
+        user: nginx
+        path: /var/www/html
+      - name: web3
+        domain: deniss.wang
+        port: 9092
+        user: nginx
+        path: /var/www/html
+
+  tasks:
+    - name: copy template conf
+      template: src=nginx.conf.j2 dest=/tmp/nginx.conf
+</code></pre>
+<ul>
+<li>nginx.conf.j2 文件，放在templates下面</li>
+</ul>
+<pre><code>{% for s in service %}
+user {{ s.user }};
+worker_processes {{ ansible_processor_vcpus * 2 }};
+pid /run/nginx.pid;
+    server {
+        listen       {{ s.port }} default_server;
+        listen       [::]:{{ s.port }} default_server;
+        server_name  {{ s.name }}.{{ s.domain }};
+        root         {{ s.path }};
+    }
+
+{% endfor %}
+</code></pre>
+<ul>
+<li>
+<p>if 流程控制</p>
+</li>
+<li>
+<ul>
+<li><code>{% if 语句块 %} ... {% else %} ... {% endif %}</code></li>
+</ul>
+</li>
+<li>
+<p>playbook 文件</p>
+</li>
+<li>
+<ul>
+<li>其中 web1, web2 不传 user 变量，web3 传 user 变量。</li>
+</ul>
+</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+  vars:
+    # 字典
+    service:
+      - name: web1
+        domain: deniss.wang
+        port: 90
+        path: /var/www/html
+
+      - name: web2
+        domain: deniss.wang
+        port: 91
+        path: /var/www/html
+
+      - name: web3
+        domain: deniss.wang
+        port: 92
+        user: nginx
+        path: /var/www/html
+
+  tasks:
+    - name: copy template conf
+      template: src=nginx2.conf.j2 dest=/tmp/nginx2.conf
+</code></pre>
+<ul>
+<li>
+<p>nginx2.conf.j2 文件</p>
+</li>
+<li>
+<ul>
+<li><code>{% if s.user is defined %}</code> 判断 是否有 s.user 这个变量</li>
+</ul>
+</li>
+</ul>
+<pre><code>{% for s in service %}
+
+{% if s.user is defined %}
+user {{ s.user }};
+{% else %}
+user root;
+{% endif %}
+worker_processes {{ ansible_processor_vcpus * 2 }};
+pid /run/nginx.pid;
+    server {
+        listen       {{ s.port }} default_server;
+        server_name  {{ s.name }}.{{ s.domain }};
+        root         {{ s.path }};
+    }
+
+{% endfor %}
+</code></pre>
+<ul>
+<li>
+<p>查看生成后的 nginx2.conf</p>
+</li>
+<li>
+<ul>
+<li>第一个server 不包含 s.user 变量 所以 <code>user root;</code></li>
+<li>第二个server 不包含 s.user 变量 所以 <code>user root;</code></li>
+<li>第三个server 包含 s.user 变量 所以 <code>user nginx;</code> 等于变量值</li>
+</ul>
+</li>
+</ul>
+<pre><code># cat  nginx2.conf
+user root;
+worker_processes 4;
+pid /run/nginx.pid;
+    server {
+        listen       90 default_server;
+        server_name  web1.deniss.wang;
+        root         /var/www/html;
+    }
+
+
+user root;
+worker_processes 4;
+pid /run/nginx.pid;
+    server {
+        listen       91 default_server;
+        server_name  web2.deniss.wang;
+        root         /var/www/html;
+    }
+
+
+user nginx;
+worker_processes 4;
+pid /run/nginx.pid;
+    server {
+        listen       92 default_server;
+        server_name  web3.deniss.wang;
+        root         /var/www/html;
+    }
+</code></pre>
+<hr>
+<h4 id="tasks-示范">tasks 示范</h4>
+<ul>
+<li>定义一组执行任务，可以包含多个模块的集合。</li>
+</ul>
+<p><strong>Demo</strong></p>
+<pre><code>---
+# 指定主机组
+- hosts: k3s-cluster
+  # 开启提权，指定用户
+  become: yes
+  become_user: root
+
+  # 任务
+  tasks:
+    # 任务的名称
+    - name: ping server
+      ping:
+    - name: echo hostname
+      # shell 为模块名, 后面等同于 -a '' 参数
+      shell: hostname
+    - name: touch file
+      file: name=/tmp/file.txt state=touch
+    - name: echo file
+      shell: ls -l /tmp/file.txt
+    - name: write file
+      shell: echo &quot;hello world&quot; &gt; /tmp/file.txt
+    - name: copy module write file
+      copy: content=&quot;hello deniss\n&quot; dest=/tmp/deniss.txt
+    - name: display file content
+      shell: cat /tmp/file.txt
+      register: display_content1
+    - name: show
+      debug: var=display_content1.stdout verbosity=0
+    - name: display copy module file content
+      shell: cat /tmp/deniss.txt
+      register: display_content2
+    - name: show
+      debug: var=display_content2.stdout verbosity=0
+# ansible-playbook hello.yaml
+PLAY [k3s-cluster] *******************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [ping server] *******************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [echo hostname] *****************************************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+TASK [touch file] ********************************************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+TASK [echo file] *********************************************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+TASK [write file] ********************************************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+TASK [copy module write file] ********************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [display file content] **********************************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+TASK [show] **************************************************************************************************************************************************************************
+ok: [ubuntu20-bj03] =&gt; {
+    &quot;display_content1.stdout&quot;: &quot;hello world&quot;
+}
+
+TASK [display copy module file content] **********************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+TASK [show] **************************************************************************************************************************************************************************
+ok: [ubuntu20-bj03] =&gt; {
+    &quot;display_content2.stdout&quot;: &quot;hello deniss&quot;
+}
+
+PLAY RECAP ***************************************************************************************************************************************************************************
+ubuntu20-bj03              : ok=11   changed=6    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+</code></pre>
+<ul>
+<li>
+<p>状态释义:</p>
+</li>
+<li>
+<ul>
+<li><code>ok</code> : ok 未修改文件元数据，绿色</li>
+<li><code>changed</code> : 数据有修改，黄色</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4 id="handles-示范">handles 示范</h4>
+<ul>
+<li>
+<p><code>handles</code> 与 <code>notity</code> 结合的例子</p>
+</li>
+<li>
+<ul>
+<li>同一个<code>name</code> 下可以定义多个 <code>notify</code> 配置关联到不同的 <code>handlers</code> 中。</li>
+</ul>
+</li>
+</ul>
+<pre><code>---
+# 指定主机组
+- hosts: k3s-cluster
+  # 开启提权，指定用户
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: copy httpd.conf
+      copy: src=~/ansible/httpd.conf dest=/etc/httpd/conf/httpd.conf backup=yes
+      # 关联多个触发器的写法
+      notify:
+        - restart httpd
+        - check status httpd
+        - check network port
+</code></pre>
+<p><strong>Demo</strong></p>
+<pre><code>Centos
+---
+# 指定主机组
+- hosts: k3s-cluster
+  # 开启提权，指定用户
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: install httpd
+      yum: name=httpd
+    - name: copy httpd.conf
+      copy: src=/opt/ansible/conf/httpd.conf dest=/etc/httpd/conf/httpd.conf backup=yes
+      # 此任务 如果有变动会触发如下定义名称的触发器
+      notify: restart httpd
+    - name: start httpd
+      service: name=httpd state=started enabled=yes
+
+  # 触发器, 需要配置 notify 触发
+  handlers:
+    - name: restart httpd
+      service: name=httpd state=restarted
+Ubuntu
+---
+# 指定主机组
+- hosts: k3s-cluster
+  # 开启提权，指定用户
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: Update apt-get repo and cache
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+    - name: Install Vsftpd
+      apt:
+        name: vsftpd
+    - name: copy vsftpd.conf
+      copy: src=/opt/ansible/conf/vsftpd.conf dest=/etc/vsftpd.conf backup=yes
+      notify: restart vsftpd
+    - name: start vsftpd
+      service: name=vsftpd state=started enabled=yes
+  # 配置 notify 触发，修改配置文件的时候生效。
+  handlers:
+    - name: restart vsftpd
+      service: name=vsftpd state=restarted
+</code></pre>
+<ul>
+<li>执行安装vsftpd PlayBook</li>
+</ul>
+<pre><code># ansible-playbook install_vsftpd.yaml
+PLAY [k3s-cluster] *******************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [Update apt-get repo and cache] *************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [Install Vsftpd] ****************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [copy vsftpd.conf] **************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [start vsftpd] ******************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+PLAY RECAP ***************************************************************************************************************************************************************************
+ubuntu20-bj03              : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+</code></pre>
+<ul>
+<li>修改vsftpd文件以后会触发重启操作。</li>
+</ul>
+<pre><code># ansible-playbook install_pkg.yaml
+PLAY [k3s-cluster] *******************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [Update apt-get repo and cache] *************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [Install Vsftpd] ****************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [copy vsftpd.conf] **************************************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+TASK [start vsftpd] ******************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+RUNNING HANDLER [restart vsftpd] *****************************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+PLAY RECAP ***************************************************************************************************************************************************************************
+ubuntu20-bj03              : ok=6    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+</code></pre>
+<hr>
+<h4 id="tags示范">Tags示范</h4>
+<ul>
+<li>
+<p><code>tags</code></p>
+</li>
+<li>
+<ul>
+<li>定义了 <code>tags</code> 后可通过定义的 <code>tags</code> 单独运行该 <code>tags</code>来执行指定的tasks， 运行多个可用 <code>,</code> 号分隔。</li>
+<li>多个不同的任务中可以定义相同的 <code>tags</code>。</li>
+</ul>
+</li>
+</ul>
+<pre><code>---
+# 指定主机组
+- hosts: k3s-cluster
+  # 开启提权，指定用户
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: Update apt-get repo and cache
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+    - name: Install Vsftpd
+      apt:
+        name: vsftpd
+    - name: copy vsftpd.conf
+      copy: src=conf/vsftpd.conf dest=/etc/vsftpd.conf backup=yes
+      notify: restart vsftpd
+      # 定义标签
+      tags: cpconf      
+    - name: start vsftpd
+      service: name=vsftpd state=started enabled=yes
+      # 定义标签
+      tags: upvsftpd      
+  # 配置 notify 触发，修改配置文件的时候生效。
+  handlers:
+    - name: restart vsftpd
+      service: name=vsftpd state=restarted      
+   
+</code></pre>
+<ul>
+<li><code>-t</code> 指定标签执行</li>
+</ul>
+<pre><code># ansible-playbook -t upvsftpd  install_vsftpd.yaml
+PLAY [k3s-cluster] *******************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [start vsftpd] ******************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+PLAY RECAP ***************************************************************************************************************************************************************************
+ubuntu20-bj03              : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+# ansible-playbook -t cpconf  install_vsftpd.yaml
+PLAY [k3s-cluster] *******************************************************************************************************************************************************************
+
+TASK [Gathering Facts] ***************************************************************************************************************************************************************
+ok: [ubuntu20-bj03]
+
+TASK [copy vsftpd.conf] **************************************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+RUNNING HANDLER [restart vsftpd] *****************************************************************************************************************************************************
+changed: [ubuntu20-bj03]
+
+PLAY RECAP ***************************************************************************************************************************************************************************
+ubuntu20-bj03              : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+</code></pre>
+<hr>
+<h3 id="ansible-vault">ansible-vault</h3>
+<ul>
+<li>
+<p><code>playbook</code> <strong>文件加密工具。</strong></p>
+</li>
+<li>
+<p><code>ansible-vault encrypt hello.yaml</code></p>
+</li>
+<li>
+<ul>
+<li><code>encrypt</code>: <strong>AES256 加密 ( 会提示输入密码 )。</strong></li>
+<li><code>view</code>: <strong>加密的情况下 查看 原来的内容。</strong></li>
+<li><code>edit</code>: <strong>编辑加密的 playbook 文件。</strong></li>
+<li><code>decrypt</code>: <strong>解密。</strong></li>
+<li><code>rekey</code>: <strong>修改加密密码。</strong></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="ansible-console">ansible-console</h3>
+<ul>
+<li><code>ansible-console</code>: 可交互执行命令, 支持 <code>Tab</code> 键。</li>
+</ul>
+<pre><code># ansible-consoleWelcome to the ansible console.Type help or ? to list commands.deniss.wang@all (10)[f:5]$
+</code></pre>
+<ul>
+<li>
+<p><code>root@all (10) [f:5]$</code></p>
+</li>
+<li>
+<ul>
+<li><code>root</code> <strong>当前执行用户。</strong></li>
+<li><code>all</code> <strong>表示当前主机列表。</strong></li>
+<li><code>(10)</code> <strong>表示当前主机清单下包含 <code>10</code> 台主机。</strong></li>
+<li><code>[f:5]</code>: <strong>表示并发执行任务数为 <code>5</code> 个。。</strong></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="ansible-roles">ansible Roles</h3>
+<ul>
+<li><code>Roles</code> 角色是 Ansible v1.2 版本新加入特性，用于层次性、结构化的组织 <code>playbook</code>。</li>
+<li><code>Roles</code> 能够根据层次结构自动加载- 变量文件、tasks、handler、template 文件等. 简单来讲就是将 这些文件归类到各自单独的文件目录中, 使 playbook 文件可以更好的通过 <code>include</code> 这些文件目录。</li>
+<li><code>Roles</code> 一般用于基于 <code>主机构建服务</code> 的场景中, 但也可以用于构建 <code>守护进程</code> 等场景。</li>
+<li><code>Roles</code> 默认的目录为 <code>/etc/ansible/roles</code> 。</li>
+</ul>
+<figure data-type="image" tabindex="3"><img src="https://mmbiz.qpic.cn/mmbiz_png/hBBhGOkMVjjhia73k6FeQibXyQorL13hdRbJZ4RfKBl4diboov3nedDlzsTnZ1zYVq8GvicyHmo0a6a3FTkYvW0Z2g/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<figure data-type="image" tabindex="4"><img src="https://mmbiz.qpic.cn/mmbiz_png/hBBhGOkMVjjhia73k6FeQibXyQorL13hdRmUWcuUa72TBmcgjzzvYQ9rw0cVh9RTFO1lOkSbJxrmpm2ibwkOOlaBA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<ul>
+<li>
+<p>目录结构说明</p>
+</li>
+<li>
+<ul>
+<li><code>playbook.yml</code> <strong>- 剧本文件</strong></li>
+<li><code>app</code> <strong>具体的角色项目名称, 比如 Nginx、PHP、Apache</strong></li>
+<li><code>files</code> <strong>用于存放由<code>copy</code> 或<code>script</code> 模块调用的文件</strong></li>
+<li><code>templates</code> <strong>用于存放 <code>Jinja2</code> 模板, <code>template</code> 模块会自动在此目录中寻找 <code>Jinja2</code> 模板文件</strong></li>
+<li><code>tasks</code> <strong><code>main.yml</code>文件为入口, 用于定义此角色的任务列表, 此文件可以使用<code>include</code>包含其它的位于此目录的 <code>task</code> 文件</strong></li>
+<li><code>handlers</code> <strong><code>main.yml</code>文件为入口, 用于定义此角色中触发条件时执行的动作</strong></li>
+<li><code>vars</code> <strong><code>main.yml</code>文件为入口，用于定义此角色用到的变量</strong></li>
+<li><code>defaults</code> <strong><code>main.yml</code>文件为入口， 用于为当前角色设定默认变量</strong></li>
+<li><code>meta</code> <strong><code>main.yml</code>文件为入口，用于定义此角色的特殊设定及其依赖关系</strong></li>
+<li><code>roles</code>: 所有的角色必须放在roles目录下, 这个目录可以自定义位置，默认的位置在 <code>/etc/ansible/roles</code></li>
+</ul>
+</li>
+<li>
+<p>nginx roles</p>
+</li>
+</ul>
+<pre><code># tree .
+
+|-- nginx
+    |-- defaults
+    |-- files
+    |-- handlers
+    |-- meta
+    |-- tasks
+    |-- templates
+    |-- vars
+</code></pre>
+<ul>
+<li>创建对应的文件</li>
+</ul>
+<pre><code># tree  roles/
+roles/
+|-- nginx
+    |-- defaults
+    |-- files
+    |-- handlers
+    |-- meta
+    |-- tasks
+    |   |-- group.yaml
+    |   |-- main.yaml
+    |   |-- restart.yaml
+    |   |-- start.yaml
+    |   |-- template.yaml
+    |   |-- user.yaml
+    |   |-- yum.yaml
+    |-- templates
+    |   |-- nginx.conf.j2
+    |-- vars
+</code></pre>
+<ul>
+<li><code>/etc/ansible/nginx_roles.yml</code> 与 roles存放位置在同一目录。</li>
+</ul>
+<pre><code>---
+- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+  # 选择 调用的 roles 属性
+  roles:
+      # 调用定义好的role，存放在roles目录中。
+    - role: nginx
+</code></pre>
+<ul>
+<li>
+<p><code>/etc/ansible/roles/nginx/tasks/main.yml</code> 入口文件 配置 task 执行顺序。</p>
+</li>
+<li>
+<ul>
+<li><code>- include: roles/httpd/tasks/copyfile.yml</code></li>
+<li>跨 roles 调用 tasks，需要写 roles 目录级的全路径。 如:</li>
+</ul>
+</li>
+</ul>
+<pre><code>- include: group.yml
+- include: user.yml
+- include: yum.yml
+- include: template.yml
+- include: start.yml
+</code></pre>
+<ul>
+<li><code>/etc/ansible/roles/nginx/tasks/group.yml</code> 单独的 tasks 文件只写单独的内容 如下:</li>
+</ul>
+<pre><code>- name: create group
+  group: name=nginx gid=80
+</code></pre>
+<ul>
+<li>执行 <code>nginx_roles.yml</code> 文件</li>
+</ul>
+<pre><code># ansible-playbook nginx_roles.yml
+
+PLAY [k3s-cluster] ****************************************************************************************
+
+TASK [Gathering Facts] ****************************************************************************
+ok: [10.0.8.2]
+
+TASK [nginx : create group] ***********************************************************************
+changed: [10.0.8.2]
+
+TASK [nginx : create user] ************************************************************************
+changed: [10.0.8.2]
+
+TASK [nginx : install package] ********************************************************************
+changed: [10.0.8.2]
+
+TASK [nginx : copy conf] **************************************************************************
+changed: [10.0.8.2]
+
+TASK [nginx : start service] **********************************************************************
+changed: [10.0.8.2]
+
+PLAY RECAP ****************************************************************************************
+10.0.8.2   : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+</code></pre>
+<blockquote>
+<p>“</p>
+<p>roles tags 标签</p>
+</blockquote>
+<ul>
+<li>在 playbook 文件中 对 roles 配置相应的 tags 。</li>
+</ul>
+<pre><code>- hosts: k3s-cluster
+  become: yes
+  become_user: root
+
+
+  # 选择 roles 属性
+  roles:
+    # 配置相应的 tags 用 { } 引用
+    - { role: nginx, tags: ['web', 'nginx'] }
+    - { role: mysql, tags: ['db', 'mysql'] }
+    - { role: redis, tags: ['db', 'redis'] }
+    - { role: golang, tags: ['web', 'golang'] }
+    - { role: vue, tags: ['web', 'vue'] }   
+    - { role: app_demo, tags: &quot;app_demo&quot; }
+</code></pre>
+<ul>
+<li>
+<p>跟上面的用法一样，通过 <code>ansible-playbook -t</code> 参数指定 tags 进行单独调用</p>
+</li>
+<li>
+<ul>
+<li>如下指定 tags 为 web 的 role 执行，其中会依次执行nginx 、golang、vue的roles。</li>
+</ul>
+</li>
+</ul>
+<pre><code># ansible-playbook -t web playbook.yml
+</code></pre>
+<blockquote>
+<p>“</p>
+<p>roles when 语句</p>
+</blockquote>
+<ul>
+<li>
+<p>对 role 进行条件的判断.</p>
+</li>
+<li>
+<ul>
+<li><code>ansible_distribution_major_version == &quot;7&quot;</code></li>
+</ul>
+</li>
+</ul>
+<pre><code>---
+- hosts: all
+  become: yes
+  become_user: root
+
+  # 选择 roles 属性
+  roles:
+    # 配置相应的 tags 用 { } 引用
+    - { role: nginx, tags: ['web', 'nginx'] }
+    - { role: mysql, tags: ['db', 'mysql'] }
+    - { role: redis, tags: ['db', 'redis'] }
+    # 只针对操作系统为 Centos7 的执行
+    - { role: golang, tags: ['web', 'golang'], when: ansible_distribution_major_version == &quot;7&quot; }
+    # 只针对操作系统为 Ubuntu20 的执行
+    - { role: vue, tags: ['web', 'vue'], when: (ansible_distribution == &quot;Ubuntu&quot; and ansible_distribution_major_version == &quot;20&quot;)}
+    - { role: app, tags: &quot;app&quot; }
+</code></pre>
+<hr>
+<h3 id="extra-vars">extra-vars</h3>
+<ul>
+<li><code>--extra-vars</code> 执行 playboook 的时候以参数方式传入变量。</li>
+</ul>
+<pre><code># 以变量方式传参
+ansible-playbook deploy.yaml --extra-vars &quot;hosts=k3s-cluster user=ubuntu&quot; 
+# 以json格式传参
+ansible-playbook deploy.yaml --extra-vars &quot;{'app_name':'nginx', 'pkg_name':'vsftpd'}&quot;
+# 以json文件方式传参
+ansible-playbook deploy.yml --extra-vars &quot;@test_vars.json&quot;
+</code></pre>
+<hr>
+<h3 id="附上2个demo">附上2个<code>Demo</code></h3>
+<p>Ubuntu 安装软件，传入参数即可安装软件。</p>
+<pre><code>---
+# 定义集群，并设置提权root，
+- hosts: all
+  become: yes
+  become_user: root
+
+  vars:
+    # 传入参数
+    - DEPLOY_USER: ubuntu
+    - APP_NAME: '{{ app_name }}'
+  
+  tasks:
+    - name: 更新 apt-get 仓库以及缓存
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+    - name: 安装 {{ APP_NAME }} 程序
+      apt:
+        name: &quot;{{ APP_NAME }}&quot;
+    # - name: &quot;复制 {{ APP_NAME }} 配置文件&quot;
+    #   copy: src=./conf/vsftpd.conf dest=/etc/{{ APP_NAME }}.conf backup=yes
+    #   notify: restart {{ APP_NAME }} # 此处必须与handlers一致
+    #   # 定义标签
+    #   tags: copyconf
+    - name: &quot;启动 {{ APP_NAME }} 服务&quot;
+      service: name={{ APP_NAME }} state=started enabled=yes
+      # 定义标签
+      tags: startvsftpd
+          
+  # 配置 notify 触发，修改配置文件的时候生效。
+  handlers:
+    - name: restart {{ APP_NAME }}
+      service: name={{ APP_NAME }} state=restarted
+</code></pre>
+<p>发布流程，Demo中的具体实现逻辑，需要根据自己的环境来定义，此处仅做参考，如果你有什么好的建议和意见，可以扫描下面的二维码，加我微信，一起交流。</p>
+<pre><code>---
+- hosts: all
+  gather_facts: no
+
+  vars:
+    # OSS参数
+    - OSS_URL: 'https://repo.opendevops.cn'
+    - OSS_PATH: 'codo/codo-api/cclib/production'
+    - OSS_FILE: 'xxxxx_20211020181130_dispatch-service-0.0.7.jar'
+    - OSS_FILE_KEY: '?xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    # 部署参数
+    - DEPLOY_USER: '{{ deploy_user }}' # &quot;ubuntu&quot;
+    - APP_NAME: '{{ app_name }}' # &quot;tomcat&quot;
+    - APP_DIR:  '{{ app_dir }}' # &quot;/tmp&quot;
+    - DING_URL: '{{ ding_url }}'
+    - DING_TOKEN: '{{ ding_token }}'
+
+  tasks:
+
+    - name: &quot;验证 {{ inventory_hostname }} SSH 端口&quot;
+      local_action: wait_for port=22 host=&quot;{{ inventory_hostname }}&quot; search_regex=OpenSSH
+    - name: gather facts
+      setup:    
+
+    - name: &quot;钉钉 {{ ding_url }} {{ ding_token }}&quot;
+      shell: &quot;echo {{ ding_url }}&quot;   
+      register: print_ding_url
+
+    - name: &quot;获取当前发布主机IP&quot;
+      shell: &quot;curl http://ip.me&quot;   
+      register: get_ip_addr
+    - name: &quot;获取当前发布主机IP SDTOUT&quot;  
+      debug: var=get_ip_addr.stdout
+      
+    - name: &quot;获取当前发布主机名称&quot;
+      shell: &quot;hostname&quot;
+      register: get_hostname
+    - name: &quot;获取当前发布主机名称 SDTOUT&quot;
+      debug: var=get_hostname
+
+    # 发布的一些动作
+    - name: &quot;发布主机: {{ get_hostname.stdout }} 验证 {{ APP_NAME }} 目录&quot;
+      file:
+        path: &quot;{{ APP_DIR }}/{{ APP_NAME }}&quot;
+        state: directory
+        mode: '0755'   
+      register: create_dir
+    - name: &quot;发布主机: {{ get_hostname.stdout }} 验证 {{ APP_NAME }} 目录 STDOUT&quot;
+      debug: var=create_dir
+
+    - name: &quot;发布主机: {{ get_hostname.stdout }} APP {{ APP_NAME }} 程序包下载&quot;            
+      shell: &quot;wget {{ OSS_URL }}/{{ OSS_PATH }}/{{ OSS_FILE }}'{{ OSS_FILE_KEY }}' -O {{ APP_DIR }}/{{ APP_NAME }}/{{ OSS_FILE }}&quot;
+      args:
+        chdir: /opt/
+        creates: /opt/{{ OSS_URL }}/{{ OSS_FILE }}
+      register: download_file
+      #notify: restart {{ APP_NAME }}
+    - name: &quot;发布主机: {{ get_hostname.stdout }} APP {{ APP_NAME }} 程序包下载 CMD&quot;
+      debug: var=download_file.cmd
+
+    - name: &quot;发布主机: {{ get_hostname.stdout }} APP {{ APP_NAME }} 改名&quot;
+      shell: &quot;new_file_name=`ls {{ APP_DIR }}/{{ APP_NAME }}/{{ OSS_FILE }} |awk -F'_' '{print $3}'` &amp;&amp; echo ${new_file_name} &amp;&amp; mv {{ APP_DIR }}/{{ APP_NAME }}/{{ OSS_FILE }} {{ APP_DIR }}/{{ APP_NAME }}/${new_file_name}&quot;
+      args:
+        chdir: /opt/
+        creates: /opt/{{ OSS_URL }}/{{ OSS_FILE }}
+      register: move_file
+    - name: &quot;发布主机: {{ get_hostname.stdout }} APP {{ APP_NAME }} 改名 STDOUT&quot;
+      debug: var=move_file.stdout
+
+    - name: &quot;发布主机: {{ get_hostname.stdout }} APP {{ APP_NAME }} 权限修改&quot;
+      file:
+        path: &quot;{{ APP_DIR }}/{{ APP_NAME }}&quot;
+        state: directory
+        owner: &quot;{{ DEPLOY_USER }}&quot;
+        group: &quot;{{ DEPLOY_USER }}&quot;
+        recurse: yes
+      register: changed_permissions
+    - name: &quot;APP {{ APP_NAME }} 权限修改 STDOUT&quot;
+      debug: var=changed_permissions
+
+    - name: &quot;发布主机: {{ get_hostname.stdout }} APP {{ APP_NAME }} 服务重启&quot;      
+      shell: &quot;echo {{ OSS_URL }}/{{ OSS_PATH }}/{{ OSS_FILE }} -O {{ APP_DIR }}/{{ APP_NAME }}/{{ OSS_FILE }}&quot;
+      register: restart_service
+      notify: restart {{ APP_NAME }}
+    - name: &quot;发布主机: {{ get_hostname.stdout }} APP {{ APP_NAME }} 服务重启 SDTOUT&quot;
+      debug: var=restart_service.cmd
+
+    # 发布完成后的验证
+    - name: &quot;发布主机: {{ get_hostname.stdout }} 验证 {{ APP_NAME }} 进程状态&quot;      
+      shell: &quot;echo {{ OSS_URL }}/{{ OSS_PATH }}/{{ OSS_FILE }} -O {{ APP_DIR }}/{{ APP_NAME }}/{{ OSS_FILE }}&quot;
+      args:
+        chdir: /opt/
+        creates: /opt/{{ OSS_URL }}/{{ OSS_FILE }}
+      register: process_status
+    - name: &quot;发布主机: {{ get_hostname.stdout }} 验证 {{ APP_NAME }} 进程状态 STDOUT&quot;
+      debug: var=process_status.stdout      
+
+    - name: &quot;发布主机: {{ get_hostname.stdout }} 验证 {{ APP_NAME }} 服务状态&quot;      
+      shell: &quot;echo {{ OSS_URL }}/{{ OSS_PATH }}/{{ OSS_FILE }} -O {{ APP_DIR }}/{{ APP_NAME }}/{{ OSS_FILE }}&quot;
+      args:
+        chdir: /opt/
+        creates: /opt/{{ OSS_URL }}/{{ OSS_FILE }}
+      register: service_status
+    - name: &quot;发布主机: {{ get_hostname.stdout }} 验证 {{ APP_NAME }} 服务状态 STDOUT&quot;
+      debug: var=service_status.stdout  
+
+    - name: &quot;发布主机: {{ get_hostname.stdout }} 验证 {{ APP_NAME }} 接口状态&quot;      
+      shell: &quot;curl -s -L %{http_code} {{ OSS_URL }}  | grep \&quot;Welcome!\&quot; |awk '{print $1}'&quot;
+      args:
+        chdir: /opt/
+        creates: /opt/{{ OSS_URL }}/{{ OSS_FILE }}
+      register: interface_status
+    - name: &quot;发布主机: {{ get_hostname.stdout }} 验证 {{ APP_NAME }} 接口状态 STDOUT&quot;
+      debug: var=interface_status.stdout
+
+  # 重启服务
+  handlers:
+    - name: restart {{ APP_NAME }}
+      service: name={{ APP_NAME }} state=restarted
+</code></pre>
+<p>执行参数</p>
+<pre><code># 变量
+ansible-playbook -C deploy.yaml -e &quot;ding_url=ding.opendevops.cn app_name=tomcat app_dir=/tmp/deniss deploy_user=ubuntu, ding_token=qwerty&amp;^%FDSFBSNFXZ&amp;^%%&quot;
+# json
+ansible-playbook -C deploy.yaml --extra-vars &quot;{'app_name':'tomcat', 'deploy_user':'ubuntu', 'app_dir':'/tmp/deniss', 'ding_url':'ding.opendevops.cn', 'ding_token':'qwerty&amp;^%FDSFBSNFXZ&amp;^%%'}&quot;
+</code></pre>
+<hr>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/3L2skT18n/">
+              <span class="post-title">
+                Tomcat日志切割脚本&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

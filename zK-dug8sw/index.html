@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot 整合mybatis操作数据库 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot 整合mybatis操作数据库 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot 整合mybatis操作数据库"/>
+    <meta property="og:url" content="https://jwangkun.github.io/zK-dug8sw/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1>SpringBoot 整合mybatis操作数据库</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过程以及高级映射。MyBatis 避免了几乎所有的 JDBC 代码和手动设置参数以及获取结果集。MyBatis 可以使用简单的 XML 或注解来配置和映射原生信息，将接口和 Java 的 POJOs(Plain Ordinary Java Object,普通的 Java对象)映射成数据库中的记录。</p>
+<h2 id="通过注解完成数据操作">通过注解完成数据操作</h2>
+<p>第一步：引入mysql依赖和mybatis依赖</p>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;mysql&lt;/groupId&gt;
+    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+    &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+    &lt;version&gt;LATEST&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>第二步：新建学生表及对应的实体类</p>
+<pre><code>CREATE TABLE `student` (
+   `student_id` int(30) NOT NULL AUTO_INCREMENT,
+   `age` int(1) DEFAULT NULL COMMENT '年龄',
+   `name` varchar(45) DEFAULT NULL COMMENT '姓名',
+   `sex` int(1) DEFAULT NULL COMMENT '性别：1：男，2：女，0：未知',
+   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+   `status` int(1) DEFAULT NULL COMMENT '状态：1：正常，-1：删除',
+   PRIMARY KEY (`student_id`)
+ ) ENGINE=InnoDB AUTO_INCREMENT=617354 DEFAULT CHARSET=utf8mb4 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='学生表'
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Student implements Serializable {
+
+    private static final long serialVersionUID = 6712540741269055064L;
+
+    private Integer studentId;
+    private Integer age;
+    private String name;
+    private Integer sex;
+    private Date createTime;
+    private Integer status;
+}
+</code></pre>
+<p>第三步：配置数据库连接信息</p>
+<pre><code>spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/simple_fast
+    username: root
+    password: root
+</code></pre>
+<h3 id="增删改查">增删改查</h3>
+<pre><code>@Mapper
+public interface StudentMapper {
+
+    @Select(&quot;select * from student where student_id = #{studentId}&quot;)
+    Student findById(@Param(&quot;studentId&quot;) Integer studentId);
+
+    @Insert(&quot;insert into student(age,name) values(#{age},#{name})&quot;)
+    int addStudent(@Param(&quot;name&quot;) String name,@Param(&quot;age&quot;) Integer age);
+
+    @Update(&quot;update student set name = #{name} where student_id = #{studentId}&quot;)
+    int updateStudent(@Param(&quot;studentId&quot;) Integer studentId,@Param(&quot;name&quot;) String name);
+
+    @Delete(&quot;delete from student where student_id = #{studentId}&quot;)
+    int deleteStudent(@Param(&quot;studentId&quot;) Integer studentId);
+}
+</code></pre>
+<p>上面演示的传参方式是通过单个参数传递的，<strong>如果想通过Map或实体类传参数，就不需要使用@Param来绑定参数了，将map中的key或者实体类中的属性与sql中的参数值对应上就可以了</strong>。</p>
+<h2 id="通过xml配置完成数据操作">通过XML配置完成数据操作</h2>
+<p><strong>@Mapper和@MapperScan</strong></p>
+<p>@Mapper加在数据层接口上，将其注册到ioc容器上，@MapperScan加在启动类上，需要指定扫描的数据层接口包。如下：</p>
+<pre><code>@Mapper
+public interface StudentMapper {}
+@SpringBootApplication
+@MapperScan(&quot;com.javatrip.mybatis.mapper&quot;)
+public class MybatisApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MybatisApplication.class, args);
+    }
+}
+</code></pre>
+<p>两个注解的作用一样，在开发中为了方便，通常我们会使用@MapperScan。</p>
+<p><strong>指定mapper.xml的位置</strong></p>
+<pre><code>mybatis:
+  mapper-locations: classpath:mybatis/*.xml
+</code></pre>
+<p><strong>开启数据实体映射驼峰命名</strong></p>
+<pre><code>mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+</code></pre>
+<p><strong>编写xml和与之对应的mapper接口</strong></p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
+&lt;!DOCTYPE mapper
+        PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;
+        &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+&lt;mapper namespace=&quot;com.javatrip.mybatis.mapper.StudentXMapper&quot;&gt;
+    &lt;select id=&quot;findById&quot; resultType=&quot;com.javatrip.mybatis.entity.Student&quot;&gt;
+        select * from student where student_id = #{studentId}
+    &lt;/select&gt;
+    &lt;insert id=&quot;addStudent&quot; parameterType=&quot;com.javatrip.mybatis.entity.Student&quot;&gt;
+        insert into student(name,age) values(#{name},#{age})
+    &lt;/insert&gt;
+    
+    &lt;update id=&quot;updateStudent&quot; parameterType=&quot;com.javatrip.mybatis.entity.Student&quot;&gt;
+        update student set name = #{name} where  student_id = #{studentId}
+    &lt;/update&gt;
+
+    &lt;delete id=&quot;deleteStudent&quot; parameterType=&quot;Integer&quot;&gt;
+        delete from student where student_id = #{studentId}
+    &lt;/delete&gt;
+&lt;/mapper&gt;
+@Mapper
+public interface StudentXMapper {
+
+    Student findById(@Param(&quot;studentId&quot;) Integer studentId);
+
+    int addStudent(Student student);
+
+    int updateStudent(@Param(&quot;studentId&quot;) Integer studentId,@Param(&quot;name&quot;) String name);
+
+    int deleteStudent(@Param(&quot;studentId&quot;) Integer studentId);
+}
+</code></pre>
+<p><strong>编写测试类</strong></p>
+<pre><code>@SpringBootTest
+class MybatisApplicationTests {
+
+    @Autowired
+    StudentMapper mapper;
+
+    @Autowired
+    StudentXMapper xMapper;
+
+    @Test
+    void testMapper() {
+
+        Student student = mapper.findById(10);
+        mapper.addStudent(&quot;Java旅途&quot;,19);
+        mapper.deleteStudent(31);
+        mapper.updateStudent(10,&quot;Java旅途&quot;);
+    }
+
+    @Test
+    void contextLoads() {
+        
+        Student student = xMapper.findById(10);
+        Student studentDo = new Student();
+        studentDo.setAge(18);
+        studentDo.setName(&quot;Java旅途呀&quot;);
+        xMapper.addStudent(studentDo);
+        xMapper.deleteStudent(32);
+        xMapper.updateStudent(31,&quot;Java旅途&quot;);
+    }
+}
+</code></pre>
+<p>这里有几个需要注意的点：mapper标签中namespace属性对应的是mapper接口；select标签的id对应mapper接口中的方法名字；select标签的resultType对应查询的实体类，使用全路径。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/sTuzMnGzp/">
+              <span class="post-title">
+                Springboot 整合jdbcTemplate操作数据库&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

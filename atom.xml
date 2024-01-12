@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://jwangkun.github.io</id>
+    <title>John Wong&apos;s Blog</title>
+    <updated>2024-01-12T09:42:30.088Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://jwangkun.github.io"/>
+    <link rel="self" href="https://jwangkun.github.io/atom.xml"/>
+    <subtitle>Never care about others&apos;s looks  ，Just do it ！</subtitle>
+    <logo>https://jwangkun.github.io/images/avatar.png</logo>
+    <icon>https://jwangkun.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2024, John Wong&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[K8s 集群环境准备]]></title>
+        <id>https://jwangkun.github.io/aiciRg6jM/</id>
+        <link href="https://jwangkun.github.io/aiciRg6jM/">
+        </link>
+        <updated>2024-01-12T05:58:38.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[一键测试Linux性能脚本]]></title>
+        <id>https://jwangkun.github.io/Saf87wrwT/</id>
+        <link href="https://jwangkun.github.io/Saf87wrwT/">
+        </link>
+        <updated>2023-02-14T02:21:24.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Centos 挂在iSCSI磁盘]]></title>
+        <id>https://jwangkun.github.io/bOVNtCNyF/</id>
+        <link href="https://jwangkun.github.io/bOVNtCNyF/">
+        </link>
+        <updated>2022-10-28T09:11:07.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[IO测试工具之fio详解]]></title>
+        <id>https://jwangkun.github.io/i-pthMtMd/</id>
+        <link href="https://jwangkun.github.io/i-pthMtMd/">
+        </link>
+        <updated>2021-12-08T03:41:31.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Bash 脚本实现每次登录到 Shell 时可以查看 Linux 系统信息]]></title>
+        <id>https://jwangkun.github.io/Tt57M-PiK/</id>
+        <link href="https://jwangkun.github.io/Tt57M-PiK/">
+        </link>
+        <updated>2021-12-08T00:59:49.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[NFS 高可用方案（NFS+keepalived+Sersync）]]></title>
+        <id>https://jwangkun.github.io/AbHIK1zdg/</id>
+        <link href="https://jwangkun.github.io/AbHIK1zdg/">
+        </link>
+        <updated>2021-12-07T05:57:05.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ DRBD+HEARTBEAT  搭建NFS 服务高可用方案]]></title>
+        <id>https://jwangkun.github.io/LAiVBbLo2/</id>
+        <link href="https://jwangkun.github.io/LAiVBbLo2/">
+        </link>
+        <updated>2021-12-07T05:54:09.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[NFS文件系统相关参数介绍]]></title>
+        <id>https://jwangkun.github.io/VSlKpIv5O/</id>
+        <link href="https://jwangkun.github.io/VSlKpIv5O/">
+        </link>
+        <updated>2021-12-07T05:28:27.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[CentOS 7.x安装部署NFS文件共享服务器]]></title>
+        <id>https://jwangkun.github.io/1H8T7qrJf/</id>
+        <link href="https://jwangkun.github.io/1H8T7qrJf/">
+        </link>
+        <updated>2021-12-07T05:11:48.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Ansible 以及 Ansible-playbook介绍]]></title>
+        <id>https://jwangkun.github.io/W0k7jH8wF/</id>
+        <link href="https://jwangkun.github.io/W0k7jH8wF/">
+        </link>
+        <updated>2021-12-04T02:07:22.000Z</updated>
+    </entry>
+</feed>

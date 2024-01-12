@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot 自定义 starter | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot 自定义 starter | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot 自定义 starter"/>
+    <meta property="og:url" content="https://jwangkun.github.io/BXn3b8xdV/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/Cb4xnYXzO/" class="tag">自定义 starter</a>
+            
+        </span>
+            <h1>SpringBoot 自定义 starter</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="一-简介">一、简介</h2>
+<p>SpringBoot 最强大的功能就是把我们常用的场景抽取成了一个个starter（场景启动器），我们通过引入springboot 为我提供的这些场景启动器，我们再进行少量的配置就能使用相应的功能。即使是这样，springboot也不能囊括我们所有的使用场景，往往我们需要自定义starter，来简化我们对springboot的使用。</p>
+<h2 id="二-如何自定义starter">二、如何自定义starter</h2>
+<h3 id="1实例">1.实例</h3>
+<h4 id="如何编写自动配置">如何编写自动配置 ？</h4>
+<p>我们参照@WebMvcAutoConfiguration为例，我们看看们需要准备哪些东西，下面是WebMvcAutoConfiguration的部分代码：</p>
+<pre><code class="language-java">@Configuration
+@ConditionalOnWebApplication
+@ConditionalOnClass({Servlet.class, DispatcherServlet.class, WebMvcConfigurerAdapter.class})
+@ConditionalOnMissingBean({WebMvcConfigurationSupport.class})
+@AutoConfigureOrder(-2147483638)
+@AutoConfigureAfter({DispatcherServletAutoConfiguration.class, ValidationAutoConfiguration.class})
+public class WebMvcAutoConfiguration {
+
+	@Import({WebMvcAutoConfiguration.EnableWebMvcConfiguration.class})
+    @EnableConfigurationProperties({WebMvcProperties.class, ResourceProperties.class})
+    public static class WebMvcAutoConfigurationAdapter extends WebMvcConfigurerAdapter {
+
+        @Bean
+        @ConditionalOnBean({View.class})
+        @ConditionalOnMissingBean
+        public BeanNameViewResolver beanNameViewResolver() {
+            BeanNameViewResolver resolver = new BeanNameViewResolver();
+            resolver.setOrder(2147483637);
+            return resolver;
+        }
+    }
+}
+</code></pre>
+<p>我们可以抽取到我们自定义starter时同样需要的一些配置。</p>
+<pre><code class="language-java">@Configuration  //指定这个类是一个配置类
+@ConditionalOnXXX  //指定条件成立的情况下自动配置类生效
+@AutoConfigureOrder  //指定自动配置类的顺序
+@Bean  //向容器中添加组件
+@ConfigurationProperties  //结合相关xxxProperties来绑定相关的配置
+@EnableConfigurationProperties  //让xxxProperties生效加入到容器中
+
+自动配置类要能加载需要将自动配置类，配置在META-INF/spring.factories中
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.springframework.boot.autoconfigure.admin.SpringApplicationAdminJmxAutoConfiguration,\
+org.springframework.boot.autoconfigure.aop.AopAutoConfiguration,\
+</code></pre>
+<h4 id="模式">模式</h4>
+<p>我们参照 <strong>spring-boot-starter</strong> 我们发现其中没有代码：</p>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-5/1.png" alt="img" loading="lazy"></figure>
+<p>我们在看它的pom中的依赖中有个 <strong>springboot-starter</strong></p>
+<pre><code class="language-xml">&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>我们再看看 <strong>spring-boot-starter</strong> 有个 <strong>spring-boot-autoconfigure</strong></p>
+<pre><code class="language-xml">&lt;dependency&gt;
+	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+	&lt;artifactId&gt;spring-boot-autoconfigure&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>关于web的一些自动配置都写在了这里 ，所以我们有总结：</p>
+<pre><code>启动器starter只是用来做依赖管理
+需要专门写一个类似spring-boot-autoconfigure的配置模块
+用的时候只需要引入启动器starter，就可以使用自动配置了
+</code></pre>
+<h4 id="命名规范">命名规范</h4>
+<p><strong>官方命名空间</strong></p>
+<ul>
+<li>前缀：spring-boot-starter-</li>
+<li>模式：spring-boot-starter-模块名</li>
+<li>举例：spring-boot-starter-web、spring-boot-starter-jdbc</li>
+</ul>
+<p><strong>自定义命名空间</strong></p>
+<ul>
+<li>后缀：-spring-boot-starter</li>
+<li>模式：模块-spring-boot-starter</li>
+<li>举例：mybatis-spring-boot-starter</li>
+</ul>
+<h2 id="三-自定义starter实例">三、自定义starter实例</h2>
+<p>我们需要先创建两个工程 <strong>hello-spring-boot-starter</strong> 和 <strong>hello-spring-boot-starter-autoconfigurer</strong></p>
+<h3 id="1-hello-spring-boot-starter">1. hello-spring-boot-starter</h3>
+<h4 id="1pomxml">1.pom.xml</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+	&lt;groupId&gt;com.gf&lt;/groupId&gt;
+	&lt;artifactId&gt;hello-spring-boot-starter&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
+
+	&lt;name&gt;hello-spring-boot-starter&lt;/name&gt;
+
+	&lt;!-- 启动器 --&gt;
+	&lt;dependencies&gt;
+		&lt;!-- 引入自动配置模块 --&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;com.gf&lt;/groupId&gt;
+			&lt;artifactId&gt;hello-spring-boot-starter-autoconfigurer&lt;/artifactId&gt;
+			&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+
+
+&lt;/project&gt;
+</code></pre>
+<p>同时删除 启动类、resources下的文件，test文件。</p>
+<h3 id="2-hello-spring-boot-starter-autoconfigurer">2. hello-spring-boot-starter-autoconfigurer</h3>
+<h4 id="1-pomxml">1. pom.xml</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+	&lt;groupId&gt;com.gf&lt;/groupId&gt;
+	&lt;artifactId&gt;hello-spring-boot-starter-autoconfigurer&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
+
+	&lt;name&gt;hello-spring-boot-starter-autoconfigurer&lt;/name&gt;
+	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+	&lt;parent&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+		&lt;version&gt;1.5.9.RELEASE&lt;/version&gt;
+		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+	&lt;/parent&gt;
+
+	&lt;properties&gt;
+		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+		&lt;java.version&gt;1.8&lt;/java.version&gt;
+	&lt;/properties&gt;
+
+	&lt;dependencies&gt;
+		&lt;!-- 引入spring-boot-starter，所有starter的基本配合 --&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+
+	&lt;/dependencies&gt;
+
+
+&lt;/project&gt;
+</code></pre>
+<h4 id="2-helloproperties">2. HelloProperties</h4>
+<pre><code class="language-java">package com.gf.service;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = &quot;gf.hello&quot;)
+public class HelloProperties {
+
+    private String prefix;
+    private String suffix;
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
+    }
+
+}
+</code></pre>
+<h4 id="3-helloservice">3. HelloService</h4>
+<pre><code class="language-java">package com.gf.service;
+
+
+public class HelloService {
+
+    HelloProperties helloProperties;
+
+    public HelloProperties getHelloProperties() {
+        return helloProperties;
+    }
+
+    public void setHelloProperties(HelloProperties helloProperties) {
+        this.helloProperties = helloProperties;
+    }
+
+    public String sayHello(String name ) {
+        return helloProperties.getPrefix()+ &quot;-&quot; + name + helloProperties.getSuffix();
+    }
+}
+</code></pre>
+<h4 id="4-helloserviceautoconfiguration">4. HelloServiceAutoConfiguration</h4>
+<pre><code class="language-java">package com.gf.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ConditionalOnWebApplication //web应该生效
+@EnableConfigurationProperties(HelloProperties.class)
+public class HelloServiceAutoConfiguration {
+
+    @Autowired
+    HelloProperties helloProperties;
+
+    @Bean
+    public HelloService helloService() {
+        HelloService service = new HelloService();
+        service.setHelloProperties( helloProperties  );
+        return service;
+    }
+
+
+}
+</code></pre>
+<h4 id="5-springfactories">5. spring.factories</h4>
+<p>在 <strong>resources</strong> 下创建文件夹 <strong>META-INF</strong> 并在 <strong>META-INF</strong> 下创建文件 <strong>spring.factories</strong> ，内容如下：</p>
+<pre><code># Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.gf.service.HelloServiceAutoConfiguration
+</code></pre>
+<p>到这儿，我们的配置自定义的starter就写完了 ，我们hello-spring-boot-starter-autoconfigurer、hello-spring-boot-starter 安装成本地jar包。</p>
+<h2 id="三-测试自定义starter">三、测试自定义starter</h2>
+<p>我们创建个项目 <strong>hello-spring-boot-starter-test</strong>，来测试系我们写的stater。</p>
+<h3 id="1-pomxml-2">1. pom.xml</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+	&lt;groupId&gt;com.gf&lt;/groupId&gt;
+	&lt;artifactId&gt;hello-spring-boot-starter-test&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
+
+	&lt;name&gt;hello-spring-boot-starter-test&lt;/name&gt;
+	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+	&lt;parent&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+		&lt;version&gt;1.5.9.RELEASE&lt;/version&gt;
+		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+	&lt;/parent&gt;
+
+	&lt;properties&gt;
+		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+		&lt;java.version&gt;1.8&lt;/java.version&gt;
+	&lt;/properties&gt;
+
+	&lt;dependencies&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+
+		&lt;!-- 引入自定义starter --&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;com.gf&lt;/groupId&gt;
+			&lt;artifactId&gt;hello-spring-boot-starter&lt;/artifactId&gt;
+			&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+			&lt;scope&gt;test&lt;/scope&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+
+	&lt;build&gt;
+		&lt;plugins&gt;
+			&lt;plugin&gt;
+				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+			&lt;/plugin&gt;
+		&lt;/plugins&gt;
+	&lt;/build&gt;
+
+
+&lt;/project&gt;
+</code></pre>
+<h3 id="2-hellocontroller">2. HelloController</h3>
+<pre><code class="language-java">package com.gf.controller;
+
+import com.gf.service.HelloService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HelloController {
+
+    @Autowired
+    HelloService helloService;
+
+    @GetMapping(&quot;/hello/{name}&quot;)
+    public String hello(@PathVariable(value = &quot;name&quot;) String name) {
+        return helloService.sayHello( name + &quot; , &quot; );
+    }
+
+}
+</code></pre>
+<h3 id="3-applicationproperties">3. application.properties</h3>
+<pre><code>gf.hello.prefix = hi
+gf.hello.suffix = what's up man ?
+</code></pre>
+<p>我运行项目访问 http://127.0.0.1:8080/hello/zhangsan，结果如下：</p>
+<pre><code>hi-zhangsan , what's up man ? 
+</code></pre>
+<p>源码下载: https://github.com/gf-huanchupk/SpringBootLearning</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/sY0ka1Vfs/">
+              <span class="post-title">
+                SpringBoot Profile多环境配置&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

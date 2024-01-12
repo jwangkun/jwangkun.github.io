@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>搭建私有Charts仓库 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="搭建私有Charts仓库 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="搭建私有Charts仓库"/>
+    <meta property="og:url" content="https://jwangkun.github.io/j2GK2Y38c/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+        </span>
+            <h1>搭建私有Charts仓库</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>在 centos 上用 nginx 镜像创建一个容器，名字为 c1</p>
+<pre><code>[root@vms12 ~]# docker run -dit --name=c1 -p 8080:80 -v /data:/usr/share/nginx/html/charts  docker.io/nginx 
+</code></pre>
+<pre><code>ca08a2ce9b8e910ed71f458fa3c7dd53843bf50e5bb92c089fdacf7cd65a1657 
+</code></pre>
+<!-- more -->
+<p>在 master 上自定义一个 chart：</p>
+<pre><code>[root@vms10 ~]# mkdir mychar 
+
+[root@vms10 ~]# 
+
+[root@vms10 ~]# cd mychar/ 
+
+[root@vms10 mychar]# helm create chart1 
+</code></pre>
+<pre><code>Creating chart1 
+</code></pre>
+<pre><code>[root@vms10 mychar]# cp -r ../mysql . 
+
+[root@vms10 mychar]# 
+
+[root@vms10 mychar]# ls 
+</code></pre>
+<pre><code>chart1 mysql 
+</code></pre>
+<p>对这两个 chart 进行打包：</p>
+<pre><code>[root@vms10 mychar]# **helm package chart1** 
+</code></pre>
+<pre><code>Successfully packaged chart and saved it to: /root/mychar/chart1-0.1.0.tgz 
+</code></pre>
+<p>[root@vms10 mychar]# h<strong>elm package mysql/</strong></p>
+<pre><code>Successfully packaged chart and saved it to: /root/mychar/mysql-1.6.4.tgz 
+</code></pre>
+<pre><code>[root@vms10 mychar]# ls 
+</code></pre>
+<pre><code>chart1 chart1-0.1.0.tgz mysql mysql-1.6.4.tgz 
+</code></pre>
+<p>给当前目录下的两个包建立索引文件，并指定私有仓库地址：</p>
+<pre><code>[root@vms10 mychar]# helm repo **index** . --url **http://192.168.26.12:8080/charts** 
+</code></pre>
+<pre><code>[root@vms10 mychar]# ls 
+</code></pre>
+<pre><code>chart1 chart1-0.1.0.tgz index.yaml mysql mysql-1.6.4.tgz 
+</code></pre>
+<p>把当前目录下 index.yaml 和后缀为 tgz 的包全部拷贝 192.168.26.12 的/data 目录里（请理解</p>
+<p>前面 c1 容器数据卷的设置）：</p>
+<pre><code>[root@vms10 mychar]# scp index.yaml *.tgz 192.168.26.12:/data 
+</code></pre>
+<p>切换到 vms12 上：</p>
+<pre><code>[root@vms12 ~]# **ls /data/** 
+</code></pre>
+<pre><code>index.yaml mychartxx-0.1.0.tgz mysql-1.6.2.tgz 
+</code></pre>
+<pre><code>[root@vms12 ~]# docker exec -it c1 
+
+&gt; **ls /usr/share/nginx/html/charts** 
+</code></pre>
+<pre><code>index.yaml mychartxx-0.1.0.tgz mysql-1.6.2.tgz 
+</code></pre>
+<p>切换到 master 上，添加 http://192.168.26.12:8080/charts 作为仓库：</p>
+<pre><code>[root@vms10 mychar]# **helm repo add myrepo http://192.168.26.12:8080/charts** 
+</code></pre>
+<pre><code>&quot;myrepo&quot; has been added to your repositories 
+</code></pre>
+<pre><code>[root@vms10 mychar]# helm repo list 
+</code></pre>
+<p>搜索 mysql 的 chart：</p>
+<p>[root@vms10 mychar]# helm search repo mysql</p>
+<p>除了在阿里云里可以找到 mysql 的仓库之外，在我们自定义的仓库里也能找到 mysql。</p>
+<p>查询 chart1：</p>
+<p>[root@vms10 mychar]# helm search repo chart1</p>
+<pre><code>NAME 
+
+CHART VERSION APP VERSION DESCRIPTION 
+
+myrepo/chart1 
+
+0.1.0 
+
+1.16.0 
+
+A Helm chart for Kubernetes 
+</code></pre>
+<p>私有仓库配置完毕。</p>
+<p>删除本地私有仓库地址：</p>
+<pre><code>[root@vms10 mychar]# **helm repo remove myrepo** 
+</code></pre>
+<pre><code>&quot;myrepo&quot; has been removed from your repositories 
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/apGBI-lqF/">
+              <span class="post-title">
+                Kubernetes Config Maps&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

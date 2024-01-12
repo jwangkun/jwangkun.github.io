@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Spring Task实现简单定时任务 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Spring Task实现简单定时任务 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Spring Task实现简单定时任务"/>
+    <meta property="og:url" content="https://jwangkun.github.io/TrR0hf0TL/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/pDqaXfdRb/" class="tag">Spring Task</a>
+            
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1>Spring Task实现简单定时任务</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Spring Task是Spring 3.0自带的定时任务，可以将它看作成一个轻量级的Quartz，功能虽然没有Quartz那样强大，但是使用起来非常简单，无需增加额外的依赖，可直接上手使用。</p>
+<h2 id="一-如何实现定时任务">一 如何实现定时任务</h2>
+<h3 id="1-开启定时任务">1. 开启定时任务</h3>
+<p>在启动类上增加<code>@EnableScheduling</code>注解，开启定时任务</p>
+<h3 id="2-定时任务方法">2. 定时任务方法</h3>
+<p>使用<code>@Scheduled</code>注解的方法就会被声明成一个定时任务</p>
+<pre><code>@Slf4j
+@Component
+public class ScheduledTest {
+
+    @Scheduled(cron = &quot;*/1 * * * * ?&quot;)
+    public void test1(){
+        log.info(&quot;这个定时任务1----&quot;);
+    }
+    @Scheduled(cron = &quot;*/1 * * * * ?&quot;)
+    public void test2(){
+        log.info(&quot;这个定时任务2----&quot;);
+    }
+    @Scheduled(cron = &quot;*/1 * * * * ?&quot;)
+    public void test3(){
+        log.info(&quot;这个定时任务3----&quot;);
+    }
+}
+</code></pre>
+<h3 id="3-注册bean">3. 注册bean</h3>
+<p>使用<code>@Component</code>将这个定时任务类注册成一个bean组件，交给Spring容器管理。</p>
+<h2 id="二-cron表达式详解">二 cron表达式详解</h2>
+<p>在spring 4.x中已经不支持7个参数的cronin表达式了，要求必须是6个参数。cron表达式格式如下：</p>
+<pre><code>{秒} {分} {时} {日期（具体哪天）} {月} {星期}
+</code></pre>
+<ul>
+<li>秒：必填项，允许的值范围是0-59，支持的特殊符号包括<code>,</code> <code>-</code> <code>*</code> <code>/</code>，<code>,</code>表示特定的某一秒才会触发任务，<code>-</code>表示一段时间内会触发任务，<code>*</code>表示每一秒都会触发，<code>/</code>表示从哪一个时刻开始，每隔多长时间触发一次任务。</li>
+<li>分：必填项，允许的值范围是0-59，支持的特殊符号和秒一样，含义类推</li>
+<li>时：必填项，允许的值范围是0-23，支持的特殊符号和秒一样，含义类推</li>
+<li>日期：必填项，允许的值范围是1-31，支持的特殊符号相比秒多了<code>?</code>，表示与{星期}互斥，即意味着若明确指定{星期}触发，则表示{日期}无意义，以免引起冲突和混乱。</li>
+<li>月：必填项，允许的值范围是1-12（JAN-DEC），支持的特殊符号与秒一样，含义类推</li>
+<li>星期：必填项，允许值范围是1~7 (SUN-SAT),1代表星期天（一星期的第一天），以此类推，7代表星期六，支持的符号相比秒多了<code>?</code>，表达的含义是与{日期}互斥，即意味着若明确指定{日期}触发，则表示{星期}无意义。</li>
+</ul>
+<p>如果对cron表达式不是很熟悉，可以网上找一下，有许多生产cron表达式的网站。Spring Task就简单介绍到这了，使用起来非常方便，下一章将介绍Quartz的使用及将任务持久化存储。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Y5VB2-e2s/">
+              <span class="post-title">
+                spring-boot-admin监控服务&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

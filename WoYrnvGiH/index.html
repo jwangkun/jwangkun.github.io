@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Ceph搭建硬件建议详解 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Ceph搭建硬件建议详解 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Ceph搭建硬件建议详解"/>
+    <meta property="og:url" content="https://jwangkun.github.io/WoYrnvGiH/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/NuKABzdBlt/" class="tag">Ceph</a>
+            
+        </span>
+            <h1>Ceph搭建硬件建议详解</h1>
+            <span class="meta">
+            	Posted on
+              2021-05-19，13 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Ceph是专为在商品硬件上运行而设计的，这使得构建和维护超大规模的数据集群在经济上是可行的。当规划出你的集群硬件时，你需要平衡一些考虑因素，包括故障域和潜在的性能问题。硬件规划应该包括将Ceph守护进程和其他使用Ceph的进程分布在许多主机上。一般来说，我们 建议在为该类型的守护进程配置的主机上运行特定的Ceph守护进程。我们建议使用其他主机来处理使用您的数据集群的进程（例如OpenStack、CloudStack）</p>
+<h2 id="cpu">CPU</h2>
+<p>Ceph元数据服务器会动态地重新分配负载，这对CPU来说是很有必要的。所以你的元数据处理器应该有相当大的处理能力（四核心或更高的CPU）。Ceph OSDs 运行RADOS服务，用CRUSH计算数据放置、复制数据，并维护自己的集群地图副本。因此，OSD应该有合理的处理能力（例如双核处理器）。监视器只是维护集群映射的主副本，所以监视器不需要CPU密集型的处理能力。</p>
+<p>除了Ceph守护进程之外，你还必须考虑主机是否会运行CPU密集型进程，例如，如果您的主机将运行计算虚拟机（例如，OpenStack Nova)，您需要确保这些其他进程为Ceph守护进程留下足够的处理能力。我们建议在单独的主机上运行额外的CPU密集型进程。</p>
+<h2 id="ram">RAM</h2>
+<p>一般来说，RAM越多越好</p>
+<p><strong>| Monitors and managers (ceph-mon and ceph-mgr)</strong></p>
+<p>监视器和管理器守护进程的内存使用量一般会随着集群的大小而变化。</p>
+<p>对于小型集群，一般来说，1-2GB就足够了。</p>
+<p>对于大型集群，你应该提供更多（5-10GB）。</p>
+<p>你可能还需要考虑调整设置，如mon_osd_cache_size或 rocksdb_cache_size</p>
+<p><strong>| OSDs (ceph-osd)</strong></p>
+<h2 id="memory">Memory</h2>
+<p>Bluestore使用自己的内存来缓存数据，而不是依赖操作系统的页面缓存。在BlueStore中，你可以通过osd_memory_target选项调整OSD_memory_target的内存量</p>
+<ul>
+<li>通常不建议将osd_memory_target设置为2GB以下，可能会将内存保持在2GB以下，同时也可能导致性能极慢。</li>
+<li>将内存目标设置在2Gb和4Gb之间通常有效，但可能会导致性能下降，因为元数据可能在IO期间从磁盘读取，除非活动数据集相对较小。</li>
+<li>4GB是目前默认的osd_memory_target大小，这样设置的目的是为了平衡内存需求和OSD的性能，以满足典型的使用情况</li>
+<li>设置osd_memory_target高于4GB时，当有许多（小的）或大的（256GB/OSD)数据集被处理时，可能会提高性能。</li>
+</ul>
+<p>重要：</p>
+<p><strong>OSD的内存自动调整是“尽力而为”。虽然OSD可能会解除内存映射，让内核回收内存，但不能保证内核会在任何特定的时间框架内实际回收释放的内存。这在旧版本的Ceph中尤其如此，因为透明的巨页会阻止内核从碎片化的巨页中回收内存。现代版本的Ceph在应用级禁用透明巨页以避免这种情况，但这仍然不能保证内核会立即回收未映射的内存。OSD有时仍然可能会超过它的内存目标。我们建议在系统中保留20%左右的额外内存，以防止OSD在临时高峰期或由于内核延迟回收空闲页而导致的OSD出现OOM。这个值可能会比需要的多或少取决于系统的具体配置。</strong></p>
+<p>在使用传统的FileStore后端时，页面缓存是用来缓存数据的，所以一般不需要调优，OSD的内存消耗一般与系统中每个守护进程的PG数量有关</p>
+<h2 id="data-storage">Data Storage</h2>
+<p>仔细规划你的数据存储配置。在规划数据存储时，需要考虑重大的成本和性能权衡。同时进行操作系统操作，以及多个守护进程对单个驱动器同时请求读取和写入操作，会大大降低性能。</p>
+<p>重要</p>
+<p><strong>由于Ceph在发送ACK之前必须先将所有数据写入日志（至少对XFS来说），所以日志和OSD的性能平衡真的很重要！在这里，Ceph的日志和OSD的性能是非常重要的。</strong></p>
+<p><strong>| Hard Disk Drives</strong></p>
+<p>OSD应该有足够的硬盘空间来存放对象数据。我们建议硬盘驱动器的最小容量为1T。考虑到较大磁盘的每GB的成本优势。我们建议将硬盘驱动器的价格除以千兆字节，得出每千兆字节的成本，因为较大的驱动器可能会对每千兆字节的成本有很大影响。例如，价格为75美元的1T硬盘，每千兆字节的成本为0.07美元。相比之下，价格为150美元的3T硬盘的成本为每千兆字节0.05美元。在上述例子中，使用1T硬盘通常会使每千兆字节的成本增加40%——使集群的成本效益大大降低。</p>
+<p>Tips: 在一个磁盘上运行多个OSD，无论分区如何，都不是一个好主意</p>
+<p>Tips: 在单一磁盘上运行OSD和显示器或者元数据服务器，无论分区如何，都不是一个好主意</p>
+<p>存储驱动器在寻求时间、访问时间、读取和写入时间以及总吞吐量方面受到限制。这些物理限制会影响整体系统性能，特别是在恢复期间。我们建议为操作系统和软件使用一个专门驱动器，并且您在主机上运行的每个Ceph OSD daemon使用一个驱动器。大多数“慢OSD”问题的出现是由于在同一个驱动器上运行一个操作系统，多个OSD，或多个日志。由于在一个小型集群上排除性能问题的成本超过了额外的磁盘驱动器的成本，因此您可以通过避免过度消耗OSD存储驱动器的诱惑来优化您的集群设计规划。</p>
+<p>您可以在每个硬盘驱动器上运行多个Ceph OSD Daemons，但这可能会导致资源征用，降低整体吞吐量。你可以在同一硬盘上存储日志和对象数据，但这可能会增加写日志和ACK到客户端所需要的时间。Ceph必须先写入到日志，然后再进行ACK写入。</p>
+<p>ack写入：完成此类写入之后，将向客户端发送一个成功写入的ACK，所以称之为ACK写入</p>
+<p>Ceph最佳实践规定，你应该在不同的驱动器上运行操作系统、OSD数据和OSD日志</p>
+<p><strong>| Solid State Drives</strong></p>
+<p>提高性能的一个机会是使用固态硬盘来减少随机访问时间和读取延迟，同时加快吞吐量。与机械硬盘相比，固态硬盘每千兆字节的成本往往超过10倍以上，但固态硬盘的访问时间往往比机械硬盘至少快100倍。</p>
+<p>固态硬盘没有活动的机械部件，所以他们不一定会受到与机械硬盘相同的限制。但固态硬盘确实有很大的局限性。在评估固态硬盘时，重要的是考虑顺序读取和写入的性能。当为多个OSD存储多个日志时，具有400MB/S顺序写入吞吐量的SSD可能比具有120MB/s顺序写入吞吐量的SSD性能要好的多。</p>
+<p><strong>重要</strong></p>
+<p>我们建议探索使用固态硬盘来提高性能。然而，在对SSD进行重大投资之前，我们强烈建议在审查SSD的性能指标和测试配置中测试SSD的性能</p>
+<p>由于固态硬盘没有活动的机械部件，所以在Ceph中不需要使用大量存储空间的区域（如日志）使用固态硬盘是很有意义的。相对便宜的SSD可能会吸引你的经济意识。请谨慎使用。在选择使用Ceph的SSD时，仅有可接受的IOPS是不够的。日志和SSD有几个重要的性能注意事项：</p>
+<ul>
+<li>写入密集型语义：日志涉及到写密集型语义，因此您应该确保您选择部署的SSD在写入数据时的性能 相当于或优于机械硬盘。廉价的固态硬盘在加速访问时间的同时，可能会引入写入延时，因为有时高性能硬盘的写入速度会比市场上一些更经济的固态硬盘快，因此，您应该确保您选择的固态硬盘在写入数据时的性能与机械硬盘相当或更好。</li>
+<li>顺序写入：当您在SSD上存储多个日志时，您必须考虑到SSD的顺序写入限制，因为它们可能会同时处理对多个OSD日志的写入请求。</li>
+<li>分区对齐：SSD性能的一个常见问题是，人们喜欢将硬盘分区作为最佳做法，但往往忽略了对SSD的正确分区对齐，这样会导致SSD的数据传输速度更慢。确保SSD分区正确对齐</li>
+</ul>
+<p>虽然固态硬盘对于对象存储的成本较高，但通过将OSD的日志存储在固态硬盘上，并将OSD的对象存储存储在独立的机械硬盘上，可能会看到性能的显著提升。osd journal配置设置默认为/var/lib/ceph/osd/$cluster-id/journal。您可以将此路径挂载到SSD或者SSD分区，使其不只是与对象数据存储在同一硬盘上。</p>
+<p>Ceph加速CephFS文件系统性能的一种方法是将CephFS元数据的存储与CephFS文件内容的存储隔离开来。Ceph为CephFS元数据提供了一个默认的元数据池。你永远不必为CephFS元数据创建一个池，但你可以为你的CephFS元数据池创建一个只指向主机的SSD存储介质的CRUSH映射层次结构。详情请参见将池映射到不同类型的OSDs。</p>
+<ul>
+<li>意思是可以将一个池的所有数据都存储到SSD类型的OSD</li>
+</ul>
+<p><strong>| Controllers</strong></p>
+<p>磁盘控制器对写入吞吐量也有很大影响。在选择磁盘控制器时要慎重考虑，确保不会造成性能瓶颈。</p>
+<p>Tips：Ceph博客通常是对Ceph性能问题的一个很好的信息来源。更多详情请参加Ceph写吞吐量1和Ceph写吞吐量2</p>
+<p>•<a href="https://link.zhihu.com/?target=http%3A//ceph.com/community/ceph-performance-part-1-disk-controller-write-throughput/">http://ceph.com/community/ceph-performance-part-1-disk-controller-write-throughput/</a>•<a href="https://link.zhihu.com/?target=http%3A//ceph.com/community/ceph-performance-part-2-write-throughput-without-ssd-journals/">http://ceph.com/community/ceph-performance-part-2-write-throughput-without-ssd-journals/</a></p>
+<p><strong>| Additional Considerations 其他考虑因素</strong></p>
+<p>你可以在每台主机上运行多个OSD，但你应该确保你的OSD硬盘的总吞吐量之和不超过服务于客户端读取或写入所需的网络带宽。你还应该考虑集群在每台主机上存储的数据占整体数据的百分比。如果某个特定主机上的百分比很大，而该主机出现故障，可能会导致超过 full ratio等问题，从而导致Ceph停止工作，作为防止数据丢失的安全规范措施。</p>
+<p>当你在每个主机上运行多个OSD时，你还需要确保内核是最新的。请参阅OS建议中关于glibc和syncfs（2）的说明，以确保你的硬件在每个主机上运行多个OSD时，能按照预期的方式执行。</p>
+<h2 id="networks">NETWORKS</h2>
+<p>考虑从机架上的10Gbps+网络开始。在1Gbps网络上复制1TB的数据需要3个小时，而10TB需要30个小时！相比之下，使用10Gbps网络，复制时间分别需要20分钟和1小时。在petabyte规模的集群中，OSD磁盘的故障应该是一种预期，而不是例外。在考虑到价格/性能权衡的情况下，系统管理员会很欣赏PG能尽快从降级状态恢复到活动+清洁状态。此外，一些部署工具采用VLANS使硬件和网络布线更易于管理。使用802.1q协议的运营成本节省所抵消。当使用VLAN来处理集群和计算堆栈（例如OpenStack、CloudStack等）之间的VM流量时，也值得考虑10G以太网。每个网络的架上路由器还需要能够与吞吐量更快的骨干路由器进行通信，例如40Gbps到100Gbps。</p>
+<p>您的服务器硬件应该有一个底层管理控制器（BMC）。管理和部署工具也可能会大量使用BMC，因此要考虑带外网络的管理成本/收益权衡。Hypervisor SSH访问、VM镜像上传、操作系统镜像安装、管理套接字等都会给网络带来巨大的负载。运行三个网络可能看起来似乎矫枉过正，但每个流量路径都代表了潜在的容量、吞吐量和/或性能瓶颈，在部署大规模数据集群之前，您应该仔细考虑。</p>
+<p>BMC：Baseboard Management Controller，基板管理控制器</p>
+<p>带外网络：OOB，全程Out Of Band，一套与任何业务数据网络没有关联的独立网络，在任何时候——即便是业务网络终端的情况下，网络控制中心都可以通过带外网络连接到各个服务器或者网络设备的管理接口或者console.</p>
+<h2 id="failure-domains-故障域">FAILURE DOMAINS 故障域</h2>
+<p>故障域是指任何阻止一个或多个OSD的故障。这可能是主机上的守护进程停止；硬盘故障、操作系统崩溃、网卡故障、电源故障、网络中断、断电等等。在规划硬件需求的时候，你必须平衡一下，把太多的责任放在太少的故障域中来降低成本，以及隔离每个潜在故障域所带来的额外成本</p>
+<h2 id="最低硬件建议">最低硬件建议</h2>
+<p>Ceph可以在廉价的商品硬件上运行。小型生产集群和开发集群可以用适中的硬件成功运行</p>
+<figure data-type="image" tabindex="1"><img src="https://pic2.zhimg.com/80/v2-3d5f5a06f94ff7369c1af0d5f6031bd9_720w.jpg" alt="img" loading="lazy"></figure>
+<pre><code class="language-text">1  Tips：如果您使用单一磁盘运行OSD，请为你的卷存储创建一个与包含操作系统的分区分开的分区。一般情况下，我们建议将操作系统和卷存储区的磁盘分开。
+2  BlueStore会比FileStore占用更多的内存
+3  https://ceph.io/releases/v12-2-10-luminous-released/
+4  osd_memory_target的默认值是4294967296 Bytes，约等于4.2Gb
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/H6mPk4-w4/">
+              <span class="post-title">
+                 Ceph集群的搭建与运维&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

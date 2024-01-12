@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>HDFS完全分布式集群搭建 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="HDFS完全分布式集群搭建 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="HDFS完全分布式集群搭建"/>
+    <meta property="og:url" content="https://jwangkun.github.io/ldWvjNELN/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/BBrbTLSK6/" class="tag">HDFS</a>
+            
+            <a href="https://jwangkun.github.io/DI-wY1RMLz/" class="tag">HDFS集群</a>
+            
+            <a href="https://jwangkun.github.io/QUknudSmd1/" class="tag">分布式文件服务器</a>
+            
+        </span>
+            <h1>HDFS完全分布式集群搭建</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="一-环境信息">一、环境信息</h2>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>主机名(FQDN)</th>
+<th>IP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NameNode、ResourceManager</td>
+<td>namenode.chengdumap.cn</td>
+<td>172.24.134.24</td>
+</tr>
+<tr>
+<td>DataNode、NodeManager</td>
+<td>datanode1.chengdumap.cn</td>
+<td>172.24.134.27</td>
+</tr>
+<tr>
+<td>DataNode、NodeManager</td>
+<td>datanode2.chengdumap.cn</td>
+<td>172.24.134.29</td>
+</tr>
+<tr>
+<td>DataNode、NodeManager</td>
+<td>datanode3.chengdumap.cn</td>
+<td>172.24.134.30</td>
+</tr>
+</tbody>
+</table>
+<p>操作系统：CentOS 7.6<br>
+Hadoop版本：hadoop-2.9.2</p>
+<h2 id="二-环境准备">二、环境准备</h2>
+<p>以下只在其中一台机器上操作，另外三台不作演示</p>
+<ol>
+<li>分别修改4台机器的主机名</li>
+</ol>
+<pre><code>[root@namenode ]# hostnamectl set-hostname namenode.chengdumap.cn
+</code></pre>
+<ol>
+<li>分别关闭4台机器的防火墙和SELinux</li>
+</ol>
+<pre><code>[root@namenode ]# systemctl stop firewalld.service
+[root@namenode ]# systemctl disable firewalld.service
+
+[root@namenode ]# setenforce 0
+[root@namenode ]# sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+</code></pre>
+<ol>
+<li>分别配置4台机器的hosts，配置好如下</li>
+</ol>
+<pre><code>[root@namenode ]# cat /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+172.24.134.24 namenode.chengdumap.cn
+172.24.134.27 datanode1.chengdumap.cn
+172.24.134.29 datanode2.chengdumap.cn
+172.24.134.30 datanode3.chengdumap.cn
+</code></pre>
+<ol>
+<li>卸载系统自带JDK</li>
+</ol>
+<pre><code>[root@namenode ]# rpm -qa |grep jdk
+[root@namenode ]# rpm -e --nodeps $包名
+</code></pre>
+<ol>
+<li>安装jdk8</li>
+</ol>
+<pre><code>[root@namenode ]# rpm -ivh jdk-8u251-linux-x64.rpm
+[root@namenode ]# rpm -qa |grep -i jdk
+[root@namenode hadoop]#  java -version
+java version &quot;1.8.0_251&quot;
+Java(TM) SE Runtime Environment (build 1.8.0_251-b08)
+Java HotSpot(TM) 64-Bit Server VM (build 25.251-b08, mixed mode)
+[root@namenode ]# 
+</code></pre>
+<ol>
+<li>创建hadoop用户，并赋权</li>
+</ol>
+<pre><code>[root@namenode ]# useradd agsdoop
+[root@namenode ]# echo &quot;system&quot; |passwd --stdin agsdoop
+[root@namenode ]# chown -R agsdoop:agsdoop /data
+</code></pre>
+<ol>
+<li>打通agsdoop用户的ssh通道<br>
+四台机器均执行下面操作，如果使用root来操作hdfs，则打通root通道即可</li>
+</ol>
+<pre><code>[root@namenode ]# su - agsdoop
+[agsdoop@namenode ~]$ ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+[agsdoop@namenode ~]$ cat ~/.ssh/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys
+[agsdoop@namenode ~]$ chmod 0600 ~/.ssh/authorized_keys
+</code></pre>
+<p>四台机器都操作一下，把公钥拷贝到其他机器上，如果没有ssh-copy-id命令，可以手动将id_rsa.pub文件写到对方<code>~/.ssh/authorized_keys</code>文件里</p>
+<pre><code>[agsdoop@namenode ~]$ ssh-copy-id -i ~/.ssh/id_rsa.pub namenode.chengdumap.cn
+[agsdoop@namenode ~]$ ssh-copy-id -i ~/.ssh/id_rsa.pub datanode1.chengdumap.cn
+[agsdoop@namenode ~]$ ssh-copy-id -i ~/.ssh/id_rsa.pub datanode2.chengdumap.cn
+[agsdoop@namenode ~]$ ssh-copy-id -i ~/.ssh/id_rsa.pub datanode3.chengdumap.cn
+</code></pre>
+<p>四台机器分别测试配置成功</p>
+<pre><code>[agsdoop@namenode ~]$ ssh datanode1.chengdumap.cn
+Last login: Mon Jun 1 17:51:47 2020 from namenode
+</code></pre>
+<ol>
+<li>创建逻辑卷，挂载到/data目录<br>
+过程省略</li>
+</ol>
+<h2 id="三-hdfs安装">三、HDFS安装</h2>
+<p>本章以下步骤，如无特别说明，都只需要在NameNode节点上进行</p>
+<ol>
+<li>上传软件包，解压</li>
+</ol>
+<pre><code>[root@namenode ~]# tar -zxvf /software/hadoop-2.9.2.tar.gz -C /data/
+</code></pre>
+<ol>
+<li>配置hadoop环境变量<br>
+此步骤在四台机器上都要做，末尾增加如下三行：</li>
+</ol>
+<pre><code>[root@namenode ~]# vim /etc/profile
+# hadoop
+export HADOOP_HOME=/data/hadoop-2.9.2
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:
+</code></pre>
+<p>测试环境变量是否生效</p>
+<pre><code>[agsdoop@namenode ~]$ hadoop version
+Hadoop 2.9.2
+Subversion https://git-wip-us.apache.org/repos/asf/hadoop.git -r 826afbeae31ca687bc2f8471dc841b66ed2c6704
+Compiled by ajisaka on 2018-11-13T12:42Z
+Compiled with protoc 2.5.0
+From source with checksum 3a9939967262218aa556c684d107985
+This command was run using /data/hadoop-2.9.2/share/hadoop/common/hadoop-common-2.9.2.jar
+</code></pre>
+<ol>
+<li>创建数据存储目录<br>
+此步骤在四台机器上都要做</li>
+</ol>
+<ul>
+<li>NameNode 数据存放目录： /data/hdfs/namenode</li>
+<li>SecondaryNameNode 数据存放目录： /data/hdfs/secondary</li>
+<li>DataNode 数据存放目录： /data/hdfs/datanode</li>
+<li>临时数据存放目录： /data/hdfs/tmp</li>
+</ul>
+<pre><code>[agsdoop@namenode ~]$ mkdir -p /data/hdfs/namenode
+[agsdoop@namenode ~]$ mkdir -p /data/hdfs/secondary
+[agsdoop@namenode ~]$ mkdir -p /data/hdfs/datanode
+[agsdoop@namenode ~]$ mkdir -p /data/hdfs/tmp
+</code></pre>
+<ol>
+<li>修改配置文件<br>
+配置文件存放在/data/hadoop-2.9.2/etc/hadoop<br>
+需要修改hadoop-env.sh、core-site.xml、hdfs-site.xml、yarn-site.xml、mapred-site.xml、slaves这6个配置文件<br>
+如下：</li>
+</ol>
+<p><strong>hadoop-env.sh</strong><br>
+新增如下：</p>
+<pre><code>export JAVA_HOME=/usr/java/jdk1.8.0_251-amd64
+export HADOOP_CONF_DIR=/data/hadoop-2.9.2/etc/hadoop
+
+export HDFS_NAMENODE_USER=&quot;agsdoop&quot;
+export HDFS_DATANODE_USER=&quot;agsdoop&quot;
+export HDFS_SECONDARYNAMENODE_USER=&quot;agsdoop&quot;
+export YARN_RESOURCEMANAGER_USER=&quot;agsdoop&quot;
+export YARN_NODEMANAGER_USER=&quot;agsdoop&quot;
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604144353838-1605089998.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604144359429-1245154442.png" alt="img" loading="lazy"></figure>
+<p><strong>core-site.xml</strong></p>
+<pre><code>&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;fs.default.name&lt;/name&gt;
+        &lt;value&gt;hdfs://172.24.134.24:9000&lt;/value&gt;
+        &lt;description&gt;指定默认的访问地址以及端口号&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+        &lt;value&gt;/data/hdfs/tmp/&lt;/value&gt;
+        &lt;description&gt;其它临时目录的父目录，会被其它临时目录用到&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+         &lt;name&gt;io.file.buffer.size&lt;/name&gt;
+         &lt;value&gt;131072&lt;/value&gt;
+        &lt;description&gt;在序列中使用的缓冲区大小&lt;/description&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<figure data-type="image" tabindex="3"><img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604144408942-136482027.png" alt="img" loading="lazy"></figure>
+<p><strong>hdfs-site.xml</strong></p>
+<pre><code>&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;dfs.replication&lt;/name&gt;
+        &lt;value&gt;3&lt;/value&gt;
+        &lt;description&gt;副本数，HDFS存储时的备份数量&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;
+        &lt;value&gt;/data/hdfs/tmp&lt;/value&gt;
+        &lt;description&gt;namenode临时文件所存放的目录&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;
+        &lt;value&gt;/data/hdfs/tmp&lt;/value&gt;
+        &lt;description&gt;datanode临时文件所存放的目录&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;dfs.namenode.http-address&lt;/name&gt;
+        &lt;value&gt;172.24.134.24:50070&lt;/value&gt;
+        &lt;description&gt;hdfs web 地址&lt;/description&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<figure data-type="image" tabindex="4"><img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604144418965-211155410.png" alt="img" loading="lazy"></figure>
+<p><strong>yarn-site.xml</strong><br>
+需要配置的是数据获取方式， master 地址，（配置yarn 外部可访问），关闭内存检测（虚拟机需要），容器可能会覆盖的环境变量。</p>
+<pre><code>&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;
+        &lt;value&gt;mapreduce_shuffle&lt;/value&gt;
+        &lt;description&gt;nomenodeManager获取数据的方式是shuffle&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;yarn.resourcemanager.hostname&lt;/name&gt;
+        &lt;value&gt;172.24.134.24&lt;/value&gt;
+        &lt;description&gt;指定Yarn的老大(ResourceManager)的地址&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+          &lt;name&gt;yarn.resourcemanager.webapp.address&lt;/name&gt;
+          &lt;value&gt;172.24.134.24:8088&lt;/value&gt;
+        &lt;description&gt;配置 yarn 外部可访问，(外网IP:端口)&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+       &lt;name&gt;yarn.nodemanager.vmem-check-enabled&lt;/name&gt;
+       &lt;value&gt;false&lt;/value&gt;
+        &lt;description&gt;关闭内存检测，虚拟机需要，不配会报错&lt;/description&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<figure data-type="image" tabindex="5"><img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604144427018-1229835194.png" alt="img" loading="lazy"></figure>
+<p><strong>mapred-site.xml</strong><br>
+先从模板复制出来</p>
+<pre><code>[agsdoop@namenode ~]$ cp mapred-site.xml.template mapred-site.xml
+[agsdoop@namenode ~]$ vim mapred-site.xml
+&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;mapreduce.framework.name&lt;/name&gt;
+        &lt;value&gt;yarn&lt;/value&gt;
+        &lt;description&gt;告诉hadoop以后MR(Map/Reduce)运行在YARN上&lt;/description&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<figure data-type="image" tabindex="6"><img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604144435238-556316849.png" alt="img" loading="lazy"></figure>
+<p><strong>slaves</strong><br>
+配置DataNode节点的主机名</p>
+<pre><code>datanode1.chengdumap.cn
+datanode2.chengdumap.cn
+datanode3.chengdumap.cn
+</code></pre>
+<figure data-type="image" tabindex="7"><img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604144510611-2016779653.png" alt="img" loading="lazy"></figure>
+<ol>
+<li>配置分发<br>
+这里我每个机子都装了相同的hadoop和路径，所以只要分发配置文件即可：</li>
+</ol>
+<pre><code>[agsdoop@namenode ~]$ rsync -avp /data/hadoop-2.9.2/etc/hadoop* 172.24.134.27:/data/hadoop-2.9.2/etc/hadoop
+[agsdoop@namenode ~]$ rsync -avp /data/hadoop-2.9.2/etc/hadoop* 172.24.134.29:/data/hadoop-2.9.2/etc/hadoop
+[agsdoop@namenode ~]$ rsync -avp /data/hadoop-2.9.2/etc/hadoop* 172.24.134.30:/data/hadoop-2.9.2/etc/hadoop
+</code></pre>
+<ol>
+<li>对NameNode做格式化</li>
+</ol>
+<pre><code>[agsdoop@namenode ~]$ hdfs namenode -format
+</code></pre>
+<figure data-type="image" tabindex="8"><img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604144522273-1037830833.png" alt="img" loading="lazy"></figure>
+<p>格式化成功之后会在/data/hdfs/tmp目录下多一个current文件夹</p>
+<ol>
+<li>启动集群</li>
+</ol>
+<pre><code># 一次性启动
+[agsdoop@namenode ~]$ start-all.sh
+
+# 逐个组件启动
+[agsdoop@namenode ~]$ start-dfs.sh
+[agsdoop@namenode ~]$ start-yarn.sh
+</code></pre>
+<ol>
+<li>访问<br>
+Hadoop：<br>
+<img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604145049700-679190376.png" alt="img" loading="lazy"></li>
+</ol>
+<p>Yarn：<br>
+<img src="https://img2020.cnblogs.com/blog/1046752/202006/1046752-20200604145151920-1112095118.png" alt="img" loading="lazy"></p>
+<ol>
+<li>测试上传与下载</li>
+</ol>
+<pre><code>[agsdoop@namenode ~]$ hadoop fs -mkdir -p /tmp/test
+[agsdoop@namenode ~]$ hadoop fs -ls /tmp/test
+[agsdoop@namenode ~]$ hadoop fs -put test_file /tmp/test
+[agsdoop@namenode ~]$ hadoop fs -ls /tmp/test
+[agsdoop@namenode ~]$ hadoop fs -get /tmp/test/test_file /tmp/
+</code></pre>
+<p>原文链接：https://www.cnblogs.com/williamzheng/p/13043461.html</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/fja0PWFwF/">
+              <span class="post-title">
+                elasticsearch集群&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

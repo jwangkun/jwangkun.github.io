@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>docker 安装 clickhouse 单机版 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="docker 安装 clickhouse 单机版 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="docker 安装 clickhouse 单机版"/>
+    <meta property="og:url" content="https://jwangkun.github.io/gn2rRNL0W/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/FeZnbmX34/" class="tag">Clickhouse</a>
+            
+            <a href="https://jwangkun.github.io/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>docker 安装 clickhouse 单机版</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-27，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>直接运行, docker 会自动帮你拉取镜像:</p>
+<pre><code>docker run -d --name ch-server --ulimit nofile=262144:262144 -p 8123:8123 -p 9000:9000 -p 9009:9009 yandex/clickhouse-server
+
+</code></pre>
+<p>查看镜像</p>
+<pre><code>[root@ly-A2 ~]# docker ps
+CONTAINER ID        IMAGE                      COMMAND             CREATED             STATUS              PORTS                                                                    NAMES
+d00724297352        yandex/clickhouse-server   &quot;/entrypoint.sh&quot;    9 seconds ago       Up 8 seconds        0.0.0.0:8123-&gt;8123/tcp, 0.0.0.0:9000-&gt;9000/tcp, 0.0.0.0:9009-&gt;9009/tcp   ch-server
+</code></pre>
+<p>进入 Clickhouse 容器</p>
+<pre><code>docker exec -it d00724297352 /bin/bash
+</code></pre>
+<p>需要注意的是, 默认的容器是一个依赖包不完整的 ubuntu 虚拟机</p>
+<p>所以我们需要安装 vim</p>
+<pre><code>apt-get update
+apt-get install vim -y
+</code></pre>
+<p>进入 clickhouse-server 目录并查看目录</p>
+<pre><code>cd /etc/clickhouse-server
+</code></pre>
+<h1 id="查看目录">查看目录</h1>
+<pre><code>root@d00724297352:/etc/clickhouse-server# ll
+total 52
+drwxr-xr-x 1 root root  4096 May 14 18:29 ./
+drwxr-xr-x 1 root root  4096 May 22 08:12 ../
+drwxr-xr-x 1 root root  4096 May 14 18:29 config.d/
+-rw-r--r-- 1 root root 26466 May  8 19:38 config.xml
+lrwxrwxrwx 1 root root    41 May 14 18:29 preprocessed -&gt; /var/lib/clickhouse//preprocessed_configs/
+drwxr-xr-x 2 root root  4096 May 14 18:29 users.d/
+-rw-r--r-- 1 root root  5328 May  8 19:38 users.xml
+</code></pre>
+<p>修改 clickhouse 的用户密码需要在 users.xml 中配置</p>
+<p>需要注意的是: 密码必须为加密过的形式, 否则会一直连不上。</p>
+<p>我们这次采用 SHA256 的方式加密</p>
+<pre><code>PASSWORD=$(base64 &lt; /dev/urandom | head -c8); echo &quot;你的密码&quot;; echo -n &quot;你的密码&quot; | sha256sum | tr -d '-'
+</code></pre>
+<p>执行以上命令后会在命令行打印密码明文和密码密文, 如下</p>
+<pre><code>root（密码明文）
+4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2
+</code></pre>
+<p>vim user.xml 修改用户密码</p>
+<p>将 55 行的 替换为 &lt;password_sha256_hex&gt; 密码密文 &lt;/password_sha256_hex&gt;<br>
+不需要重启即可登录</p>
+<pre><code>clickhouse-client -h 127.0.0.1 -d default -m -u default --password '你的密码'
+</code></pre>
+<p>客户端常用参数<br>
+clickhouse-client<br>
+--host, -h     	：服务端host名称，默认 localhost<br>
+--port         	：连接端口，默认9000<br>
+--user, -u     	：用户名，默认 default<br>
+--password     	：密码，默认空<br>
+--query, -q    	：非交互模式下的查询语句<br>
+--database, -d 	：默认当前操作的数据库，默认default<br>
+--multiline, -m ：允许多行语句查询，在clickhouse中默认回车即为sql结束，可使用该参数多行输入<br>
+--format, -f		：使用指定的默认格式输出结果      csv,以逗号分隔<br>
+--time, -t			：非交互模式下会打印查询执行的时间<br>
+--stacktrace		：出现异常会打印堆栈跟踪信息<br>
+--config-file		：配置文件名称</p>
+<h1 id="登录成功">登录成功</h1>
+<p>d00724297352 😃 show databases;</p>
+<p>SHOW DATABASES</p>
+<p>┌─name───────────────────────────┐<br>
+│ _temporary_and_external_tables │<br>
+│ default                        │<br>
+│ system                         │<br>
+└────────────────────────────────┘</p>
+<p>3 rows in set. Elapsed: 0.002 sec.</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/ULzlrwcmM/">
+              <span class="post-title">
+                Redis 的几种数据导入导出方式&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>linux中配置双网卡实现双网卡绑定，负载均衡 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="linux中配置双网卡实现双网卡绑定，负载均衡 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="linux中配置双网卡实现双网卡绑定，负载均衡"/>
+    <meta property="og:url" content="https://jwangkun.github.io/B_yo2HBga/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/9zJYvNpO2I/" class="tag">双网卡绑定</a>
+            
+            <a href="https://jwangkun.github.io/GLRJD5xeG0/" class="tag">Linux</a>
+            
+        </span>
+            <h1>linux中配置双网卡实现双网卡绑定，负载均衡</h1>
+            <span class="meta">
+            	Posted on
+              2021-10-26，6 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p><strong>配置双网卡的目的：</strong></p>
+<p>1、实现冗余</p>
+<p>2、负载均衡</p>
+<p>linux 主机安装双网卡，共享一个IP地址，对外提供访问，实际 同样 连接两条物理线路到交换机<br>
+实现平时 双网卡同时工作，分流网络压力，同时提供冗余备份，监控，防止物理线路的单点故障。</p>
+<p>用于关键性节点服务器，高网络IO服务器，网络共享存储服务器等。。。。。</p>
+<p>Linux bonding 驱动模块 提供了一种方法，用以把多个网络接口（network interface）组合成一个 逻辑的 &quot;bonded&quot; 接口。<br>
+Bonded 接口的工作方式取决于驱动的模式：不同的模式提供了热备份或负载均衡等不同的服 务。</p>
+<p>此外，驱动还会监控链路的可用性。大多数目前发布的Linux内核都以模块（module）方式带了bonding驱动，<br>
+ifenslave工具（主要配置工具）也都已经安装好。</p>
+<p>• 轮询策略（round robin），mode=0，按照设备顺序依次传输数据包，提供负载均衡和容错能力<br>
+• 主备策略（active-backup），mode=1，只有主网卡处于工作状态，备网卡处于备用状态，主网卡坏掉后备网卡开始工作，提供容错能力<br>
+• 异或策略（load balancing (xor)），mode=2，根据源MAC地址和目的MAC地址进行异或计算的结果来选择传输设备，提供负载均衡和容错能力<br>
+• 广播策略（fault-tolerance (broadcast)），mode=3，将所有数据包传输给所有接口通过全部设备来传输所有数据，一个报文会复制两份通过bond下的两个网卡分别发送出去，提供高容错能力<br>
+• 动态链接聚合（lacp），mode=4，按照802.3ad协议的聚合自动配置来共享相同的传输速度，网卡带宽最高可以翻倍，链路聚合控制协议（LACP）自动通知交换机聚合哪些端口，需要交换机支持 802.3ad协议，提供容错能力<br>
+• 输出负载均衡模式（transmit load balancing），mode=5，输出负载均衡模式，只有输出实现负载均衡，输入数据时则只选定其中一块网卡接收，需要网卡和驱动支持ethtool命令<br>
+输入/输出负载均衡模式（adaptive load balancing），mode=6，输入和输出都实现负载均衡，需要网卡和驱动支持ethtool命令</p>
+<p><strong>CentOS双网卡绑定，实现负载均衡</strong></p>
+<p>bind0 IP 地址： 192.168.10.54</p>
+<p>先关闭两张网卡</p>
+<pre><code>[root@uplooking ~]# ifdown ens33
+[root@uplooking ~]# ifdown ens38
+</code></pre>
+<p>新建网卡配置文件</p>
+<pre><code>[root@uplooking /etc/sysconfig/network-scripts]#vim ifcfg-bond0
+
+ ifcfg-bond0 配置文件 
+
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=bond0
+DEVICE=bond0
+IPADDR=&quot;192.168.10.54&quot;
+NETMASK=255.255.255.0
+GATEWAY=192.168.10.2
+ONBOOT=yes
+BONDING_OPTS=&quot;miimon=100 mode=6&quot;     ##bonding 参数直接在网卡配置文件中指派，并且开机可以自动生效
+                                      \## mode=1   1为储备模式， 推荐为 6 ，不会浪费资源。
+</code></pre>
+<p>ifcfg-ens33 配置文件</p>
+<pre><code>TYPE=Ethernet
+BOOTPROTO=none
+NAME=ens33
+DEVICE=ens33
+ONBOOT=yes
+MASTER=bond0
+SLAVE=yes
+</code></pre>
+<p>ifcfg-ens38 配置文件</p>
+<pre><code>TYPE=Ethernet
+BOOTPROTO=none
+NAME=ens38
+DEVICE=ens38
+ONBOOT=yes
+MASTER=bond0
+SLAVE=yes
+</code></pre>
+<p>修改/etc/modprobe.d/dist.conf文件</p>
+<p>在此文件中添加以下内容：</p>
+<figure data-type="image" tabindex="1"><img src="https://img2018.cnblogs.com/blog/1048257/201905/1048257-20190521173714193-933648292.png" alt="img" loading="lazy"></figure>
+<p>alias bond0 bonding，表示系统在启动时加载bonding模块，对外虚拟网络接口设备为 bond0</p>
+<p>miimon=100，表示系统每100ms监测一次链路连接状态，如果有一条线路不通就转入另一条线</p>
+<p>mode=1，表示绑定模式为1</p>
+<p>primary=eth0，系统首先eth0作为bond0接口与外界信息的传输接口</p>
+<p>修改配置文件/etc/rc.local</p>
+<p>在此文件中添加以下内容：</p>
+<figure data-type="image" tabindex="2"><img src="https://img2018.cnblogs.com/blog/1048257/201905/1048257-20190521174519268-1980887682.png" alt="img" loading="lazy"></figure>
+<p>modprobe bonding miimon=100 mode=1</p>
+<p>重启网络</p>
+<pre><code> systemctl restart network
+</code></pre>
+<p>观察验证：</p>
+<pre><code>[root@uplooking ~]# ifconfig
+</code></pre>
+<figure data-type="image" tabindex="3"><img src="https://img2018.cnblogs.com/blog/1754173/201907/1754173-20190728095527191-116674477.png" alt="img" loading="lazy"></figure>
+<p><strong>查看 bind0 的状态</strong></p>
+<pre><code>  ip addr 或者  ifconfig 
+</code></pre>
+<p>### 状态信息验证</p>
+<pre><code>cat /proc/net/bonding/bond0 
+</code></pre>
+<p>文件可以显示 双网卡 配置信息。  ens 33  和 ens 38 的 启用状态。</p>
+<p>通过查阅该文件，获取bond0 网卡的工作状态信息</p>
+<p>通过断开不同网卡，观察改文件的信息变化。</p>
+<pre><code>[root@server-18 ~]# watch -n 1 &quot;cat /proc/net/bonding/bond0&quot;
+
+
+
+ Ethernet Channel Bonding Driver: v3.7.1 (April 27, 2011)
+
+Bonding Mode: adaptive load balancing
+Primary Slave: None
+Currently Active Slave: ens37
+MII Status: up
+MII Polling Interval (ms): 100
+Up Delay (ms): 0
+Down Delay (ms): 0
+
+Slave Interface: ens33
+MII Status: up
+Speed: 1000 Mbps
+Duplex: full
+Link Failure Count: 3
+Permanent HW addr: 00:0c:29:e6:3b:9d
+Slave queue ID: 0
+
+Slave Interface: ens38
+MII Status: up
+Speed: 1000 Mbps
+Duplex: full
+Link Failure Count: 3
+Permanent HW addr: 00:0c:29:e6:3b:a7   
+  
+</code></pre>
+<p><strong>验证负载均衡的效果：</strong></p>
+<p>http-02 ping 192.168.10.54<br>
+arp -a 查询 arp 表：发现 192.168.10.54 在 00:0C:29:58:4C:31 (ens33) 网卡上<br>
+<img src="https://img2018.cnblogs.com/blog/1754173/201907/1754173-20190728095944422-139855164.png" alt="img" loading="lazy"></p>
+<p>http-03  ping  192.168.10.54<br>
+arp -a 查询 arp 表：发现 192.168.10.54 在 00:0C:29:58:4C:3B (ens33) 网卡上<br>
+<img src="https://img2018.cnblogs.com/blog/1754173/201907/1754173-20190728100009740-767061776.png" alt="img" loading="lazy"></p>
+<p><strong>取消 bond0 网卡的方法</strong></p>
+<p>​      1、ifdown bond0 ##此时网络断开<br>
+​      2、移除ifcfg-bond0 网卡的配置文件，建议不要直接删除，而是移到别的位置，备份起来、<br>
+​          [root@server-18 /etc/sysconfig/network-scripts]#mv ifcfg-bond0 /root</p>
+<p>​          echo -bond0 &gt; /sys/class/net/bonding_masters  ## 移除系统中的 bonding状态。</p>
+<p>​<br>
+​      3、修改 ens33 ens38 网卡配置，解除 与 bond0 网卡的从属关系<br>
+​         BOOTPROTO=static<br>
+​         MASTER=bond0 去掉<br>
+​         SLAVE=yes  去掉<br>
+​         加上自己网卡的原先配置。<br>
+​<br>
+​      4、 systemctl restart network<br>
+​<br>
+​      5、 ifconfig再次观察</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/sg1JEEq_V/">
+              <span class="post-title">
+                Linux对大容量磁盘分区&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

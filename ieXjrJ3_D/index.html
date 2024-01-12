@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Kubernetes - 集群备份和恢复 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes - 集群备份和恢复 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Kubernetes - 集群备份和恢复"/>
+    <meta property="og:url" content="https://jwangkun.github.io/ieXjrJ3_D/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/NYWqy-Izb/" class="tag">集群备份恢复</a>
+            
+            <a href="https://jwangkun.github.io/2eFiGOtFN/" class="tag">k8s</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Kubernetes - 集群备份和恢复</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-23，12 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>一、备份</p>
+<p>思路：</p>
+<p>①集群运行中 etcd 数据备份到磁盘上</p>
+<p>②kubeasz 项目创建的集群，需要备份 CA 证书文件，以及 ansible 的 hosts 文件</p>
+<p>【deploy 节点操作】</p>
+<p>1：创建存放备份文件目录</p>
+<pre><code>mkdir -p /backup/k8s1
+</code></pre>
+<p>2：etcd 数据保存到备份目录下</p>
+<pre><code>ETCDCTL_API=3 etcdctl snapshot save /backup/k8s1/snapshot.db
+Snapshot saved at /backup/k8s1/snapshot.db
+
+du -h /backup/k8s1/snapshot.db 
+
+4 1.6M    /backup/k8s1/snapshot.db
+</code></pre>
+<p>3：拷贝 kubernetes 目录下 ssl 文件</p>
+<pre><code>cp /etc/kubernetes/ssl/* /backup/k8s1/
+ll /backup/k8s1/
+
+总用量 1628
+-rw-r--r--. 1 root root 1675 12月 10 21:21 admin-key.pem
+-rw-r--r--. 1 root root 1391 12月 10 21:21 admin.pem
+-rw-r--r--. 1 root root 997 12月 10 21:21 aggregator-proxy.csr
+-rw-r--r--. 1 root root 219 12月 10 21:21 aggregator-proxy-csr.json
+-rw-------. 1 root root 1675 12月 10 21:21 aggregator-proxy-key.pem
+-rw-r--r--. 1 root root 1383 12月 10 21:21 aggregator-proxy.pem
+-rw-r--r--. 1 root root 294 12月 10 21:21 ca-config.json
+-rw-r--r--. 1 root root 1675 12月 10 21:21 ca-key.pem
+-rw-r--r--. 1 root root 1350 12月 10 21:21 ca.pem
+-rw-r--r--. 1 root root 1082 12月 10 21:21 kubelet.csr
+-rw-r--r--. 1 root root 283 12月 10 21:21 kubelet-csr.json
+-rw-------. 1 root root 1675 12月 10 21:21 kubelet-key.pem
+-rw-r--r--. 1 root root 1452 12月 10 21:21 kubelet.pem
+-rw-r--r--. 1 root root 1273 12月 10 21:21 kubernetes.csr
+-rw-r--r--. 1 root root 488 12月 10 21:21 kubernetes-csr.json
+-rw-------. 1 root root 1679 12月 10 21:21 kubernetes-key.pem
+-rw-r--r--. 1 root root 1639 12月 10 21:21 kubernetes.pem
+-rw-r--r--. 1 root root 1593376 12月 10 21:32 snapshot.db
+</code></pre>
+<p>4：模拟集群崩溃，执行 clean.yml 清除操作</p>
+<pre><code>cd /etc/ansible/
+</code></pre>
+<pre><code>ansible-playbook 99.clean.yml 
+</code></pre>
+<p>二、恢复</p>
+<p>【deploy 节点操作】</p>
+<p>1：恢复 ca 证书</p>
+<pre><code>mkdir -p /etc/kubernetes/ssl
+cp /backup/k8s1/ca* /etc/kubernetes/ssl/
+</code></pre>
+<p>2：开始执行重建集群操作</p>
+<pre><code>ansible-playbook 01.prepare.yml
+ansible-playbook 02.etcd.yml
+ansible-playbook 03.docker.yml
+nsible-playbook 04.kube-master.yml
+ansible-playbook 05.kube-node.yml
+</code></pre>
+<p>3：暂停 etcd 服务</p>
+<pre><code>ansible etcd -m service -a 'name=etcd state=stopped'
+</code></pre>
+<p>4：清空数据</p>
+<pre><code>cp /etc/kubernetes/ssl/* /backup/k8s1/
+ll /backup/k8s1/
+总用量 1628
+-rw-r--r--. 1 root root 1675 12月 10 21:21 admin-key.pem
+-rw-r--r--. 1 root root 1391 12月 10 21:21 admin.pem
+-rw-r--r--. 1 root root 997 12月 10 21:21 aggregator-proxy.csr
+-rw-r--r--. 1 root root 219 12月 10 21:21 aggregator-proxy-csr.json
+-rw-------. 1 root root 1675 12月 10 21:21 aggregator-proxy-key.pem
+-rw-r--r--. 1 root root 1383 12月 10 21:21 aggregator-proxy.pem
+-rw-r--r--. 1 root root 294 12月 10 21:21 ca-config.json
+-rw-r--r--. 1 root root 1675 12月 10 21:21 ca-key.pem
+-rw-r--r--. 1 root root 1350 12月 10 21:21 ca.pem
+-rw-r--r--. 1 root root 1082 12月 10 21:21 kubelet.csr
+-rw-r--r--. 1 root root 283 12月 10 21:21 kubelet-csr.json
+-rw-------. 1 root root 1675 12月 10 21:21 kubelet-key.pem
+-rw-r--r--. 1 root root 1452 12月 10 21:21 kubelet.pem
+-rw-r--r--. 1 root root 1273 12月 10 21:21 kubernetes.csr
+-rw-r--r--. 1 root root 488 12月 10 21:21 kubernetes-csr.json
+-rw-------. 1 root root 1679 12月 10 21:21 kubernetes-key.pem
+-rw-r--r--. 1 root root 1639 12月 10 21:21 kubernetes.pem
+-rw-r--r--. 1 root root 1593376 12月 10 21:32 snapshot.db
+</code></pre>
+<p>5：将备份的 etcd 数据文件同步到每个 etcd 节点上</p>
+<pre><code>cp /etc/kubernetes/ssl/* /backup/k8s1/
+ll /backup/k8s1/
+总用量 1628
+-rw-r--r--. 1 root root 1675 12月 10 21:21 admin-key.pem
+-rw-r--r--. 1 root root 1391 12月 10 21:21 admin.pem
+-rw-r--r--. 1 root root 997 12月 10 21:21 aggregator-proxy.csr
+-rw-r--r--. 1 root root 219 12月 10 21:21 aggregator-proxy-csr.json
+-rw-------. 1 root root 1675 12月 10 21:21 aggregator-proxy-key.pem
+-rw-r--r--. 1 root root 1383 12月 10 21:21 aggregator-proxy.pem
+-rw-r--r--. 1 root root 294 12月 10 21:21 ca-config.json
+-rw-r--r--. 1 root root 1675 12月 10 21:21 ca-key.pem
+-rw-r--r--. 1 root root 1350 12月 10 21:21 ca.pem
+-rw-r--r--. 1 root root 1082 12月 10 21:21 kubelet.csr
+-rw-r--r--. 1 root root 283 12月 10 21:21 kubelet-csr.json
+-rw-------. 1 root root 1675 12月 10 21:21 kubelet-key.pem
+-rw-r--r--. 1 root root 1452 12月 10 21:21 kubelet.pem
+-rw-r--r--. 1 root root 1273 12月 10 21:21 kubernetes.csr
+-rw-r--r--. 1 root root 488 12月 10 21:21 kubernetes-csr.json
+-rw-------. 1 root root 1679 12月 10 21:21 kubernetes-key.pem
+-rw-r--r--. 1 root root 1639 12月 10 21:21 kubernetes.pem
+-rw-r--r--. 1 root root 1593376 12月 10 21:32 snapshot.db
+</code></pre>
+<p>6：在每个 etcd 节点执行下面数据恢复操作，然后重启 etcd</p>
+<p>## 说明：在 / etc/systemd/system/etcd.service 找到 --inital-cluster etcd1=https://xxxx:2380,etcd2=https://xxxx:2380,etcd3=https://xxxx:2380 替换恢复命令中的 --initial-cluster{ } 变量，--name=【当前 etcd-node-name】, 最后还需要填写当前节点的 IP:2380</p>
+<p>①【deploy 操作】</p>
+<pre><code>cp /etc/kubernetes/ssl/* /backup/k8s1/
+ll /backup/k8s1/
+总用量 1628
+-rw-r--r--. 1 root root 1675 12月 10 21:21 admin-key.pem
+-rw-r--r--. 1 root root 1391 12月 10 21:21 admin.pem
+-rw-r--r--. 1 root root 997 12月 10 21:21 aggregator-proxy.csr
+-rw-r--r--. 1 root root 219 12月 10 21:21 aggregator-proxy-csr.json
+-rw-------. 1 root root 1675 12月 10 21:21 aggregator-proxy-key.pem
+-rw-r--r--. 1 root root 1383 12月 10 21:21 aggregator-proxy.pem
+-rw-r--r--. 1 root root 294 12月 10 21:21 ca-config.json
+-rw-r--r--. 1 root root 1675 12月 10 21:21 ca-key.pem
+-rw-r--r--. 1 root root 1350 12月 10 21:21 ca.pem
+-rw-r--r--. 1 root root 1082 12月 10 21:21 kubelet.csr
+-rw-r--r--. 1 root root 283 12月 10 21:21 kubelet-csr.json
+-rw-------. 1 root root 1675 12月 10 21:21 kubelet-key.pem
+-rw-r--r--. 1 root root 1452 12月 10 21:21 kubelet.pem
+-rw-r--r--. 1 root root 1273 12月 10 21:21 kubernetes.csr
+-rw-r--r--. 1 root root 488 12月 10 21:21 kubernetes-csr.json
+-rw-------. 1 root root 1679 12月 10 21:21 kubernetes-key.pem
+-rw-r--r--. 1 root root 1639 12月 10 21:21 kubernetes.pem
+-rw-r--r--. 1 root root 1593376 12月 10 21:32 snapshot.db
+</code></pre>
+<p>执行上面步骤后，会在当前节点目录下，生成一个【node-name】.etcd 目录文件</p>
+<pre><code>tree etcd1.etcd/
+
+etcd1.etcd/
+└── member
+    ├── snap
+    │   ├── 0000000000000001-0000000000000003.snap
+    │   └── db
+    └── wal
+        └── 0000000000000000-0000000000000000.wal
+        
+cp -r etcd1.etcd/member /var/lib/etcd/
+systemctl restart etcd
+</code></pre>
+<p>②【etcd2 节点操作】</p>
+<pre><code>cd /backup/k8s1/
+ETCDCTL_API=3 etcdctl snapshot restore snapshot.db  --name etcd2 --initial-cluster etcd1=https://192.168.1.200:2380,etcd2=https://192.168.1.202:2380,etcd3=https://192.168.1.203:2380  --initial-cluster-token etcd-cluster-0 --initial-advertise-peer-urls https://192.168.1.202:2380
+2019-12-10 22:28:35.175032 I | mvcc: restore compact to 46505
+2019-12-10 22:28:35.232386 I | etcdserver/membership: added member 12229714d8728d0e [https://192.168.1.200:2380] to cluster b8ef796b710cde7d
+2019-12-10 22:28:35.232507 I | etcdserver/membership: added member 552fb05951af50c9 [https://192.168.1.203:2380] to cluster b8ef796b710cde7d
+2019-12-10 22:28:35.232541 I | etcdserver/membership: added member 8b4f4a6559bf7c2c [https://192.168.1.202:2380] to cluster b8ef796b710cde7d
+
+tree etcd2.etcd/
+etcd2.etcd/
+└── member
+    ├── snap
+    │   ├── 0000000000000001-0000000000000003.snap
+    │   └── db
+    └── wal
+        └── 0000000000000000-0000000000000000.wal
+cp -r etcd1.etcd/member /var/lib/etcd/
+systemctl restart etcd
+</code></pre>
+<p>③【etcd3 节点操作】</p>
+<pre><code>cd /backup/k8s1/
+ETCDCTL_API=3 etcdctl snapshot restore snapshot.db  --name etcd2 --initial-cluster 
+
+etcd1=https://192.168.1.200:2380,etcd2=https://192.168.1.202:2380,etcd3=https://192.168.1.203:2380  --initial-cluster-token etcd-cluster-0 --initial-advertise-peer-urls https://192.168.1.202:2380
+2019-12-10 22:28:35.175032 I | mvcc: restore compact to 46505
+2019-12-10 22:28:35.232386 I | etcdserver/membership: added member 12229714d8728d0e [https://192.168.1.200:2380] to cluster b8ef796b710cde7d
+2019-12-10 22:28:35.232507 I | etcdserver/membership: added member 552fb05951af50c9 [https://192.168.1.203:2380] to cluster b8ef796b710cde7d
+2019-12-10 22:28:35.232541 I | etcdserver/membership: added member 8b4f4a6559bf7c2c [https://192.168.1.202:2380] to cluster b8ef796b710cde7d
+
+tree etcd2.etcd/
+
+etcd2.etcd/
+└── member
+    ├── snap
+    │   ├── 0000000000000001-0000000000000003.snap
+    │   └── db
+    └── wal
+        └── 0000000000000000-0000000000000000.wal
+
+cp -r etcd1.etcd/member /var/lib/etcd/
+systemctl restart etcd
+</code></pre>
+<p>6：在 deploy 节点上操作重建网络</p>
+<pre><code>cd /etc/ansible/
+
+ansible-playbook tools/change_k8s_network.yml 
+</code></pre>
+<p>7：查看 pod、svc 恢复是否成功</p>
+<pre><code>kubectl get svc
+
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+kubernetes   ClusterIP   10.68.0.1       &lt;none&gt;        443/TCP    5d5h
+nginx        ClusterIP   10.68.241.175   &lt;none&gt;        80/TCP     5d4h
+tomcat       ClusterIP   10.68.235.35    &lt;none&gt;        8080/TCP   76m
+</code></pre>
+<pre><code>kubectl get svc
+
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+kubernetes   ClusterIP   10.68.0.1       &lt;none&gt;        443/TCP    5d5h
+nginx        ClusterIP   10.68.241.175   &lt;none&gt;        80/TCP     5d4h
+tomcat       ClusterIP   10.68.235.35    &lt;none&gt;        8080/TCP   76m
+</code></pre>
+<p>三、自动备份、自动恢复</p>
+<p>1：一键备份</p>
+<pre><code>ansible-playbook /etc/ansible/23.backup.yml 
+</code></pre>
+<p>2：模拟故障</p>
+<pre><code>ansible-playbook /etc/ansible/99.clean.yml
+</code></pre>
+<p>修改文件 / etc/ansible/roles/cluster-restore/defaults/main.yml，指定要恢复的 etcd 快照备份，如果不修改就是最新的一次</p>
+<p>3：执行自动恢复操作</p>
+<pre><code>ansible-playbook /etc/ansible/24.restore.yml
+
+ansible-playbook /etc/ansible/tools/change_k8s_network.yml 
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/cbHCwLkry/">
+              <span class="post-title">
+                kubernetes集群证书更新&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Kubernetes 中 PV 和 PVC 的状态变化 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes 中 PV 和 PVC 的状态变化 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Kubernetes 中 PV 和 PVC 的状态变化"/>
+    <meta property="og:url" content="https://jwangkun.github.io/tPLFLp3lw/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/gdOT2fhuD/" class="tag">PV</a>
+            
+            <a href="https://jwangkun.github.io/59zgP6WkyX/" class="tag">PVC</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Kubernetes 中 PV 和 PVC 的状态变化</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>我们对 PV 和 PVC 的几种状态应该不算陌生，但是在使用过程中可能也会产生一些疑问，比如为什么 PV 变成 Failed 状态了，新创建的 PVC 如何能够绑定之前的 PV，我可以恢复之前的 PV 吗？这里我们就来对 PV 和 PVC 中的几种状态变化再次进行说明。</p>
+<p>在不同的情况下，PV 和 PVC 的状态变化我们用如下所示的表格来进行说明：</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20200614120848.png" alt="PV、PVC 状态" loading="lazy">PV、PVC 状态</p>
+<h3 id="创建pv">创建PV</h3>
+<p>正常情况下 PV 被创建成功后是 Available 状态：</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv
+spec:
+  storageClassName: manual
+  capacity: 
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /data/k8s  # 指定nfs的挂载点
+    server: 10.151.30.1  # 指定nfs服务地址
+</code></pre>
+<p>直接创建上面的 PV 对象，就可以看到状态是 Available 状态，表示可以用于 PVC 绑定：</p>
+<pre><code class="language-bash">$ kubectl get pv nfs-pv
+NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+nfs-pv   1Gi        RWO            Retain           Available           manual                  7s
+</code></pre>
+<h3 id="新建-pvc">新建 PVC</h3>
+<p>刚添加的 PVC 状态是 Pending，如果有合适的 PV，这个 Pending 状态会立刻变为 Bound 状态，同时相应的 PVC 也会变为 Bound，PVC 和 PV 进行了绑定。 我们可以先添加 PVC，后添加 PV，这样就能保证看到 Pending 状态。</p>
+<pre><code class="language-yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+</code></pre>
+<p>新建上面的 PVC 资源对象，刚新建完成会是 Pending 状态：</p>
+<pre><code class="language-bash">$ kubectl get pvc nfs-pvc
+NAME      STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nfs-pvc   Pending                                      manual         7s
+</code></pre>
+<p>当 PVC 找到合适的 PV 绑定后，就会立刻变成 Bound 状态，PV 也从 Available 状态变成了 Bound 状态：</p>
+<pre><code class="language-bash">$ kubectl get pvc nfs-pvc
+NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nfs-pvc   Bound    nfs-pv   1Gi        RWO            manual         2m8s
+$ kubectl get pv nfs-pv  
+NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM             STORAGECLASS   REASON   AGE
+nfs-pv   1Gi        RWO            Retain           Bound    default/nfs-pvc   manual                  23s
+</code></pre>
+<h3 id="删除-pv">删除 PV</h3>
+<p>由于现在 PVC 和 PV 已经是处于绑定状态了，那么如果这个时候我们不小心将 PV 进行了删除，会出现怎样的情况呢：</p>
+<pre><code class="language-bash">$ kubectl delete pv nfs-pv
+persistentvolume &quot;nfs-pv&quot; deleted
+
+^C
+$ kubectl get pv nfs-pv   
+NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS        CLAIM             STORAGECLASS   REASON   AGE
+nfs-pv   1Gi        RWO            Retain           Terminating   default/nfs-pvc   manual                  12m
+$ kubectl get pvc nfs-pvc                          
+NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nfs-pvc   Bound    nfs-pv   1Gi        RWO            manual         13m
+</code></pre>
+<p>事实上我们这里删除 PV 被 hang 住了，也就是不能真正的删除 PV，但是这个时候 PV 会变成 Terminating 状态，而对应的 PVC 还是 Bound 状态，也就是说这个时候由于 PV 和 PVC 已经绑定在一起了，就不能先删除 PV，只是现在状态是 Terminating 状态，对于 PVC 还是没有任何影响，那么这个时候我们应该怎么处理呢？</p>
+<p>我们可以通过编辑 PV，删除 PV 中的 finalizers 属性来强制删除 PV：</p>
+<pre><code class="language-bash">$ kubectl edit pv nfs-pv
+# 按照下面所示删除 finalizers 属性中的内容
+</code></pre>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20200614105632.png" alt="delete finalizers" loading="lazy">delete finalizers</p>
+<p>编辑完成后 PV 就会被真正删除了，而 PVC 也是 Lost 状态了：</p>
+<pre><code class="language-bash">$ kubectl get pv nfs-pv
+Error from server (NotFound): persistentvolumes &quot;nfs-pv&quot; not found
+$ kubectl get pvc nfs-pvc
+NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nfs-pvc   Lost     nfs-pv   0                         manual         23m
+</code></pre>
+<h3 id="重新创建-pv">重新创建 PV</h3>
+<p>当我们看到 PVC 处于 Lost 状态的时候不用着急，这是由于之前已经绑定的 PV 已经没有了，但是 PVC 里面仍然有 PV 的绑定信息：</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20200614110121.png" alt="pv volumeName" loading="lazy">pv volumeName</p>
+<p>所以要解决这个问题也很简单，只需要重新把之前的 PV 创建出来即可：</p>
+<pre><code class="language-bash"># 重新创建 PV
+$ kubectl apply -f volume.yaml 
+persistentvolume/nfs-pv created
+</code></pre>
+<p>当 PV 创建成功后，PVC 和 PV 状态就都恢复成 Bound 状态了：</p>
+<pre><code class="language-bash">$ kubectl get pv nfs-pv   
+NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM             STORAGECLASS   REASON   AGE
+nfs-pv   1Gi        RWO            Retain           Bound    default/nfs-pvc   manual                  93s
+# PVC 恢复成了正常的 Bound 状态
+$ kubectl get pvc nfs-pvc        
+NAME      STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+nfs-pvc   Bound    nfs-pv   1Gi        RWO            manual         27m
+</code></pre>
+<h3 id="删除-pvc">删除 PVC</h3>
+<p>上面是先删除 PV 的情况，那么如果我们是先删除的 PVC 的话会是什么样的状况呢？</p>
+<pre><code class="language-bash">$ kubectl delete pvc nfs-pvc
+persistentvolumeclaim &quot;nfs-pvc&quot; deleted
+$ kubectl get pv nfs-pv     
+NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS     CLAIM             STORAGECLASS   REASON   AGE
+nfs-pv   1Gi        RWO            Retain           Released   default/nfs-pvc   manual                  3m36s
+</code></pre>
+<p>我们可以看到 PVC 被删除后，PV 变成了 Released 的状态，但是我们仔细看后面的 CLAIM 属性，其中依然还保留着 PVC 的绑定信息，也可以将 PV 的对象信息通过下面的命令导出：</p>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20200614110759.png" alt="pv claimRef" loading="lazy">pv claimRef</p>
+<p>这个时候大家可能就会想到现在我的 PVC 被删除了，PV 也变成了 Released 状态，那么我重建之前的 PVC 他们不就可以重新绑定了，事实并不会，PVC 只能和 <code>Available</code> 状态的 PV 进行绑定。</p>
+<p>这个时候我们就需要手工去进行干预了，真实生产环境下管理员会把数据备份或迁移出来，然后修改 PV，删除 <code>claimRef</code> 对 PVC 的引用，这个时候 Kubernetes 的 PV 控制器 watch 到 PV 变化后，就会将 PV 修改为 Available 状态，Available 状态的 PV 当然就可以被其他 PVC 绑定了。</p>
+<p>直接编辑 PV 删除 <code>cliamRef</code> 属性中的内容即可：</p>
+<pre><code class="language-bash"># 删除 cliamRef 中的内容
+$ kubectl edit pv nfs-pv
+persistentvolume/nfs-pv edited
+</code></pre>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/20200614111244.png" alt="remove pv claimRef" loading="lazy">remove pv claimRef</p>
+<p>删除完成后，这个时候 PV 就会变成正常的 Available 状态了，重新去重建之前的 PVC 当然就可以正常绑定了：</p>
+<pre><code class="language-bash">$ kubectl get pv nfs-pv
+NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+nfs-pv   1Gi        RWO            Retain           Available           manual                  12m
+</code></pre>
+<p>在较新版本的 Kubernetes 集群中对 PV 的各种功能也做了增强，比如克隆、快照等功能都是非常有用的，我们后续再来对这些新功能进行说明。</p>
+<p>原文链接： https://www.qikqiak.com/post/status-in-pv-pvc/</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/HpWmB6oPY/">
+              <span class="post-title">
+                Kubernetes 的网络模型&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

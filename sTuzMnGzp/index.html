@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Springboot 整合jdbcTemplate操作数据库 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Springboot 整合jdbcTemplate操作数据库 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Springboot 整合jdbcTemplate操作数据库"/>
+    <meta property="og:url" content="https://jwangkun.github.io/sTuzMnGzp/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1>Springboot 整合jdbcTemplate操作数据库</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>在一部分内容中，我们学习了Restful接口的编写，及接口文档的生成。我们需要将接口数据进行持久化存储，这一部分我们主要学习几种持久化框架将数据进行存储。本部分内容中，我们都将使用mysql为例来做为演示数据库。</p>
+<p>在刚开始接触数据库操作的时候我们都会使用JDBC来进行数据库操作，但是每次都要创建连接，关闭连接非常麻烦，Spring将JDBC进行了简易的封装成了一个新的框架——JdbcTemplate。</p>
+<h2 id="项目搭建">项目搭建</h2>
+<h3 id="1-添加mysql依赖">1 添加mysql依赖</h3>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;mysql&lt;/groupId&gt;
+    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+    &lt;version&gt;8.0.11&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="2-添加jdbctemplate依赖">2. 添加jdbcTemplate依赖</h3>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="3-配置mysql">3. 配置mysql</h3>
+<pre><code>spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/simple_fast?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai&amp;zeroDateTimeBehavior=CONVERT_TO_NULL&amp;useSSL=false&amp;useAffectedRows=true&amp;allowPublicKeyRetrieval=true
+    username: root
+    password: root
+</code></pre>
+<h2 id="简单操作数据库">简单操作数据库</h2>
+<p>新建一张表<code>student</code>用来测试JdbcTemplate的常用功能。建表语句如下：</p>
+<pre><code>CREATE TABLE `student` (
+   `student_id` int(30) NOT NULL,
+   `age` int(1) DEFAULT NULL COMMENT '年龄',
+   `name` varchar(45) DEFAULT NULL COMMENT '姓名',
+   `sex` int(1) DEFAULT NULL COMMENT '性别：1：男，2：女，0：未知',
+   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+   `status` int(1) DEFAULT NULL COMMENT '状态：1：正常，-1：删除',
+   PRIMARY KEY (`student_id`)
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 CHECKSUM=1 DELAY_KEY_WRITE=1 ROW_FORMAT=DYNAMIC COMMENT='学生表'
+</code></pre>
+<p>对应的实体类如下：</p>
+<pre><code>@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class StudentBean implements Serializable {
+    
+    private static final long serialVersionUID = 4618004018169112427L;
+
+    private Integer studentId;
+    private Integer age;
+    private String name;
+    private Integer sex;
+    private Date createTime;
+    private Integer status;
+}
+</code></pre>
+<p>JdbcTemplate提供了比较完善的数据库操作API，日常开发中比较常用的API主要为两类，分别是</p>
+<ul>
+<li>query与queryXXX</li>
+<li>update与batchUpdate</li>
+</ul>
+<p>JdbcTemplate的使用也非常简单，哪儿需要使用注入即可</p>
+<pre><code>@Autowired
+private JdbcTemplate jdbcTemplate;
+</code></pre>
+<h3 id="1-查询单个实体">1 查询单个实体</h3>
+<pre><code>public StudentBean getStudent(int status){
+    String sql = &quot;select * from student where status = ? limit 1&quot;;
+    return jdbcTemplate.queryForObject(sql,new Object[]{status},new BeanPropertyRowMapper&lt;&gt;(StudentBean.class));
+}
+</code></pre>
+<h3 id="2-查询list集合">2 查询List集合</h3>
+<pre><code>public List&lt;StudentBean&gt; studentBeanList(int status){
+    String sql = &quot;select * from student where status = ?&quot;;
+    return  jdbcTemplate.query(sql,new Object[]{status},new BeanPropertyRowMapper&lt;&gt;(StudentBean.class));
+}
+</code></pre>
+<h3 id="3-删除操作">3. 删除操作</h3>
+<pre><code>public int deleteStudent(int status){
+    String sql = &quot;delete from student where status = 0&quot;;
+    return jdbcTemplate.update(sql);
+}
+</code></pre>
+<h3 id="4-更新操作">4. 更新操作</h3>
+<pre><code>public int updateStudent(int studentId,String name){
+    String sql = &quot;update student set name = ? where student_id = ?&quot;;
+    return jdbcTemplate.update(sql,new Object[]{name,studentId});
+}
+</code></pre>
+<h3 id="5-插入操作">5. 插入操作</h3>
+<pre><code>public int addStudent(){
+    String sql = &quot;insert into student(student_id,age,name,status) values(?,?,?,?)&quot;;
+    return jdbcTemplate.update(sql,new Object[]{30,18,&quot;Java旅途&quot;,0});
+}
+</code></pre>
+<h3 id="6-批量插入">6. 批量插入</h3>
+<p>JdbcTemplate提供了批量插入的API，为了减少与数据库的操作，提高插入效率，将待插入的数据批量放在缓冲区，一次批量插入多条数据。</p>
+<pre><code>public int batchAddStudent(){
+
+    // 构造list集合
+    List&lt;StudentBean&gt; studentBeanList = new ArrayList&lt;&gt;();
+    StudentBean studentBean = new StudentBean(31, 31, &quot;Java旅途&quot;, 1, new Date(), 1);
+    StudentBean studentBean1 = new StudentBean(32, 32, &quot;javatrip&quot;, 1, new Date(), 1);
+    studentBeanList.add(studentBean);
+    studentBeanList.add(studentBean1);
+    String sql = &quot;insert into student values(?,?,?,?,?,?)&quot;;
+
+    int[] ints = jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+        @Override
+        public void setValues(PreparedStatement ps, int i) throws SQLException {
+            StudentBean student = studentBeanList.get(i);
+            ps.setInt(1, student.getStudentId());
+            ps.setInt(2, student.getAge());
+            ps.setString(3, student.getName());
+            ps.setInt(4, student.getSex());
+            ps.setDate(5,new java.sql.Date(System.currentTimeMillis()));
+            ps.setInt(6, student.getStatus());
+        }
+
+        @Override
+        public int getBatchSize() {
+            return studentBeanList.size();
+        }
+    });
+    return ints.length;
+}
+</code></pre>
+<p>上面只是演示了几个简单的例子，如果需要更详细的用法可以参考官方提供的JdbcTemplate API。JdbcTemplate对于初学者来说是比较容易上手的一个框架，使用起来也非常方便。但是也存在一些缺点，它是将sql硬编码到java代码中，如果需要修改sql，就需要重新编译java代码，不利于维护。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Cyt0IF3hi/">
+              <span class="post-title">
+                 整合JApiDocs生成接口文档&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

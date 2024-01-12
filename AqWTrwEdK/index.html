@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>KubeSphere DevOps 3.0 流水线运维指南 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="KubeSphere DevOps 3.0 流水线运维指南 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="KubeSphere DevOps 3.0 流水线运维指南"/>
+    <meta property="og:url" content="https://jwangkun.github.io/AqWTrwEdK/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/An8-Q_-eS/" class="tag">Jenkins</a>
+            
+            <a href="https://jwangkun.github.io/fPt8lnQmCT/" class="tag">CI/CD</a>
+            
+            <a href="https://jwangkun.github.io/xGgIrb1zw/" class="tag">KubeSphere</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>KubeSphere DevOps 3.0 流水线运维指南</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <blockquote>
+<p>本篇主要介绍如何运维 DevOps 流水线，怎么解决一些常见的问题。问题主要分为两大类，一类是 Kubernetes 相关的，具有一定通用性；另一类是与业务相关，需要对领域有所了解，解决问题时才能事半功倍。文档内容，会不断滚动更新。</p>
+</blockquote>
+<!-- more -->
+<h2 id="1-kubernetes-问题排查">1. Kubernetes 问题排查</h2>
+<h3 id="11-基本的创建流程">1.1 基本的创建流程</h3>
+<figure data-type="image" tabindex="1"><a href="https://www.chenshaowen.com/blog/images/2020/10/how-k8s-work.png"><img src="https://www.chenshaowen.com/blog/images/2020/10/how-k8s-work.png" alt="img" loading="lazy"></a></figure>
+<p>如上图所示，是用户创建一个 Deployment 的简单流程。主要分为以下步骤:</p>
+<ol>
+<li>kubectl 根据用户输入的命令，填充相关字段，将 deployment/pvc 对象发送给 kube-apiserver</li>
+<li>kube-apiserver 会有一系列的权限/准入控制，最终将数据序列化存储在 etcd 中</li>
+<li>kube-controller-manager 包含大量的控制器，这些控制器会生成 replicaset/pod 对象存储在 etcd 中。pvc 需要绑定到 pv 上，如果没有满足要求的 pv，则通过 Storage Class 动态创建一个 pv 。</li>
+<li>kube-sheduler 负责给 pod 选择运行的 node 节点，然后将 NodeName 字段写入 pod 对象中。</li>
+<li>kubelet 发现当前 node 节点有待创建的 pod，然后开始调用 CRI 接口去管理 pod 的生命周期。如果有 pvc，还需要将远程磁盘挂载到宿主机目录。</li>
+</ol>
+<p>了解基本的创建流程，有利于排查各种可能的故障。故障可以理解为集群生命周期中的一个状态，而创建是整个生命周期的起点。同时，重置、重启都是非常快速地解决问题的方法，都涉及创建。</p>
+<h3 id="12-解决集群故障的思路">1.2 解决集群故障的思路</h3>
+<figure data-type="image" tabindex="2"><a href="https://www.chenshaowen.com/blog/images/2020/10/how-k8s-fix.png"><img src="https://www.chenshaowen.com/blog/images/2020/10/how-k8s-fix.png" alt="img" loading="lazy"></a></figure>
+<p>如上图所示，是我的集群故障修复思路。主要分为以下步骤：</p>
+<ol>
+<li><code>kubectl get</code> 检查 node、pod 等资源是否符合预期</li>
+<li><code>kubectl describe</code> 查看 Kubernetes 中的事件信息，包括 kube-sheduler 的调度、拉取镜像、启动是否成功等。通常能解决大部分的问题。</li>
+<li><code>kubectl logs</code> 查看负载的日志。当 pod 处于 running，但是又无法正常提供服务时，logs 信息能够给出有用的提示。有时无法查看 pod 中容器的日志，那么需要去 pod 所在的节点查看 docker 的日志。<code>journal</code> 通过 <code>-u</code> 参数指定服务，通过 <code>-f</code> 查看滚动的最新日志，也十分有用。</li>
+<li>如果上面两种思路还不能解决问题，那么恭喜你，又有机会提高自己了。检查底层服务，也就是检查集群的基础环境，包括磁盘、允许的协议、允许的端口、防火墙、网络等。最终能不能解决，取决于你的积累和检索问题答案的能力。</li>
+</ol>
+<h3 id="13-必要的检查事项">1.3 必要的检查事项</h3>
+<p>这里列举一些必要的检查事项，可以辅助排查问题。</p>
+<ul>
+<li>node 负载</li>
+</ul>
+<p>node 负载过高时，有可能导致节点 NotReady。</p>
+<ul>
+<li>node 磁盘</li>
+</ul>
+<p>磁盘包括两部分，大小和 inode。</p>
+<ul>
+<li>swap、firewall</li>
+</ul>
+<p>安装集群时的配置，在重启机器之后，可能会失效。</p>
+<ul>
+<li>跨 node 的 pod 通信</li>
+</ul>
+<p>跨节点通信异常时，会导致服务无法访问。</p>
+<ul>
+<li>node 节点上 kubelet、docker 的状态</li>
+</ul>
+<p><code>systemctl status kubelet</code>、<code>systemctl status docker</code> 查看组件的状态。</p>
+<ul>
+<li>检查 kubelet 、docker 的配置</li>
+</ul>
+<p><code>ps aux|grep kubelet</code> 、<code>docker info</code> 查看相关配置是否符合预期。</p>
+<h2 id="2-安装问题">2. 安装问题</h2>
+<figure data-type="image" tabindex="3"><a href="https://www.chenshaowen.com/blog/images/2020/10/kubesphere-devops-installer.png"><img src="https://www.chenshaowen.com/blog/images/2020/10/kubesphere-devops-installer.png" alt="img" loading="lazy"></a></figure>
+<p>如上图所示，是 installer 在执行安装 DevOps 时的依赖关系。DevOps 主要有两个核心组件 S2I 和 Jenkins 。S2I 依赖于 minio 存储文件，Jenkins 依赖于 uc 提供插件下载、依赖 openldap 打通账户体系。</p>
+<p>安装时，比较常见的是 minio 安装失败，导致 DevOps 无法继续安装。而 minio 安装失败通常又是存储和网络导致。</p>
+<h2 id="3-jenkins-运维问题">3. Jenkins 运维问题</h2>
+<h3 id="31-修改默认配置导致异常">3.1 修改默认配置导致异常</h3>
+<p>DevOps 允许用户自定义配置，但 Jenkins <code>/configureSecurity/</code> 页面中鉴权和 CSRF Protection 不要修改。</p>
+<figure data-type="image" tabindex="4"><a href="https://www.chenshaowen.com/blog/images/2020/10/kubesphere-devops-jenkins.png"><img src="https://www.chenshaowen.com/blog/images/2020/10/kubesphere-devops-jenkins.png" alt="img" loading="lazy"></a></figure>
+<p>修改上图，红色框中的内容，会导致流水线无法使用。</p>
+<h3 id="32-大量多分支流水线占满磁盘空间">3.2 大量多分支流水线占满磁盘空间</h3>
+<p>多分支流水线扫描时，会将仓库拉取到 <code>/var/jenkins_home/cache</code> 中，查找 jenkinsfile 文件。</p>
+<p>如果大量实践多分支流水线扫描，请将 Jenkins 的 pv 设置大一些，50 GB 以上。</p>
+<h3 id="33-lightweight-问题导致并发流水线冲突">3.3 Lightweight 问题导致并发流水线冲突</h3>
+<p>具体可以参考文档: <a href="https://www.chenshaowen.com/blog/the-question-of-lightweight-checkout-in-jenkins.html">Jenkins 中 Lightweight 拉取代码问题分析</a></p>
+<h3 id="34-多节点集群无法创建流水线">3.4 多节点集群，无法创建流水线</h3>
+<p>节点之间通信问题，可以将 ks-controller-manager 和 ks-jenkins 调度到一个节点进行验证。</p>
+<p>如果能够创建成功，那么 Pod 的跨节点通信有问题。</p>
+<h3 id="35-流水线并发数量少">3.5 流水线并发数量少。</h3>
+<p>调整 ks-jenkins 的 cpu 和 memory 限制，还有 Xms、Xmx 值。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/j9la1_NVz/">
+              <span class="post-title">
+                KubeSphere3.0 多集群联邦&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

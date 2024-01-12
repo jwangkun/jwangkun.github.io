@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>kubernetes 部署 rook+ceph 存储系统 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="kubernetes 部署 rook+ceph 存储系统 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="kubernetes 部署 rook+ceph 存储系统"/>
+    <meta property="og:url" content="https://jwangkun.github.io/cJWj7TS4N/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/Ca9ibHP53/" class="tag">云原生存储</a>
+            
+            <a href="https://jwangkun.github.io/WkafEgklqE/" class="tag">Rook</a>
+            
+            <a href="https://jwangkun.github.io/NuKABzdBlt/" class="tag">Ceph</a>
+            
+        </span>
+            <h1>kubernetes 部署 rook+ceph 存储系统</h1>
+            <span class="meta">
+            	Posted on
+              2021-11-08，23 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Rook 官网：https://rook.io<br>
+<strong>容器的持久化存储</strong><br>
+容器的持久化存储是保存容器存储状态的重要手段，存储插件会在容器里挂载一个基于网络或者其他机制的远程数据卷，使得在容器里创建的文件，实际上是保存在远程存储服务器上，或者以分布式的方式保存在多个节点上，而与当前宿主机没有任何绑定关系。这样，无论你在其他哪个宿主机上启动新的容器，都可以请求挂载指定的持久化存储卷，从而访问到数据卷里保存的内容。<br>
+由于 <a href="https://so.csdn.net/so/search?from=pc_blog_highlight&amp;q=Kubernetes">Kubernetes</a> 本身的松耦合设计，绝大多数存储项目，比如 Ceph、GlusterFS、NFS 等，都可以为 Kubernetes 提供持久化存储能力。<br>
+<strong>Ceph 分布式存储系统</strong><br>
+Ceph 是一种高度可扩展的分布式存储解决方案，提供对象、文件和块存储。在每个存储节点上，您将找到 Ceph 存储对象的文件系统和 Ceph OSD（对象存储守护程序）进程。在 Ceph 集群上，您还可以找到 Ceph MON（监控）守护程序，它们确保 Ceph 集群保持高可用性。<br>
+<strong>Rook</strong><br>
+Rook 是一个开源的 cloud-native storage 编排, 提供平台和框架；为各种存储解决方案提供平台、框架和支持，以便与云原生环境本地集成。<br>
+Rook 将存储软件转变为自我管理、自我扩展和自我修复的存储服务，它通过自动化部署、引导、配置、置备、扩展、升级、迁移、灾难恢复、监控和资源管理来实现此目的。<br>
+Rook 使用底层云本机容器管理、调度和编排平台提供的工具来实现它自身的功能。<br>
+Rook 目前支持 Ceph、NFS、Minio Object Store 和 CockroachDB。</p>
+<p>Rook 使用 Kubernetes 原语使 Ceph 存储系统能够在 Kubernetes 上运行。下图说明了 Ceph Rook 如何与 Kubernetes 集成：</p>
+<figure data-type="image" tabindex="1"><img src="https://img-blog.csdnimg.cn/20190104133544110.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<p>随着 Rook 在 Kubernetes 集群中运行，Kubernetes 应用程序可以挂载由 Rook 管理的块设备和文件系统，或者可以使用 S3 / Swift API 提供对象存储。Rook oprerator 自动配置存储组件并监控群集，以确保存储处于可用和健康状态。<br>
+Rook oprerator 是一个简单的容器，具有引导和监视存储集群所需的全部功能。oprerator 将启动并监控 ceph monitor pods 和 OSDs 的守护进程，它提供基本的 RADOS 存储。oprerator 通过初始化运行服务所需的 pod 和其他组件来管理池，对象存储（S3 / Swift）和文件系统的 CRD。<br>
+oprerator 将监视存储后台驻留程序以确保群集正常运行。Ceph mons 将在必要时启动或故障转移，并在群集增长或缩小时进行其他调整。oprerator 还将监视 api 服务请求的所需状态更改并应用更改。<br>
+Rook oprerator 还创建了 Rook agent。这些 agent 是在每个 Kubernetes 节点上部署的 pod。每个 agent 都配置一个 Flexvolume 插件，该插件与 Kubernetes 的 volume controller 集成在一起。处理节点上所需的所有存储操作，例如附加网络存储设备，安装卷和格式化文件系统。</p>
+<figure data-type="image" tabindex="2"><img src="https://img-blog.csdnimg.cn/20190104133558632.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<p>该 rook 容器包括所有必需的 Ceph 守护进程和工具来管理和存储所有数据 - 数据路径没有变化。 rook 并没有试图与 Ceph 保持完全的忠诚度。 许多 Ceph 概念（如 placement groups 和 crush maps）都是隐藏的，因此您无需担心它们。 相反，Rook 为管理员创建了一个简化的用户体验，包括物理资源，池，卷，文件系统和 buckets。 同时，可以在需要时使用 Ceph 工具应用高级配置。<br>
+Rook 在 golang 中实现。Ceph 在 C ++ 中实现，其中数据路径被高度优化。我们相信这种组合可以提供两全其美的效果。</p>
+<h2 id="部署环境准备">部署环境准备</h2>
+<p><strong>官方参考：</strong><br>
+root 项目地址：https://github.com/rook/rook<br>
+rook 官方参考文档：https://rook.io/docs/rook/v0.9/ceph-quickstart.html</p>
+<p>集群节点信息：</p>
+<pre><code>192.168.92.56 k8s-master
+192.168.92.57 k8s-node1
+192.168.92.58 k8s-node2
+</code></pre>
+<p>在集群中至少有三个节点可用，满足 ceph 高可用要求，这里已配置 master 节点使其支持运行 pod。</p>
+<p><strong>rook 使用存储方式</strong><br>
+rook 默认使用所有节点的所有资源，rook operator 自动在所有节点上启动 OSD 设备，Rook 会用如下标准监控并发现可用设备：</p>
+<ul>
+<li>设备没有分区</li>
+<li>设备没有格式化的文件系统</li>
+</ul>
+<p>Rook 不会使用不满足以上标准的设备。另外也可以通过修改配置文件，指定哪些节点或者设备会被使用。<br>
+<strong>添加新磁盘</strong><br>
+这里在所有节点添加 1 块 50GB 的新磁盘：/dev/sdb，作为 OSD 盘，提供存储空间，添加完成后扫描磁盘，确保主机能够正常识别到：</p>
+<pre><code>#扫描 SCSI总线并添加 SCSI 设备
+for host in $(ls /sys/class/scsi_host) ; do echo &quot;- - -&quot; &gt; /sys/class/scsi_host/$host/scan; done
+
+#重新扫描 SCSI 总线
+for scsi_device in $(ls /sys/class/scsi_device/); do echo 1 &gt; /sys/class/scsi_device/$scsi_device/device/rescan; done
+
+#查看已添加的磁盘，能够看到sdb说明添加成功
+lsblk
+</code></pre>
+<p>本次搭建的基本原理图：</p>
+<figure data-type="image" tabindex="3"><img src="https://img-blog.csdnimg.cn/20190106123334504.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<p>无另外说明，以下全部操作都在 master 节点执行。</p>
+<h2 id="部署-rook-operator">部署 Rook Operator</h2>
+<p>克隆 rook github 仓库到本地</p>
+<pre><code>git clone https://github.com/rook/rook.git
+cd rook/cluster/examples/kubernetes/ceph/
+</code></pre>
+<p>执行 yaml 文件部署 rook 系统组件：</p>
+<pre><code>[centos@k8s-master ceph]$ kubectl apply -f operator.yaml
+namespace/rook-ceph-system created
+customresourcedefinition.apiextensions.k8s.io/cephclusters.ceph.rook.io created
+customresourcedefinition.apiextensions.k8s.io/cephfilesystems.ceph.rook.io created
+customresourcedefinition.apiextensions.k8s.io/cephobjectstores.ceph.rook.io created
+customresourcedefinition.apiextensions.k8s.io/cephobjectstoreusers.ceph.rook.io created
+customresourcedefinition.apiextensions.k8s.io/cephblockpools.ceph.rook.io created
+customresourcedefinition.apiextensions.k8s.io/volumes.rook.io created
+clusterrole.rbac.authorization.k8s.io/rook-ceph-cluster-mgmt created
+role.rbac.authorization.k8s.io/rook-ceph-system created
+clusterrole.rbac.authorization.k8s.io/rook-ceph-global created
+clusterrole.rbac.authorization.k8s.io/rook-ceph-mgr-cluster created
+serviceaccount/rook-ceph-system created
+rolebinding.rbac.authorization.k8s.io/rook-ceph-system created
+clusterrolebinding.rbac.authorization.k8s.io/rook-ceph-global created
+deployment.apps/rook-ceph-operator created
+[centos@k8s-master ~]$
+</code></pre>
+<p>如上所示，它会创建如下资源：</p>
+<ol>
+<li>namespace：rook-ceph-system，之后的所有 rook 相关的 pod 都会创建在该 namespace 下面</li>
+<li>CRD：创建五个 CRDs，.ceph.rook.io</li>
+<li>role &amp; clusterrole：用户资源控制</li>
+<li>serviceaccount：ServiceAccount 资源，给 Rook 创建的 Pod 使用</li>
+<li>deployment：rook-ceph-operator，部署 rook ceph 相关的组件</li>
+</ol>
+<p>部署 rook-ceph-operator 过程中，会触发以 DaemonSet 的方式在集群部署 Agent 和 Discoverpods。<br>
+operator 会在集群内的每个主机创建两个 pod:rook-discover,rook-ceph-agent：</p>
+<pre><code>[centos@k8s-master ~]$ kubectl get pod -n rook-ceph-system  -o wide
+NAME                                  READY   STATUS    RESTARTS   AGE     IP              NODE         NOMINATED NODE   READINESS GATES
+rook-ceph-agent-49w7t                 1/1     Running   0          7m48s   192.168.92.57   k8s-node1    &lt;none&gt;           &lt;none&gt;
+rook-ceph-agent-dpxkq                 1/1     Running   0          111s    192.168.92.58   k8s-node2    &lt;none&gt;           &lt;none&gt;
+rook-ceph-agent-wb6r8                 1/1     Running   0          7m48s   192.168.92.56   k8s-master   &lt;none&gt;           &lt;none&gt;
+rook-ceph-operator-85d64cfb99-2c78k   1/1     Running   0          9m3s    10.244.1.2      k8s-node1    &lt;none&gt;           &lt;none&gt;
+rook-discover-597sk                   1/1     Running   0          7m48s   10.244.0.4      k8s-master   &lt;none&gt;           &lt;none&gt;
+rook-discover-7h89z                   1/1     Running   0          111s    10.244.2.2      k8s-node2    &lt;none&gt;           &lt;none&gt;
+rook-discover-hjdjt                   1/1     Running   0          7m48s   10.244.1.3      k8s-node1    &lt;none&gt;           &lt;none&gt;
+[centos@k8s-master ~]$ 
+</code></pre>
+<h3 id="创建-rook-cluster">创建 rook Cluster</h3>
+<p>当检查到 Rook operator, agent, and discover pods 已经是 running 状态后，就可以部署 roo cluster 了。<br>
+执行 yaml 文件结果：</p>
+<pre><code>[centos@k8s-master ceph]$ kubectl apply -f cluster.yaml 
+namespace/rook-ceph created
+serviceaccount/rook-ceph-osd created
+serviceaccount/rook-ceph-mgr created
+role.rbac.authorization.k8s.io/rook-ceph-osd created
+role.rbac.authorization.k8s.io/rook-ceph-mgr-system created
+role.rbac.authorization.k8s.io/rook-ceph-mgr created
+rolebinding.rbac.authorization.k8s.io/rook-ceph-cluster-mgmt created
+rolebinding.rbac.authorization.k8s.io/rook-ceph-osd created
+rolebinding.rbac.authorization.k8s.io/rook-ceph-mgr created
+rolebinding.rbac.authorization.k8s.io/rook-ceph-mgr-system created
+rolebinding.rbac.authorization.k8s.io/rook-ceph-mgr-cluster created
+cephcluster.ceph.rook.io/rook-ceph created
+[centos@k8s-master ~]$
+</code></pre>
+<p>如上所示，它会创建如下资源：</p>
+<ol>
+<li>namespace：rook-ceph，之后的所有 Ceph 集群相关的 pod 都会创建在该 namespace 下</li>
+<li>serviceaccount：ServiceAccount 资源，给 Ceph 集群的 Pod 使用</li>
+<li>role &amp; rolebinding：用户资源控制</li>
+<li>cluster：rook-ceph，创建的 Ceph 集群</li>
+</ol>
+<p>Ceph 集群部署成功后，可以查看到的 pods 如下，其中 osd 数量取决于你的节点数量：</p>
+<pre><code>[centos@k8s-master ~]$ kubectl get pod -n rook-ceph -o wide
+NAME                                     READY   STATUS      RESTARTS   AGE     IP           NODE         NOMINATED NODE   READINESS GATES
+rook-ceph-mgr-a-8649f78d9b-hlg7t         1/1     Running     0          3h30m   10.244.2.6   k8s-node2    &lt;none&gt;           &lt;none&gt;
+rook-ceph-mon-a-7c7df4b5bb-984x8         1/1     Running     0          3h31m   10.244.0.5   k8s-master   &lt;none&gt;           &lt;none&gt;
+rook-ceph-mon-b-7b9bc8b6c4-8trmz         1/1     Running     0          3h31m   10.244.1.4   k8s-node1    &lt;none&gt;           &lt;none&gt;
+rook-ceph-mon-c-54b5fb5955-5dgr7         1/1     Running     0          3h30m   10.244.2.5   k8s-node2    &lt;none&gt;           &lt;none&gt;
+rook-ceph-osd-0-b9bb5df49-gt4vs          1/1     Running     0          3h29m   10.244.0.7   k8s-master   &lt;none&gt;           &lt;none&gt;
+rook-ceph-osd-1-9c6dbf797-2dg8p          1/1     Running     0          3h29m   10.244.2.8   k8s-node2    &lt;none&gt;           &lt;none&gt;
+rook-ceph-osd-2-867ddc447d-xkh7k         1/1     Running     0          3h29m   10.244.1.6   k8s-node1    &lt;none&gt;           &lt;none&gt;
+rook-ceph-osd-prepare-k8s-master-m8tvr   0/2     Completed   0          3h29m   10.244.0.6   k8s-master   &lt;none&gt;           &lt;none&gt;
+rook-ceph-osd-prepare-k8s-node1-jf7qz    0/2     Completed   1          3h29m   10.244.1.5   k8s-node1    &lt;none&gt;           &lt;none&gt;
+rook-ceph-osd-prepare-k8s-node2-tcqdl    0/2     Completed   0          3h29m   10.244.2.7   k8s-node2    &lt;none&gt;           &lt;none&gt;
+[centos@k8s-master ~]$ 
+</code></pre>
+<p>可以看出部署的 Ceph 集群有：</p>
+<ol>
+<li>Ceph Monitors：默认启动三个 ceph-mon，可以在 cluster.yaml 里配置</li>
+<li>Ceph Mgr：默认启动一个，可以在 cluster.yaml 里配置</li>
+<li>Ceph OSDs：根据 cluster.yaml 里的配置启动，默认在所有的可用节点上启动<br>
+上述 Ceph 组件对应 kubernetes 的 kind 是 deployment：</li>
+</ol>
+<pre><code>[centos@k8s-master ~]$ kubectl -n rook-ceph get deployment
+NAME              READY   UP-TO-DATE   AVAILABLE   AGE
+rook-ceph-mgr-a   1/1     1            1           5h34m
+rook-ceph-mon-a   1/1     1            1           5h36m
+rook-ceph-mon-b   1/1     1            1           5h35m
+rook-ceph-mon-c   1/1     1            1           5h35m
+rook-ceph-osd-0   1/1     1            1           5h34m
+rook-ceph-osd-1   1/1     1            1           5h34m
+rook-ceph-osd-2   1/1     1            1           5h34m
+[centos@k8s-master ~]$ 
+</code></pre>
+<p><strong>删除 Ceph 集群</strong><br>
+如果要删除已创建的 Ceph 集群，可执行下面命令：</p>
+<pre><code># kubectl delete -f cluster.yaml
+</code></pre>
+<p>删除 Ceph 集群后，在之前部署 Ceph 组件节点的 / var/lib/rook / 目录，会遗留下 Ceph 集群的配置信息。<br>
+若之后再部署新的 Ceph 集群，先把之前 Ceph 集群的这些信息删除，不然启动 monitor 会失败；</p>
+<pre><code># cat clean-rook-dir.sh
+hosts=(
+  k8s-master
+  k8s-node1
+  k8s-node2
+)
+
+for host in ${hosts[@]} ; do
+  ssh $host &quot;rm -rf /var/lib/rook/*&quot;
+done
+</code></pre>
+<h2 id="配置-ceph-dashboard">配置 ceph dashboard</h2>
+<p>在 cluster.yaml 文件中默认已经启用了 ceph dashboard，查看 dashboard 的 service：</p>
+<pre><code>[centos@k8s-master ~]$ kubectl get service -n rook-ceph
+NAME                                     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+rook-ceph-mgr                            ClusterIP   10.107.77.188    &lt;none&gt;        9283/TCP         3h33m
+rook-ceph-mgr-dashboard                  ClusterIP   10.96.135.98     &lt;none&gt;        8443/TCP         3h33m
+rook-ceph-mon-a                          ClusterIP   10.105.153.93    &lt;none&gt;        6790/TCP         3h35m
+rook-ceph-mon-b                          ClusterIP   10.105.107.254   &lt;none&gt;        6790/TCP         3h34m
+rook-ceph-mon-c                          ClusterIP   10.104.1.238     &lt;none&gt;        6790/TCP         3h34m
+[centos@k8s-master ~]$ 
+</code></pre>
+<p>rook-ceph-mgr-dashboard 监听的端口是 8443，创建 nodeport 类型的 service 以便集群外部访问。</p>
+<pre><code>kubectl apply -f rook/cluster/examples/kubernetes/ceph/dashboard-external-https.yaml
+</code></pre>
+<p>查看一下 nodeport 暴露的端口，这里是 32483 端口：</p>
+<pre><code>[centos@k8s-master ~]$ kubectl get service -n rook-ceph | grep dashboard
+rook-ceph-mgr-dashboard                  ClusterIP   10.96.135.98     &lt;none&gt;        8443/TCP         3h37m
+rook-ceph-mgr-dashboard-external-https   NodePort    10.97.181.103    &lt;none&gt;        8443:32483/TCP   3h29m
+[centos@k8s-master ~]$ 
+</code></pre>
+<p>获取 Dashboard 的登陆账号和密码</p>
+<pre><code>[centos@k8s-master ~]$ MGR_POD=`kubectl get pod -n rook-ceph | grep mgr | awk '{print $1}'`
+[centos@k8s-master ~]$ kubectl -n rook-ceph logs $MGR_POD | grep password
+2019-01-03 05:44:00.585 7fced4782700  0 log_channel(audit) log [DBG] : from='client.4151 10.244.1.2:0/3446600469' entity='client.admin' cmd=[{&quot;username&quot;: &quot;admin&quot;, &quot;prefix&quot;: &quot;dashboard set-login-credentials&quot;, &quot;password&quot;: &quot;8v2AbqHDj6&quot;, &quot;target&quot;: [&quot;mgr&quot;, &quot;&quot;], &quot;format&quot;: &quot;json&quot;}]: dispatch
+[centos@k8s-master ~]$ 
+</code></pre>
+<p>找到 username 和 password 字段，我这里是 admin，8v2AbqHDj6<br>
+打开浏览器输入任意一个 Node 的 IP+nodeport 端口，这里使用 master 节点 ip 访问：<br>
+https://192.168.92.56:32483</p>
+<figure data-type="image" tabindex="4"><img src="https://img-blog.csdnimg.cn/20190104134300431.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<p>登录后界面如下：</p>
+<figure data-type="image" tabindex="5"><img src="https://img-blog.csdnimg.cn/20190104134335201.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<p>查看 hosts 状态：<br>
+运行了 1 个 mgr、3 个 mon 和 3 个 osd</p>
+<figure data-type="image" tabindex="6"><img src="https://img-blog.csdnimg.cn/20190104134341810.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<p>查看 monitors 状态：</p>
+<figure data-type="image" tabindex="7"><img src="https://img-blog.csdnimg.cn/20190104134348345.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<p>查看 OSD 状态<br>
+3 个 osd 状态正常，每个容量 50GB.</p>
+<figure data-type="image" tabindex="8"><img src="https://img-blog.csdnimg.cn/2019010413440155.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<h2 id="部署-ceph-toolbox">部署 Ceph toolbox</h2>
+<p>默认启动的 Ceph 集群，是开启 Ceph 认证的，这样你登陆 Ceph 组件所在的 Pod 里，是没法去获取集群状态，以及执行 CLI 命令，这时需要部署 Ceph toolbox，命令如下：</p>
+<pre><code>kubectl apply -f rook/cluster/examples/kubernetes/ceph/ toolbox.yaml
+</code></pre>
+<p>部署成功后，pod 如下：</p>
+<pre><code>[centos@k8s-master ceph]$  kubectl -n rook-ceph get pods -o wide | grep ceph-tools
+rook-ceph-tools-76c7d559b6-8w7bk         1/1     Running     0          11s     192.168.92.58   k8s-node2    &lt;none&gt;           &lt;none&gt;
+[centos@k8s-master ceph]$ 
+</code></pre>
+<p>然后可以登陆该 pod 后，执行 Ceph CLI 命令：</p>
+<pre><code>[centos@k8s-master ceph]$ kubectl -n rook-ceph exec -it rook-ceph-tools-76c7d559b6-8w7bk bash
+bash: warning: setlocale: LC_CTYPE: cannot change locale (en_US.UTF-8): No such file or directory
+bash: warning: setlocale: LC_COLLATE: cannot change locale (en_US.UTF-8): No such file or directory
+bash: warning: setlocale: LC_MESSAGES: cannot change locale (en_US.UTF-8): No such file or directory
+bash: warning: setlocale: LC_NUMERIC: cannot change locale (en_US.UTF-8): No such file or directory
+bash: warning: setlocale: LC_TIME: cannot change locale (en_US.UTF-8): No such file or directory
+[root@k8s-node2 /]# 
+</code></pre>
+<p>查看 ceph 集群状态</p>
+<pre><code>[root@k8s-node2 /]# ceph status
+  cluster:
+    id:     abddff95-5fa0-47dc-a001-7fb291a42bc6
+    health: HEALTH_OK
+ 
+  services:
+    mon: 3 daemons, quorum c,b,a
+    mgr: a(active)
+    osd: 3 osds: 3 up, 3 in
+ 
+  data:
+    pools:   1 pools, 100 pgs
+    objects: 0  objects, 0 B
+    usage:   12 GiB used, 129 GiB / 141 GiB avail
+    pgs:     100 active+clean
+ 
+[root@k8s-node2 /]# 
+</code></pre>
+<p>查看 ceph 配置文件</p>
+<pre><code>[root@k8s-node2 /]# cd /etc/ceph/
+[root@k8s-node2 ceph]# ll
+total 12
+-rw-r--r-- 1 root root 121 Jan  3 11:28 ceph.conf
+-rw-r--r-- 1 root root  62 Jan  3 11:28 keyring
+-rw-r--r-- 1 root root  92 Sep 24 18:15 rbdmap
+[root@k8s-node2 ceph]# cat ceph.conf 
+[global]
+mon_host = 10.104.1.238:6790,10.105.153.93:6790,10.105.107.254:6790
+
+[client.admin]
+keyring = /etc/ceph/keyring
+[root@k8s-node2 ceph]# cat keyring
+[client.admin]
+key = AQBjoC1cXKJ7KBAA3ZnhWyxvyGa8+fnLFK7ykw==
+[root@k8s-node2 ceph]# cat rbdmap 
+# RbdDevice             Parameters
+#poolname/imagename     id=client,keyring=/etc/ceph/ceph.client.keyring
+[root@k8s-node2 ceph]# 
+</code></pre>
+<h2 id="rook-提供-rbd-服务">rook 提供 RBD 服务</h2>
+<p>rook 可以提供以下 3 类型的存储：<br>
+ Block: Create block storage to be consumed by a pod<br>
+ Object: Create an object store that is accessible inside or outside the Kubernetes cluster<br>
+ Shared File System: Create a file system to be shared across multiple pods<br>
+在提供（Provisioning）块存储之前，需要先创建 StorageClass 和存储池。K8S 需要这两类资源，才能和 Rook 交互，进而分配持久卷（PV）。<br>
+在 kubernetes 集群里，要提供 rbd 块设备服务，需要有如下步骤：</p>
+<ol>
+<li>创建 rbd-provisioner pod</li>
+<li>创建 rbd 对应的 storageclass</li>
+<li>创建 pvc，使用 rbd 对应的 storageclass</li>
+<li>创建 pod 使用 rbd pvc</li>
+</ol>
+<p>通过 rook 创建 Ceph Cluster 之后，rook 自身提供了 rbd-provisioner 服务，所以我们不需要再部署其 provisioner。<br>
+备注：代码位置 pkg/operator/ceph/provisioner/provisioner.go<br>
+<strong>创建 pool 和 StorageClass</strong><br>
+查看 storageclass.yaml 的配置（默认）：</p>
+<pre><code>[centos@k8s-master ~]$ vim rook/cluster/examples/kubernetes/ceph/storageclass.yaml
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: replicapool
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 1
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+   name: rook-ceph-block
+provisioner: ceph.rook.io/block
+parameters:
+  blockPool: replicapool
+  # Specify the namespace of the rook cluster from which to create volumes.
+  # If not specified, it will use `rook` as the default namespace of the cluster.
+  # This is also the namespace where the cluster will be
+  clusterNamespace: rook-ceph
+  # Specify the filesystem type of the volume. If not specified, it will use `ext4`.
+  fstype: xfs
+  # (Optional) Specify an existing Ceph user that will be used for mounting storage with this StorageClass.
+  #mountUser: user1
+  # (Optional) Specify an existing Kubernetes secret name containing just one key holding the Ceph user secret.
+  # The secret must exist in each namespace(s) where the storage will be consumed.
+  #mountSecret: ceph-user1-secret
+</code></pre>
+<p>配置文件中包含了一个名为 replicapool 的存储池，和名为 rook-ceph-block 的 storageClass。</p>
+<p>运行 yaml 文件</p>
+<pre><code>kubectl apply -f /rook/cluster/examples/kubernetes/ceph/storageclass.yaml
+</code></pre>
+<p>查看创建的 storageclass:</p>
+<pre><code>[centos@k8s-master ~]$ kubectl get storageclass
+NAME              PROVISIONER          AGE
+rook-ceph-block   ceph.rook.io/block   171m
+[centos@k8s-master ~]$ 
+</code></pre>
+<p>登录 ceph dashboard 查看创建的存储池：</p>
+<figure data-type="image" tabindex="9"><img src="https://img-blog.csdnimg.cn/20190104134752317.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<p><strong>使用存储</strong><br>
+以官方 wordpress 示例为例，创建一个经典的 wordpress 和 mysql 应用程序来使用 Rook 提供的块存储，这两个应用程序都将使用 Rook 提供的 block volumes。<br>
+查看 yaml 文件配置，主要看定义的 pvc 和挂载 volume 部分，以 wordpress.yaml 为例：</p>
+<pre><code>[centos@k8s-master ~]$ cat rook/cluster/examples/kubernetes/wordpress.yaml 
+......
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wp-pv-claim
+  labels:
+    app: wordpress
+spec:
+  storageClassName: rook-ceph-block
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+......
+        volumeMounts:
+        - name: wordpress-persistent-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: wordpress-persistent-storage
+        persistentVolumeClaim:
+          claimName: wp-pv-claim
+[centos@k8s-master ~]$ 
+</code></pre>
+<p>yaml 文件里定义了一个名为 wp-pv-claim 的 pvc，指定 storageClassName 为 rook-ceph-block，申请的存储空间大小为 20Gi。最后一部分创建了一个名为 wordpress-persistent-storage 的 volume，并且指定 claimName 为 pvc 的名称，最后将 volume 挂载到 pod 的 / var/lib/mysql 目录下。<br>
+启动 mysql 和 wordpress ：</p>
+<pre><code>kubectl apply -f rook/cluster/examples/kubernetes/mysql.yaml
+kubectl apply -f rook/cluster/examples/kubernetes/wordpress.yaml
+</code></pre>
+<p>这 2 个应用都会创建一个块存储卷，并且挂载到各自的 pod 中，查看声明的 pvc 和 pv：</p>
+<pre><code>[centos@k8s-master ~]$ kubectl get pvc
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
+mysql-pv-claim   Bound    pvc-5bfbe28e-0fc9-11e9-b90d-000c291c25f3   20Gi       RWO            rook-ceph-block   32m
+wp-pv-claim      Bound    pvc-5f56c6d6-0fc9-11e9-b90d-000c291c25f3   20Gi       RWO            rook-ceph-block   32m
+[centos@k8s-master ~]$ kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                    STORAGECLASS      REASON   AGE
+pvc-5bfbe28e-0fc9-11e9-b90d-000c291c25f3   20Gi       RWO            Delete           Bound    default/mysql-pv-claim   rook-ceph-block            32m
+pvc-5f56c6d6-0fc9-11e9-b90d-000c291c25f3   20Gi       RWO            Delete           Bound    default/wp-pv-claim      rook-ceph-block            32m
+[centos@k8s-master ~]$ 
+</code></pre>
+<p>注意：这里的 pv 会自动创建，当提交了包含 StorageClass 字段的 PVC 之后，Kubernetes 就会根据这个 StorageClass 创建出对应的 PV，这是用到的是 Dynamic Provisioning 机制来动态创建 pv，PV 支持 Static 静态请求，和动态创建两种方式。<br>
+在 Ceph 集群端检查：</p>
+<pre><code>[centos@k8s-master ceph]$ kubectl -n rook-ceph exec -it rook-ceph-tools-76c7d559b6-8w7bk bash
+......
+[root@k8s-node2 /]# rbd info -p replicapool pvc-5bfbe28e-0fc9-11e9-b90d-000c291c25f3 
+rbd image 'pvc-5bfbe28e-0fc9-11e9-b90d-000c291c25f3':
+        size 20 GiB in 5120 objects
+        order 22 (4 MiB objects)
+        id: 88156b8b4567
+        block_name_prefix: rbd_data.88156b8b4567
+        format: 2
+        features: layering
+        op_features: 
+        flags: 
+        create_timestamp: Fri Jan  4 02:35:12 2019
+[root@k8s-node2 /]# 
+</code></pre>
+<p>登陆 pod 检查 rbd 设备：</p>
+<pre><code>[centos@k8s-master ~]$ kubectl get pod -o wide
+NAME                               READY   STATUS    RESTARTS   AGE    IP            NODE        NOMINATED NODE   READINESS GATES
+wordpress-7b6c4c79bb-t5pst         1/1     Running   0          135m   10.244.1.16   k8s-node1   &lt;none&gt;           &lt;none&gt;
+wordpress-mysql-6887bf844f-9pmg8   1/1     Running   0          135m   10.244.2.14   k8s-node2   &lt;none&gt;           &lt;none&gt;
+[centos@k8s-master ~]$ 
+
+[centos@k8s-master ~]$ kubectl exec -it wordpress-7b6c4c79bb-t5pst bash
+root@wordpress-7b6c4c79bb-t5pst:/var/www/html#
+root@wordpress-7b6c4c79bb-t5pst:/var/www/html#  mount | grep rbd
+/dev/rbd0 on /var/www/html type xfs (rw,relatime,attr2,inode64,sunit=8192,swidth=8192,noquota)
+root@wordpress-7b6c4c79bb-t5pst:/var/www/html# df -h
+Filesystem               Size  Used Avail Use% Mounted on
+......
+/dev/rbd0                 20G   59M   20G   1% /var/www/html
+......
+</code></pre>
+<p>登录 ceph dashboard 查看创建的 images</p>
+<figure data-type="image" tabindex="10"><img src="https://img-blog.csdnimg.cn/20190104134923802.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+<p>一旦 wordpress 和 mysql pods 处于运行状态，获取 wordpress 应用程序的集群 IP 并使用浏览器访问：</p>
+<pre><code>[centos@k8s-master ~]$ kubectl get svc wordpress
+NAME        TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+wordpress   LoadBalancer   10.98.178.189   &lt;pending&gt;     80:30001/TCP   136m
+[centos@k8s-master ~]$ 
+</code></pre>
+<p>访问 wordpress:</p>
+<figure data-type="image" tabindex="11"><img src="https://img-blog.csdnimg.cn/20190104135002395.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/n8NIXj7Rj/">
+              <span class="post-title">
+                部署 Mariadb HA 环境&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

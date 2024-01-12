@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>MinIO 分布式集群搭建 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="MinIO 分布式集群搭建 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="MinIO 分布式集群搭建"/>
+    <meta property="og:url" content="https://jwangkun.github.io/YNaOOJ8rC/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/1ENrc-EXo/" class="tag">MinIO</a>
+            
+            <a href="https://jwangkun.github.io/8kykEFAe4N/" class="tag">MinIO集群</a>
+            
+            <a href="https://jwangkun.github.io/8oKhucYoJq/" class="tag">MinIO 分布式集群</a>
+            
+        </span>
+            <h1>MinIO 分布式集群搭建</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-06，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>分布式 Minio 可以让你将多块硬盘（甚至在不同的机器上）组成一个对象存储服务。由于硬盘分布在不同的节点上，分布式 Minio 避免了单点故障。</p>
+<p>Minio 分布式模式可以搭建一个高可用的对象存储服务，你可以使用这些存储设备，而不用考虑其真实物理位置。</p>
+<p><strong>（1）数据保护</strong></p>
+<p>分布式 Minio 采用纠删码（erasure code）来防范多个节点宕机和位衰减（bit rot）。</p>
+<p>分布式 Minio 至少需要 4 个节点，使用分布式 Minio 就自动引入了纠删码功能。</p>
+<p>纠删码是一种恢复丢失和损坏数据的数学算法， Minio 采用 Reed-Solomon code 将对象拆分成 N/2 数据和 N/2 奇偶校验块。 这就意味着如果是 12 块盘，一个对象会被分成 6 个数据块、6 个奇偶校验块，你可以丢失任意 6 块盘（不管其是存放的数据块还是奇偶校验块），你仍可以从剩下的盘中的数据进行恢复。</p>
+<p>纠删码的工作原理和 RAID 或者复制不同，像 RAID6 可以在损失两块盘的情况下不丢数据，而 Minio 纠删码可以在丢失一半的盘的情况下，仍可以保证数据安全。 而且 Minio 纠删码是作用在对象级别，可以一次恢复一个对象，而RAID 是作用在卷级别，数据恢复时间很长。 Minio 对每个对象单独编码，存储服务一经部署，通常情况下是不需要更换硬盘或者修复。Minio 纠删码的设计目标是为了性能和尽可能的使用硬件加速。</p>
+<p>位衰减又被称为数据腐化 Data Rot、无声数据损坏 Silent Data Corruption ，是目前硬盘数据的一种严重数据丢失问题。硬盘上的数据可能会神不知鬼不觉就损坏了，也没有什么错误日志。正所谓明枪易躲，暗箭难防，这种背地里犯的错比硬盘直接故障还危险。 所以 Minio 纠删码采用了高速 HighwayHash 基于哈希的校验和来防范位衰减。</p>
+<p><strong>（2）高可用</strong></p>
+<p>单机 Minio 服务存在单点故障，相反，如果是一个 N 节点的分布式 Minio ,只要有 N/2 节点在线，你的数据就是安全的。不过你需要至少有 N/2+1 个节点来创建新的对象。</p>
+<p>例如，一个 8 节点的 Minio 集群，每个节点一块盘，就算 4 个节点宕机，这个集群仍然是可读的，不过你需要 5 个节点才能写数据。</p>
+<p><strong>（3）限制</strong></p>
+<p>分布式 Minio 单租户存在最少 4 个盘最多 16 个盘的限制（受限于纠删码）。这种限制确保了 Minio 的简洁，同时仍拥有伸缩性。如果你需要搭建一个多租户环境，你可以轻松的使用编排工具（Kubernetes）来管理多个Minio实例。</p>
+<p>注意，只要遵守分布式 Minio 的限制，你可以组合不同的节点和每个节点几块盘。比如，你可以使用 2 个节点，每个节点 4 块盘，也可以使用 4 个节点，每个节点两块盘，诸如此类。</p>
+<p><strong>（4）一致性</strong><br>
+Minio 在分布式和单机模式下，所有读写操作都严格遵守 read-after-write 一致性模型。</p>
+<h1 id="搭建分布式集群">搭建分布式集群</h1>
+<p>启动一个分布式 Minio 实例，你只需要把硬盘位置做为参数传给 minio server 命令即可，然后，你需要在所有其它节点运行同样的命令。</p>
+<p>注意</p>
+<ul>
+<li>
+<p>分布式 Minio 里所有的节点需要有同样的 access 秘钥和 secret 秘钥，这样这些节点才能建立联接。为了实现这个，你需要在执行 minio server 命令之前，先将 access 秘钥和 secret 秘钥 export 成环境变量。</p>
+</li>
+<li>
+<p>分布式 Minio 使用的磁盘里必须是干净的，里面没有数据。</p>
+</li>
+<li>
+<p>下面示例里的 IP 仅供示例参考，你需要改成你真实用到的 IP 和文件夹路径。</p>
+</li>
+<li>
+<p>分布式 Minio 里的节点时间差不能超过 3 秒，你可以使用 NTP 来保证时间一致。</p>
+</li>
+<li>
+<p>在 Windows 下运行分布式 Minio 处于实验阶段，不建议用于生产环境。</p>
+<p>生产环境建议最少 4 节点</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>IP</th>
+<th>data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>minio1</td>
+<td>10.10.0.1</td>
+<td>/data/minio/data</td>
+</tr>
+<tr>
+<td>minio2</td>
+<td>10.10.0.2</td>
+<td>/data/minio/data</td>
+</tr>
+<tr>
+<td>minio3</td>
+<td>10.10.0.3</td>
+<td>/data/minio/data</td>
+</tr>
+<tr>
+<td>minio4</td>
+<td>10.10.0.4</td>
+<td>/data/minio/data</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1-获取-minio">1、获取 Minio</h2>
+<p>https://dl.min.io/server/minio/release/linux-amd64/minio</p>
+<h2 id="2-修改主机名及-hosts">2、修改主机名及 hosts</h2>
+<pre><code>hostnamectl set-hostname minio1
+hostnamectl set-hostname minio2
+hostnamectl set-hostname minio3
+hostnamectl set-hostname minio4
+...
+cat &gt;&gt; /etc/hosts &lt;&lt;EOF
+10.10.0.1 minio1
+10.10.0.2 minio2
+10.10.0.3 minio3
+10.10.0.4 minio4
+EOF
+</code></pre>
+<h2 id="3-系统最大文件数修改">3、系统最大文件数修改</h2>
+<pre><code>echo &quot;*   soft    nofile  65535&quot; &gt;&gt; /etc/security/limits.conf
+echo &quot;*   hard    nofile  65535&quot; &gt;&gt; /etc/security/limits.conf
+</code></pre>
+<h2 id="4-目录创建">4、目录创建</h2>
+<ul>
+<li>启动脚本及二进制文件目录 run</li>
+<li>数据存储目录 data</li>
+<li>配置文件目录 / etc/minio</li>
+</ul>
+<pre><code>mkdir -p /data/minio/{run,data} &amp;&amp; mkdir -p /etc/minio
+</code></pre>
+<h2 id="5-集群启动文件">5、集群启动文件</h2>
+<pre><code>vim /data/minio/run/run.sh
+</code></pre>
+<ul>
+<li>MINIO_ACCESS_KEY：用户名，长度最小是 5 个字符</li>
+<li>MINIO_SECRET_KEY：密码，密码不能设置过于简单，不然 minio 会启动失败，长度最小是 8 个字符</li>
+<li>–config-dir：指定集群配置文件目录</li>
+</ul>
+<pre><code>#!/bin/bash
+export MINIO_ACCESS_KEY=Minio
+export MINIO_SECRET_KEY=Test1234!
+
+/data/minio/run/minio server --config-dir /etc/minio \
+http://10.10.0.1/data/minio/data \
+http://10.10.0.2/data/minio/data \
+http://10.10.0.3/data/minio/data \
+http://10.10.0.4/data/minio/data \
+</code></pre>
+<p>示例1:</p>
+<p>启动分布式Minio实例，8个节点，每节点1块盘，需要在8个节点上都运行下面的命令。</p>
+<pre><code>export MINIO_ACCESS_KEY=&lt;ACCESS_KEY&gt;
+export MINIO_SECRET_KEY=&lt;SECRET_KEY&gt;
+minio server http://192.168.1.11/export1 http://192.168.1.12/export2 \
+               http://192.168.1.13/export3 http://192.168.1.14/export4 \
+               http://192.168.1.15/export5 http://192.168.1.16/export6 \
+               http://192.168.1.17/export7 http://192.168.1.18/export8
+</code></pre>
+<p>示例2:</p>
+<p>启动分布式Minio实例，4节点，每节点4块盘，需要在4个节点上都运行下面的命令。</p>
+<pre><code>export MINIO_ACCESS_KEY=&lt;ACCESS_KEY&gt;
+export MINIO_SECRET_KEY=&lt;SECRET_KEY&gt;
+minio server http://192.168.1.11/export1 http://192.168.1.11/export2 \
+               http://192.168.1.11/export3 http://192.168.1.11/export4 \
+               http://192.168.1.12/export1 http://192.168.1.12/export2 \
+               http://192.168.1.12/export3 http://192.168.1.12/export4 \
+               http://192.168.1.13/export1 http://192.168.1.13/export2 \
+               http://192.168.1.13/export3 http://192.168.1.13/export4 \
+               http://192.168.1.14/export1 http://192.168.1.14/export2 \
+               http://192.168.1.14/export3 http://192.168.1.14/export4
+</code></pre>
+<h2 id="6-minioservice">6、minio.service</h2>
+<ul>
+<li>WorkingDirectory：二进制文件目录</li>
+<li>ExecStart：指定集群启动脚本</li>
+</ul>
+<pre><code>cat &gt; /usr/lib/systemd/system/minio.service &lt;&lt;EOF
+[Unit]
+Description=Minio service
+Documentation=https://docs.minio.io/
+
+[Service]
+WorkingDirectory=/data/minio/run/
+ExecStart=/data/minio/run/run.sh
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+</code></pre>
+<h2 id="7-二进制文件">7、二进制文件</h2>
+<p>将 minio 二进制文件上传到 / data/minio/run 目录</p>
+<h2 id="8-权限修改">8、权限修改</h2>
+<p>给所有涉及到的文件或目录添加权限</p>
+<ul>
+<li>service 文件</li>
+<li>二进制文件</li>
+<li>集群启动脚本</li>
+</ul>
+<pre><code>chmod +x /usr/lib/systemd/system/minio.service &amp;&amp; chmod +x /data/minio/run/minio &amp;&amp; chmod +x /data/minio/run/run.sh
+</code></pre>
+<h2 id="9-启动集群">9、启动集群</h2>
+<pre><code>systemctl daemon-reload
+systemctl enable minio &amp;&amp; systemctl start minio
+</code></pre>
+<h2 id="10-代理集群">10、代理集群</h2>
+<p>生产环境需要使用 Nginx 将集群地址进行代理，对外统一入口</p>
+<pre><code>upstream minio{
+        server 10.10.0.1:9000;
+        server 10.10.0.2:9000;
+        server 10.10.0.3:9000;
+        server 10.10.0.4:9000;
+}
+server {
+        listen 9000;
+        server_name minio;
+        location / {
+                proxy_pass http://minio;
+                proxy_set_header Host $http_host;
+                client_max_body_size 1000m;
+        }
+}
+</code></pre>
+<h2 id="11-测试">11、测试</h2>
+<p>浏览器访问 minio 集群代理地址 + 9000 端口，用户名密码为上文中启动文件 run.sh 中我们设置的</p>
+<figure data-type="image" tabindex="1"><img src="https://img-blog.csdnimg.cn/20200407111842400.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3l3ZDE5OTI=,size_16,color_FFFFFF,t_70" alt="img" loading="lazy"></figure>
+</li>
+</ul>
+<h2 id=""></h2>
+<p>验证是否部署成功，使用浏览器访问 Minio 服务或者使用 mc。多个节点的存储容量和就是分布式Minio的存储容量。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/BwodkKc_v/">
+              <span class="post-title">
+                Redis5.x集群搭建&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

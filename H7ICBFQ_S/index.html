@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>containerd与安全沙箱的Kubernetes初体验 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="containerd与安全沙箱的Kubernetes初体验 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="containerd与安全沙箱的Kubernetes初体验"/>
+    <meta property="og:url" content="https://jwangkun.github.io/H7ICBFQ_S/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/K3pAKkDy2/" class="tag">containerd</a>
+            
+        </span>
+            <h1>containerd与安全沙箱的Kubernetes初体验</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-08，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <figure data-type="image" tabindex="1"><img src="https://segmentfault.com/img/bVbzCB2?w=894&amp;h=894" alt="img" loading="lazy"></figure>
+<p>containerd是一个开源的行业标准容器运行时，关注于简单、稳定和可移植，同时支持Linux和Windows。2016年12月14日，Docker公司宣布将Docker Engine的核心组件 containerd 捐赠到一个新的开源社区独立发展和运营。阿里云，AWS， Google，IBM和Microsoft作为初始成员，共同建设 containerd 社区。2017年3月，Docker 将 containerd 捐献给CNCF（云原生计算基金会）。containerd得到了快速的发展和广泛的支持。Docker引擎已经将containerd作为容器生命周期管理的基础，Kubernetes也在2018年5月，正式支持containerd作为容器运行时管理器。2019年2月，CNCF宣布containerd毕业，成为生产可用的项目。</p>
+<p>containerd 从1.1版本开始就已经内置了Container Runtime Interface (CRI) 支持，进一步简化了对Kubernetes的支持。其架构图如下：</p>
+<figure data-type="image" tabindex="2"><img src="https://segmentfault.com/img/bVbzCB9?w=4540&amp;h=952" alt="img" loading="lazy"></figure>
+<p>在Kubernetes场景下，containerd与完整Docker Engine相比，具有更少的资源占用和更快的启动速度。</p>
+<figure data-type="image" tabindex="3"><img src="https://segmentfault.com/img/bVbzCCg?w=564&amp;h=462" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="4"><img src="https://segmentfault.com/img/bVbzCCi?w=732&amp;h=556" alt="img" loading="lazy"></figure>
+<p>来源 <a href="https://yq.aliyun.com/go/articleRenderRedirect?url=https%3A%2F%2Fkubernetes.io%2Fblog%2F2018%2F05%2F24%2Fkubernetes-containerd-integration-goes-ga%2F">containerd</a></p>
+<p>红帽主导的cri-o是与containerd竞争的容器运行时管理项目。containerd与cri-o项目相比，在性能上具备优势，在社区支持上也更加广泛。</p>
+<figure data-type="image" tabindex="5"><img src="https://segmentfault.com/img/bVbzCCl?w=1080&amp;h=638" alt="img" loading="lazy"></figure>
+<p>来源 <a href="https://yq.aliyun.com/go/articleRenderRedirect?url=https%3A%2F%2Fwww.infoq.cn%2Farticle%2FodSLClSjvO8BNx">ebay的分享</a></p>
+<p>更重要的是containerd提供了灵活的扩展机制，支持各种符合OCI（Open Container Initiative）的容器运行时实现，比如runc容器（也是熟知的Docker容器），KataContainer, gVisor和Firecraker等安全沙箱容器。</p>
+<figure data-type="image" tabindex="6"><img src="https://segmentfault.com/img/bVbzCCA?w=1542&amp;h=642" alt="img" loading="lazy"></figure>
+<p>在Kubernetes环境中，可以用不同的API和命令行工具来管理容器/Pod，镜像等概念。为了便于大家理解，我们可以用下图说明如何利用不同层次的API和CLI管理容器生命周期管理。</p>
+<figure data-type="image" tabindex="7"><img src="https://segmentfault.com/img/bVbzCCB?w=358&amp;h=268" alt="img" loading="lazy"></figure>
+<ul>
+<li>Kubectl：是集群层面的命令行工具，支持Kubernetes的基本概念</li>
+<li>crictl：是针对节点上CRI的命令行工具，<a href="https://yq.aliyun.com/go/articleRenderRedirect?url=https%3A%2F%2Fgithub.com%2Fcontainerd%2Fcri%2Fblob%2Fmaster%2Fdocs%2Fcrictl.md">文档</a></li>
+<li>ctr：是针对containerd的命令行工具，<a href="https://yq.aliyun.com/go/articleRenderRedirect?url=https%3A%2F%2Fgithub.com%2Fcontainerd%2Fcontainerd%2Fblob%2Fmaster%2Fdocs%2Fman%2Fctr.1.md">文档</a></li>
+</ul>
+<h2 id="体验">体验</h2>
+<p>Minikube是体验containerd作为Kubernetes容器运行时的最简单方式，我们下面将将其作为Kubernetes容器运行时，并支持runc和gvisor两种不同的实现。</p>
+<p>早期由于网络访问原因，很多朋友无法直接使用官方Minikube进行实验。在最新的Minikube 1.5版本中，已经提供了完善的配置化的方式，可以帮助大家利用阿里云的镜像地址来获取所需Docker镜像和配置，同时支持Docker/Containerd等不同容器运行时。</p>
+<p>我们创建一个Minikube虚拟机环境，详细信息可以参考 https://yq.aliyun.com/articles/221687 ,注意需要指明 <code>--container-runtime=containerd</code> 参数设置containerd作为容器运行时。同时registry-mirror也要替换成自己的阿里云镜像加速地址。</p>
+<pre><code>$ minikube start --image-mirror-country cn \
+    --iso-url=https://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/iso/minikube-v1.5.0.iso \
+    --registry-mirror=https://XXX.mirror.aliyuncs.com \
+    --container-runtime=containerd
+
+  Darwin 10.14.6 上的 minikube v1.5.0
+  Automatically selected the 'hyperkit' driver (alternates: [virtualbox])
+️  您所在位置的已知存储库都无法访问。正在将 registry.cn-hangzhou.aliyuncs.com/google_containers 用作后备存储库。
+  正在创建 hyperkit 虚拟机（CPUs=2，Memory=2000MB, Disk=20000MB）...
+️  VM is unable to connect to the selected image repository: command failed: curl -sS https://k8s.gcr.io/
+stdout:
+stderr: curl: (7) Failed to connect to k8s.gcr.io port 443: Connection timed out
+: Process exited with status 7
+  正在 containerd 1.2.8 中准备 Kubernetes v1.16.2…
+  拉取镜像 ...
+  正在启动 Kubernetes ...
+⌛  Waiting for: apiserver etcd scheduler controller
+  完成！kubectl 已经配置至 &quot;minikube&quot;
+
+$ minikube dashboard
+  Verifying dashboard health ...
+  Launching proxy ...
+  Verifying proxy health ...
+  Opening http://127.0.0.1:54438/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/ in your default browser...
+</code></pre>
+<h2 id="部署测试应用">部署测试应用</h2>
+<p>我们通过Pod部署一个nginx应用</p>
+<pre><code>$ cat nginx.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+
+$ kubectl apply -f nginx.yaml
+pod/nginx created
+
+$ kubectl exec nginx -- uname -a
+Linux nginx 4.19.76 #1 SMP Fri Oct 25 16:07:41 PDT 2019 x86_64 GNU/Linux
+</code></pre>
+<p>然后，我们开启 minikube 对 gvisor 支持</p>
+<pre><code>$ minikube addons enable gvisor
+  gvisor was successfully enabled
+
+$ kubectl get pod,runtimeclass gvisor -n kube-system
+NAME         READY   STATUS    RESTARTS   AGE
+pod/gvisor   1/1     Running   0          60m
+
+NAME                              CREATED AT
+runtimeclass.node.k8s.io/gvisor   2019-10-27T01:40:45Z
+
+$ kubectl get runtimeClass
+NAME     CREATED AT
+gvisor   2019-10-27T01:40:45Z
+</code></pre>
+<p>当 <code>gvisor</code> pod进入 <code>Running</code> 状态的时候，可以部署gvisor测试应用。</p>
+<p>我们可以看到K8s集群中已经注册了一个<code>gvisor</code>的“runtimeClassName“。</p>
+<p>之后，开发者可以通过在Pod声明中的 ”runtimeClassName“来选择不同类型的容器运行时实现。比如，如下我们创建一个运行在 gvisor 沙箱容器中的 nginx 应用。</p>
+<pre><code>$ cat nginx-untrusted.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-untrusted
+spec:
+  runtimeClassName: gvisor
+  containers:
+  - name: nginx
+    image: nginx
+
+$ kubectl delete -f nginx-untrusted.yaml
+pod/nginx-untrusted created
+
+$ kubectl exec nginx-untrusted -- uname -a
+Linux nginx-untrusted 4.4 #1 SMP Sun Jan 10 15:06:54 PST 2016 x86_64 GNU/Linux
+</code></pre>
+<p>我们可以清楚地发现：由于基于runc的容器与宿主机共享操作系统内核，runc容器中查看到的OS内核版本与Minikube宿主机OS内核版本相同。而gvisor的runsc容器采用了独立内核，它和Minikube宿主机OS内核版本不同。</p>
+<p>正是因为每个沙箱容器拥有独立的内核，减小了安全攻击面，具备更好的安全隔离特性。适合隔离不可信的应用，或者多租户场景。</p>
+<p>注意：gvisor在minikube中，通过ptrace对内核调用进行拦截，其性能损耗较大。此外gvisor的兼容性还有待增强。</p>
+<h2 id="使用ctl和crictl工具">使用ctl和crictl工具</h2>
+<p>我们现在可以进入进入Minikube虚拟机</p>
+<pre><code>$ minikube ssh
+</code></pre>
+<p>containerd支持通过名空间对容器资源进行隔离，查看现有 containerd 名空间</p>
+<pre><code>$ sudo ctr namespaces ls
+NAME   LABELS
+k8s.io
+# 列出所有容器镜像
+$ sudo ctr --namespace=k8s.io images ls
+...
+
+# 列出所有容器列表
+$ sudo ctr --namespace=k8s.io containers ls
+</code></pre>
+<p>在Kubernetes环境更加简单的方式是利用 <code>crictl</code> 对pods进行操作</p>
+<pre><code># 查看pod列表
+$ sudo crictl pods
+POD ID              CREATED             STATE               NAME                                         NAMESPACE              ATTEMPT
+78bd560a70327       3 hours ago         Ready               nginx-untrusted                              default                0
+94817393744fd       3 hours ago         Ready               nginx                                        default                0
+...
+
+# 查看名称包含nginx的pod的详细信息
+$ sudo crictl pods --name nginx -v
+ID: 78bd560a70327f14077c441aa40da7e7ad52835100795a0fa9e5668f41760288
+Name: nginx-untrusted
+UID: dda218b1-d72e-4028-909d-55674fd99ea0
+Namespace: default
+Status: Ready
+Created: 2019-10-27 02:40:02.660884453 +0000 UTC
+Labels:
+    io.kubernetes.pod.name -&gt; nginx-untrusted
+    io.kubernetes.pod.namespace -&gt; default
+    io.kubernetes.pod.uid -&gt; dda218b1-d72e-4028-909d-55674fd99ea0
+Annotations:
+    kubectl.kubernetes.io/last-applied-configuration -&gt; {&quot;apiVersion&quot;:&quot;v1&quot;,&quot;kind&quot;:&quot;Pod&quot;,&quot;metadata&quot;:{&quot;annotations&quot;:{},&quot;name&quot;:&quot;nginx-untrusted&quot;,&quot;namespace&quot;:&quot;default&quot;},&quot;spec&quot;:{&quot;containers&quot;:[{&quot;image&quot;:&quot;nginx&quot;,&quot;name&quot;:&quot;nginx&quot;}],&quot;runtimeClassName&quot;:&quot;gvisor&quot;}}
+
+    kubernetes.io/config.seen -&gt; 2019-10-27T02:40:00.675588392Z
+    kubernetes.io/config.source -&gt; api
+
+ID: 94817393744fd18b72212a00132a61c6cc08e031afe7b5295edafd3518032f9f
+Name: nginx
+UID: bfcf51de-c921-4a9a-a60a-09faab1906c4
+Namespace: default
+Status: Ready
+Created: 2019-10-27 02:38:19.724289298 +0000 UTC
+Labels:
+    io.kubernetes.pod.name -&gt; nginx
+    io.kubernetes.pod.namespace -&gt; default
+    io.kubernetes.pod.uid -&gt; bfcf51de-c921-4a9a-a60a-09faab1906c4
+Annotations:
+    kubectl.kubernetes.io/last-applied-configuration -&gt; {&quot;apiVersion&quot;:&quot;v1&quot;,&quot;kind&quot;:&quot;Pod&quot;,&quot;metadata&quot;:{&quot;annotations&quot;:{},&quot;name&quot;:&quot;nginx&quot;,&quot;namespace&quot;:&quot;default&quot;},&quot;spec&quot;:{&quot;containers&quot;:[{&quot;image&quot;:&quot;nginx&quot;,&quot;name&quot;:&quot;nginx&quot;}]}}
+
+    kubernetes.io/config.seen -&gt; 2019-10-27T02:38:18.206096389Z
+    kubernetes.io/config.source -&gt; api
+</code></pre>
+<p>更多信息可以参考</p>
+<p><a href="https://yq.aliyun.com/go/articleRenderRedirect?url=https%3A%2F%2Fkubernetes.io%2Fdocs%2Ftasks%2Fdebug-application-cluster%2Fcrictl%2F">https://kubernetes.io/docs/tasks/debug-application-cluster/crictl/</a></p>
+<h2 id="containerd与docker的关系">containerd与Docker的关系</h2>
+<p>很多同学都关心containerd与Docker的关系，以及是否containerd可以取代Docker？<br>
+containerd已经成为容器运行时的主流实现，也得到了Docker社区和Kubernetes社区的大力支持。Docker Engine底层的容器生命周期管理也是基于containerd实现。</p>
+<figure data-type="image" tabindex="8"><img src="https://segmentfault.com/img/bVbzCCK?w=346&amp;h=347" alt="img" loading="lazy"></figure>
+<p>但是Docker Engine包含了更多的开发者工具链，比如镜像构建。也包含了Docker自己的日志、存储、网络、Swarm编排等能力。此外，绝大多数容器生态厂商，如安全、监控、开发等对Docker Engine的支持比较完善，对containerd的支持也在逐渐补齐。</p>
+<p>所以在Kubernetes运行时环境，对安全和效率和定制化更加关注的用户可以选择containerd作为容器运行时环境。对于大多数开发者，继续使用Docker Engine作为容器运行时也是一个不错的选择。</p>
+<h2 id="阿里云容器服务对containerd的支持">阿里云容器服务对containerd的支持</h2>
+<p>在阿里云Kubernetes服务ACK，我们已经采用containerd作为容器运行时管理，来支撑安全沙箱容器和runc容器的混合部署。在现有产品中，我们和阿里云操作系统团队、蚂蚁金服一起支持了基于轻量虚拟化的runV沙箱容器，4Q也将和操作系统团队、安全团队合作发布基于Intel SGX的可信加密沙箱容器。</p>
+<figure data-type="image" tabindex="9"><img src="https://segmentfault.com/img/bVbzCCP?w=960&amp;h=540" alt="img" loading="lazy"></figure>
+<p>具体产品信息可以参考 https://help.aliyun.com/document_detail/140541.html</p>
+<p>和Serverless Kubernetes（ASK）中，我们也利用containerd灵活的插件机制定制和剪裁了面向nodeless环境的容器运行时实现。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/nR5vRQbNX/">
+              <span class="post-title">
+                Mysql 中主库跑太快，从库追不上怎么整？&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

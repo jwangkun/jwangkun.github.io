@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>K8s 集群环境准备 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="K8s 集群环境准备 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="K8s 集群环境准备"/>
+    <meta property="og:url" content="https://jwangkun.github.io/aiciRg6jM/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/_Fq675P8s/" class="tag">K8s</a>
+            
+        </span>
+            <h1>K8s 集群环境准备</h1>
+            <span class="meta">
+            	Posted on
+              2024-01-12，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>一键换源</p>
+<pre><code>bash &lt;(curl -sSL https://linuxmirrors.cn/main.sh)
+</code></pre>
+<p>设置系统相关参数</p>
+<pre><code># 1、修改 hostname
+# master 节点
+hostnamectl set-hostname k8s-master-01
+# worker 节点
+hostnamectl set-hostname k8s-node-01
+
+# 2、设置时区
+timedatectl set-timezone &quot;Asia/Shanghai&quot;
+# 查看时区设置是否生效
+timedatectl
+
+# 3、设置 locale
+localectl set-locale LANG=zh_CN.utf8
+# 查看是否生效（注意需要退出 SSH 再重新登陆才能生效）
+localectl
+</code></pre>
+<p>关闭 firewalld、selinux、swap</p>
+<pre><code># 关闭防火墙
+systemctl stop firewalld
+systemctl disable firewalld
+
+# 关闭 selinux
+setenforce 0
+sed -i &quot;s/^SELINUX=enforcing/SELINUX=disabled/g&quot; /etc/selinux/config
+
+# 关闭 swap
+# 因为 k8s 的特点是速度快，运行在内存中来保持高速，而 swap 分区的速度慢，k8s 不允许这样，这就是为什么 k8s 对环境有严格的要求
+swapoff -a
+sed -i 's/.*swap.*/#&amp;/' /etc/fstab
+</code></pre>
+<p>配置内核参数</p>
+<p>桥接的IPv4流量传递到iptables的链</p>
+<pre><code>cat &gt; /etc/sysctl.d/k8s.conf &lt;&lt; EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+</code></pre>
+<p>sysctl --system # 生效</p>
+<p>时间同步</p>
+<pre><code>yum install ntpdate -y
+ntpdate 10.213.120.3
+
+echo &quot;*/10 * * * * ntpdate 10.213.120.3&quot;  #设置时间同步
+</code></pre>
+<p>修改 ulimit<br>
+为了防止出现 too open many files 错误，需要修改系统的 ulimit</p>
+<pre><code>vim /etc/security/limit.conf
+* soft nofile 1000000
+* hard nofile 1000000
+</code></pre>
+<p>重启所有服务器</p>
+<p>安装 docker</p>
+<p>卸载系统下已经存在的Docker和相关依赖项以避免安装失败</p>
+<pre><code>sudo yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
+
+
+</code></pre>
+<p>安装最新版 Docker</p>
+<pre><code>安装软件包
+sudo yum install -y yum-utils \
+  device-mapper-persistent-data \
+  lvm2
+# 设置仓库地址，从该仓库进行下载和更新
+sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+
+
+# 安装过程中如果出现GPG密钥，请选择'y'
+sudo yum install docker-ce docker-ce-cli containerd.io
+
+
+</code></pre>
+<p>安装指定版本 Docker</p>
+<pre><code># 展示出仓库中所有可以使用的Docker版本
+yum list docker-ce --showduplicates | sort -r
+# 结果类似如下，其中第二列为版本号：
+docker-ce.x86_64   3:19.03.6-3.el7   docker-ce-stable 
+docker-ce.x86_64   3:19.03.5-3.el7   docker-ce-stable
+docker-ce.x86_64   18.06.3.ce-3.el7  docker-ce-stable
+# 获取指定版本的安装命令步骤如下：
+# 1、假如此时需要安装的Docker的版本号为 3:19.03.6-3.el7
+# 2、从第一个冒号截取到第一个中横线（如果没有冒号则从第一个字符开始）
+# 3、得到19.03.6并运行命令
+sudo yum install docker-ce-23.* docker-ce-cli-23.* containerd.io
+</code></pre>
+<p>设置开机自启，并启动docker</p>
+<pre><code>systemctl enable docker &amp;&amp; systemctl start docker
+</code></pre>
+<p>查看docker版本</p>
+<pre><code>docker --version
+</code></pre>
+<p>修改docker默认路径</p>
+<p>迁移/var/lib/docker目录下面的文件到 /home/docker</p>
+<pre><code>mkdir -p /home/docker
+rsync -avz /var/lib/docker /home/docker #和cp类似，只不过是会自动过滤，目标目录有的文件不会重新拷贝
+</code></pre>
+<p>修改 /etc/docker/daemon.json文件</p>
+<pre><code>{
+&quot;data-root&quot;: &quot;/home/docker&quot;,
+&quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],
+&quot;live-restore&quot;: true,
+&quot;default-ulimits&quot;: {
+    &quot;nofile&quot;: {
+        &quot;Soft&quot;: 500000,
+        &quot;Hard&quot;: 500000,
+        &quot;Name&quot;: &quot;nofile&quot;
+    }
+  }
+}
+</code></pre>
+<p>重启docker</p>
+<pre><code>systemctl daemon-reload
+systemctl restart docker
+systemctl enable docker
+
+docker info #查看默认路径师傅已经修改/home/docker
+</code></pre>
+<p>k8s 源配置<br>
+因为 k8s 的相关源都放在 google 的服务器上，除非翻墙，否则根本无法访问，因此必须配置 k8s 的源，使用 aliyun 的镜像：</p>
+<pre><code>cat &gt; /etc/yum.repos.d/kubernetes.repo &lt;&lt; EOF
+[kubernetes]
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+enabled=1
+gpgcheck=0
+repo_gpgcheck=0
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+EOF
+</code></pre>
+<p>安装 Kubernetes 系统依赖包</p>
+<pre><code>yum install curl socat conntrack ebtables ipset ipvsadm -y
+
+# 安装其他必备包，openEuler 也是奇葩了，默认居然都不安装tar，不装的话后面会报错
+yum install tar -y
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Saf87wrwT/">
+              <span class="post-title">
+                一键测试Linux性能脚本&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

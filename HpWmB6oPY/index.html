@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Kubernetes 的网络模型 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes 的网络模型 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Kubernetes 的网络模型"/>
+    <meta property="og:url" content="https://jwangkun.github.io/HpWmB6oPY/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Kubernetes 的网络模型</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，6 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="k8s-的网络特征">K8S 的网络特征:</h2>
+<ol>
+<li>每个POD 一个IP (IP peer POD)</li>
+<li>所有POD 通过IP 直接访问其他POD 而不管POD 是否在同一台物理机上</li>
+<li>POD 内的所有容器共享一个LINUX NET NAMESPACE (网络堆栈), POD 内的容器, 都可以使用localhost 来访问pod 内的其他容器.</li>
+</ol>
+<h2 id="k8s-对集群网络的要求">K8S 对集群网络的要求:</h2>
+<ol>
+<li>所有容器都可以在不用NAT 的方式下访问其他容器</li>
+<li>所有节点都可以在不用NAT的方式下同所有容器通信,反之亦然</li>
+<li>容器的地址和别人看到的地址是同一个地址</li>
+</ol>
+<h2 id="kubernetes-网络实现">kubernetes 网络实现</h2>
+<p>POD 间通信网络模型</p>
+<figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/12/7/16ede3cd74dd361d?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="image.png" loading="lazy"></figure>
+<p>NODE 间通信网络模型</p>
+<figure data-type="image" tabindex="2"><img src="https://user-gold-cdn.xitu.io/2019/12/7/16ede3cd75382a39?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="image.png" loading="lazy"></figure>
+<p>ip1 ip2 都存在 etcd中</p>
+<p>K8S 不同node 中pod 相互通信需要满足的条件如下</p>
+<ol>
+<li>整个K8S集群中的POD IP 分配不能有冲突</li>
+<li>找到一种办法,将 POD 的 IP 和所在的 NDOE 的 IP 关联起来, 通过这个关联让 POD 相互访问</li>
+</ol>
+<p>条件1 要求NODE 中的docker0 的网桥地址不能冲突</p>
+<p>条件2 要求 POD 中的数据在出发时,需要有一个机制能够知道对方 POD 的 IP 地址在哪个NODE上</p>
+<p>满足条件的扁平化网络拓扑如下</p>
+<figure data-type="image" tabindex="3"><img src="https://user-gold-cdn.xitu.io/2019/12/7/16ede3cd755d92e8?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="image.png" loading="lazy"></figure>
+<p>默认docker0 的网络为 172.17.0.0/16 的网段. 每个容器都在这个子网内获得 IP 并且将 docker0 作为网关</p>
+<p>docker 宿主机不需要知道任何关于docker 0 的信息, 因为docker 宿主机对任何容器发出的数据,在物理卡上都做了 IP 伪装(masquerade 隐含nat),也就是说其他任何node看到的数据包来源都是宿主机的物理网卡IP</p>
+<blockquote>
+<p>这个模型的缺点是, 需要使用nat技术</p>
+</blockquote>
+<p>K8S 模型中,每个 NODE 上的 docker0 都是可以被路由到的, 也就是说, 在部署一个 POD 时, 在同一个集群内, 各个主机都可以访问其他主机上的 POD IP, 并不需要在主机上做端口映射.</p>
+<p>我们可以把NODE 看作交换机网络模型看起来就是下面这个样子</p>
+<figure data-type="image" tabindex="4"><img src="https://user-gold-cdn.xitu.io/2019/12/7/16ede3cd76f88b23?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="image.png" loading="lazy"></figure>
+<p>在node中,我们目前采用直接路由的方式来实现.在每个node上配置讲台路由</p>
+<p>例如在192.168.1.10 上配置</p>
+<pre><code>route add -net 10.1.20.0 netmask 255.255.255.0 gw 192.168.1.20
+route add -net 10.1.30.0 netmask 255.255.255.0 gw 192.168.1.30
+复制代码
+</code></pre>
+<p>当我们启动一个POD ,要求POD 下的所有容器都使用同一个网络命名空间,以及同一个IP,所以必须要使用容器网络的 container 模式. 如果将所有 pod 中的容器做成一个链的结构, 中间任何一个容器出问题, 都会引起连锁反映, 所以在每个 POD 中都引入一个 google_containers/pause 其他容器都链接到这个容器, 由 google_containers/pause 来负责端口规划和映射</p>
+<p>POD 内部的网络模型为</p>
+<figure data-type="image" tabindex="5"><img src="https://user-gold-cdn.xitu.io/2019/12/7/16ede3cd78c95660?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="image.png" loading="lazy"></figure>
+<p>pause 容器用于接管pod的endpoint.</p>
+<p>通过<code>docker inpsect &lt;id&gt; | grep NetworkMod</code> 查看pause 容器的网络模式,可以看到使用的是bridge 而 业务容器 <code>docker inpsect &lt; 业务容器id&gt; | grep NetworkMod</code> 使用的是 container:&lt;长ID&gt;</p>
+<p>Service 的网络信息</p>
+<p>当在K8S中创建一个service(非 NODEPORT) 之后, K8S 会为每个 service 分配一个cluster IP</p>
+<pre><code>roger@microk8s:~$ kubectl get service
+NAME                   TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+default-http-backend   ClusterIP   10.152.183.69    &lt;none&gt;        80/TCP    11d
+http-svc               ClusterIP   10.152.183.164   &lt;none&gt;        80/TCP    11d
+
+复制代码
+</code></pre>
+<p>IP 地址段为 apiserver 启动时, --server-cluster-ip-range 所指定的 IP 段,这个 IP 段不能和 docker0 的 IP 段冲突, 这个网段不会在 物理网络和 docker0 之间路由. 这个portal network 的意义是让容器流量都指向默认的网关,也就docker0</p>
+<p>查看iptables-save 数据</p>
+<pre><code>:KUBE-POSTROUTING - [0:0]
+...
+-A KUBE-PORTALS-CONTAINER -d 10.152.183.69/32 -p tcp -m comment --comment &quot;default/default-http-backend:&quot; -m tcp --dport 80 -j REDIRECT --to-ports 37853
+-A KUBE-PORTALS-CONTAINER -d 10.152.183.164/32 -p tcp -m comment --comment &quot;default/http-svc:http&quot; -m tcp --dport 80 -j REDIRECT --to-ports 35667
+-A KUBE-PORTALS-CONTAINER -d 10.152.183.1/32 -p tcp -m comment --comment &quot;default/kubernetes:https&quot; -m tcp --dport 443 -j REDIRECT --to-ports 40441
+...
+-A KUBE-PORTALS-HOST -d 10.152.183.69/32 -p tcp -m comment --comment &quot;default/default-http-backend:&quot; -m tcp --dport 80 -j DNAT --to-destination 192.168.10.5:37853
+-A KUBE-PORTALS-HOST -d 10.152.183.164/32 -p tcp -m comment --comment &quot;default/http-svc:http&quot; -m tcp --dport 80 -j DNAT --to-destination 192.168.10.5:35667
+-A KUBE-PORTALS-HOST -d 10.152.183.1/32 -p tcp -m comment --comment &quot;default/kubernetes:https&quot; -m tcp --dport 443 -j DNAT --to-destination 192.168.10.5:40441
+
+
+</code></pre>
+<p>可以发现, 到三个服务的流量都被重定向到一个随机端口, 37853, 35667, 40441 . 这几个端口都是由kube-proxy 创建的, kube-proxy 服务会为每个创建的service 都关联一个随机端口,并监听那个特定的端口, 为服务创建相关联的负载均衡.</p>
+<figure data-type="image" tabindex="6"><img src="https://user-gold-cdn.xitu.io/2019/12/7/16ede3cd794940e5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="image.png" loading="lazy"></figure>
+<p>注意, node3 的kubeproxy 并未参与此次交互. node1 的kube-proxy 起到了负载均衡的作用</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/ctkbBNw6F/">
+              <span class="post-title">
+                K8s 持久化存储流程&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

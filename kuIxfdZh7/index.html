@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务"/>
+    <meta property="og:url" content="https://jwangkun.github.io/kuIxfdZh7/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/rl-VqPDNe/" class="tag">jiacrontab</a>
+            
+        </span>
+            <h1>jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务</h1>
+            <span class="meta">
+            	Posted on
+              2021-02-09，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>jiacrontab是一款使用golang编写的定时任务（crontab）工具，在文章《<a href="https://www.xiaoz.me/archives/%E4%BD%BF%E7%94%A8jiacrontab%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%8F%AF%E8%A7%86%E5%8C%96%E7%9A%84%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1">使用jiacrontab搭建一个可视化的定时任务</a>》介绍过jiacrontab 1.4x版本，经过作者不断努力，2.x版本已开发完毕，功能更强大，界面更美观。如果你还在寻找可视化定时任务工具，jiacrontab 2.x是一个不错的选择。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.xiaoz.me/wp-content/uploads/2018/11/crontab.jpg" alt="img" loading="lazy"></figure>
+<h3 id="jiacrontab-2x说明">jiacrontab 2.x说明</h3>
+<p>jiacrontab 2.x版本，软件架构略微发生了变化，说明如下：</p>
+<ul>
+<li>jiacrontab 由 jiacrontab_admin，jiacrontabd 两部分构成，两者完全独立通过 rpc 通信</li>
+<li>jiacrontab_admin：管理后台向用户提供web操作界面</li>
+<li>jiacrontabd：负责job数据存储，任务调度</li>
+</ul>
+<h3 id="安装jiacrontab-2x">安装jiacrontab 2.x</h3>
+<p>jiacrontab官方编译好的二进制文件在：https://jiacrontab.iwannay.cn/download/ 可下载，不过官方提供的地址速度太慢了，这里用小z博客软件库来下载安装。</p>
+<pre><code class="language-bash">#下载jiacrontab
+wget http://soft.xiaoz.org/linux/jiacrontab-v2.0.3-linux-amd64.zip
+#解压
+unzip jiacrontab-v2.0.3-linux-amd64.zip
+#进入jiacrontab_admin目录
+cd jiacrontab_admin
+#运行jiacrontab_admin
+nohup ./jiacrontab_admin &amp;&gt; jiacrontab_admin.log &amp;
+#进入jiacrontabd目录
+cd jiacrontabd
+#运行jiacrontabd
+nohup ./jiacrontabd &amp;&gt; jiacrontabd.log &amp;
+</code></pre>
+<p>放行端口，jiacrontab服务端和客户端监听了20000 - 20003，输入下面的命令放行：</p>
+<pre><code class="language-bash">#firewalld放行端口
+firewall-cmd --zone=public --add-port=20000-20003/tcp --permanent
+firewall-cmd --reload
+#如果使用的iptables
+iptables -I INPUT -p tcp --dport 20000 -j ACCEPT
+iptables -I INPUT -p tcp --dport 20001 -j ACCEPT
+iptables -I INPUT -p tcp --dport 20002 -j ACCEPT
+iptables -I INPUT -p tcp --dport 20003 -j ACCEPT
+iptables save
+service iptables restart 
+</code></pre>
+<h3 id="初始化jiacrontab-2x">初始化jiacrontab 2.x</h3>
+<p>访问<code>http://IP:2000</code>可看到WEB界面，首次访问设置用户名、密码、邮箱，根据提示完成初始化完成即可登录后台。</p>
+<figure data-type="image" tabindex="2"><img src="https://cdn.xiaoz.me/wp-content/uploads/2019/08/snipaste_20190820_111353.png" alt="img" loading="lazy"></figure>
+<h3 id="nginx反向代理">nginx反向代理</h3>
+<p>如果你不喜欢用<code>http://IP:2000</code>IP + 端口的形式访问，可以使用nginx反向代理，通过域名的方式来访问，下方是xiaoz的nginx反向代理jiacrontab配置，仅供参考。</p>
+<pre><code>server
+    {
+    listen 80;
+    server_name     cron.ttt.sh;
+
+    charset utf-8,gbk;
+    location / {
+        proxy_pass http://127.0.0.1:20000;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+</code></pre>
+<h3 id="jiacrontab-2x的一些变化">jiacrontab 2.x的一些变化</h3>
+<p>jiacrontab 2.x相比1.4x版本界面更加清爽，增加了更多功能选项，同时还支持秒级定时任务，对于一些需要精确到秒的任务来说使用jiacrontab 2.x非常方便。</p>
+<figure data-type="image" tabindex="3"><img src="https://cdn.xiaoz.me/wp-content/uploads/2019/08/snipaste_20190820_112235.png" alt="img" loading="lazy"></figure>
+<h3 id="总结">总结</h3>
+<p>jiacrontab适合Linux运维人员或熟悉Linux命令的站长使用，不然可能搞不明白jiacrontab到底是干嘛的，jiacrontab还有更多特色功能，大家可自行发掘。</p>
+<ul>
+<li>演示地址：https://jiacrontab-spa.iwannay.cn/ （账号：test 密码：123456）</li>
+<li>项目地址：https://github.com/iwannay/jiacrontab</li>
+</ul>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/gOJjX82dR/">
+              <span class="post-title">
+                 CentOS 7安装Nano轻量级虚拟机管理软件&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

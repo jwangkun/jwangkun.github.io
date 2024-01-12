@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> K8s 资源全汇总 从零入门 K8s | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" K8s 资源全汇总 从零入门 K8s | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" K8s 资源全汇总 从零入门 K8s"/>
+    <meta property="og:url" content="https://jwangkun.github.io/Z-wMIR6wz/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1> K8s 资源全汇总 从零入门 K8s</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>从 2019 年，云原生技术开始大规模普及，以“云”为核心的软件研发思想，正逐步成为所有开发者的默认选项，像 Kubernetes 等云原生技术正在成为技术人员的必修课。这种背景下，“会 Kubernetes”已经远远不够了，“懂 Kubernetes”、“会云原生架构”的重要性正日益凸显出来，这也是为什么大家都要学习和投资云原生技术的重要原因。</p>
+<!-- more -->
+<h3 id="课程介绍">【课程介绍】</h3>
+<p>本课程是由 CNCF 官方与阿里巴巴强强联合，共同推出的以“云原生技术体系”为核心、以“技术解读”和“实践落地”并重的系列技术公开课。课程全程免费且无需注册，为您带来：</p>
+<ul>
+<li>完善的知识体系，打造属于自己的云原生技能树</li>
+<li>理解云原生技术背后的思想与本质</li>
+<li>与知识体系相辅相成的动手实践</li>
+<li>一线技术团队云原生技术最佳实践</li>
+</ul>
+<h3 id="讲师阵容">【讲师阵容】</h3>
+<p>来自全球“云原生”技术社区的亲历者和领军人物，如作为 <strong>CNCF 全球 TOC 之一的李响及 CNCF 官方大使张磊</strong>，齐聚“课堂”为每一位中国开发者讲解和剖析关于“云原生”的方方面面，旨在让广大中国开发者可以近距离聆听世界级技术专家解析云原生技术，让“云原生”技术真正触手可及。</p>
+<h3 id="资源汇总">【资源汇总】</h3>
+<ul>
+<li><strong>课时1</strong> 《Kubernetes 入门必备云原生发展简史》</li>
+</ul>
+<p>图文版课程链接：<a href="https://developer.aliyun.com/article/717581">developer.aliyun.com/article/717…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13076">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时2</strong> 《从零开始入门 K8s | 详解 K8s 容器基本概念》</li>
+</ul>
+<p>图文版课程链接：<a href="https://developer.aliyun.com/article/718433">developer.aliyun.com/article/718…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13082">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时3 **《从零开始入门 K8s | 阿里技术专家详解 K8s 核心概念》</li>
+</ul>
+<p>图文版课程链接：<a href="https://developer.aliyun.com/article/718798">developer.aliyun.com/article/718…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13078">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时4</strong> 《从零入门 K8s | 人人都能看懂 Pod 与容器设计模式》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/OW7zvGhPgGAnBuo4A_SXFw">mp.weixin.qq.com/s/OW7zvGhPg…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13079">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时5</strong> 《从零开始入门 K8s | K8s 的应用编排与管理》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/T1l5ebHqo0GUFfbfBnd-tQ">mp.weixin.qq.com/s/T1l5ebHqo…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13080">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时6</strong> 《从零开始入门 K8s | 应用编排与管理》</li>
+</ul>
+<p>图文版课程链接：<a href="https://developer.aliyun.com/article/719455">developer.aliyun.com/article/719…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13081">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时7 **《从零开始入门 K8s | 应用编排与管理：Job &amp; DaemonSet》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/XdhdAxaLPg7ZUS5WonXhXw">mp.weixin.qq.com/s/XdhdAxaLP…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13083">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时8</strong> 《从零开始入门 K8s | 如何实现应用配置管理？》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/8r-_Ekje__GVHsKLfJ-66A">mp.weixin.qq.com/s/8r-<em>Ekje</em>…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13084">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时9 **《从零开始入门 K8s | 应用存储和持久化数据卷：核心知识》</li>
+</ul>
+<p>图文版课程链接：<a href="https://developer.aliyun.com/article/720251">developer.aliyun.com/article/720…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13085">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时10</strong> 《从零开始入门 K8s | 应用存储和持久化数据卷：存储快照与拓扑调度》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/enoy5KRd2sxpZFZ6f06ZiQ">mp.weixin.qq.com/s/enoy5KRd2…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_15457">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时11</strong> 《从零开始入门 K8s | 可观测性：你的应用健康吗？》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/L1KT0VISxlGYZXGtLzSwBA">mp.weixin.qq.com/s/L1KT0VISx…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13086">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时12 **《从零开始入门 K8s | 可观测性：监控与日志》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/5z4IhCJhCfwbSZne93VEsQ">mp.weixin.qq.com/s/5z4IhCJhC…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_15541">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时13</strong> 《从零开始入门 K8s | Kubernetes 网络概念及策略控制》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/kjOAlKTwaMZzVOiSuJE6fQ">mp.weixin.qq.com/s/kjOAlKTwa…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13087">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时14</strong> 《从零开始入门 | Kubernetes 中的服务发现与负载均衡》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/klc0GYAcTthPdUaF-O7izQ">mp.weixin.qq.com/s/klc0GYAcT…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_15658">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时15</strong> 《从零开始入门 K8s | 深入剖析 Linux 容器》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/r3BCE46iAMn4gqbY3lS6TA">mp.weixin.qq.com/s/r3BCE46iA…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13088">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>特别篇</strong> 《Helm 从入门到实践 | 从 0 开始制作一个 Helm Charts》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/uWdPB4LvmMmvUX2ioKwbww">mp.weixin.qq.com/s/uWdPB4Lvm…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_16513">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时16</strong> 《从零开始入门 K8s | 手把手带你理解 etcd》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/qjLevhAn43d6jWQR_WTMJw">mp.weixin.qq.com/s/qjLevhAn4…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13089">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时17 **《从零开始入门 K8s | etcd 性能优化实践》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/lD2b-DZyvRJ3qWqmlvHpxg">mp.weixin.qq.com/s/lD2b-DZyv…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_16861">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时18 **《从零开始入门 K8s | Kubernetes 调度和资源管理》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/yD7vmIq9iCGrwAUKHs9WqA">mp.weixin.qq.com/s/yD7vmIq9i…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13090">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时19</strong> 《从零开始入门 K8s | 调度器的调度流程和算法介绍》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/1ntzs0__3FnLJRE9MDDCnQ">mp.weixin.qq.com/s/1ntzs0__3…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_17018">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时20</strong> 《从零开始入门 K8s | GPU 管理和 Device Plugin 工作机制》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/-rUaFgTbI-GI-LmJTkferQ">mp.weixin.qq.com/s/-rUaFgTbI…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13091">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时21</strong> 《从零开始入门 K8s | Kubernetes 存储架构及插件使用》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/QWLGkpqpMdsY1w6npZj-yQ">mp.weixin.qq.com/s/QWLGkpqpM…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13092">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时22 **《从零开始入门 K8s | 有状态应用编排 - StatefulSet》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/oTNv8gop93ljEUGhfKzNrw">mp.weixin.qq.com/s/oTNv8gop9…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13093">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时23</strong> 《从零开始入门 K8s | Kubernetes API 编程范式》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/uBCNTLCllE0tl70oLhLufg">mp.weixin.qq.com/s/uBCNTLCll…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13094">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时24 **《从零开始入门 K8s | Kubernetes API 编程利器：Operator 和 Operator Framework》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/SdWp1A6zDp7inLzG5VSE4Q">mp.weixin.qq.com/s/SdWp1A6zD…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13095">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时25</strong> 《从零开始入门 K8s | Kubernetes 网络模型进阶》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/Jm8VynGd506wN5-yiLHzdg">mp.weixin.qq.com/s/Jm8VynGd5…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13096">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时26 **《从零开始入门 K8s | 理解 CNI 和 CNI 插件》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/sGTEp9m8PC2zhlEgcnqtZA">mp.weixin.qq.com/s/sGTEp9m8P…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13097">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时27</strong> 《从零开始入门 K8s | K8s 安全之访问控制》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/nPErpcghHih5-dGPQkStJA">mp.weixin.qq.com/s/nPErpcghH…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13099">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li>**课时28 **《从零开始入门 K8s | 理解容器运行时接口 CRI》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/aexS9HmlxCpmY7gn3MIFsA">mp.weixin.qq.com/s/aexS9Hmlx…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_17238">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时29</strong> 《从零开始入门 K8s | Kata Containers 创始人带你入门安全容器技术》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/w2SkC6TuSBqurvAae0RAUA">mp.weixin.qq.com/s/w2SkC6TuS…</a><br>
+视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13100">edu.aliyun.com/lesson_1651…</a></p>
+<ul>
+<li><strong>课时30</strong> 《从零开始入门 K8s | 理解 RuntimeClass 与使用多容器运行时》</li>
+</ul>
+<p>图文版课程链接：<a href="https://mp.weixin.qq.com/s/JQ2NNHmpUrVUqX6BIyqUmQ">mp.weixin.qq.com/s/JQ2NNHmpU…</a> 视频版课程链接：<a href="https://edu.aliyun.com/lesson_1651_13101">edu.aliyun.com/lesson_1651…</a></p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/HwKdS3aOl/">
+              <span class="post-title">
+                kubectl基本命令&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

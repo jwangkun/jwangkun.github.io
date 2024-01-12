@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>KubeSphere3.0 多集群联邦 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="KubeSphere3.0 多集群联邦 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="KubeSphere3.0 多集群联邦"/>
+    <meta property="og:url" content="https://jwangkun.github.io/j9la1_NVz/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/xGgIrb1zw/" class="tag">KubeSphere</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>KubeSphere3.0 多集群联邦</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>KubeSphere v3.0.0进行了重大升级，其中多集群管理功能是重要更新之一。</p>
+<p>使用KubeSphere，用户可以添加或删除集群。可以以统一的方式管理部署在任何基础架构（例如Amazon EKS和Google Kubernetes Engine）上的异构集群。KubeSphere的中央控制平面通过两种有效的管理方法使之成为可能。</p>
+<!-- more -->
+<ol>
+<li><strong>Solo</strong>，可以在KubeSphere容器平台中一起维护和管理独立部署的Kubernetes集群。</li>
+<li><strong>Federation</strong>，多个Kubernetes集群可以聚合在一起作为Kubernetes资源池。当用户部署应用程序时，副本可以部署在池中的不同Kubernetes群集上。在这方面，跨区域和群集实现了高可用性。</li>
+</ol>
+<p><strong>多集群高可用</strong></p>
+<p>KubeSphere允许用户跨集群部署应用程序。更重要的是，还可以将应用程序配置为在特定群集上运行。此外，多集群功能与行业领先的应用程序管理平台OpenPitrix配合使用，使用户可以在整个生命周期（包括发行，删除和分发）中管理应用程序。</p>
+<p>用户可以使用全局VIP或DNS将请求发送到相应的后端群集，从而在多个群集上部署工作负载。当群集发生故障或无法处理请求时，可以将VIP或DNS记录传输到运行状况群集。<br>
+<a href="https://img-blog.csdnimg.cn/20201013231527147.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013231527147.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a></p>
+<p><strong>多集群故障隔离</strong></p>
+<p>故障隔离。通常，与大型群集相比，多个小型群集隔离故障要容易得多。如果出现断电，网络故障，资源不足或其他可能导致的问题，则可以将故障隔离在某个群集中，而不会扩展到其他群集。</p>
+<p>业务隔离。尽管Kubernetes提供了名称空间作为应用程序隔离的解决方案，但此方法仅代表逻辑上的隔离。这是因为通过网络连接了不同的名称空间，这意味着资源抢占问题仍然存在。为了实现进一步的隔离，用户需要创建其他网络隔离策略或设置资源配额。使用多个群集可以实现完全的物理隔离，这比通过名称空间进行隔离更加安全可靠。例如，当企业内的不同部门使用多个集群来部署开发，测试或生产环境时，这非常有效。</p>
+<p><a href="https://img-blog.csdnimg.cn/20201013231608339.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013231608339.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+<strong>多集群功能实现</strong></p>
+<p>使用多集群功能之前，需要创建一个主机集群（以下称为Host Cluster集群），它实际上是启用了多集群功能的KubeSphere集群。</p>
+<p>Host Cluster集群管理的所有集群都称为成员集群（以下称为Member Cluster群集）。它们是未启用多集群功能的常见KubeSphere集群。</p>
+<p>Host Cluster集群只能存在一个，而Member Cluster集群可以同时存在多个。</p>
+<p>在多群集体系结构中，Host Cluster集群和Member Cluster集群之间的网络可以直接连接，也可以通过代理连接。Member Cluster集群之间的网络可以完全隔离。</p>
+<figure data-type="image" tabindex="1"><a href="https://img-blog.csdnimg.cn/20201013215357793.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013215357793.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="**在这里插入图片描述**" loading="lazy"></a></figure>
+<h2 id="快速部署kubesphere多集群联邦">快速部署kubeSphere多集群联邦</h2>
+<p>多集群联邦要求每个kubernetes集群都要部署kubeSphere，下面准备3个节点每个节点都以all-in-one方式同时部署kubernetes和kubeSphere。</p>
+<p>准备3个节点至少4核8G配置，每个节点都执行以下操作：</p>
+<p>安装kubernetes集群部署工具kubekey</p>
+<pre><code class="language-shell">wget https://github.com/kubesphere/kubekey/releases/download/v1.0.0/kubekey-v1.0.0-linux-amd64.tar.gz
+tar -zxvf kubekey-v1.0.0-linux-amd64.tar.gz
+mv kk /usr/local/bin/
+</code></pre>
+<p>安装相关依赖</p>
+<pre><code class="language-shell">yum install -y socat conntrack
+</code></pre>
+<p>部署kubernetes和kubesphere</p>
+<pre><code class="language-shell">kk create cluster --with-kubernetes v1.18.6 --with-kubesphere v3.0.0
+</code></pre>
+<p>查看每个节点集群部署情况，每个节点模拟一个集群（实际部署时每个集群应参考官方文档规划为高可用集群，这里仅作为演示）：</p>
+<pre><code class="language-shell">[root@cluster1 ~]# kubectl get nodes -o wide
+NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
+cluster1   Ready    master,worker   69m   v1.18.6   192.168.1.123   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1127.18.2.el7.x86_64   docker://19.3.8
+
+[root@cluster2 ~]# kubectl get nodes -o wide
+NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
+cluster2   Ready    master,worker   71m   v1.18.6   192.168.1.124   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1127.18.2.el7.x86_64   docker://19.3.8
+
+[root@cluster3 ~]# kubectl get nodes -o wide
+NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
+cluster3   Ready    master,worker   71m   v1.18.6   192.168.1.125   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1127.18.2.el7.x86_64   docker://19.3.8
+</code></pre>
+<h2 id="启用host集群">启用host集群</h2>
+<p>登录第一个集群kubesphere UI，默认密码admin/P@88w0rd</p>
+<pre><code class="language-shell">http://192.168.1.123:30880
+</code></pre>
+<p>选择左侧自定义资源CRD，搜索clusterConfiguration</p>
+<p><a href="https://img-blog.csdnimg.cn/20201013223259804.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013223259804.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+点击进入，选择ks-installer右侧编辑配置文件，修改clusterRole为host</p>
+<pre><code class="language-yaml">multicluster:
+  clusterRole: host
+</code></pre>
+<p>保存后查看部署日志</p>
+<pre><code class="language-shell">kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l app=ks-install -o jsonpath='{.items[0].metadata.name}') -f
+</code></pre>
+<p>确认multicluster集群启用成功：</p>
+<pre><code class="language-shell">......
+[22:27:51]Start installing monitoring
+[22:27:51]Start installing multicluster
+[22:27:51]**************************************************
+[22:27:51]task monitoring status is running
+[22:27:51]task multicluster status is successful
+[22:27:51]total: 2     completed:1
+[22:27:51]**************************************************
+[22:27:51]task monitoring status is successful
+[22:27:51]task multicluster status is successful
+[22:27:51]total: 2     completed:2
+......
+</code></pre>
+<p>查看部署的kubefed组件</p>
+<pre><code class="language-shell">[root@cluster1 ~]# helm ls -A | grep kubefed
+kubefed                 kube-federation-system          1               2020-10-13 22:26:22.252226967 +0800 CST deployed        kubefed-0.3.0 
+
+[root@cluster1 ~]# kubectl -n kube-federation-system  get pods
+NAME                                          READY   STATUS    RESTARTS   AGE
+kubefed-admission-webhook-66bbdff47d-zxhsm    1/1     Running   0          30m
+kubefed-controller-manager-54b459dfc4-s26bp   1/1     Running   0          30m                     
+</code></pre>
+<p>重新登录kubeSphere，可以看到集群已经变更为host集群：</p>
+<figure data-type="image" tabindex="2"><a href="https://img-blog.csdnimg.cn/20201013224133206.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013224133206.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a></figure>
+<h2 id="启用member集群">启用member集群</h2>
+<p>获取host cluster的jwtSecret</p>
+<pre><code class="language-shell">[root@cluster1 ~]# kubectl -n kubesphere-system get cm kubesphere-config -o yaml | grep -v &quot;apiVersion&quot; | grep jwtSecret
+      jwtSecret: &quot;V4kcSF2Ai7z9duNT9k0xAUJ85dWWtFH3&quot;
+</code></pre>
+<p>登录第二个及第三个集群UI，同样方式修改clusterConfiguration，配置jwtSecret并修改集群角色：</p>
+<pre><code class="language-yaml">authentication:
+  jwtSecret: V4kcSF2Ai7z9duNT9k0xAUJ85dWWtFH3
+  
+multicluster:
+  clusterRole: member
+</code></pre>
+<p>保存后查看部署日志</p>
+<pre><code class="language-shell">kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l app=ks-install -o jsonpath='{.items[0].metadata.name}') -f
+</code></pre>
+<p>member集群启用完成后还需要在host集群执行手动导入操作。</p>
+<h2 id="导入member集群">导入member集群</h2>
+<p>登录host cluster，选择添加集群</p>
+<p><a href="https://img-blog.csdnimg.cn/20201013224848730.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013224848730.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+配置基本信息，cluster2作为开发环境</p>
+<p><a href="https://img-blog.csdnimg.cn/2020101322494193.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/2020101322494193.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+在集群2 master节点获取kubeconfig，注意修改 server: https://lb.kubesphere.local:6443为节点IP地址，确保host cluster能够与member cluster正常连通：</p>
+<pre><code class="language-shell">[root@cluster2 ~]# cat /root/.kube/config 
+</code></pre>
+<p>复制粘贴kubeconfig内容，点击导入</p>
+<p><a href="https://img-blog.csdnimg.cn/20201013225426841.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013225426841.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+同样方式导入cluster3作为生产环境。</p>
+<p>导入完成后点击左上角平台管理，集群管理，可以看到host集群已经纳管了开发集群和生产集群：</p>
+<figure data-type="image" tabindex="3"><a href="https://img-blog.csdnimg.cn/20201013233055260.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013233055260.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a></figure>
+<p>选择任意集群进入，点击集群管理可以在任意集群间快速切换：</p>
+<figure data-type="image" tabindex="4"><a href="https://img-blog.csdnimg.cn/20201013230749408.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013230749408.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a></figure>
+<h2 id="部署跨集群应用">部署跨集群应用</h2>
+<p>选择平台管理，访问控制，创建企业空间时可勾选可用的集群：</p>
+<figure data-type="image" tabindex="5"><a href="https://img-blog.csdnimg.cn/2020101323333071.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/2020101323333071.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a></figure>
+<p>在多集群企业空间中可以创建多集群项目，创建多集群项目意味着每个k8s集群都会创建一个同名的命名空间：</p>
+<p><a href="https://img-blog.csdnimg.cn/20201013234016617.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013234016617.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+首先在高级设置中开启每个集群外网访问网关</p>
+<p><a href="https://img-blog.csdnimg.cn/20201013234828380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013234828380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+在多集群项目中部署工作负载或服务，可在部署位置中选择跨集群部署应用副本，这里以跨每个集群部署2副本的nginx为例：</p>
+<p><a href="https://img-blog.csdnimg.cn/20201013235728917.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013235728917.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+支持差异化配置，同一个应用可以在不同集群使用不同镜像：<br>
+<a href="https://img-blog.csdnimg.cn/20201014000035531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201014000035531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a></p>
+<p>创建完成后查看部署的跨集群应用：</p>
+<p><a href="https://img-blog.csdnimg.cn/20201014001015228.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201014001015228.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+点击查看详情</p>
+<p><a href="https://img-blog.csdnimg.cn/20201014001115462.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201014001115462.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+编辑配置文件查看yaml信息，可以看到创建的资源类型为FederatedDeployment，也就是在多集群项目中创建的所有资源都以Federatedxxx开头，包括创建的存储卷，密钥和配置，并且都会在每个集群分发一份。</p>
+<pre><code class="language-yaml">apiVersion: types.kubefed.io/v1beta1
+kind: FederatedDeployment
+...
+</code></pre>
+<p>选择服务，进入服务选择服务访问，由于选择nodePort暴露服务，任意集群节点加nodePort即可访问应用，也可以考虑在node节点前加负载均衡</p>
+<p><a href="https://img-blog.csdnimg.cn/20201014001815371.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201014001815371.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a><br>
+使用nodeport访问示例：<br>
+<a href="https://img-blog.csdnimg.cn/20201014002050939.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201014002050939.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a></p>
+<h2 id="解绑集群">解绑集群</h2>
+<p>选择集群设置，可执行解绑集群<br>
+<a href="https://img-blog.csdnimg.cn/20201013233824639.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center"><img src="https://img-blog.csdnimg.cn/20201013233824639.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L25ldHdvcmtlbg==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述" loading="lazy"></a></p>
+<p>备注：<br>
+除了纳管本地kubeadm部署的kubernetes集群，kubesphere也支持纳管Aliyun ACK、AWS EKS等集群类型。</p>
+<p>原文链接：https://blog.csdn.net/networken/article/details/109062141</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/9zKNF0siQ/">
+              <span class="post-title">
+                Centos7.4使用rke V1.1.9安装K8s集群&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

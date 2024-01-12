@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Docker 部署 Confluence(破解版) | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Docker 部署 Confluence(破解版) | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Docker 部署 Confluence(破解版)"/>
+    <meta property="og:url" content="https://jwangkun.github.io/Ov0CrYjjG/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/bFIvvpRsv/" class="tag">Confluence</a>
+            
+        </span>
+            <h1>Docker 部署 Confluence(破解版)</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-20，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>一、 说明<br>
+1.1 素材</p>
+<p>本文采用素材如下：<br>
+Docker镜像 Github链接(https://github.com/cptactionhank)<br>
+破解工具 Gitee链接(https://gitee.com/pengzhile/atlassian-agent) (https://zhile.io/2018/12/20/atlassian-license-crack.html)</p>
+<p>采用以上工具，理论上可以破解几乎全部版本。</p>
+<p>本地下载地址：https://files.cnblogs.com/files/sanduzxcvbnm/atlassian-agent-v1.2.3.zip</p>
+<p>1.2 数据库</p>
+<p>如果是选择外部数据库，大家可以按照这样创建：</p>
+<pre><code># 创建confluence数据库及用户
+CREATE DATABASE confdb CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+grant all on confdb.* to 'confuser'@'%' identified by '7FxxxzhO';
+
+# confluence要求设置事务级别为READ-COMMITTED
+set global tx_isolation='READ-COMMITTED';
+</code></pre>
+<p>二、 安装 Confluence(7.4.0)<br>
+Atlassian Confluence（简称Confluence）是一个专业的wiki程序。它是一个知识管理的工具，通过它可以实现团队成员之间的协作和知识共享。</p>
+<p>2.1 制作Docker破解容器</p>
+<p>编写Dockerfile文件：</p>
+<pre><code>FROM cptactionhank/atlassian-confluence:latest
+
+USER root
+
+# 将代理破解包加入容器
+COPY &quot;atlassian-agent.jar&quot; /opt/atlassian/confluence/
+
+# 设置启动加载代理包
+RUN echo 'export CATALINA_OPTS=&quot;-javaagent:/opt/atlassian/confluence/atlassian-agent.jar ${CATALINA_OPTS}&quot;' &gt;&gt; /opt/atlassian/confluence/bin/setenv.sh
+</code></pre>
+<p>2.2 下载破解文件</p>
+<p>在gitee 中下载编译好的即可，放置在Dockerfile同目录下</p>
+<ul>
+<li>JIRA<br>
+--Dockerfile<br>
+--atlassian-agent.jar</li>
+</ul>
+<p>2.3 构建镜像</p>
+<pre><code>docker build -t confluence:latest .
+</code></pre>
+<p>结果如下：</p>
+<pre><code>Sending build context to Docker daemon  976.9kB
+Step 1/4 : FROM cptactionhank/atlassian-confluence:latest
+ ---&gt; 080599d8b2d7
+Step 2/4 : USER root
+ ---&gt; Running in 016cda821c07
+Removing intermediate container 016cda821c07
+ ---&gt; 6506aa1b43c1
+Step 3/4 : COPY &quot;atlassian-agent.jar&quot; /opt/atlassian/confluence/
+ ---&gt; 27ab3f8f23cc
+Step 4/4 : RUN echo 'export CATALINA_OPTS=&quot;-javaagent:/opt/atlassian/confluence/atlassian-agent.jar ${CATALINA_OPTS}&quot;' &gt;&gt; /opt/atlassian/confluence/bin/setenv.sh
+ ---&gt; Running in 68588c4f146c
+Removing intermediate container 68588c4f146c
+ ---&gt; 45a74f5420da
+Successfully built 45a74f5420da
+Successfully tagged confluence:latest
+</code></pre>
+<p>2.4 启动容器</p>
+<pre><code># 提前创建/home/confluence目录
+docker run -d --name confluence \
+  --restart always \
+  -p 18010:8090 \
+  -e TZ=&quot;Asia/Shanghai&quot; \
+  -v /home/confluence:/var/atlassian/confluence \
+  confluence:latest
+</code></pre>
+<p>2.5 访问 confluence<br>
+访问 IP:18010，参照JIRA的安装流程，进行操作。可在引导过程中，与之前安装的JIRA进行绑定关联。<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013151943287-2110073625.png" alt="img" loading="lazy"></p>
+<p>我们就选择一个应用吧<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013152025404-110926332.png" alt="img" loading="lazy"></p>
+<p>2.6 破解</p>
+<p>生成confluence许可命令参照如下：</p>
+<pre><code># 设置产品类型：-p conf， 详情可执行：java -jar atlassian-agent.jar 
+java -jar atlassian-agent.jar -d -m test@test.com -n BAT -p conf -o http://192.168.0.89 -s BTW4-2T4Y-9BTK-R0DP
+</code></pre>
+<p>复制服务器ID: BTW4-2T4Y-9BTK-R0DP<br>
+在本地存放atlassian-agent.jar的目录下执行命令，生成许可证：<br>
+需替换邮箱（test@test.com）、名称（BAT）、访问地址（<a href="http://192.168.0.89/">http://192.168.0.89</a>）、服务器ID（BTW4-2T4Y-9BTK-R0DP）为你的信息</p>
+<pre><code>java -jar atlassian-agent.jar \
+  -d -m test@test.com -n BAT \
+  -p jira -o http://192.168.0.89 \
+  -s BTW4-2T4Y-9BTK-R0DP
+</code></pre>
+<p>例如我的信息如下，生成许可证：</p>
+<pre><code>java -jar atlassian-agent.jar \
+  -d -m wangzan18@126.com -n BAT \
+  -p conf -o http://confluence.wzlinux.com \
+  -s BTW4-2T4Y-9BTK-R0DP
+
+====================================================
+=======        Atlassian Crack Agent         =======
+=======           https://zhile.io           =======
+=======          QQ Group: 30347511          =======
+====================================================
+
+Your license code(Don't copy this line!!!): 
+
+AAABXQ0ODAoPeJx1kV9vgjAUxd/7KUj2XG1R5p+EZArEmYEsotteK7tqEyikLW7s069UzJJlS/rQn
+HtPf/fc3mWNcBLWOpQ41JuT6dylTpDtHJe4BCWMCw2CiRyiz5rLNmQafJdMZ5hMzEExz0Gof4ohq
+FzyWvNK+HtR8JJreHeKq8U5tM5Z61rNh8OvMy9gwCsUVEKzXG9YCf5ysUMZyAvIdegvR49jHNL0F
+a+25A0/Be4K5ZU4DjZNeQCZHvcKpPIxRak8McEVs9QOYN7vOosGTIpBXpXS1MRJddcbMDJBC/+Di
+dMXE3T6QN17W7aIPuOurcEOFqRJEm2D9SJGgQQL6pO7BBMPU3Jbixk8XodZtMEx9aYzMht7hI4mH
+jKS/4dscWYcfgFfywZQdGFFc41yZIUC9NzI/MwU/AZmzeFn19Zq38o0kxpkb7aScbIARKfavv47X
+sz6Oq/7DWevrTUwLgIVAIEyoNFjmUFyTJOVUzmxTJTM14S8AhUAkaRbRjdl4D9MZtO6l5nCHcR2B
+80=X02h9
+</code></pre>
+<p>将生成的许可证复制到页面，完成破解。<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013152518259-783178591.png" alt="img" loading="lazy"></p>
+<p>选择单机模式，并设置数据库<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013152620260-458232693.png" alt="img" loading="lazy"></p>
+<p>需要事先创建数据库，并且设置如下：<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013153303842-1204286496.png" alt="img" loading="lazy"><br>
+还有开头的事务级别</p>
+<pre><code>mysql&gt; set global tx_isolation='READ-COMMITTED';
+Query OK, 0 rows affected (0.00 sec)
+</code></pre>
+<p>注意一下：数据库url连接中用的是utf8,不能用utf8mb4.</p>
+<pre><code>jdbc:mysql://192.168.0.254/confluence?useUnicode=true&amp;characterEncoding=utf8
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013152708106-355960221.png" alt="img" loading="lazy"></figure>
+<p>2.7 配置 confluence<br>
+我们做个示范站点<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013153745363-878959299.png" alt="img" loading="lazy"></p>
+<p>配置用户管理，这里我们选择之前创建好的 jira<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013153813296-59979739.png" alt="img" loading="lazy"></p>
+<p>配置连接信息<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013153856300-124843698.png" alt="img" loading="lazy"></p>
+<p>同步数据<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013153917902-1173835991.png" alt="img" loading="lazy"></p>
+<figure data-type="image" tabindex="2"><img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013153927591-1288298794.png" alt="img" loading="lazy"></figure>
+<p>登陆查看授权情况<br>
+站点管理，一般设置，授权细节<br>
+<img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013161121558-799346154.png" alt="img" loading="lazy"></p>
+<figure data-type="image" tabindex="3"><img src="https://img2020.cnblogs.com/blog/794174/202010/794174-20201013153950382-114407398.png" alt="img" loading="lazy"></figure>
+<p>三、乱码问题</p>
+<p>在我们正常安装之后，中文可能会有乱码，我们修改一下连接字符串，在 confluence 的家目录下面，有一个配置文件confluence.cfg.xml，找到hibernate.connection.url，在数据库字符串后面加上如下字符，整体结果如下：</p>
+<pre><code>jdbc:mysql://172.17.64.10/confdb?useUnicode=true&amp;characterEncoding=utf8
+</code></pre>
+<p>记住，里面的amp;不要省略。</p>
+<p>如果可以的话，把数据库的字符串改成utf8mb4<br>
+https://confluence.atlassian.com/doc/database-setup-for-mysql-128747.html</p>
+<p>还有一个文档说字符串改成utf8，不是utf8mb4，具体区别我也不知道，大家可以去测试一下<br>
+https://www.cwiki.us/display/CONFLUENCEWIKI/Database+Setup+For+MySQL</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/o6tAVfUH0/">
+              <span class="post-title">
+                CentOS7.4 源码安装MySQL8.0的教程详解 &rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Nginx 反向代理 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Nginx 反向代理 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Nginx 反向代理"/>
+    <meta property="og:url" content="https://jwangkun.github.io/FmS59gnRe/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/gvX4bCYuo/" class="tag">反向代理</a>
+            
+            <a href="https://jwangkun.github.io/S4vm1SSFL/" class="tag">Nginx</a>
+            
+        </span>
+            <h1>Nginx 反向代理</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-06，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="什么是反向代理">什么是反向代理</h3>
+<p>代理在生活中非常常见，房屋中介是代理、终端零售是代理、选举代表是代理。这些代理都可以帮助需求方减轻很多工作的复杂度，提升效率和体验。</p>
+<p>网络里的代理服务是什么样子，我想各位读者也非常清楚，这里再简单回顾一下：假设我们想在公司上网看B站的视频，而规范的公司出于安全和办公效率的考虑，设置了网络策略，不允许访问视频网站，聪明的程序员不可能被这些事情所打败，只要购买一台云服务，搭建代理服务，把浏览器设置上代理，就可以轻松访问视频网站。这就是常见的代理。</p>
+<figure data-type="image" tabindex="1"><img src="http://college.creditease.cn/resources/upload/image/20191106/1573007506690086761.png" alt="img" loading="lazy"></figure>
+<p>那么现在问题来了：“代理”大家都懂，这里为什么强调是反向代理呢？难道还有正向代理？答案是肯定的。</p>
+<p>正向代理就是大家常见的代理，以请求端也就是客户端的角度为正向，用户发出请求经过的代理，称为“正向代理”。这时是用户主动选择使用代理。</p>
+<p>反向代理：先看图再解释。</p>
+<figure data-type="image" tabindex="2"><img src="http://college.creditease.cn/resources/upload/image/20191106/1573007514500040177.png" alt="img" loading="lazy"></figure>
+<p>主动权被反转，原来是客户端选择代理，现在是代理选择服务端节点。由于控制权的反转，这样的代理被称为“反向代理”。</p>
+<h3 id="22-反向代理的优点">2.2 反向代理的优点</h3>
+<p><strong>1）保护服务安全</strong></p>
+<ul>
+<li>隐藏服务节点的IP；</li>
+<li>将服务节点置于防火墙之后，避免直接攻击业务节点服务器。</li>
+</ul>
+<p>2）服务节点更专注于业务，同时提升性能</p>
+<ul>
+<li>由于有反向代理的存在，可以让反向代理服务器去实现比如https、gzip压缩等与业务无关的功能；</li>
+<li>提供动静态分离，将静态文件发往静态服务器或本地文件系统，避免业务节点处理这些与业务无关的请求；</li>
+<li>提供缓存机制，将一些短时间内不会变化的动态内容，在反向代理服务器这层增加缓存，降低业务服务器的请求量；</li>
+<li>由于控制权在代理服务这边，完全可以根据服务节点的性能动态分配请求，做到服务节点性能最佳。</li>
+</ul>
+<p>正是由于Ngxin引入了反向代理的特性，让请求和响应都要经过Nginx，因此给Nginx带来了非常多的可能。比如负载均衡、HTTP缓存等。</p>
+<figure data-type="image" tabindex="3"><img src="http://college.creditease.cn/resources/upload/image/20191106/1573007524870008807.png" alt="img" loading="lazy"></figure>
+<h2 id="三-反向代理的配置">三、反向代理的配置</h2>
+<p>Nginx中关于反向代理的配置相当简单。</p>
+<h3 id="31-配置一个单节点的反向代理">3.1 配置一个单节点的反向代理</h3>
+<pre><code># simple reverse-proxy
+server { 
+    listen       80;
+    server_name  big.server.com;
+    access_log   logs/big.server.access.log  main;
+
+    # pass requests for dynamic content to rails/turbogears/zope, et al
+    location / {
+      proxy_pass      http://127.0.0.1:8080;
+    }
+  }
+</code></pre>
+<p>这里定义的规则是以big.server.com域名来请求Nginx的80端口，会将请求代理到127.0.0.1:8080上。</p>
+<h3 id="32-配置一组反向代理的服务节点">3.2 配置一组反向代理的服务节点。</h3>
+<p>1）配置一组反向代理并命名。</p>
+<pre><code>upstream big_server_com {
+    server 192.168.0.1:8000;
+    server 192.168.0.1:8001;
+} 
+</code></pre>
+<p>这里定义了upstream，这个upstream可以理解为上传流，之所以叫上传是因为：从服务器获取数据叫下载，向服务器发送数据就叫上传，这里是将数据请求发送到服务节点，所以叫上传。</p>
+<p>给这组服务节点命名为big_server_com，其中包括两个节点，分别是：192.168.0.1:8000和192.168.0.1:8001。</p>
+<p>2）配置规则：让满足的请求能够反向代理到这组服务节点中。</p>
+<pre><code>server { 
+    listen          80;
+    server_name     big.server.com;
+    access_log      logs/big.server.access.log main;
+
+    location / {
+      proxy_pass      http://big_server_com;
+    }
+  }
+</code></pre>
+<p>这里定义的规则是以big.server.com域名来请求Nginx的80端口，请求url是以/为后缀的所有请求，都会转发到前面定义的名字为big_server_com的服务节点组。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/IS-vQIvPv/">
+              <span class="post-title">
+                Nginx 负载均衡&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

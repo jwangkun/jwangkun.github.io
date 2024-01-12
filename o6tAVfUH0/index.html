@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>CentOS7.4 源码安装MySQL8.0的教程详解  | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="CentOS7.4 源码安装MySQL8.0的教程详解  | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="CentOS7.4 源码安装MySQL8.0的教程详解 "/>
+    <meta property="og:url" content="https://jwangkun.github.io/o6tAVfUH0/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/_JVrn2ZGG/" class="tag">MySQL</a>
+            
+        </span>
+            <h1>CentOS7.4 源码安装MySQL8.0的教程详解 </h1>
+            <span class="meta">
+            	Posted on
+              2020-11-20，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>特此说明：MySQL官方推荐使用二进制安装的方式。</p>
+<h2 id="一环境"><strong>一.环境</strong></h2>
+<p>CentOS7.4  64位 最小化安装</p>
+<h2 id="二准备工作"><strong>二.准备工作</strong></h2>
+<p>1.安装依赖</p>
+<pre><code> yum -y install wget cmake gcc gcc-c++ ncurses ncurses-devel libaio-devel openssl openssl-devel
+</code></pre>
+<p>2.下载源码包</p>
+<pre><code> wget https://cdn.mysql.com//Downloads/MySQL-8.0/mysql-boost-8.0.11.tar.gz   (此版本带有boost)
+</code></pre>
+<p>3.创建mysql用户</p>
+<pre><code> groupadd mysql
+    useradd -r -g mysql -s /bin/false mysql
+</code></pre>
+<p>4.创建安装目录和数据目录</p>
+<pre><code>   mkdir -p /usr/local/mysql
+   mkdir -p /data/mysql
+</code></pre>
+<h2 id="三安装mysql8011"><strong>三.安装MySQL8.0.11</strong></h2>
+<p>1.解压源码包</p>
+<pre><code>tar -zxf mysql-boost-8.0.11.tar.gz -C /usr/local
+</code></pre>
+<p>2.编译&amp;安装</p>
+<pre><code>   cd /usr/local/mysql-8.0.11
+   cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/mysql -DMYSQL_DATADIR=/usr/local/mysql/data -DSYSCONFDIR=/etc -DMYSQL_TCP_PORT=3306 -DWITH_BOOST=/usr/local/mysql-8.0.11/boost 
+   make &amp;&amp; make install
+</code></pre>
+<p>3.配置my.cnf文件</p>
+<pre><code>cat /etc/my.cnf
+   [mysqld]
+   server-id=1
+   port=3306
+   basedir=/usr/local/mysql
+   datadir=/data/mysql
+##请根据实际情况添加参数
+</code></pre>
+<p>4.目录权限修改</p>
+<pre><code>chown -R mysql:mysql /usr/local/mysql
+   chown -R mysql:mysql /data/mysql
+   chmod 755 /usr/local/mysql -R
+   chmod 755 /data/mysql -R
+</code></pre>
+<p>5.初始化</p>
+<pre><code>bin/mysqld --initialize --user=mysql --datadir=/data/mysql/
+   bin/mysql_ssl_rsa_setup
+</code></pre>
+<p>6.启动mysql</p>
+<pre><code>bin/mysqld_safe --user=mysql &amp;
+</code></pre>
+<p>7.修改账号密码</p>
+<pre><code>  bin/mysql -uroot -p
+   mysql&gt; alter user 'root'@'localhost' identified by &quot;123456&quot;;
+    mysql&gt; show databases;
+    +--------------------+
+    | Database      |
+    +--------------------+
+    | information_schema |
+    | mysql       |
+    | performance_schema |
+    | sys        |
+    +--------------------+
+    4 rows in set (0.00 sec)
+    ##添加远程特账号
+    mysql&gt; create user root@'%' identified by '123456';
+    Query OK, 0 rows affected (0.08 sec)
+    mysql&gt; grant all privileges on *.* to root@'%';
+    Query OK, 0 rows affected (0.04 sec)
+    mysql&gt; flush privileges;
+    Query OK, 0 rows affected (0.01 sec)
+</code></pre>
+<p>8.创建软链接(非必要)</p>
+<pre><code> ln -s /usr/local/mysql/bin/* /usr/local/bin/
+　　　　mysql -h 127.0.0.1 -P 3306 -uroot -p123456 -e &quot;select version();&quot;
+　　　　mysql: [Warning] Using a password on the command line interface can be insecure.
+　　　　+-----------+
+　　　　| version() |
+　　　　+-----------+
+　　　　| 8.0.11  |
+　　　　+-----------+
+</code></pre>
+<p>9.添加到启动(非必要)</p>
+<pre><code> cp support-files/mysql.server /etc/init.d/mysql.server
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/8_XaqMMnz/">
+              <span class="post-title">
+                Ansible 极简教程&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> 使用 helm 部署 k8s 资源 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" 使用 helm 部署 k8s 资源 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" 使用 helm 部署 k8s 资源"/>
+    <meta property="og:url" content="https://jwangkun.github.io/7BntkM5Xr/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/pvmyuN_DG/" class="tag">helm</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1> 使用 helm 部署 k8s 资源</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>helm 是基于 kubernetes 的包管理器。它之于 kubernetes 就如 yum 之于 centos，pip 之于 python，npm 之于<br>
+javascript</p>
+<!-- more -->
+<ol>
+<li>更方便地部署基础设施，如 <code>gitlab</code>，<code>postgres</code>，<code>prometheus</code>，<code>grafana</code> 等</li>
+<li>更方便地部署自己的应用，为公司内部的项目配置 Chart，使用 <code>helm</code> 结合 CI，在 k8s 中部署应用一行命令般简单</li>
+</ol>
+<p><strong>当然 <code>helm</code> 更伟大的作用在于运维人员与开发人员的职责分离</strong>。</p>
+<p>让开发人员写 k8s 资源配置文件是不现实的</p>
+<ol>
+<li>不是所有开发都了解k8s，或者说很少，不了解 k8s 很难写资源配置部署文件</li>
+<li>开发的主要职能还是在业务上</li>
+</ol>
+<p>于是 <code>helm</code> 应时而出，运维写配置文件，开发给配置文件填很少的参数</p>
+<p>本篇文章主要介绍如何安装 helm 以及如何使用 helm 部署基础服务和业务</p>
+<ul>
+<li><code>Chart</code>: 一系列 k8s 资源集合的命名，它包含一系列 k8s 资源配置文件的模板与参数，可供灵活配置</li>
+<li><code>release</code>: 当一个 Chart 部署后生成一个 release，chart/relase 类似于 docker 中 image/container</li>
+<li><code>repo</code>: 即 chart 的仓库，其中有很多个 chart 可供选择，如官方 <a href="https://github.com/helm/charts">helm/charts</a></li>
+</ul>
+<p>使用 <code>helm create</code> 创建一个 chart，了解简单 chart 的目录结构</p>
+<blockquote>
+<p>关于如何安装 helm 参考下一小节</p>
+</blockquote>
+<pre><code># 创建一个 chart
+$ helm create todo
+Creating todo
+
+$ cd todo
+
+# 打印 chart 目录，主要文件有 Chart.yaml 与 values.yaml
+# --dirsfirst 先打印文件夹名称
+$ tree --dirsfirst
+.
+├── charts
+├── templates
+│   ├── tests
+│   │   └── test-connection.yaml
+│   ├── NOTES.txt
+│   ├── _helpers.tpl
+│   ├── deployment.yaml
+│   ├── ingress.yaml
+│   └── service.yaml
+├── Chart.yaml
+└── values.yaml
+
+3 directories, 8 files
+</code></pre>
+<p>查看主要的两个文件目录</p>
+<ul>
+<li><code>templates/</code>: 这是运维大哥写的配置文件模板，示例是最简单应用的资源配置，但复杂应用还会有 pvc，role，service-acount 等等</li>
+<li><code>values.yaml</code>: 这是给开发小弟写的可选参数，但是大部分参数都被运维大哥给内置了</li>
+</ul>
+<h2 id="使用-helm-部署基础服务">使用 helm 部署基础服务</h2>
+<p>真实案例可以参看我的系列文章其它章节</p>
+<ul>
+<li><a href="https://shanyue.tech/k8s/deploy-redis">使用 helm 部署 redis</a></li>
+<li><a href="https://shanyue.tech/k8s/deploy-postgres">使用 helm 部署 postgres</a></li>
+<li><a href="https://shanyue.tech/k8s/deploy-drone">使用 helm 部署 drone</a></li>
+</ul>
+<p>这里讲述一些关于部署基础服务的一般步骤。假设我们需要部署 redis</p>
+<blockquote>
+<p>这里使用 helm v3，语法与 v2 可能略有出入</p>
+</blockquote>
+<h3 id="01-查找相关-chart">01 查找相关 Chart</h3>
+<p>使用 <code>helm search hub</code></p>
+<pre><code>$ helm search hub redis
+URL                                                     CHART VERSION   APP VERSION     DESCRIPTION
+https://hub.helm.sh/charts/bitnami/redis                9.5.0           5.0.5           Open source, advanced key-value store. It is of...
+https://hub.helm.sh/charts/hephy/redis                  v2.4.0                          A Redis database for use inside a Kubernetes cl...
+https://hub.helm.sh/charts/incubator/redis-cache        0.5.0           4.0.12-alpine   A pure in-memory redis cache, using statefulset...
+</code></pre>
+<h3 id="02-选定-chart跟进-chart-的官方文档">02 选定 Chart，跟进 Chart 的官方文档</h3>
+<p>我们选定 <a href="https://hub.helm.sh/charts/bitnami/redis">stable/redis</a> 这个 chart。</p>
+<p>跟踪官方文档，设置相关参数，存储为 <code>values-production.yaml</code></p>
+<pre><code># Production configuration
+$ helm install stable/redis --values values-production.yaml
+</code></pre>
+<p>如果有必要时会添加 repo: <code>helm repo add</code></p>
+<pre><code># helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+
+# 列出所有 repo
+$ helm repo list
+NAME            URL
+stable          https://kubernetes-charts.storage.googleapis.com/
+apphub          https://apphub.aliyuncs.com
+jetstack        https://charts.jetstack.io
+
+</code></pre>
+<h3 id="03-校验部署状态">03 校验部署状态</h3>
+<p>这与需要部署的资源有关，不过一般也就分为 <code>Service</code>，<code>Pod</code> 和 <code>PVC</code></p>
+<h2 id="安装-helm">安装 helm</h2>
+<p>这里参考官方文档 <a href="https://helm.sh/docs/using_helm/#installing-helm">安装 helm</a></p>
+<p><code>helm</code> 在 helm v2 时分为客户端 (helm client，即命令行工具) 与服务端 (helm server) 两部分，在服务端又叫 <code>Tiller</code>，安装 <code>Tiller</code> 时会在集群中部署一个 <code>Pod</code>。</p>
+<p><code>helm</code> 此时已发布了 v3，相比 v2 而言，它去掉了 <code>Tiller</code>，更加具体的变更参考 <a href="https://v3.helm.sh/docs/faq/">helm v3 FAQ</a></p>
+<h3 id="安装客户端-helm-client">安装客户端 (helm client)</h3>
+<p>helm client 需要安装在你可以访问 k8s 集群的任何服务器，如同 <code>kubectl</code>，不过通常来说，你需要安装在两个地方</p>
+<ol>
+<li>k8s 集群的 master node</li>
+<li>你自己的 PC/mac 上</li>
+</ol>
+<blockquote>
+<p>在 helm v3 中，只需要安装 helm client</p>
+</blockquote>
+<p>在 mac 上进行安装</p>
+<pre><code>$ brew install kubernetes-helm
+
+</code></pre>
+<p>在 linux 上进行安装</p>
+<pre><code>$ curl -LO https://git.io/get_helm.sh
+$ chmod 700 get_helm.sh
+$ ./get_helm.sh
+
+</code></pre>
+<p>根据源码包进行安装，比较推荐(毕竟使用以上两种方案可能有网络问题)，至于如何使用 <code>rsync</code> 见以下安装步骤</p>
+<blockquote>
+<p>使用脚本安装在国内会出现网络问题，需要在代理节点安装并使用 <code>rsync</code> 或者 <code>scp</code> 移动到目标位置</p>
+</blockquote>
+<p>示例选择 <code>2.14.3</code> 进行安装，<code>helm</code> 的最新版本可以参考 <a href="https://github.com/helm/helm/releases">helm/helm Releases</a>。</p>
+<blockquote>
+<p>可以选择 3.0+ 版本的安装，目前最新版本是 <code>Helm v3.0.0-rc.1</code> (2019/11/01)</p>
+</blockquote>
+<pre><code># 下载 MAC 上适用的软件包
+# -L: 追踪重定向链接
+# -O: 保存到本地
+# -S: 打印错误
+$ curl -SLO https://get.helm.sh/helm-v2.14.3-darwin-amd64.tar.gz 
+
+# 下载 CentOS 上适用的软件包
+$ curl -SLO https://get.helm.sh/helm-v2.14.3-linux-amd64.tar.gz
+
+# 如果有网络问题，请在代理节点下载并 rsync 到目标节点，如果没有，跳过此步
+$ rsync -avhzP proxy:/root/helm-v2.14.3-linux-amd64.tar.gz .
+
+# 如果在 mac 上
+$ tar -zxvf helm-v2.14.3-darwin-amd64.tar.gz 
+
+# 如果在 centos 上
+$ tar -zxvf helm-v2.14.3-linux-amd64.tar.gz
+
+# 进入相应目录，移至 /bin 目录
+$ mv linux-amd64/helm /usr/local/bin/helm
+
+</code></pre>
+<h3 id="安装-tiller-helm-server">安装 tiller (helm server)</h3>
+<blockquote>
+<p>如果使用了 Helm v3，则不用安装 tiller</p>
+</blockquote>
+<h4 id="01-下载镜像">01 下载镜像</h4>
+<p>tiller 的镜像 <code>gcr.io/kubernetes-helm/tiller:v2.14.3</code> 在 gcr.io 上，这意味着在国内网络需要先下载到代理节点，再移动到目标位置。具体步骤参照以前章节</p>
+<ul>
+<li><a href="https://shanyue.tech/k8s/install-master-node">安装主节点 - 准备离线镜像</a></li>
+</ul>
+<h4 id="02-安装-tiller">02 安装 Tiller</h4>
+<p>当安装好 <code>helm</code> 命令行工具后，使用 <code>helm init</code> 安装 tiller。安装 <code>tiller</code> 时会在 k8s 上部署一个 pod。</p>
+<pre><code>$ helm init
+Creating /root/.helm
+Creating /root/.helm/repository
+Creating /root/.helm/repository/cache
+Creating /root/.helm/repository/local
+Creating /root/.helm/plugins
+Creating /root/.helm/starters
+Creating /root/.helm/cache/archive
+Creating /root/.helm/repository/repositories.yaml
+Adding stable repo with URL: https://kubernetes-charts.storage.googleapis.com
+Adding local repo with URL: http://127.0.0.1:8879/charts
+$HELM_HOME has been configured at /root/.helm.
+
+Tiller (the Helm server-side component) has been installed into your Kubernetes Cluster.
+
+Please note: by default, Tiller is deployed with an insecure 'allow unauthenticated users' policy.
+To prevent this, run `helm init` with the --tiller-tls-verify flag.
+For more information on securing your installation see: https://docs.helm.sh/using_helm/#securing-your-helm-installation
+
+</code></pre>
+<p>根据提示此时已安装成功，校验 Pod 状态</p>
+<pre><code># 查看 tiller 是否出在运行状态
+$ kubectl get pods --all-namespaces
+
+# 查看 helm 与 tiller 版本
+$ helm version
+Client: &amp;version.Version{SemVer:&quot;v2.14.3&quot;, GitCommit:&quot;0e7f3b6637f7af8fcfddb3d2941fcc7cbebb0085&quot;, GitTreeState:&quot;clean&quot;}
+Server: &amp;version.Version{SemVer:&quot;v2.14.3&quot;, GitCommit:&quot;0e7f3b6637f7af8fcfddb3d2941fcc7cbebb0085&quot;, GitTreeState:&quot;clean&quot;}
+
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/wyCYu2kwn/">
+              <span class="post-title">
+                允许Docker使用无权限验证的Docker Registry&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

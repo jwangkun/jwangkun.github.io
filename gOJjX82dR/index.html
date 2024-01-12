@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> CentOS 7安装Nano轻量级虚拟机管理软件 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" CentOS 7安装Nano轻量级虚拟机管理软件 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" CentOS 7安装Nano轻量级虚拟机管理软件"/>
+    <meta property="og:url" content="https://jwangkun.github.io/gOJjX82dR/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/61dVEwuKw/" class="tag">Nano</a>
+            
+        </span>
+            <h1> CentOS 7安装Nano轻量级虚拟机管理软件</h1>
+            <span class="meta">
+            	Posted on
+              2021-02-09，6 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Nano基于KVM技术，使用Go语言开发，简单易学的虚拟机管理软件，从Web管理门户、主机监控、镜像克隆到故障切换，功能完备，开箱即用。类似noKvm、Proxmox VE这类虚拟化管理平台，Nano无需第三方软件或者依赖库即可执行，安装非常简单。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_OjUjybnInb.png" alt="img" loading="lazy"></figure>
+<h3 id="服务器要求">服务器要求</h3>
+<ul>
+<li>支持虚拟化的X86服务器或者打开嵌套虚拟化（Intel VT-x/AMD-v）的虚拟机</li>
+<li>2核4G内存50GB磁盘和一个网络设备</li>
+<li>CentOS 7.7(1908) Minimal</li>
+<li>操作系统安装完成并且网络就绪</li>
+<li>Firewalld服务启动并且正常运行</li>
+<li>如有Raid/LVM请先完成配置，再进行Nano安装</li>
+</ul>
+<h3 id="安装nano">安装Nano</h3>
+<p>复制下面的命令进行安装</p>
+<pre><code class="language-bash">#下载Nano
+wget https://nanos.cloud/files/nano_installer_1.2.0.tar.gz
+#解压
+tar zxfv nano_installer_1.2.0.tar.gz
+#进入目录
+cd nano_installer
+#安装
+./installer
+</code></pre>
+<p>安装的时候会要求选择模块，一般情况选3（全部）安装，其它选项如果不清楚，全部保持默认即可，通常在几分钟即可完整安装。</p>
+<figure data-type="image" tabindex="2"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/MobaXterm_ZYEM2kLmap.png" alt="img" loading="lazy"></figure>
+<h3 id="运行nano">运行Nano</h3>
+<p>Nano的相关文件位于<code>/opt/nano/</code>目录，需要进入该目录启动下面的服务：</p>
+<pre><code class="language-bash">cd /opt/nano/core
+./core start
+cd ../cell
+./cell start
+cd ../frontend
+./frontend start
+</code></pre>
+<p>当front-end模块成功启动后，会提示一个形如&quot;192.168.6.3:5870&quot;的监听地址，使用Chrome或者Firefox打开这个地址就可以进行平台管理了,首次打开WEB界面会要求设置账号、密码。</p>
+<figure data-type="image" tabindex="3"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_F8mcSs4tdn.png" alt="img" loading="lazy"></figure>
+<p>进入后Nano WEB管理界面后，看到的内容如下，界面还是挺美观的。</p>
+<figure data-type="image" tabindex="4"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_oCDf0sH4U3.png" alt="img" loading="lazy"></figure>
+<h3 id="首次使用">首次使用</h3>
+<p><strong>设置计算资源池</strong></p>
+<p>在下图的位置设置资源节点，否则无法正常创建云主机。</p>
+<figure data-type="image" tabindex="5"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_mAit5WffuG.png" alt="img" loading="lazy"></figure>
+<p><strong>地址池</strong></p>
+<p>在下图中设置地址池，否则无法自动为虚拟机分配IP地址，同时请确保这些地址在同一网络下是正常可用的，并非随意填写。</p>
+<figure data-type="image" tabindex="6"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_6gH7ZgJDca.png" alt="img" loading="lazy"></figure>
+<p><strong>光盘镜像</strong></p>
+<p>系统镜像可以自行去官方先下载好，然后通过下方界面进行上传。xiaoz使用Edge (Chromium)上传镜像的时候，卡在100%，原因不明。后来更换Chrome后就可以了，官方推荐使用Chrome或Firefox浏览器。</p>
+<figure data-type="image" tabindex="7"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_7GMGVtNaOL.png" alt="img" loading="lazy"></figure>
+<p>上传后的光盘镜像位于<code>/opt/nano/core/data/media_images</code>目录，目前还不支持直接在宿主机上wget下载，只能在线上传镜像，这点感觉不是特别方便。</p>
+<p><strong>创建云主机</strong></p>
+<p>上方条件准备完毕后即可创建云主机，按下图所示，先插入光盘镜像，然后启动系统，再进入控制台进行安装。</p>
+<figure data-type="image" tabindex="8"><img src="https://cdn.xiaoz.me/wp-content/uploads/2020/05/msedge_q3oLhUjHRI.png" alt="img" loading="lazy"></figure>
+<h3 id="遇到的问题">遇到的问题</h3>
+<p>安装Windows Server 2019后，发现从控制台进入，无法发送<code>Ctrl + Alt + Del</code>快捷键，解决办法是使用VNC客户端进行连接。</p>
+<p>点击资源监控的时候浏览器提示内存不足，这个情况应该Windows虚拟机会出现此问题，解决办法是安装virtio驱动和qeum agent，下载地址为：<code>https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.173-9/virtio-win.iso</code>，不然nano查看虚拟机资源监控会卡住。</p>
+<h3 id="nano脚本管理与开机启动">Nano脚本管理与开机启动</h3>
+<p>每次都进入<code>/opt/nano/core</code>目录去管理Nano的3个服务，非常不方便，我们可以编写脚本来对Nano进行管理。xiaoz已经编写好了，可以直接下载使用：</p>
+<pre><code class="language-bash">#下载管理脚本
+wget -O /usr/sbin/nano https://raw.githubusercontent.com/helloxz/shell/master/nano.sh
+#添加执行权限
+chmod +x nano
+</code></pre>
+<p>脚本添加后，可以使用下方的命令来快速管理Nano。</p>
+<pre><code class="language-bash">#查看nano状态
+nano status
+#停止nano
+nano stop
+#启动nano
+nano start
+#重启nano 
+nano restart
+</code></pre>
+<p>继续编写<code>systemd</code>服务，以便设置开机启动，新建一个nano服务文件<code>vi /etc/systemd/system/nano.service</code>，内容如下：</p>
+<pre><code class="language-bash">[Unit]
+Description=Nano - https://nanos.cloud/
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/nano
+ExecRestart=/usr/sbin/nano restart
+ExecStop=/usr/sbin/nano stop
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>服务添加完毕后输入<code>systemctl daemon-reload</code>刷新刚刚添加的nano服务，然后就可以使用<code>systemctl</code>来进行管理了，命令如下：</p>
+<pre><code class="language-bash">#设置nano开机启动
+systemctl enable nano
+#启动nano
+systemctl start nano
+#停止nano
+systemctl stop nano
+#重启nano
+systemctl restart nano
+</code></pre>
+<p>注意，此服务需要依赖于上方的<code>nano.sh</code>脚本，xiaoz已放到Github：https://github.com/helloxz/shell/blob/master/nano.sh</p>
+<h3 id="总结">总结</h3>
+<p>Nano使用Golang开发，无需第三方软件或者依赖库即可执行，安装非常简单，相比其它虚拟化管理平台，安装更简单而且不容易出错。目前仅用过VMware、ESXI、Nano这几个虚拟化软件，ESXI必须使用镜像才能运行，而Nano只需要CentOS 7即可安装。有网友分享说Nano比PVE更加好用，好吧，我没用过PVE，就无法做对比了。</p>
+<p>Nano也有一些不足，比如光盘镜像必须在线上传，如果您是国外的独立服务器，镜像比较大的情况下，简直是一个噩梦，而ESXI则可以直接在宿主机上wget。另外安装Windows虚拟机后，WEB控制台那里无法发送<code>Ctrl + Alt + Del</code>，最后只好用VNC客户端操作。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Z29uiKS0U/">
+              <span class="post-title">
+                将OneDrive等云盘文件同步到Fast.io提供直连下载&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

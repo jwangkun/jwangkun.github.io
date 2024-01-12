@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Docker 常用命令汇总 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Docker 常用命令汇总 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Docker 常用命令汇总"/>
+    <meta property="og:url" content="https://jwangkun.github.io/Ij5JN2yIV/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>Docker 常用命令汇总</h1>
+            <span class="meta">
+            	Posted on
+              2020-09-11，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="docker-镜像命令">Docker 镜像命令</h3>
+<p>列出镜像列表</p>
+<pre><code class="language-sh">$ docker images
+$ docker image ls -a
+</code></pre>
+<p>运行 Docker 镜像（守护态方式）</p>
+<pre><code class="language-sh">$ docker run -d {镜像名}
+</code></pre>
+<p>删除指定 Docker 镜像</p>
+<pre><code class="language-sh">$ docker  image rm {镜像名}
+</code></pre>
+<p>删除 Docker 虚悬镜像</p>
+<pre><code class="language-sh">$ docker image prune
+</code></pre>
+<h3 id="docker-容器命令">Docker 容器命令</h3>
+<p>列出正在运行的容器</p>
+<pre><code class="language-bash">$ docker ps -a
+</code></pre>
+<p>列出所有容器（包括已停止容器）</p>
+<pre><code class="language-bash">$ docker ps -l
+</code></pre>
+<p>进入运行中的 Docker 容器</p>
+<pre><code class="language-bash">$ docker exec -it {容器ID} /bin/bash
+</code></pre>
+<p>停止 Docker 容器</p>
+<pre><code class="language-bash">$ docker stop {容器ID}
+</code></pre>
+<p>删除指定 Docker 容器</p>
+<pre><code class="language-bash">$ docker rm -f {容器ID}
+</code></pre>
+<p>删除停止的 Docker 容器</p>
+<pre><code class="language-bash">$ docker container prune
+</code></pre>
+<p>查看 Docker 容器历史运行日志</p>
+<pre><code class="language-bash">$ docker logs {容器名}
+</code></pre>
+<p>实时监听 Docker 容器运行日志</p>
+<pre><code class="language-bash">$ docker logs -f {容器名}
+</code></pre>
+<h3 id="docker-数据卷命令">Docker 数据卷命令</h3>
+<p>创建 Docker 数据卷</p>
+<pre><code class="language-bash">$ docker volume create {数据卷名}
+</code></pre>
+<p>列出所有 Docker 数据卷</p>
+<pre><code class="language-bash">$ docker volume ls
+</code></pre>
+<p>删除指定 Docker 数据卷</p>
+<pre><code class="language-bash">$ docker volume rm {数据卷名}
+</code></pre>
+<p>删除未关联（失效） Docker 数据卷</p>
+<pre><code class="language-bash">$ docker volume prune
+$ docker volume rm $(docker volume ls -qf dangling=true)
+</code></pre>
+<h3 id="docker-文件操作命令">Docker 文件操作命令</h3>
+<p>从主机复制文件到 Docker 容器中</p>
+<pre><code class="language-bash">$ sudo docker cp {主机内文件路径} {容器ID}:{容器内文件存储路径}
+</code></pre>
+<p>从 Docker 容器中复制文件到主机中</p>
+<pre><code class="language-bash">$ sudo docker cp {容器ID}:{容器内文件路径} {主机内文件存储路径}
+</code></pre>
+<h2 id="从image启动一个container">从image启动一个container</h2>
+<p>docker run命令首先会从特定的image创之上create一层可写的container，然后通过start命令来启动它。停止的container可以重新启动并保留原来的修改。run命令启动参数有很多，以下是一些常规使用说明</p>
+<p>当利用 docker run 来创建容器时，Docker 在后台运行的标准操作包括：</p>
+<ul>
+<li>检查本地是否存在指定的镜像，不存在就从公有仓库下载</li>
+<li>利用镜像创建并启动一个容器</li>
+<li>分配一个文件系统，并在只读的镜像层外面挂载一层可读写层</li>
+<li>从宿主主机配置的网桥接口中桥接一个虚拟接口到容器中去</li>
+<li>从地址池配置一个 ip 地址给容器</li>
+<li>执行用户指定的应用程序</li>
+<li>执行完毕后容器被终止</li>
+</ul>
+<pre><code>Usage: docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+</code></pre>
+<p>下面是一个例子：</p>
+<pre><code>$ sudo docker run --name nginx_test \
+&gt; -v /tmp/docker:/usr/share/nginx/html:ro \
+&gt; -p 80:80 -d \
+&gt; nginx:1.7.6
+</code></pre>
+<h2 id="开启停止重启containerstartstoprestart">开启/停止/重启container（start/stop/restart</h2>
+<p>容器可以通过run新建一个来运行，也可以重新start已经停止的container，但start不能够再指定容器启动时运行的指令，因为docker只能有一个前台进程。</p>
+<p>容器stop（或Ctrl+D）时，会在保存当前容器的状态之后退出，下次start时保有上次关闭时更改。而且每次进入attach进去的界面是一样的，与第一次run启动或commit提交的时刻相同。</p>
+<pre><code>CONTAINER_ID=$(docker start &lt;containner_id&gt;)
+$ sudo docker stop $CONTAINER_ID
+$ sudo docker restart $CONTAINER_ID
+</code></pre>
+<h2 id="连接到正在运行中的containerattach">连接到正在运行中的container（attach）</h2>
+<p>要attach上去的容器必须正在运行，可以同时连接上同一个container来共享屏幕（与screen命令的attach类似）。</p>
+<p>官方文档中说attach后可以通过CTRL-C来detach，但实际上经过我的测试，如果container当前在运行bash，CTRL-C自然是当前行的输入，没有退出；如果container当前正在前台运行进程，如输出nginx的access.log日志，CTRL-C不仅会导致退出容器，而且还stop了。这不是我们想要的，detach的意思按理应该是脱离容器终端，但容器依然运行。好在attach是可以带上--sig-proxy=false来确保CTRL-D或CTRL-C不会关闭容器。</p>
+<pre><code>$ sudo docker attach --sig-proxy=false $CONTAINER_ID
+</code></pre>
+<h2 id="查看image或container的底层信息inspect">查看image或container的底层信息（inspect）</h2>
+<p>inspect的对象可以是image、运行中的container和停止的container。</p>
+<p>查看容器的内部IP</p>
+<pre><code>$ sudo docker inspect --format='{{.NetworkSettings.IPAddress}}' $CONTAINER_ID
+</code></pre>
+<h2 id="查看容器中正在运行的进程top">查看容器中正在运行的进程（top）</h2>
+<p>容器运行时不一定有/bin/bash终端来交互执行top命令，查看container中正在运行的进程，况且还不一定有top命令，这是docker top &lt;container_id/container_name&gt;就很有用了。实际上在host上使用ps -ef|grep docker也可以看到一组类似的进程信息，把container里的进程看成是host上启动docker的子进程就对了。</p>
+<pre><code>$ sudo docker top &lt;container_id/container_name&gt;
+</code></pre>
+<h2 id=""></h2>
+<h2 id="docker-build-命令">Docker build 命令</h2>
+<p>build命令可以从Dockerfile和上下文来创建镜像：</p>
+<pre><code>$ sudo docker build [OPTIONS] PATH | URL | -
+</code></pre>
+<p>上面的PATH或URL中的文件被称作上下文，build image的过程会先把这些文件传送到docker的服务端来进行的。</p>
+<pre><code># cat Dockerfile 
+ FROM seanlook/nginx:bash_vim
+ EXPOSE 80
+ ENTRYPOINT /usr/sbin/nginx -c /etc/nginx/nginx.conf &amp;&amp; /bin/bash
+
+# docker build -t seanlook/nginx:bash_vim_Df .
+</code></pre>
+<p>给镜像打上标签（tag）</p>
+<p>tag的作用主要有两点：一是为镜像起一个容易理解的名字，二是可以通过docker tag来重新指定镜像的仓库，这样在push时自动提交到仓库。</p>
+<p>将同一IMAGE_ID的所有tag，合并为一个新的</p>
+<pre><code>$ sudo docker tag 195eb90b5349 seanlook/ubuntu:rm_test
+</code></pre>
+<p>新建一个tag，保留旧的那条记录</p>
+<pre><code>$ sudo docker tag Registry/Repos:Tag New_Registry/New_Repos:New_Tag
+</code></pre>
+<h2 id="将一个container固化为一个新的imagecommit">将一个container固化为一个新的image（commit）</h2>
+<p>当我们在制作自己的镜像的时候，会在container中安装一些工具、修改配置，如果不做commit保存起来，那么container停止以后再启动，这些更改就消失了。</p>
+<pre><code>$ sudo docker commit &lt;container&gt; [repo:tag]
+</code></pre>
+<p>后面的repo:tag可选</p>
+<p>只能提交正在运行的container，即通过docker ps可以看见的容器</p>
+<h2 id="推送一个image或repository到registrypush">推送一个image或repository到registry（push）</h2>
+<p>与上面的pull对应，可以推送到Docker Hub的Public、Private以及私服，但不能推送到Top Level Repository。</p>
+<pre><code>$ sudo docker push seanlook/mongo
+$ sudo docker push registry.tp-link.net:5000/mongo:2014-10-27
+</code></pre>
+<p>registry.tp-link.net也可以写成IP，172.29.88.222。</p>
+<p>在repository不存在的情况下，命令行下push上去的会为我们创建为私有库，然而通过浏览器创建的默认为公共库。</p>
+<h2 id="其他命令"><strong>其他命令</strong></h2>
+<p>docker还有一些如login、cp、logs、export、import、load、kill等不是很常用的命令，比较简单，请参考官网。</p>
+<p>events、history和logs命令</p>
+<p>这3个命令用于查看Docker的系统日志信息。events命令会打印出实时的系统事件；history命令会打印出指定镜像的历史版本信息，即构建该镜像的每一层镜像的命令记录；logs命令会打印出容器中进程的运行日志。</p>
+<p>docker events [options] ：从服务器获取实时事件。</p>
+<ul>
+<li>
+<pre><code>Options：
+
+- **-f** **：**根据条件过滤事件；
+- **--since** **：**从指定的时间戳后显示所有事件;
+- **--until** **：**流水时间显示到指定的时间为止；
+</code></pre>
+</li>
+</ul>
+<p>docker history [options] image：查看指定镜像的创建历史。</p>
+<ul>
+<li>
+<pre><code>Options：
+
+- **-H :**以可读的格式打印镜像大小和日期，默认为true；
+- **--no-trunc :**显示完整的提交记录；
+- **-q :**仅列出提交记录ID。
+</code></pre>
+</li>
+</ul>
+<p>docker logs [options] container</p>
+<pre><code>Options:
+
+     --details    显示更多的信息
+   -f, --follow     跟踪日志输出，最后一行为当前时间戳的日志
+     --since string  显示自具体某个时间或时间段的日志
+     --tail string  从日志末尾显示多少行日志， 默认是all
+   -t, --timestamps   显示时间戳
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/yN7KC6fen/">
+              <span class="post-title">
+                Docker使用Portainer搭建可视化管理界面&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

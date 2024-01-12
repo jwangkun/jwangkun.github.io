@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> 教你 Linux 下如何实现 MySQL 数据库每天自动备份定时备份 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" 教你 Linux 下如何实现 MySQL 数据库每天自动备份定时备份 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" 教你 Linux 下如何实现 MySQL 数据库每天自动备份定时备份"/>
+    <meta property="og:url" content="https://jwangkun.github.io/LQ4nxLesv/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/2uLYsNFCz/" class="tag">定时备份</a>
+            
+            <a href="https://jwangkun.github.io/SZqIPA4Gk/" class="tag">Mysql</a>
+            
+        </span>
+            <h1> 教你 Linux 下如何实现 MySQL 数据库每天自动备份定时备份</h1>
+            <span class="meta">
+            	Posted on
+              2021-11-03，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>备份是容灾的基础，是指为防止系统出现操作失误或系统故障导致数据丢失，而将全部或部分数据集合从应用主机的硬盘或阵列复制到其它的存储介质的过程。而对于一些网站、系统来说，数据库就是一切，所以做好数据库的备份是至关重要的！</p>
+<h3 id="备份是什么">备份是什么？</h3>
+<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_png/sG1icpcmhbiaDY1cP2zNLw96xR6R11zPNzZyXsSDuUFxWicHg31Ymn1qcNTssy4X7pgSBp8Fs4R9KhlicynkCtjThg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<h3 id="为什么要备份">为什么要备份</h3>
+<figure data-type="image" tabindex="2"><img src="https://mmbiz.qpic.cn/mmbiz_png/sG1icpcmhbiaDY1cP2zNLw96xR6R11zPNzouRbeGCGwGZdWI9NS3CIyekDKL2kzkTVkUpGDIuAx4ibQUFgB1jwcIA/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<h3 id="容灾方案建设">容灾方案建设</h3>
+<figure data-type="image" tabindex="3"><img src="https://mmbiz.qpic.cn/mmbiz_png/sG1icpcmhbiaDY1cP2zNLw96xR6R11zPNz8VSwiafDICib81ZBumFxpcgqpewoqKX5kq1YwTyTTSW4xunIlgPBoubg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy"></figure>
+<h3 id="存储介质">存储介质</h3>
+<blockquote>
+<p>光盘<br>
+磁带<br>
+硬盘<br>
+磁盘阵列<br>
+DAS：直接附加存储<br>
+NAS：网络附加存储<br>
+SAN：存储区域网络<br>
+云存储</p>
+</blockquote>
+<p>这里主要以本地磁盘为存储介质讲一下计划任务的添加使用，基本的备份脚本，其它存储介质只是介质的访问方式可能不大一样。</p>
+<h4 id="1-查看磁盘空间情况">1、查看磁盘空间情况：</h4>
+<p>既然是定时备份，就要选择一个空间充足的磁盘空间，避免出现因空间不足导致备份失败，数据丢失的恶果！</p>
+<p>存储到当前磁盘这是最简单，却是最不推荐的；服务器有多块硬盘，最好是把备份存放到另一块硬盘上；有条件就选择更好更安全的存储介质；</p>
+<pre><code># df -hFilesystem
+</code></pre>
+<h4 id="2-创建备份目录">2、创建备份目录：</h4>
+<p>上面我们使用命令看出/home下空间比较充足，所以可以考虑在/home保存备份文件；</p>
+<pre><code>cd /home
+mkdir backupcd backup
+</code></pre>
+<h4 id="3-创建备份shell脚本">3、创建备份Shell脚本:</h4>
+<p>注意把以下命令中的DatabaseName换为实际的数据库名称；<br>
+当然，你也可以使用其实的命名规则！</p>
+<pre><code>vi bkDatabaseName.sh
+</code></pre>
+<p>输入/粘贴以下内容：</p>
+<pre><code>#!/bin/bash
+mysqldump -uusername -ppassword DatabaseName &gt; /home/backup/DatabaseName_$(date +%Y%m%d_%H%M%S).sql
+</code></pre>
+<p>对备份进行压缩：</p>
+<pre><code>#!/bin/bash
+mysqldump -uusername -ppassword DatabaseName | gzip &gt; /home/backup/DatabaseName_$(date +%Y%m%d_%H%M%S).sql.gz
+</code></pre>
+<p>注意：</p>
+<p>把 username 替换为实际的用户名；<br>
+把 password 替换为实际的密码；<br>
+把 DatabaseName 替换为实际的数据库名；</p>
+<h4 id="4-添加可执行权限">4、添加可执行权限：</h4>
+<pre><code>chmod u+x bkDatabaseName.sh
+</code></pre>
+<p>添加可执行权限之后先执行一下，看看脚本有没有错误，能不能正常使用；</p>
+<pre><code>./bkDatabaseName.sh
+</code></pre>
+<h4 id="5-添加计划任务">5、添加计划任务</h4>
+<p><strong>检测或安装 crontab</strong></p>
+<p>广告</p>
+<h2 id="linux就该这么学第2版">Linux就该这么学（第2版）</h2>
+<p>作者：刘遄</p>
+<p><strong>京东</strong></p>
+<p>购买</p>
+<p>确认crontab是否安装：</p>
+<p>执行 crontab 命令如果报 command not found，就表明没有安装</p>
+<pre><code># crontab
+-bash: crontab: command not found
+</code></pre>
+<p>如时没有安装 crontab，需要先安装它，具体步骤请参考：</p>
+<p>CentOS下使用yum命令安装计划任务程序crontab<br>
+https://blog.csdn.net/testcs_dn/article/details/48780971</p>
+<p>使用rpm命令从CentOS系统盘安装计划任务程序crontab<br>
+https://blog.csdn.net/testcs_dn/article/details/48781553</p>
+<p><strong>添加计划任务</strong></p>
+<p>执行命令：</p>
+<pre><code>crontab -e
+</code></pre>
+<p>这时就像使用vi编辑器一样，可以对计划任务进行编辑。</p>
+<p>输入以下内容并保存：</p>
+<pre><code>*/1 * * * * /home/backup/bkDatabaseName.sh
+</code></pre>
+<p>具体是什么意思呢？</p>
+<p>意思是每一分钟执行一次shell脚本“/home/backup/bkDatabaseName.sh”。</p>
+<h3 id="6-测试任务是否执行">6、测试任务是否执行</h3>
+<p>很简单，我们就执行几次“ls”命令，看看一分钟过后文件有没有被创建就可以了！</p>
+<p>如果任务执行失败了，可以通过以下命令查看任务日志：</p>
+<pre><code># tail -f /var/log/cron
+</code></pre>
+<p>输出类似如下：</p>
+<pre><code>Sep 30 14:01:01 bogon run-parts(/etc/cron.hourly)[2503]: starting 0anacron
+Sep 30 14:01:01 bogon run-parts(/etc/cron.hourly)[2512]: finished 0anacron
+Sep 30 15:01:01 bogon CROND[3092]: (root) CMD (run-parts /etc/cron.hourly)
+Sep 30 15:01:01 bogon run-parts(/etc/cron.hourly)[3092]: starting 0anacron
+Sep 30 15:01:02 bogon run-parts(/etc/cron.hourly)[3101]: finished 0anacron
+Sep 30 15:50:44 bogon crontab[3598]: (root) BEGIN EDIT (root)
+Sep 30 16:01:01 bogon CROND[3705]: (root) CMD (run-parts /etc/cron.hourly)
+Sep 30 16:01:01 bogon run-parts(/etc/cron.hourly)[3705]: starting 0anacron
+Sep 30 16:01:01 bogon run-parts(/etc/cron.hourly)[3714]: finished 0anacron
+Sep 30 16:15:29 bogon crontab[3598]: (root) END EDIT (root)
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/DFkq8lYsr/">
+              <span class="post-title">
+                CentOS 配置本地yum源&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

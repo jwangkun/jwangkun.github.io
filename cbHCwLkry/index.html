@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>kubernetes集群证书更新 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="kubernetes集群证书更新 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="kubernetes集群证书更新"/>
+    <meta property="og:url" content="https://jwangkun.github.io/cbHCwLkry/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/H2fsabQqXX/" class="tag">证书</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>kubernetes集群证书更新</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-23，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>kubeadm配置的集群默认的证书是1年，到期后证书升级是个很麻烦的事情。，该脚本可将kubeadm生成的证书有效期更新为10年</p>
+<p><strong>该脚本用于处理已过期或者即将过期的kubernetes集群证书</strong></p>
+<p>该脚本只处理master节点上的证书：kubeadm默认配置了kubelet证书自动更新，node节点kubelet.conf所指向的证书会自动更新</p>
+<p><em>小于<code>v1.17</code>版本的master初始化节点(执行kubeadm init的节点) kubelet.conf里的证书并不会自动更新，这算是一个<a href="https://github.com/kubernetes/kubeadm/issues/1753">bug</a>，该脚本会一并处理更新master节点的kubelet.conf所包含的证书</em></p>
+<h1 id="1-使用说明">1. 使用说明</h1>
+<p>小于等于<code>v1.9</code>版本，etcd默认是不使用TLS连接，没有etcd相关证书，只需要更新master证书即可</p>
+<p>大于等于<code>v1.10</code>版本，etcd默认开启TLS，需要更新etcd证书和master证书</p>
+<p><strong>该脚本适用于所有k8s版本集群证书更新，但大于等于v1.15版本建议使用kubeadm命令更新</strong></p>
+<p><strong>该脚本仅需要在master和etcd节点执行，无需在node节点执行</strong></p>
+<h2 id="11-拉取脚本">1.1. 拉取脚本</h2>
+<pre><code>git clone https://github.com/yuyicai/update-kube-cert.git
+cd update-kubeadm-cert
+chmod 755 update-kubeadm-cert.sh
+</code></pre>
+<p><em>执行时请使用<code>./update-kubeadm-cert.sh all</code>或者<code>bash update-kubeadm-cert.sh all</code>，不要使用<code>sh update-kubeadm-cert.sh all</code>，因为某些发行版sh并不是链接到bash，会不兼容</em></p>
+<h2 id="12-同时更新etcd证书和master证书">1.2. 同时更新etcd证书和master证书</h2>
+<p>如果master和etcd在同一个节点，执行以下命令更新证书全部etcd证书和master证书</p>
+<p>如果有多个master节点，在每个master节点都执行一次</p>
+<pre><code>./update-kubeadm-cert.sh all
+</code></pre>
+<p>将更新以下证书和kubeconfig配置文件</p>
+<pre><code>/etc/kubernetes
+├── admin.conf
+├── controller-manager.conf
+├── scheduler.conf
+├── kubelet.conf
+└── pki
+    ├── apiserver.crt
+    ├── apiserver-etcd-client.crt
+    ├── apiserver-kubelet-client.crt
+    ├── front-proxy-client.crt
+    └── etcd
+        ├── healthcheck-client.crt
+        ├── peer.crt
+        └── server.crt
+</code></pre>
+<h2 id="13-只更新etcd证书">1.3. 只更新etcd证书</h2>
+<p>如果有多个etcd节点，在每个etcd节点上都执行一次</p>
+<pre><code>./update-kubeadm-cert.sh etcd
+</code></pre>
+<p>将更新以下etcd证书</p>
+<pre><code>/etc/kubernetes
+ └── pki
+  ├── apiserver-etcd-client.crt
+  └── etcd
+      ├── healthcheck-client.crt
+      ├── peer.crt
+      └── server.crt
+</code></pre>
+<h2 id="14-只更新master证书">1.4. 只更新master证书</h2>
+<p>如果有多个master节点，在每个master节点都执行一次</p>
+<pre><code>./update-kubeadm-cert.sh master
+</code></pre>
+<p>将更新以下master证书和kubeconfig配置文件</p>
+<pre><code>/etc/kubernetes
+├── admin.conf
+├── controller-manager.conf
+├── scheduler.conf
+├── kubelet.conf
+└── pki
+    ├── apiserver.crt
+    ├── apiserver-kubelet-client.crt
+    └── front-proxy-client.crt
+</code></pre>
+<h1 id="2-证书更新失败回滚">2. 证书更新失败回滚</h1>
+<p>脚本会自动备份<code>/etc/kubernetes</code>目录到<code>/etc/kubernetes.old-$(date +%Y%m%d)</code>目录（备份目录名录示例：kubernetes.old-20200325）</p>
+<p>若更新证书失败需要回滚，手动将份<code>/etc/kubernetes.old-$(date +%Y%m%d)</code>目录覆盖<code>/etc/kubernetes</code>目录</p>
+<h1 id="3-kubeadm-证书相关命令发展">3. kubeadm 证书相关命令发展</h1>
+<ul>
+<li><code>v1.8</code>版开始提供了证书生成命令<code>kubeadm alpha phase certs &lt;cert_name&gt;</code></li>
+<li><code>v1.13</code>版开始证书生成命令改为<code>kubeadm init phase certs &lt;cert_name&gt;</code></li>
+<li><code>v1.15</code>版增加了证书更新命令<code>kubeadm alpha certs renew &lt;cert_name&gt;</code>（这个命令与上面两个区别是：上面两个是生成证书，这个是更新证书），<code>v1.15</code>版之后建议使用<code>kubeadm alpha certs renew &lt;cert_name&gt;</code>来更新证书</li>
+</ul>
+<h1 id="4-关于大于等于v115版本">4. 关于大于等于v1.15版本</h1>
+<p>大于等于<code>v1.15</code>的版本建议直接使用<code>kubeadm alpha certs renew &lt;cert_name&gt;</code>来更新证书有效期，更新后延长一年</p>
+<p>小坑：</p>
+<p><code>kubeadm alpha certs renew</code> 并不会更新kubelet证书（kubelet.conf文件里面写的客户端证书），因为kubelet证书是默认开启自动更新的</p>
+<p>但是在执行<code>kubeadm init</code>的master节点的kubelet.conf文件里面的证书是以base64编码写死在conf文件的（和controller-manager.conf一样），在用kubeadm命令更新master证书时需要手动将kubelet.conf文件的 <code>client-certificate-data</code> 和 <code>client-key-data</code> 该为：</p>
+<pre><code>client-certificate: /var/lib/kubelet/pki/kubelet-client-current.pem
+client-key: /var/lib/kubelet/pki/kubelet-client-current.pem
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/1v3c-Lt8W/">
+              <span class="post-title">
+                KubeSphere3.0启用k8s多集群 &rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

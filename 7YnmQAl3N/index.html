@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot 整合 mybatis-plus | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot 整合 mybatis-plus | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot 整合 mybatis-plus"/>
+    <meta property="og:url" content="https://jwangkun.github.io/7YnmQAl3N/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/BZQCFJpV3/" class="tag">mybatis-plus</a>
+            
+        </span>
+            <h1>SpringBoot 整合 mybatis-plus</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="简介">简介</h2>
+<p>这一篇我们讲解如何在springboot下整合mybatis-plus，并访问数据库。 MyBatis-Plus（简称 MP）是一个 MyBatis 的增强工具，在 MyBatis 的基础上只做增强不做改变，为简化开发、提高效率而生。 <img src="http://image.itwolfed.com/springboot-6/1.png" alt="img" loading="lazy"> 对于 mybatis-plus 的使用，可以参照官网http://mp.baomidou.com/，这里我就不讲解了。</p>
+<h2 id="一-创建数据库表">一、创建数据库表</h2>
+<pre><code class="language-sql">DROP TABLE IF EXISTS `tb_employee`;
+CREATE TABLE `tb_employee` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `lastName` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `gender` int(2) DEFAULT NULL,
+  `d_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</code></pre>
+<h2 id="二-创建项目">二、创建项目</h2>
+<p>创建一个项目springboot-mybatis</p>
+<h3 id="1-pomxml">1、pom.xml</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+	&lt;groupId&gt;com.gf&lt;/groupId&gt;
+	&lt;artifactId&gt;springboot-mybatis&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
+
+	&lt;name&gt;springboot-mybatis&lt;/name&gt;
+	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+	&lt;parent&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+		&lt;version&gt;2.1.0.RELEASE&lt;/version&gt;
+		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+	&lt;/parent&gt;
+
+	&lt;properties&gt;
+		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+		&lt;java.version&gt;1.8&lt;/java.version&gt;
+	&lt;/properties&gt;
+
+	&lt;dependencies&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;mysql&lt;/groupId&gt;
+			&lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+			&lt;scope&gt;runtime&lt;/scope&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+			&lt;artifactId&gt;lombok&lt;/artifactId&gt;
+			&lt;optional&gt;true&lt;/optional&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;com.baomidou&lt;/groupId&gt;
+			&lt;artifactId&gt;mybatis-plus-boot-starter&lt;/artifactId&gt;
+			&lt;version&gt;3.0.1&lt;/version&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.apache.velocity&lt;/groupId&gt;
+			&lt;artifactId&gt;velocity&lt;/artifactId&gt;
+			&lt;version&gt;1.7&lt;/version&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+			&lt;scope&gt;test&lt;/scope&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+
+	&lt;build&gt;
+		&lt;plugins&gt;
+			&lt;plugin&gt;
+				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+			&lt;/plugin&gt;
+		&lt;/plugins&gt;
+	&lt;/build&gt;
+
+
+&lt;/project&gt;
+</code></pre>
+<h3 id="2-代码生成器">2. 代码生成器</h3>
+<p>AutoGenerator 是 MyBatis-Plus 的代码生成器，通过 AutoGenerator 可以快速生成 Entity、Mapper、Mapper XML、Service、Controller 等各个模块的代码，极大的提升了开发效率。</p>
+<h4 id="1-mapperxmlvm">1. mapper.xml.vm</h4>
+<p>在resources/templates 下创建 Mapper XML的生成模板</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE mapper PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot; &quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
+&lt;mapper namespace=&quot;${package.Mapper}.${table.mapperName}&quot;&gt;
+
+#if(${enableCache})
+    &lt;!-- 开启二级缓存 --&gt;
+    &lt;cache type=&quot;org.mybatis.caches.ehcache.LoggingEhcache&quot;/&gt;
+
+#end
+#if(${baseResultMap})
+    &lt;!-- 通用查询映射结果 --&gt;
+    &lt;resultMap id=&quot;BaseResultMap&quot; type=&quot;${package.Entity}.${entity}&quot;&gt;
+#foreach($field in ${table.fields})
+#if(${field.keyFlag})##生成主键排在第一位
+        &lt;id column=&quot;${field.name}&quot; property=&quot;${field.propertyName}&quot; /&gt;
+#end
+#end
+#foreach($field in ${table.commonFields})##生成公共字段
+    &lt;result column=&quot;${field.name}&quot; property=&quot;${field.propertyName}&quot; /&gt;
+#end
+#foreach($field in ${table.fields})
+#if(!${field.keyFlag})##生成普通字段
+        &lt;result column=&quot;${field.name}&quot; property=&quot;${field.propertyName}&quot; /&gt;
+#end
+#end
+    &lt;/resultMap&gt;
+
+#end
+#if(${baseColumnList})
+    &lt;!-- 通用查询结果列 --&gt;
+    &lt;sql id=&quot;Base_Column_List&quot;&gt;
+#foreach($field in ${table.commonFields})
+        ${field.name},
+#end
+        ${table.fieldNames}
+    &lt;/sql&gt;
+
+#end
+&lt;/mapper&gt;
+</code></pre>
+<h4 id="2-codegenerator">2. CodeGenerator</h4>
+<pre><code class="language-java">package com.gf.config;
+
+
+import com.baomidou.mybatisplus.annotation.DbType;
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.baomidou.mybatisplus.generator.AutoGenerator;
+import com.baomidou.mybatisplus.generator.InjectionConfig;
+import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
+import com.baomidou.mybatisplus.generator.config.FileOutConfig;
+import com.baomidou.mybatisplus.generator.config.GlobalConfig;
+import com.baomidou.mybatisplus.generator.config.PackageConfig;
+import com.baomidou.mybatisplus.generator.config.StrategyConfig;
+import com.baomidou.mybatisplus.generator.config.TemplateConfig;
+import com.baomidou.mybatisplus.generator.config.po.TableInfo;
+import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class CodeGenerator {
+
+    public static void main(String[] args) throws InterruptedException {
+        AutoGenerator mpg = new AutoGenerator();
+
+        // 全局配置
+        GlobalConfig gc = new GlobalConfig();
+        String projectPath = System.getProperty(&quot;user.dir&quot;);
+        gc.setOutputDir(projectPath + &quot;/src/main/java&quot;);
+        gc.setFileOverride(true);
+        gc.setActiveRecord(true);
+        gc.setEnableCache(false);// XML 二级缓存
+        gc.setBaseResultMap(true);// XML ResultMap
+        gc.setBaseColumnList(true);// XML columList
+        gc.setOpen(false);
+        gc.setAuthor(&quot;gf&quot;);
+
+
+        // 自定义文件命名，注意 %s 会自动填充表实体属性！
+        gc.setMapperName(&quot;%sMapper&quot;);
+        gc.setXmlName(&quot;%sMapper&quot;);
+        gc.setServiceName(&quot;%sService&quot;);
+        gc.setServiceImplName(&quot;%sServiceImpl&quot;);
+        gc.setControllerName(&quot;%sController&quot;);
+
+        mpg.setGlobalConfig(gc);
+
+        // 数据源配置
+        DataSourceConfig dsc = new DataSourceConfig();
+        dsc.setDbType( DbType.MYSQL);
+        dsc.setDriverName(&quot;com.mysql.jdbc.Driver&quot;);
+        dsc.setUrl(&quot;jdbc:mysql://127.0.0.1:3306/test?useSSL=false&quot;);
+        dsc.setUsername(&quot;xxxxxx&quot;);
+        dsc.setPassword(&quot;xxxxxx&quot;);
+        mpg.setDataSource(dsc);
+
+        // 包配置
+        PackageConfig pc = new PackageConfig();
+        pc.setParent(&quot;com.gf&quot;);
+        pc.setController( &quot;controller&quot;);
+        pc.setEntity( &quot;entity&quot; );
+        //pc.setModuleName(&quot;test&quot;);
+        mpg.setPackageInfo(pc);
+
+        // 自定义配置
+        InjectionConfig cfg = new InjectionConfig() {
+            @Override
+            public void initMap() {
+                // to do nothing
+            }
+        };
+        List&lt;FileOutConfig&gt; focList = new ArrayList&lt;&gt;();
+        focList.add(new FileOutConfig(&quot;/templates/mapper.xml.vm&quot;) {
+            @Override
+            public String outputFile(TableInfo tableInfo) {
+                // 自定义输入文件名称
+                return projectPath + &quot;/src/main/resources/mapper/&quot;
+                        + tableInfo.getEntityName() + &quot;Mapper&quot; + StringPool.DOT_XML;
+            }
+        });
+        cfg.setFileOutConfigList(focList);
+        mpg.setCfg(cfg);
+        mpg.setTemplate(new TemplateConfig().setXml(null));
+
+        // 策略配置
+        StrategyConfig strategy = new StrategyConfig();
+        //此处可以修改为您的表前缀
+        strategy.setTablePrefix(new String[] { &quot;tb_&quot;});
+        // 表名生成策略
+        strategy.setNaming(NamingStrategy.underline_to_camel);
+        // 需要生成的表
+        strategy.setInclude(new String[] { &quot;tb_employee&quot; });
+        // 排除生成的表
+        //strategy.setExclude(new String[]{&quot;test&quot;});
+        strategy.setEntityLombokModel( true );
+
+        mpg.setStrategy(strategy);
+
+        // 执行生成
+        mpg.execute();
+    }
+
+}
+</code></pre>
+<p>我运行 CodeGenerator 会发现，我么需要的 entity、mapper、service、controller 都有了，而且mybatis-plus 为我们封装了很对常用的方法 ，大大的提到了我们的开发效率</p>
+<h3 id="3-applicationproperties">3. application.properties</h3>
+<pre><code>spring.datasource.url=jdbc:mysql://localhost:3306/test
+spring.datasource.username=xxxxxx
+spring.datasource.password=xxxxxx
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+</code></pre>
+<h3 id="4-employeecontroller">4. EmployeeController</h3>
+<pre><code class="language-java">@RestController
+@RequestMapping(&quot;/employee&quot;)
+public class EmployeeController {
+
+
+    @Autowired
+    EmployeeService employeeService;
+
+    @RequestMapping(value = &quot;/list&quot;, method = RequestMethod.GET)
+    public List&lt;Employee&gt; getEmployees() {
+        return employeeService.list( null );
+    }
+
+    @RequestMapping(value = &quot;/{id}&quot;, method = RequestMethod.GET)
+    public Employee getEmployeeById(@PathVariable(&quot;id&quot;) int id) {
+        return employeeService.getById( id );
+    }
+
+    @RequestMapping(value = &quot;/{id}&quot;, method = RequestMethod.PUT)
+    public String updateEmployee(@PathVariable(&quot;id&quot;) int id, @RequestParam(value = &quot;lastName&quot;, required = true) String lastName,
+                                @RequestParam(value = &quot;email&quot;, required = true) String email , @RequestParam(value = &quot;gender&quot;, required = true) int gender , @RequestParam(value = &quot;dId&quot;, required = true) int dId) {
+        Employee employee = new Employee();
+        employee.setId( id );
+        employee.setLastName( &quot;张&quot; );
+        employee.setEmail( &quot;zhang@163.com&quot; );
+        employee.setGender( 1 );
+        employee.setDId( 1 );
+
+        boolean b = employeeService.updateById( employee );
+
+        if (b) {
+            return &quot;update success&quot;;
+        } else {
+            return &quot;update fail&quot;;
+        }
+
+    }
+
+    @RequestMapping(value = &quot;/{id}&quot;, method = RequestMethod.DELETE)
+    public String delete(@PathVariable(value = &quot;id&quot;)int id) {
+        boolean b = employeeService.removeById( id );
+
+        if(b) {
+            return &quot;delete success&quot;;
+        }else {
+            return &quot;delete fail&quot;;
+        }
+
+    }
+
+    @RequestMapping(value = &quot;&quot;, method = RequestMethod.POST)
+    public String postEmployee(@RequestParam(value = &quot;lastName&quot;, required = true) String lastName,
+                               @RequestParam(value = &quot;email&quot;, required = true) String email , @RequestParam(value = &quot;gender&quot;, required = true) int gender , @RequestParam(value = &quot;dId&quot;, required = true) int dId) {
+
+        Employee employee = new Employee();
+        employee.setLastName( &quot;王&quot; );
+        employee.setEmail( &quot;wang@163.com&quot; );
+        employee.setGender( 2 );
+        employee.setDId( 2 );
+        boolean b = employeeService.save( employee );
+
+        if(b) {
+            return &quot;sava success&quot;;
+        }else {
+            return &quot;sava fail&quot;;
+        }
+
+    }
+
+
+}
+</code></pre>
+<p>源码下载：https://github.com/gf-huanchupk/SpringBootLearning</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/BXn3b8xdV/">
+              <span class="post-title">
+                SpringBoot 自定义 starter&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

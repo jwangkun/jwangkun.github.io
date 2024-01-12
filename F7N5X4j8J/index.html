@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>使用 kainstall 工具一键部署 kubernetes 高可用集群 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="使用 kainstall 工具一键部署 kubernetes 高可用集群 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="使用 kainstall 工具一键部署 kubernetes 高可用集群"/>
+    <meta property="og:url" content="https://jwangkun.github.io/F7N5X4j8J/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/2BWBEWb3V/" class="tag">kainstall</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>使用 kainstall 工具一键部署 kubernetes 高可用集群</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-23，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h1 id="kainstall-kubeadm-install-kubernetes">kainstall = kubeadm install kubernetes</h1>
+<p>使用 shell 脚本, 基于 kubeadm 一键部署 kubernetes 集群</p>
+<h2 id="为什么">为什么？</h2>
+<p><strong>为什么要搞这个？Ansible PlayBook 不好么？</strong></p>
+<p><strong>因为懒</strong>，Ansible PlayBook 编排是非常给力的，不过需要安装 Python 和 Ansible, 且需要下载多个 yaml 文件 。<strong>因为懒</strong>，我想要个更简单的方式来<strong>快速部署</strong>一个分布式的 <strong>Kubernetes HA</strong> 集群， 使用 <strong>shell</strong> 脚本可以不借助外力直接在服务器上运行，省时省力。 并且 shell 脚本只有一个文件，文件大小<strong>不到 100 KB</strong>，非常小巧，可以实现一条命令安装集群的超快体验，而且配合<strong>离线安装包</strong>，可以在不联网的环境下安装集群，这体验真的<strong>非常爽</strong>啊。</p>
+<h2 id="要求">要求</h2>
+<p>OS: <code>centos 7.x x64</code> , <code>centos 8.x x64</code></p>
+<p>CPU: <code>2C</code></p>
+<p>MEM: <code>4G</code></p>
+<blockquote>
+<p>未指定离线包时，需要连通外网，用于下载 kube 组件和 docker 镜像。</p>
+</blockquote>
+<h2 id="架构">架构</h2>
+<figure data-type="image" tabindex="1"><a href="https://github.com/lework/kainstall/blob/master/images/k8s-node-ha.png"><img src="https://github.com/lework/kainstall/raw/master/images/k8s-node-ha.png" alt="img" loading="lazy"></a></figure>
+<h2 id="功能">功能</h2>
+<ul>
+<li>服务器初始化。
+<ul>
+<li>关闭 <code>selinux</code></li>
+<li>关闭 <code>swap</code></li>
+<li>关闭 <code>firewalld</code></li>
+<li>关闭大内存页</li>
+<li>配置 <code>epel</code> 源</li>
+<li>修改 <code>limits</code></li>
+<li>配置内核参数</li>
+<li>配置 <code>history</code> 记录</li>
+<li>配置 <code>journal</code> 日志</li>
+<li>配置 <code>chrony</code>时间同步</li>
+<li>安装 <code>ipvs</code> 模块</li>
+<li>更新内核</li>
+</ul>
+</li>
+<li>安装<code>docker</code>, <code>kube</code>组件。</li>
+<li>初始化<code>kubernetes</code>集群,以及增加或删除节点。</li>
+<li>安装<code>ingress</code>组件，可选<code>nginx</code>，<code>traefik</code>。</li>
+<li>安装<code>network</code>组件，可选<code>flannel</code>，<code>calico</code>， 需在初始化时指定。</li>
+<li>安装<code>monitor</code>组件，可选<code>prometheus</code>。</li>
+<li>安装<code>log</code>组件，可选<code>elasticsearch</code>。</li>
+<li>安装<code>storage</code>组件，可选<code>rook</code>，<code>longhorn</code>。</li>
+<li>安装<code>web ui</code>组件，可选<code>dashboard</code>。</li>
+<li>升级到<code>kubernetes</code>指定版本。</li>
+<li>更新集群证书。</li>
+<li>添加运维操作，如备份etcd快照。</li>
+<li>支持<strong>离线部署</strong>。</li>
+<li>支持<strong>sudo特权</strong>。</li>
+<li>支持<strong>10年证书期限</strong>。</li>
+</ul>
+<h2 id="默认版本">默认版本</h2>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>软件</th>
+<th>kainstall 默认版本</th>
+<th>软件最新版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>common</td>
+<td><a href="https://github.com/docker/docker-ce">docker-ce</a></td>
+<td>latest</td>
+<td><a href="https://camo.githubusercontent.com/12dd46fce861e013918ce4950366368a49d0b800/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f646f636b65722f646f636b65722d63653f736f72743d73656d766572"><img src="https://camo.githubusercontent.com/12dd46fce861e013918ce4950366368a49d0b800/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f646f636b65722f646f636b65722d63653f736f72743d73656d766572" alt="docker-ce release" loading="lazy"></a></td>
+</tr>
+<tr>
+<td>common</td>
+<td><a href="https://github.com/kubernetes/kubernetes">kubernetes</a></td>
+<td>latest</td>
+<td><a href="https://camo.githubusercontent.com/1dc3e025f3eea0a0419c05f91c7553ae33d041b5/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6b756265726e657465732f6b756265726e657465733f736f72743d73656d766572"><img src="https://camo.githubusercontent.com/1dc3e025f3eea0a0419c05f91c7553ae33d041b5/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6b756265726e657465732f6b756265726e657465733f736f72743d73656d766572" alt="kubernetes release" loading="lazy"></a></td>
+</tr>
+<tr>
+<td>network</td>
+<td><a href="https://github.com/coreos/flannel">flannel</a></td>
+<td>0.13.0</td>
+<td><a href="https://camo.githubusercontent.com/46e0e696c9a543ec3b08b4c0ea08b896f23acedb/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f636f72656f732f666c616e6e656c"><img src="https://camo.githubusercontent.com/46e0e696c9a543ec3b08b4c0ea08b896f23acedb/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f636f72656f732f666c616e6e656c" alt="flannel release" loading="lazy"></a></td>
+</tr>
+<tr>
+<td>network</td>
+<td><a href="https://github.com/projectcalico/calico">calico</a></td>
+<td>3.16.3</td>
+<td><a href="https://camo.githubusercontent.com/bae8d7a4089d567a3045d5513974ab76c4b34fd4/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f70726f6a65637463616c69636f2f63616c69636f3f736f72743d73656d766572"><img src="https://camo.githubusercontent.com/bae8d7a4089d567a3045d5513974ab76c4b34fd4/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f70726f6a65637463616c69636f2f63616c69636f3f736f72743d73656d766572" alt="calico release " loading="lazy"></a></td>
+</tr>
+<tr>
+<td>addons</td>
+<td><a href="https://github.com/kubernetes-sigs/metrics-server">metrics server</a></td>
+<td>0.3.7</td>
+<td><a href="https://camo.githubusercontent.com/e337d2841f6b50c7f73f22536aa7aa84ac54a866/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6b756265726e657465732d736967732f6d6574726963732d736572766572"><img src="https://camo.githubusercontent.com/e337d2841f6b50c7f73f22536aa7aa84ac54a866/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6b756265726e657465732d736967732f6d6574726963732d736572766572" alt="metrics-server release" loading="lazy"></a></td>
+</tr>
+<tr>
+<td>ingress</td>
+<td><a href="https://github.com/kubernetes/ingress-nginx">ingress nginx controller</a></td>
+<td>0.40.2</td>
+<td><a href="https://camo.githubusercontent.com/89d6e65a1ad78f17928d1e2f11db5feb450a1c8a/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6b756265726e657465732f696e67726573732d6e67696e783f736f72743d73656d766572"><img src="https://camo.githubusercontent.com/89d6e65a1ad78f17928d1e2f11db5feb450a1c8a/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6b756265726e657465732f696e67726573732d6e67696e783f736f72743d73656d766572" alt="ingress-nginx release" loading="lazy"></a></td>
+</tr>
+<tr>
+<td>ingress</td>
+<td><a href="https://github.com/traefik/traefik">traefik</a></td>
+<td>2.3.2</td>
+<td><a href="https://camo.githubusercontent.com/408f3b7077120b000223eec3f27e20ff7fbd7cf5/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f7472616566696b2f7472616566696b3f736f72743d73656d766572"><img src="https://camo.githubusercontent.com/408f3b7077120b000223eec3f27e20ff7fbd7cf5/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f7472616566696b2f7472616566696b3f736f72743d73656d766572" alt="traefik release " loading="lazy"></a></td>
+</tr>
+<tr>
+<td>monitor</td>
+<td><a href="https://github.com/prometheus-operator/kube-prometheus">kube_prometheus</a></td>
+<td>0.6.0</td>
+<td><a href="https://camo.githubusercontent.com/f50a76899e0bc33a44b30f69cf1f8131628d8960/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f70726f6d6574686575732d6f70657261746f722f6b7562652d70726f6d657468657573"><img src="https://camo.githubusercontent.com/f50a76899e0bc33a44b30f69cf1f8131628d8960/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f70726f6d6574686575732d6f70657261746f722f6b7562652d70726f6d657468657573" alt="kube-prometheus release" loading="lazy"></a></td>
+</tr>
+<tr>
+<td>log</td>
+<td><a href="https://github.com/elastic/elasticsearch">elasticsearch</a></td>
+<td>7.9.2</td>
+<td><a href="https://camo.githubusercontent.com/45c37892bd84db6e21ee6bbb18cedd23e33f9d76/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f656c61737469632f656c61737469637365617263683f736f72743d73656d766572"><img src="https://camo.githubusercontent.com/45c37892bd84db6e21ee6bbb18cedd23e33f9d76/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f656c61737469632f656c61737469637365617263683f736f72743d73656d766572" alt="elasticsearch release" loading="lazy"></a></td>
+</tr>
+<tr>
+<td>storage</td>
+<td><a href="https://github.com/rook/rook">rook</a></td>
+<td>1.4.6</td>
+<td><a href="https://camo.githubusercontent.com/b6d6b5765e36edf5a04e9a5fc84bca75cae7b739/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f726f6f6b2f726f6f6b3f736f72743d73656d766572"><img src="https://camo.githubusercontent.com/b6d6b5765e36edf5a04e9a5fc84bca75cae7b739/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f726f6f6b2f726f6f6b3f736f72743d73656d766572" alt="rook release" loading="lazy"></a></td>
+</tr>
+<tr>
+<td>storage</td>
+<td><a href="https://github.com/longhorn/longhorn">longhorn</a></td>
+<td>1.0.2</td>
+<td><a href="https://camo.githubusercontent.com/4ae4696d864921b4789865c8f5616743829796d0/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6c6f6e67686f726e2f6c6f6e67686f726e3f736f72743d73656d766572"><img src="https://camo.githubusercontent.com/4ae4696d864921b4789865c8f5616743829796d0/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6c6f6e67686f726e2f6c6f6e67686f726e3f736f72743d73656d766572" alt="longhorn release" loading="lazy"></a></td>
+</tr>
+<tr>
+<td>ui</td>
+<td><a href="https://github.com/kubernetes/dashboard">kubernetes_dashboard</a></td>
+<td>2.0.4</td>
+<td><a href="https://camo.githubusercontent.com/6d5ca1844b8d90dc7e24ceac3fd12f707a0f53bf/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6b756265726e657465732f64617368626f6172643f736f72743d73656d766572"><img src="https://camo.githubusercontent.com/6d5ca1844b8d90dc7e24ceac3fd12f707a0f53bf/68747470733a2f2f696d672e736869656c64732e696f2f6769746875622f762f72656c656173652f6b756265726e657465732f64617368626f6172643f736f72743d73656d766572" alt="kubernetes dashboard release" loading="lazy"></a></td>
+</tr>
+</tbody>
+</table>
+<p>除 <strong>kube组件</strong> 版本可以通过参数(<code>--version</code>) 指定外，其他的软件版本需在脚本中指定。</p>
+<h2 id="使用">使用</h2>
+<blockquote>
+<p>案例使用请见：https://lework.github.io/2020/09/26/kainstall</p>
+</blockquote>
+<h3 id="下载脚本">下载脚本</h3>
+<pre><code>wget https://cdn.jsdelivr.net/gh/lework/kainstall/kainstall.sh
+</code></pre>
+<h3 id="帮助信息">帮助信息</h3>
+<pre><code># bash kainstall.sh 
+
+Install kubernetes cluster using kubeadm.
+
+Usage:
+  kainstall.sh [command]
+
+Available Commands:
+  init            Init Kubernetes cluster.
+  reset           Reset Kubernetes cluster.
+  add             Add nodes to the cluster.
+  del             Remove node from the cluster.
+  upgrade         Upgrading kubeadm clusters.
+  renew-cert      Renew all available certificates.
+
+Flag:
+  -m,--master          master node, default: ''
+  -w,--worker          work node, default: ''
+  -u,--user            ssh user, default: root
+  -p,--password        ssh password,default: 123456
+  -P,--port            ssh port, default: 22
+  -v,--version         kube version, default: latest
+  -n,--network         cluster network, choose: [flannel,calico], default: flannel
+  -i,--ingress         ingress controller, choose: [nginx,traefik], default: nginx
+  -ui,--ui             cluster web ui, choose: [dashboard], default: dashboard
+  -M,--monitor         cluster monitor, choose: [prometheus]
+  -l,--log             cluster log, choose: [elasticsearch]
+  -s,--storage         cluster storage, choose: [rook,longhorn]
+  -U,--upgrade-kernel  upgrade kernel
+  -of,--offline-file   specify the offline package file to load
+  --10years            the certificate period is 10 years.
+  --sudo               sudo mode
+  --sudo-user          sudo user
+  --sudo-password      sudo user password
+
+Example:
+  [init cluster]
+  kainstall.sh init \
+  --master 192.168.77.130,192.168.77.131,192.168.77.132 \
+  --worker 192.168.77.133,192.168.77.134,192.168.77.135 \
+  --user root \
+  --password 123456 \
+  --version 1.19.3
+
+  [reset cluster]
+  kainstall.sh reset \
+  --user root \
+  --password 123456
+
+  [add node]
+  kainstall.sh add \
+  --master 192.168.77.140,192.168.77.141 \
+  --worker 192.168.77.143,192.168.77.144 \
+  --user root \
+  --password 123456 \
+  --version 1.19.3
+
+  [del node]
+  kainstall.sh del \
+  --master 192.168.77.140,192.168.77.141 \
+  --worker 192.168.77.143,192.168.77.144 \
+  --user root \
+  --password 123456
+ 
+  [other]
+  kainstall.sh renew-cert --user root --password 123456
+  kainstall.sh upgrade --version 1.19.3 --user root --password 123456
+  kainstall.sh add --ingress traefik
+  kainstall.sh add --monitor prometheus
+  kainstall.sh add --log elasticsearch
+  kainstall.sh add --storage rook
+  kainstall.sh add --ui dashboard
+</code></pre>
+<h3 id="初始化集群">初始化集群</h3>
+<pre><code>bash kainstall.sh init \
+  --master 192.168.77.130,192.168.77.131,192.168.77.132 \
+  --worker 192.168.77.133,192.168.77.134 \
+  --user root \
+  --password 123456 \
+  --port 22 \
+  --version 1.19.3
+</code></pre>
+<p>还可以使用一键安装方式, 连下载都省略了。</p>
+<pre><code>bash -c &quot;$(curl -sSL https://cdn.jsdelivr.net/gh/lework/kainstall/kainstall.sh)&quot;  \
+  - init \
+  --master 192.168.77.130,192.168.77.131,192.168.77.132 \
+  --worker 192.168.77.133,192.168.77.134 \
+  --user root \
+  --password 123456 \
+  --port 22 \
+  --version 1.19.3
+</code></pre>
+<h3 id="增加节点">增加节点</h3>
+<blockquote>
+<p>操作需在 k8s master 节点上操作，ssh连接信息非默认时请指定</p>
+</blockquote>
+<pre><code># 增加单个master节点
+bash kainstall.sh add --master 192.168.77.135
+
+# 增加单个worker节点
+bash kainstall.sh add --worker 192.168.77.134
+
+# 同时增加
+bash kainstall.sh add --master 192.168.77.135,192.168.77.136 --worker 192.168.77.137,192.168.77.138
+</code></pre>
+<h3 id="删除节点">删除节点</h3>
+<blockquote>
+<p>操作需在 k8s master 节点上操作，ssh连接信息非默认时请指定</p>
+</blockquote>
+<pre><code># 删除单个master节点
+bash kainstall.sh del --master 192.168.77.135
+
+# 删除单个worker节点
+bash kainstall.sh del --worker 192.168.77.134
+
+# 同时删除
+bash kainstall.sh del --master 192.168.77.135,192.168.77.136 --worker 192.168.77.137,192.168.77.138
+</code></pre>
+<h3 id="重置集群">重置集群</h3>
+<pre><code>bash kainstall.sh reset \
+  --user root \
+  --password 123456 \
+  --port 22 \
+</code></pre>
+<h3 id="其他操作">其他操作</h3>
+<blockquote>
+<p>操作需在 k8s master 节点上操作，ssh连接信息非默认时请指定</p>
+</blockquote>
+<p><strong>注意：</strong> 添加组件时请保持节点的内存和cpu至少为<code>2C4G</code>的空闲。否则会导致节点下线且服务器卡死。</p>
+<pre><code># 添加 nginx ingress
+bash kainstall.sh add --ingress nginx
+
+# 添加 prometheus
+bash kainstall.sh add --monitor prometheus
+
+# 添加 elasticsearch
+bash kainstall.sh add --log elasticsearch
+
+# 添加 rook
+bash kainstall.sh add --storage rook
+
+# 升级版本
+bash kainstall.sh upgrade --version 1.19.3
+
+# 重新颁发证书
+bash kainstall.sh renew-cert
+</code></pre>
+<h3 id="离线部署">离线部署</h3>
+<p><strong>注意</strong></p>
+<p>脚本执行的宿主机上，需要安装 <code>tar</code> 命令，用于解压离线包。</p>
+<blockquote>
+<p>详细部署请见: https://lework.github.io/2020/10/18/kainstall-offline/</p>
+</blockquote>
+<p><strong>下载指定版本的离线包</strong></p>
+<pre><code>wget http://kainstall.oss-cn-shanghai.aliyuncs.com/1.19.3/centos7.tgz
+</code></pre>
+<blockquote>
+<p>更多离线包信息，见 <a href="https://github.com/lework/kainstall-offline">kainstall-offline</a> 仓库</p>
+</blockquote>
+<p><strong>初始化集群</strong></p>
+<blockquote>
+<p>指定 <code>--offline-file</code> 参数。</p>
+</blockquote>
+<pre><code>bash kainstall.sh init \
+  --master 192.168.77.130,192.168.77.131,192.168.77.132 \
+  --worker 192.168.77.133,192.168.77.134 \
+  --offline-file centos7.tgz 
+</code></pre>
+<p><strong>添加节点</strong></p>
+<blockquote>
+<p>指定 --offline-file 参数。</p>
+</blockquote>
+<pre><code>bash kainstall.sh add \
+  --master 192.168.77.135 \
+  --worker 192.168.77.136 \
+  --offline-file centos7.tgz
+</code></pre>
+<h3 id="sudo-特权">sudo 特权</h3>
+<p>创建 sudo 用户</p>
+<pre><code>useradd test
+passwd test --stdin &lt;&lt;&lt; &quot;12345678&quot;
+echo 'test    ALL=(ALL)   ALL' &gt;&gt; /etc/sudoers
+</code></pre>
+<p>sudo 参数</p>
+<ul>
+<li><code>--sudo</code> 开启 sudo 特权</li>
+<li><code>--sudo-user</code> 指定 sudo 用户, 默认是 <code>root</code></li>
+<li><code>--sudo-password</code> 指定 sudo 密码</li>
+</ul>
+<p>示例</p>
+<pre><code># 初始化
+bash kainstall.sh init \
+  --master 192.168.77.130,192.168.77.131,192.168.77.132 \
+  --worker 192.168.77.133,192.168.77.134 \
+  --user test \
+  --password 12345678 \
+  --port 22 \
+  --version 1.19.3 \
+  --sudo \
+  --sudo-user root \
+  --sudo-password 12345678
+
+# 添加
+bash kainstall.sh add \
+  --master 192.168.77.135 \
+  --worker 192.168.77.136 \
+  --user test \
+  --password 12345678 \
+  --port 22 \
+  --version 1.19.3 \
+  --sudo \
+  --sudo-user root \
+  --sudo-password 12345678
+</code></pre>
+<h3 id="10年证书期限">10年证书期限</h3>
+<p><strong>注意:</strong> 此操作需要联网下载。</p>
+<p>使用 <a href="https://github.com/lework/kubeadm-certs">kubeadm-certs</a> 项目编译的 <code>kubeadm</code> 客户端， 其修改了 <code>kubeadm</code> 源码，将 1 年期限修改成 10 年期限，具体信息见仓库介绍。</p>
+<p>在初始化或添加时，加上 <code>--10years</code> 参数，就可以使用<code>kubeadm</code> 10 years 的客户端</p>
+<p>示例</p>
+<pre><code># 初始化
+bash kainstall.sh init \
+  --master 192.168.77.130,192.168.77.131,192.168.77.132 \
+  --worker 192.168.77.133,192.168.77.134 \
+  --user root \
+  --password 123456 \
+  --port 22 \
+  --version 1.19.3 \
+  --10years
+  
+# 添加
+bash kainstall.sh add \
+  --master 192.168.77.135 \
+  --worker 192.168.77.136 \
+  --user root \
+  --password 123456 \
+  --port 22 \
+  --version 1.19.3 \
+  --10years
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/j8crmnX4t/">
+              <span class="post-title">
+                Centos7 优化&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

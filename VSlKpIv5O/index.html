@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>NFS文件系统相关参数介绍 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="NFS文件系统相关参数介绍 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="NFS文件系统相关参数介绍"/>
+    <meta property="og:url" content="https://jwangkun.github.io/VSlKpIv5O/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/jY1_HHrkR/" class="tag">NFS</a>
+            
+        </span>
+            <h1>NFS文件系统相关参数介绍</h1>
+            <span class="meta">
+            	Posted on
+              2021-12-07，12 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>NFS就是Network File System的缩写，它的最大功能就是可以通过网络让不同的机器，不同的操作系统彼此共享文件(share files)——可以通过NFS挂载远程主机的目录，访问该目录就像访问本地目录一样，所以也可以简单的将它看作一个文件服务器(File Server)。</p>
+<p>注意：一般而言，使用NFS服务能够方便地使各unix-like系统之间实现共享，但如果需要在unix-like和windows系统之间共享，那就得使用samba了。</p>
+<p>NFS是通过网络进行数据传输，那么NFS使用哪些端口呢，答案是……不知道，因为NFS传输数据时使用的端口是随机的，唯一的限制就是小于1024，客户端怎么知道服务器使用的是哪个端口，此时就要用到远程过程调用RPC。</p>
+<p>其实，NFS运行在SUN的RPC（Remote Procedure Call，远程过程调用）基础上，RPC定义了一种与系统无关的方法来实现进程间通信，由此，NFS Server也可以看作是RPC Server。正因为NFS是一个RPC服务程序，所以在使用它之前，先要映射好端口——通过portmap设定。比如：某个NFS Client发起NFS服务请求时，它需要先得到一个端口(port)，所以它先通过portmap得到port number（不仅是NFS，所有的RPC服务程序启动之前，都需要先设定好portmap）。</p>
+<p>注意：在启动RPC服务（比如NFS）之前，需要先启动portmap服务。</p>
+<p>NFS允许系统将其目录和文件共享给网络上的其他系统。通过NFS，用户和应用程序可以访问远程系统上的文件，就像它们是本地文件一样。那么NFS最值得注意的优点有：<br>
+（1）本地工作站可以使用更少的磁盘空间，因为常用数据可以被保存在一台机器上，并让网络上的其他机器可以访问它。<br>
+（2）不需要为用户在每台网络机器上放一个用户目录，因为用户目录可以在NFS服务器上设置并使其在整个网络上可用。<br>
+（3）存储设备如软盘、光驱及USB设备可以被网络上其它机器使用，这可能可以减少网络上移动设备的数量。</p>
+<p>与NFS相关的几个文件和命令</p>
+<p>1、/etc/exports<br>
+对NFS服务的访问是由exports来批准，它枚举了若干有权访问NFS服务器上文件系统的主机名。</p>
+<p>2、/sbin/exportfs<br>
+维护NFS的资源共享，可以通过它重新设定/etc/exports的共享目录，卸载NFS Server共享的目录或者重新共享等。</p>
+<p>3、/usr/sbin/showmount<br>
+上面的文件主要用在NFS Server端，而showmount则主要用在Client端，showmount可以用來查看NFS共享的目录资源。</p>
+<p>4、/var/lib/nfs/xtab<br>
+NFS的记录文档：通过它可以查看有哪些Client连接到NFS主机的记录。</p>
+<p>下面这几个并不直接负责NFS，实际上它们是负责所有的RPC。</p>
+<p>5、/etc/default/portmap<br>
+实际上，portmap负责映射所有的RPC服务端口，它的内容非常非常之简单。</p>
+<p>6、/etc/hosts.deny<br>
+设定拒绝portmap服务的主机，即禁止访问的客户端IP列表。</p>
+<p>7、/etc/hosts.allow<br>
+设定允许portmap服务的主机，即允许访问的客户端IP列表。</p>
+<p><strong>NFS配置详解</strong></p>
+<p>配置/etc/exports</p>
+<p>（1）共享的NFS目录在/etc/exports中列出，这个文件控制对目录的共享（NFS挂载目录及权限由该文件定义），书写规则是每个共享为一行）。</p>
+<p>格式：[共享目录] <a href="%E5%8F%82%E6%95%B0,%E5%8F%82%E6%95%B0...">主机名或IP</a><br>
+第一个参数是要让客户机访问的目录，第二个是你允许的主机IP，最后的()内是访问控制方式。</p>
+<p>注意：客户端可以使用主机名或者IP地址指定，在主机名中可以使用通配符(*)，IP地址后也可以跟掩码段(/24)，但出于安全原因这种情况应该尽量避免。客户端的说明后可在圆括号中加入一系列参数。很重要的一点，不要在最后一个客户端声明的后面留下任何空白或者没关闭括号，因为空白都被解释成客户端的分隔符。</p>
+<p>例如我要将/opt/root_nfs目录让用户的IP共享，则在该文件末尾添加下列语句：</p>
+<pre><code>/opt/root_nfs  *(rw,sync,no_root_squash)
+</code></pre>
+<p>其中：<br>
+/opt/root_nfs 表示NFS共享目录，它可以作为开发板的根文件系统通过NFS挂接；<br>
+* 表示所有的客户机都可以挂接此目录；<br>
+rw 表示挂接此目录的客户机对该目录有读写的权力；<br>
+sync 表示所有数据在请求时写入共享，即数据同步写入内存和硬盘；<br>
+no_root_squash 表示允许挂接此目录的客户机享有该主机的root身份。</p>
+<p>注意：可以用主机名来代替*，尽量指定主机名以便使那些不想其访问的系统不能访问NFS挂载的资源。另外，最好加上sync, 否则$ sudo exportfs -r时会给出警告，sync是NFS的默认选项。</p>
+<p>下面是一些NFS共享的常用参数：</p>
+<p>ro 只读访问<br>
+rw 读写访问<br>
+sync 所有数据在请求时写入共享<br>
+async NFS在写入数据前可以相应请求<br>
+secure NFS通过1024以下的安全TCP/IP端口发送<br>
+insecure NFS通过1024以上的端口发送<br>
+wdelay 如果多个用户要写入NFS目录，则归组写入（默认）<br>
+no_wdelay 如果多个用户要写入NFS目录，则立即写入，当使用async时，无需此设置<br>
+hide 在NFS共享目录中不共享其子目录<br>
+no_hide 共享NFS目录的子目录<br>
+subtree_check 如果共享/usr/bin之类的子目录时，强制NFS检查父目录的权限（默认）<br>
+no_subtree_check 和上面相对，不检查父目录权限<br>
+all_squash 共享文件的UID和GID映射匿名用户anonymous，适合公用目录<br>
+no_all_squash 保留共享文件的UID和GID（默认）<br>
+root_squash root用户的所有请求映射成如anonymous用户一样的权限（默认）<br>
+no_root_squash root用户具有根目录的完全管理访问权限<br>
+anonuid=xxx 指定NFS服务器/etc/passwd文件中匿名用户的UID<br>
+anongid=xxx 指定NFS服务器/etc/passwd文件中匿名用户的GID</p>
+<p>查看NFS Server的export list：</p>
+<pre><code>sudo showmount -e
+</code></pre>
+<p>若更改了/etc/exports，运行以下命令进行更新：</p>
+<pre><code>sudo exportfs -r
+</code></pre>
+<p>然后重启NFS服务：</p>
+<pre><code>sudo /etc/init.d/nfs-kernel-server restart
+</code></pre>
+<p>配置portmap<br>
+方法1：编辑/etc/default/portmap，将&quot;-i 127.0.0.1&quot;去掉；<br>
+方法2：</p>
+<pre><code>sudo dpkg-reconfigure portmap
+</code></pre>
+<p>出现“正在设定portmap”软件包设置界面，对Should portmap be bound to the loopback address？选择“否(No)”。</p>
+<p>配置/etc/hosts.deny<br>
+禁止任何host（主机）能和你的NFS服务器进行NFS连接。在该文件中加入：</p>
+<pre><code>### NFS DAEMONS
+portmap:ALL
+lockd:ALL
+mountd:ALL
+rquotad:ALL
+statd:ALL
+</code></pre>
+<p>配置/etc/hosts.allow<br>
+允许那些你想要的主机和你的NFS服务器建立连接。</p>
+<p>下列步骤将允许任何IP地址以192.168.1开头的主机连接到NFS服务器上，具体要看你目标板的端口地址，也可以指定特定的IP地址。在该文件中加入：</p>
+<pre><code>### NFS DAEMONS
+portmap: 192.168.1.
+lockd: 192.168.1.
+rquotad: 192.168.1.
+mountd: 192.168.1.
+statd: 192.168.1.
+</code></pre>
+<p>通过/etc/hosts.deny和/etc/hosts.allow设置对portmap的访问，采用这两个配置文件有点类似&quot;mask&quot;的意思。先在/etc/hosts.deny中禁止所有用户对portmap的访问，再在/etc/hosts.allow中允许某些用户对portmap的访问。</p>
+<p>然后重启portmap daemon：</p>
+<pre><code>$ sudo /etc/init.d/portmap restart
+</code></pre>
+<p><strong>NFS客户端配置</strong></p>
+<p>在NFS服务器启动后，还需要检查Linux服务器的防火墙设置（一般需要关闭防火墙服务），确保没有屏蔽 NFS使用的端口和允许通信的主机，主要是检查Linux服务器iptables、ipchains等选项的设置，以及/etc/hosts.deny， /etc/hosts.allow文件。通常都是在内部局域网中进行开发，再安装系统时最好不要安装防火墙等网络安全软件，以方便使用时的配置。</p>
+<p>如果你有防火墙，请确保32771、111和2049端口保持开放。</p>
+<p><strong>手动挂载</strong><br>
+使用mount命令来挂载其他机器共享的NFS目录。</p>
+<p>格式：$ sudo mount [Server IP]😕[share dir] [local mount point]</p>
+<p>例如：</p>
+<pre><code>sudo mount -t nfs [-o nolock] localhost:/opt/FriendlyARM/mini2440/root_nfs /mnt/root_nfs 或
+sudo mount -t nfs -o nolock 192.168.1.101:/opt/FriendlyARM/mini2440/root_nfs /mnt/root_nfs
+</code></pre>
+<p>其中，localhost可以是具体的IP地址，同时挂载点/mnt/root_nfs目录必须已经存在，而且在/mnt/root_nfs目录中没有文件或子目录。</p>
+<p><strong>自动挂载</strong></p>
+<p>另一个挂载其他机器的NFS共享的方式就是在/etc/fstab文件中添加一行，该行必须指明NFS服务器的主机名、服务器输出的目录名以及挂载NFS共享的本机目录，同时必须是根用户才能修改/etc/fstab文件（目标板上可能没有fstab，需要自己创建一个）。</p>
+<p>格式(参考PC上的fstab)：</p>
+<pre><code>host_ip:/nfs_path /target_path nfsrsize=8192,wsize=8192,timeo=14,intr,nolock 0  0
+</code></pre>
+<p>注意：可以根据实际情况修改NFS服务器共享文件夹&quot;servername.mydomain.com:/usr/local/pub&quot;和在本机的挂载点&quot;/pub&quot;，同时挂载点/pub在客户端机器上必须存在。</p>
+<p>NFS常见挂载参数:</p>
+<p>intr 允许通知中断一个NFS调用。当服务器没有应答需要放弃的时候有用处。</p>
+<p>timeo 如果超时，客户端等待的时间，以十分之一秒计算<br>
+retrans 超时尝试的次数<br>
+bg 后台挂载（很有用）<br>
+hard 如果server端没有响应，那么客户端一直尝试挂载<br>
+rsize 读块大小<br>
+wsize 写块大小</p>
+<p><strong>使用autofs来挂载NFS</strong></p>
+<p>挂载NFS共享的第三种方法是使用autofs，它使用automount守护进程来管理挂载点，只在文件系统被访问时才动态地挂载。</p>
+<p>autofs访问主映射配置文件/etc/auto.master来决定要定义哪些挂载点，然后使用适用于各个挂载点的参数来启动automount守护进程。主映射配置中的每一行都定义一个挂载点，一个分开的映射文件定义在该挂载点下要挂载的文件系统。如/etc /auto.misc文件可能会定义/misc目录中的挂载点，这种关系在/etc/auto.master文件中会被定义。</p>
+<p>/etc/auto.master文件中的每个项目都有3个字段，第1个字段是挂载点；第2个字段是映射文件的位置；第3个字段可选，可以包括超时数值之类的信息。</p>
+<p>例如：要在机器上的/misc/myproject挂载点上挂载远程机penguin.example.net中的/project52目录。</p>
+<pre><code>在/etc/auto.master文件中添加以下行：
+/misc /etc/auto.misc --timeout 60
+在/etc/auto.misc文件中添加以下行：
+myproject -rw,soft,intr,rsize=8192,wsize=8192 penguin.example.net:/proj52
+</code></pre>
+<p>/etc/auto.misc中的第1个字段是/misc子目录的名称，该目录被automount动态地创建，它不应该在客户端机器上实际存在；第2个字段包括挂载选项，如rw代表读写访问权，第3个字段是要导出的NFS的位置，包括主机名和目录。</p>
+<p>autofs是一种服务，要启动这项服务，在shell提示下键入以下命令：</p>
+<pre><code>sudo /sbin/service autofs restart
+</code></pre>
+<p>要查看活跃的挂载点，在shell提示下键入以下命令：</p>
+<pre><code>sudo /sbin/service autofs status
+</code></pre>
+<p>如果在autofs运行时修改了/etc/auto.master配置文件，则必须在shell提示下键入以下命令来通知automount守护进程重新载入配置文件：</p>
+<pre><code>sudo /sbin/service autofs reload
+</code></pre>
+<p>df命令查看是否挂载成功：</p>
+<pre><code>sudo df
+</code></pre>
+<p>取消挂载的命令如下：</p>
+<pre><code>sudo umount /mnt/root_nfs
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/1H8T7qrJf/">
+              <span class="post-title">
+                CentOS 7.x安装部署NFS文件共享服务器&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

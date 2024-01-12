@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> SpringBoot 集成 Seata 解决分布式事务问题 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" SpringBoot 集成 Seata 解决分布式事务问题 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" SpringBoot 集成 Seata 解决分布式事务问题"/>
+    <meta property="og:url" content="https://jwangkun.github.io/HWuqcvUQz/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/7_s3hpFJj/" class="tag">Seata</a>
+            
+        </span>
+            <h1> SpringBoot 集成 Seata 解决分布式事务问题</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="seata-简介">seata 简介</h2>
+<p>Seata 是 阿里巴巴2019年开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。在 Seata 开源之前，Seata 对应的内部版本在阿里内部一直扮演着分布式一致性中间件的角色，帮助阿里度过历年的双11，对各业务进行了有力的支撑。经过多年沉淀与积累，2019.1 Seata 正式宣布对外开源 。目前 Seata 1.0 已经 GA。</p>
+<h3 id="微服务中的分布式事务问题">微服务中的分布式事务问题</h3>
+<p>让我们想象一下传统的单片应用程序，它的业务由3个模块组成，他们使用单个本地数据源。自然，本地事务将保证数据的一致性。</p>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-19/1.png" alt="img" loading="lazy"></figure>
+<p>微服务架构已发生了变化。上面提到的3个模块被设计为3种服务。本地事务自然可以保证每个服务中的数据一致性。但是整个业务逻辑范围如何？</p>
+<figure data-type="image" tabindex="2"><img src="http://image.itwolfed.com/springboot-19/2.png" alt="img" loading="lazy"></figure>
+<p>Seata怎么办？</p>
+<figure data-type="image" tabindex="3"><img src="http://image.itwolfed.com/springboot-19/3.png" alt="img" loading="lazy"></figure>
+<p>我们说，分布式事务是由一批分支事务组成的全局事务，通常分支事务只是本地事务。</p>
+<figure data-type="image" tabindex="4"><img src="http://image.itwolfed.com/springboot-19/4.png" alt="img" loading="lazy"></figure>
+<p>Seata有3个基本组成部分：</p>
+<ul>
+<li>事务协调器（TC）：维护全局事务和分支事务的状态，驱动全局提交或回滚。</li>
+<li>事务管理器TM：定义全局事务的范围：开始全局事务，提交或回滚全局事务。</li>
+<li>资源管理器（RM）：管理正在处理的分支事务的资源，与TC对话以注册分支事务并报告分支事务的状态，并驱动分支事务的提交或回滚。</li>
+</ul>
+<figure data-type="image" tabindex="5"><img src="http://image.itwolfed.com/springboot-19/5.png" alt="img" loading="lazy"></figure>
+<p>Seata管理的分布式事务的典型生命周期：</p>
+<ol>
+<li>TM要求TC开始一项新的全局事务。TC生成代表全局事务的XID。</li>
+<li>XID通过微服务的调用链传播。</li>
+<li>RM将本地事务注册为XID到TC的相应全局事务的分支。</li>
+<li>TM要求TC提交或回退相应的XID全局事务。</li>
+<li>TC驱动XID的相应全局事务下的所有分支事务以完成分支提交或回滚。</li>
+</ol>
+<figure data-type="image" tabindex="6"><img src="http://image.itwolfed.com/springboot-19/6.png" alt="img" loading="lazy"></figure>
+<h2 id="快速开始">快速开始</h2>
+<h3 id="用例">用例</h3>
+<p>用户购买商品的业务逻辑。整个业务逻辑由3个微服务提供支持：</p>
+<ul>
+<li>仓储服务：对给定的商品扣除仓储数量。</li>
+<li>订单服务：根据采购需求创建订单。</li>
+<li>帐户服务：从用户帐户中扣除余额。</li>
+</ul>
+<h3 id="环境准备">环境准备</h3>
+<h4 id="步骤-1建立数据库">步骤 1：建立数据库</h4>
+<pre><code class="language-sql"># db_seata
+DROP SCHEMA IF EXISTS db_seata;
+CREATE SCHEMA db_seata;
+USE db_seata;
+
+# Account
+CREATE TABLE `account_tbl` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `user_id` VARCHAR(255) DEFAULT NULL,
+  `money` INT(11) DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+INSERT INTO account_tbl (id, user_id, money)
+VALUES (1, '1001', 10000);
+INSERT INTO account_tbl (id, user_id, money)
+VALUES (2, '1002', 10000);
+
+# Order
+CREATE TABLE `order_tbl`
+(
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `user_id` VARCHAR(255) DEFAULT NULL,
+  `commodity_code` VARCHAR(255) DEFAULT NULL,
+  `count` INT(11) DEFAULT '0',
+  `money` INT(11) DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+# Storage
+CREATE TABLE `storage_tbl` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `commodity_code` VARCHAR(255) DEFAULT NULL,
+  `count` INT(11) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `commodity_code` (`commodity_code`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+
+INSERT INTO storage_tbl (id, commodity_code, count)
+VALUES (1, '2001', 1000);
+
+CREATE TABLE `undo_log` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `branch_id` bigint(20) NOT NULL,
+  `xid` varchar(100) NOT NULL,
+  `context` varchar(128) NOT NULL,
+  `rollback_info` longblob NOT NULL,
+  `log_status` int(11) NOT NULL,
+  `log_created` datetime NOT NULL,
+  `log_modified` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ux_undo_log` (`xid`,`branch_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+</code></pre>
+<p>seata AT 模式需要 undo_log 表,另外三张是业务表。</p>
+<h4 id="步骤-2-启动-seata-server">步骤 2: 启动 Seata Server</h4>
+<p>Server端存储模式（store.mode）现有file、db两种（后续将引入raft），file模式无需改动，直接启动即可。db模式需要导入用于存储全局事务回话信息的三张表。</p>
+<p><em><strong>注：file模式为单机模式，全局事务会话信息内存中读写并持久化本地文件root.data，性能较高; db模式为高可用模式，全局事务会话信息通过db共享，相应性能差些</strong></em></p>
+<p>可以直接通过bash 脚本启动 Seata Server，也可以通过 Docker 镜像启动，但是 Docker 方式目前只支持使用 file 模式，不支持将 Seata-Server 注册到 Eureka 或 Nacos 等注册中心。</p>
+<h5 id="通过脚本启动">通过脚本启动</h5>
+<p>在 https://github.com/seata/seata/releases 下载相应版本的 Seata Server，解压后执行以下命令启动，这里使用 file 配置</p>
+<h5 id="通过-docker-启动">通过 Docker 启动</h5>
+<pre><code class="language-sh">docker run --name seata-server -p 8091:8091 seataio/seata-server:latest
+</code></pre>
+<h3 id="项目介绍">项目介绍</h3>
+<table>
+<thead>
+<tr>
+<th>项目名</th>
+<th>地址</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sbm-account-service</td>
+<td>127.0.0.1:8081</td>
+<td>账户服务</td>
+</tr>
+<tr>
+<td>sbm-order-service</td>
+<td>127.0.0.1:8082</td>
+<td>订单服务</td>
+</tr>
+<tr>
+<td>sbm-storage-service</td>
+<td>127.0.0.1:8083</td>
+<td>仓储服务</td>
+</tr>
+<tr>
+<td>sbm-business-service</td>
+<td>127.0.0.1:8084</td>
+<td>主业务</td>
+</tr>
+<tr>
+<td>seata-server</td>
+<td>172.16.2.101:8091</td>
+<td>seata-server</td>
+</tr>
+</tbody>
+</table>
+<h3 id="核心代码">核心代码</h3>
+<p><em><strong>为了不让篇幅太长，这里只给出部分代码，详细代码文末会给出源码地址</strong></em></p>
+<p>maven 引入 seata 的依赖 eata-spring-boot-starter</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;io.seata&lt;/groupId&gt;
+    &lt;artifactId&gt;seata-spring-boot-starter&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h4 id="仓储服务">仓储服务</h4>
+<h5 id="applicationproperties">application.properties</h5>
+<pre><code class="language-properties">spring.application.name=account-service
+server.port=8081
+spring.datasource.url=jdbc:mysql://172.16.2.101:3306/db_seata?useSSL=false&amp;serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=123456
+seata.tx-service-group=my_test_tx_group
+mybatis.mapper-locations=classpath*:mapper/*Mapper.xml
+seata.service.grouplist=172.16.2.101:8091
+logging.level.io.seata=info
+logging.level.io.seata.samples.account.persistence.AccountMapper=debug
+</code></pre>
+<h5 id="storageservice">StorageService</h5>
+<pre><code class="language-java">public interface StorageService {
+
+    /**
+     * 扣除存储数量
+     */
+    void deduct(String commodityCode, int count);
+}
+</code></pre>
+<h4 id="订单服务">订单服务</h4>
+<pre><code class="language-java">public interface OrderService {
+
+    /**
+     * 创建订单
+     */
+    Order create(String userId, String commodityCode, int orderCount);
+}
+</code></pre>
+<h4 id="帐户服务">帐户服务</h4>
+<pre><code class="language-java">public interface AccountService {
+
+    /**
+     * 从用户账户中借出
+     */
+    void debit(String userId, int money);
+}
+</code></pre>
+<h4 id="主要业务逻辑">主要业务逻辑</h4>
+<p>只需要使用一个 @GlobalTransactional 注解在业务方法上。</p>
+<pre><code class="language-java">@GlobalTransactional
+public void purchase(String userId, String commodityCode, int orderCount) {
+    LOGGER.info(&quot;purchase begin ... xid: &quot; + RootContext.getXID());
+    storageClient.deduct(commodityCode, orderCount);
+    orderClient.create(userId, commodityCode, orderCount);
+}
+</code></pre>
+<h4 id="xid-的传递">XID 的传递</h4>
+<p>全局事务ID的跨服务传递，需要我们自己实现，这里通过拦截器的方式。每个服务都需要添加下面两个类。</p>
+<h5 id="seatafilter">SeataFilter</h5>
+<pre><code class="language-java">@Component
+public class SeataFilter implements Filter {
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) servletRequest;
+        String xid = req.getHeader(RootContext.KEY_XID.toLowerCase());
+        boolean isBind = false;
+        if (StringUtils.isNotBlank(xid)) {
+            RootContext.bind(xid);
+            isBind = true;
+        }
+        try {
+            filterChain.doFilter(servletRequest, servletResponse);
+        } finally {
+            if (isBind) {
+                RootContext.unbind();
+            }
+        }
+    }
+
+    @Override
+    public void destroy() {
+    }
+}
+</code></pre>
+<h5 id="seataresttemplateautoconfiguration">SeataRestTemplateAutoConfiguration</h5>
+<pre><code class="language-java">@Configuration
+public class SeataRestTemplateAutoConfiguration {
+    @Autowired(
+            required = false
+    )
+    private Collection&lt;RestTemplate&gt; restTemplates;
+    @Autowired
+    private SeataRestTemplateInterceptor seataRestTemplateInterceptor;
+
+    public SeataRestTemplateAutoConfiguration() {
+    }
+
+    @Bean
+    public SeataRestTemplateInterceptor seataRestTemplateInterceptor() {
+        return new SeataRestTemplateInterceptor();
+    }
+
+    @PostConstruct
+    public void init() {
+        if (this.restTemplates != null) {
+            Iterator var1 = this.restTemplates.iterator();
+
+            while (var1.hasNext()) {
+                RestTemplate restTemplate = (RestTemplate) var1.next();
+                List&lt;ClientHttpRequestInterceptor&gt; interceptors = new ArrayList(restTemplate.getInterceptors());
+                interceptors.add(this.seataRestTemplateInterceptor);
+                restTemplate.setInterceptors(interceptors);
+            }
+        }
+
+    }
+}
+</code></pre>
+<h3 id="测试">测试</h3>
+<h4 id="测试成功场景">测试成功场景:</h4>
+<pre><code class="language-sh">curl -X POST http://127.0.0.1:8084/api/business/purchase/commit
+</code></pre>
+<p>此时返回结果为：true</p>
+<h4 id="测试失败场景">测试失败场景:</h4>
+<p>UserId 为1002 的用户下单，sbm-account-service会抛出异常，事务会回滚</p>
+<pre><code class="language-sh">http://127.0.0.1:8084/api/business/purchase/rollback
+</code></pre>
+<p>此时返回结果为：false</p>
+<p>查看 undo_log 的日志或者主键，可以看到在执行过程中有保存数据。 如查看主键自增的值，在执行前后的值会发生变化，在执行前是 1，执行后是 7 。</p>
+<h2 id="源码地址">源码地址</h2>
+<p>https://github.com/gf-huanchupk/SpringBootLearning/tree/master/springboot-seata</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/BY-kWuR6W/">
+              <span class="post-title">
+                Spring Boot Actuator 整合 Prometheus&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

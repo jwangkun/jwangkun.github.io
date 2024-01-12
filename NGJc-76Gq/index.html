@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Kubesphere3.0启用多集群 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Kubesphere3.0启用多集群 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Kubesphere3.0启用多集群"/>
+    <meta property="og:url" content="https://jwangkun.github.io/NGJc-76Gq/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/QsPMgHTt-/" class="tag">Kubesphere</a>
+            
+            <a href="https://jwangkun.github.io/x2DSuOopv/" class="tag">多集群管理</a>
+            
+        </span>
+            <h1>Kubesphere3.0启用多集群</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="1-概述">1. 概述</h2>
+<p>多集群功能涉及到多个集群之间的网络连通，了解集群之前的网络拓扑有助于减少接下来的工作量。</p>
+<p>多集群功能需要创建一个 Host Cluster，实际即是一个开启了多集群功能的 KubeSphere 集群，简称 H 集群。H 集群管理的所有集群称之为 Member Cluster，即是一个普通的未开启多集群功能的 KubeSphere 集群，简称 M 集群。H 集群只能有一个，M 集群可以有多个。在多集群架构中，要求 H 集群和 M 集群网络可以直连或者通过代理连通，M 集群之间的网络可以是处在完全隔离的环境中。</p>
+<h2 id="2-直接连接">2. 直接连接</h2>
+<p>如果 M 集群 kube-apiserver 地址可以在 H 集群上的任一节点上都能访问，即可以使用直接连接的方式。直接连接方式适用于 M 集群可以暴露 kube-apiserver 地址或者 H 和 M 集群处在同一个私网环境中。</p>
+<h3 id="21-安装-host-cluster-集群">2.1. 安装 Host Cluster 集群</h3>
+<p>安装 Host Cluster 与安装 KubeSphere 没有大的区别，唯一的区别在于安装时确保 installer 的配置文件 ClusterConfiguration 中 multicluster 项如下配置。</p>
+<pre><code>multicluster:
+  clusterRole: host
+</code></pre>
+<p>如果你已经有一个安装好的 KubeSphere 集群，也可以通过修改 cluster configuration 的方式改变集群的角色，然后等待配置生效。</p>
+<pre><code>kubectl edit cc ks-installer -n kubesphere-system
+</code></pre>
+<h3 id="22-安装-member-cluster-集群">2.2 安装 Member Cluster 集群</h3>
+<p>为了能够使 host 集群直接管理 member 集群，需要将 member 集群的 jwtSecret 设置与 host 相同。 首先在 host 集群上执行下列命令获取到 host 集群的 jwtSecret。</p>
+<pre><code>$ kubectl -n kubesphere-system get cm kubesphere-config -o yaml | grep -v &quot;apiVersion&quot; | grep jwtSecret
+  jwtSecret: &quot;WaSEiGROspi5*******&quot;
+</code></pre>
+<p>安装 Member Cluster 和安装普通的未开启多集群功能的集群没有任何区别。确保安装时 installer 的 ClusterConfiguration 中 multicluster 项设置角色，同时填入上面获取的 host 的 jwtSecret。</p>
+<pre><code>#ClusterConfiguration中默认有此key的，找到后直接修改value值
+authentication:
+  jwtSecret: WaSEiGROspi5o*******
+
+multicluster:
+  clusterRole: member
+</code></pre>
+<p>配置完成后，执行安装。如果你已经有一个安装好的 KubeSphere 集群，也可以通过修改 cluster configuration 的方式改变集群的角色和 jwtSecret，然后等待配置生效。</p>
+<pre><code>kubectl edit cc ks-installer -n kubesphere-system
+</code></pre>
+<h3 id="23-导入集群">2.3. 导入集群</h3>
+<p>打开 H 集群 dashboard，点击添加集群，输入集群基本信息后点击下一步。</p>
+<p>连接方式选择 <code>直接连接 KubeSphere 集群</code>， 将 Member 集群的 kubeconfig 内容粘贴到输入框中。确保 kubeconfig 中的 <code>server</code> 地址在 H 集群中的任一节点都可以访问。<code>KubeSphere API Server</code> 地址填写 KubeSphere APIServer 的地址，也可以不填。</p>
+<p>点击导入，等待集群初始化完成即可</p>
+<h2 id="3-代理连接">3. 代理连接</h2>
+<p>代理连接使用了 KubeSphere 的 <a href="https://github.com/kubesphere/tower">Tower</a> 组件，Tower 是一个可以在集群间通过代理方式创建网络连接的工具。如果 H 集群不能直接访问 M 集群，可以通过暴露 H 集群代理服务地址，M 集群通过代理来创建和 H 集群的网络连接。代理连接的方式适用于 M 集群处在非公开的 IDC 机房等私有环境，而 H 集群有能力暴露代理服务的场景。</p>
+<h3 id="31-安装-host-cluster">3.1. 安装 Host Cluster</h3>
+<p>安装 Host Cluster 与安装 KubeSphere 没有大的区别，唯一的区别在于安装时确保 installer 的配置文件 ClusterConfiguration 中 multicluster 项如下配置 。</p>
+<pre><code>multicluster:
+  clusterRole: host
+</code></pre>
+<p>如果你已经有一个安装好的 KubeSphere 集群，也可以通过修改 cluster configuration 的方式改变集群的角色，然后等待配置生效。</p>
+<pre><code>kubectl edit cc ks-installer -n kubesphere-system
+</code></pre>
+<p>1.设置代理服务地址</p>
+<p>Host Cluster 安装成功后，<code>kubesphere-system</code> 项目下会创建一个名称为 tower，type 为 LoadBalancer 的代理服务。</p>
+<p>如果集群有可以使用的 LoadBalancer 插件，可以看到 <code>EXTERNAL-IP</code> 栏目有对应的地址显示，KubeSphere 会自动获取这个地址，我们可以跳过接下来的设置代理的步骤。</p>
+<pre><code>$ kubectl -n kubesphere-system get svc
+NAME       TYPE            CLUSTER-IP      EXTERNAL-IP     PORT(S)              AGE
+tower      LoadBalancer    10.233.63.191   139.198.110.23  8080:30721/TCP       16h
+</code></pre>
+<p>2.如果一直没有对应的地址显示，则需要手动设置下代理地址。假设现在有可以对外的公网 IP 地址 139.198.120.120，已经通过端口转发的方式将此 IP 地址的 8080 端口转发到集群节点的 30721 端口 (请根据您具体的端口号转发)。</p>
+<pre><code>$ kubectl -n kubesphere-system get svc
+NAME       TYPE            CLUSTER-IP      EXTERNAL-IP     PORT(S)              AGE
+tower      LoadBalancer    10.233.63.191   &lt;pending&gt;  8080:30721/TCP       16h
+</code></pre>
+<p>3.修改配置文件，填入之前设置的地址</p>
+<pre><code>$ kubectl -n kubesphere-system edit clusterconfiguration ks-installer
+
+multicluster:
+    clusterRole: host
+    proxyPublishAddress: http://139.198.120.120:8080 # 增加这一行，设置 tower 服务的访问地址，填入上面设置的 IP 地址
+</code></pre>
+<p>4.保存设置，并且重启 ks-apiserver</p>
+<pre><code>kubectl -n kubesphere-system rollout restart deployment ks-apiserver
+</code></pre>
+<h3 id="32-安装-member-cluster">3.2. 安装 Member Cluster</h3>
+<p>为了能够使 host 集群直接管理 member 集群，需要将 member 集群的 jwtSecret 设置与 host 相同。 在 host 集群上执行下列命令获取到 host 集群的 jwtSecret。</p>
+<pre><code>$ kubectl -n kubesphere-system get cm kubesphere-config -o yaml | grep -v &quot;apiVersion&quot; | grep jwtSecret
+  jwtSecret: &quot;WaSEiGROspi5o*******&quot;
+</code></pre>
+<p>安装 Member Cluster 和安装普通的未开启多集群功能的集群没有任何区别。确保安装时 installer 的 ClusterConfiguration 中 multicluster 项如下配置，同时填入上面获取的 host 的 jwtSecret。</p>
+<pre><code>#ClusterConfiguration中默认有此key的，找到后直接修改value值
+authentication:
+  jwtSecret: WaSEiGROspi5o*******
+
+multicluster:
+  clusterRole: member
+</code></pre>
+<p>配置完成后，执行安装。如果你已经有一个安装好的 KubeSphere 集群，也可以通过修改 cluster configuration 的方式改变集群的角色和 jwtSecret，然后等待配置生效。</p>
+<pre><code>kubectl edit cc ks-installer -n kubesphere-system
+</code></pre>
+<h3 id="33-导入集群">3.3. 导入集群</h3>
+<ol>
+<li>打开 H 集群 dashboard，点击添加集群，输入集群基本信息后点击下一步。</li>
+</ol>
+<figure data-type="image" tabindex="1"><img src="https://img-blog.csdnimg.cn/20200820140714632.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://img-blog.csdnimg.cn/20200820140725102.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://img-blog.csdnimg.cn/2020082014073378.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="4"><img src="https://img-blog.csdnimg.cn/20200820140743935.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
+<p>连接方式选择 <code>集群连接代理</code>，点击导入</p>
+<figure data-type="image" tabindex="5"><img src="https://img-blog.csdnimg.cn/20200820140757612.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
+<p>根据提示在 M 集群中，创建一个 <code>agent.yaml</code> 文件，并将生成的部署粘贴到文件中，在节点上执行 <code>kubectl create -f agent.yaml</code>，等待 agent 运行正常。确保 M 集群上可以访问 H 集群的代理地址。</p>
+<figure data-type="image" tabindex="6"><img src="https://img-blog.csdnimg.cn/20200820140808816.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3NoZW5ob25nbGVpMTIzNA==,size_16,color_FFFFFF,t_70#pic_center" alt="img" loading="lazy"></figure>
+<p>集群代理运行正常后即可在 H 集群上看到导入的集群</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/kDvU45B4V/">
+              <span class="post-title">
+                SpringBoot 使用 JSR303 实现参数验证&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

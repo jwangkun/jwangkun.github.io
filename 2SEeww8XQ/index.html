@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Centos7.4 haproxy 实现负载均衡集群 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Centos7.4 haproxy 实现负载均衡集群 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Centos7.4 haproxy 实现负载均衡集群"/>
+    <meta property="og:url" content="https://jwangkun.github.io/2SEeww8XQ/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/sCqnZWj35/" class="tag">haproxy</a>
+            
+        </span>
+            <h1>Centos7.4 haproxy 实现负载均衡集群</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-06，11 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="一-haproxy-概述">一、HAProxy 概述：</h2>
+<p>HAProxy 提供高可用性、负载均衡以及基于 TCP 和 HTTP 应用的代理，支持虚拟主机，它是免费、快速并且可靠的一种解决方案。根据官方数据，其最高极限支持 10G 的并发。<br>
+　　HAProxy 特别适用于那些负载特大的 web 站点， 这些站点通常又需要会话保持或七层处理。HAProxy 运行在当前的硬件上，完全可以支持数以万计的并发连接。并且它的运行模式使得它可以很简单安全的整合进您当前的架构中， 同时可以保护你的 web 服务器不被暴露到网络上。<br>
+其支持从 4 层至 7 层的网络交换，即覆盖所有的 TCP 协议。就是说，Haproxy 甚至还支持 Mysql 的均衡负载。</p>
+<p>**相同点：**在功能上，proxy 通过反向代理方式实现 WEB 均衡负载。和 Nginx，ApacheProxy，lighttpd，Cheroke 等一样。<br>
+　　**不同点：**Haproxy 并不是 web 服务器。以上提到所有带反向代理均衡负载的产品，都清一色是 WEB 服务器。简单说，就是他们能处理解析页面的。而 Haproxy 仅仅是一款的用于均衡负载的应用代理。其自身并不能提供 web 服务。但其配置简单，<strong>拥有非常不错的服务器健康检查功能还有专门的系统状态监控页面</strong>，当其代理的后端服务器出现故障, HAProxy 会自动将该服务器摘除，故障恢复后再自动将该服务器加入。<br>
+　<br>
+　　https://github.com/haproxy/haproxy/releases/ 在 github 可以下载<br>
+实验拓扑图：</p>
+<figure data-type="image" tabindex="1"><img src="https://images2018.cnblogs.com/blog/47893/201807/47893-20180704211733248-1522132827.png" alt="img" loading="lazy"></figure>
+<h2 id="二-实战">二、实战</h2>
+<h3 id="1-安装依赖">1. 安装依赖</h3>
+<pre><code>[root@xuegod63 ~]# yum -y install make gcc gcc-c++ openssl-devel
+</code></pre>
+<h3 id="2-安装-haproxy">2. 安装 haproxy</h3>
+<pre><code>[root@xuegod63 ~]# tar -zxvf haproxy-1.7.9.tar.gz
+[root@xuegod63 haproxy-1.7.9]# cd /root/haproxy-1.7.9
+[root@xuegod63 haproxy-1.7.9]# uname -r   #查看内核版本
+3.10.0-693.el7.x86_64
+[root@xuegod63 haproxy-1.7.9]# make TARGET=linux2628 PREFIX=/usr/local/haproxy     #指定操作系统内核类型和安装的路径。也可以直接修改Makefile配置文件中这两个变量的值。如下：
+[root@xuegod63 haproxy-1.7.9]# vim Makefile
+94 PREFIX = /usr/local/haproxy
+104 TARGET =linux26
+[root@xuegod63 haproxy-1.7.9]# make install PREFIX=/usr/local/haproxy    
+#如果没有修改Makefile配置文件中PREFIX变量的值，就必须在此重新对，PREFIX=/usr/local/haproxy赋值，否则直接执行 make install 时，make install会直接读取Makefile文件中PREFIX的变量值。
+[root@xuegod63 haproxy-1.7.9]# ls /usr/local/haproxy/
+doc  sbin  share
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://images2018.cnblogs.com/blog/47893/201807/47893-20180704232950077-462259532.png" alt="img" loading="lazy"></figure>
+<h3 id="3-没有生成配置文件自己手动写一个-haproxy-配置文件">3. 没有生成配置文件，自己手动写一个 HAproxy 配置文件</h3>
+<pre><code>[root@xuegod63 ~]# mkdir /usr/local/haproxy/etc
+[root@xuegod63 ~]# vim /usr/local/haproxy/etc/haproxy.cfg      #手动创建配置文件
+global
+log 127.0.0.1  local0
+#log 127.0.0.1  local1 notice
+#log loghost    local0 info
+maxconn 4096
+chroot /usr/local/haproxy
+uid 99                          #所属运行的用户uid
+gid 99                          #所属运行的用户组
+daemon                     #以后台形式运行haproxy
+nbproc 1                   #启动1个haproxy实例。# #工作进程数量(CPU数量) ，实际工作中，应该设置成和CPU核心数一样。 这样可以发挥出最大的性能。
+pidfile /usr/local/haproxy/run/haproxy.pid  #将所有进程写入pid文件
+#debug      #调试错误时用
+#quiet      #安静
+ 
+defaults
+log    global
+log    127.0.0.1      local3        #日志文件的输出定向。产生的日志级别为local3. 系统中local1-7，用户自己定义
+mode    http           #工作模式，所处理的类别,默认采用http模式，可配置成tcp作4层消息转发
+option  httplog                     #日志类别，记载http日志
+option  httpclose      #每次请求完毕后主动关闭http通道,haproxy不支持keep-alive,只能模拟这种模式的实现
+option  dontlognull    #不记录空连接，产生的日志
+option  forwardfor     #如果后端服务器需要获得客户端真实ip需要配置的参数，可以从Http Header中获得客户端ip
+option  redispatch     #当serverid对应的服务器挂掉后，强制定向到其他健康服务器
+retries 2              #2次连接失败就认为服务器不可用，主要通过后面的check检查
+maxconn 2000           #最大连接数
+balance roundrobin                    #负载均衡算法
+stats  uri    /haproxy-stats          #haproxy 监控页面的访问地址 # 可通过 http://localhost:80/haproxy-stats 访问
+timeout connect      5000             #连接超时时间。 单位：ms 毫秒
+timeout client       50000            #客户端连接超时时间
+timeout server      50000             #服务器端连接超时时间
+mode    http
+option  httpchk GET /index.html       #健康检测#注意实际工作中测试时，应该下载某一个页面来进行测试，因此这个页面应该是个小页面，而不要用首页面。这里是每隔一秒检查一次页面。
+ 
+frontend http          #前端配置，http名称可自定义
+bind 0.0.0.0:80        #发起http请求80端口，会被转发到设置的ip及端口
+default_backend http_back   #转发到后端 写上后端名称
+ 
+backend http_back    #后端配置，名称上下关联
+server  s1 192.168.1.62:80  weight 3 check  #后端的主机 IP &amp;权衡
+server  s2 192.168.1.64:80  weight 3 check  #后端的主机 IP &amp;权衡
+#server node1 192.168.179.131:8081 check inter 2000 rise 3 fall 3 weight 30
+    # inter 2000 健康检查时间间隔2秒
+    # rise 3 检测多少次才认为是正常的
+    # fall 3 失败多少次才认为是不可用的
+# weight 30 权重
+ 
+使用nobody用户运行haproxy
+[root@xuegod63 haproxy-1.7.9]# id nobody
+uid=99(nobody) gid=99(nobody) groups=99(nobody)   #id 为99
+</code></pre>
+<p><strong>关于负载均衡算法</strong><br>
+　　<strong>#source 　　 根据请求源 IP</strong><br>
+　　<strong>#static-rr 　　根据权重</strong><br>
+　　<strong>#leastconn  最少连接者先处理</strong><br>
+　　<strong>#uri 　　　　根据请求的 uri</strong><br>
+　　<strong>#url_param  根据请求的 url 参数</strong><br>
+　　<strong>#rdp-cookie 据据 cookie(name) 来锁定并哈希每一次请求</strong><br>
+　　<strong>#hdr(name) 根据 HTTP 请求头来锁定每一次 HTTP 请求</strong><br>
+　　<strong>#roundrobin 轮询方式</strong></p>
+<h3 id="4-设置-haproxy-启动脚本">4. 设置 haproxy 启动脚本</h3>
+<pre><code>[root@xuegod63 ~]# cp ./haproxy-1.7.9/examples/haproxy.init  /etc/init.d/haproxy
+[root@xuegod63 ~]# chmod 755 /etc/init.d/haproxy
+[root@xuegod63 ~]# vim /etc/init.d/haproxy   #修改后的脚本
+#!/bin/sh
+# chkconfig: - 85 15
+# description: HA-Proxy server
+# processname: haproxy
+# config: /usr/local/haproxy/etc/haproxy.cfg
+# pidfile: /usr/local/haproxy/run/haproxy.pid
+ 
+# Source function library.
+if [ -f /etc/init.d/functions ]; then
+  . /etc/init.d/functions
+elif [ -f /etc/rc.d/init.d/functions ] ; then
+  . /etc/rc.d/init.d/functions
+else
+  exit 0
+fi
+ 
+# Source networking configuration.
+. /etc/sysconfig/network
+ 
+# Check that networking is up.
+[ &quot;$NETWORKING&quot; = &quot;no&quot; ] &amp;&amp; exit 0
+ 
+# This is our service name
+BASENAME=`haproxy`
+ 
+BIN=/usr/sbin/haproxy
+ 
+CFG=/usr/local/haproxy/etc/haproxy.cfg
+[ -f $CFG ] || exit 1
+ 
+PIDFILE=/usr/local/haproxy/run/haproxy.pid
+LOCKFILE=/usr/local/haproxy/run/haproxy
+ 
+RETVAL=0
+ 
+start() {
+  quiet_check
+  if [ $? -ne 0 ]; then
+    echo &quot;Errors found in configuration file, check it with '$BASENAME check'.&quot;
+    return 1
+  fi
+ 
+  echo -n &quot;Starting $BASENAME: &quot;
+  daemon $BIN -D -f $CFG -p $PIDFILE
+  RETVAL=$?
+  echo
+  [ $RETVAL -eq 0 ] &amp;&amp; touch $LOCKFILE
+  return $RETVAL
+}
+ 
+stop() {
+  echo -n &quot;Shutting down $BASENAME: &quot;
+  killproc $BASENAME -USR1
+  RETVAL=$?
+  echo
+  [ $RETVAL -eq 0 ] &amp;&amp; rm -f $LOCKFILE
+  [ $RETVAL -eq 0 ] &amp;&amp; rm -f $PIDFILE
+  return $RETVAL
+}
+ 
+restart() {
+  quiet_check
+  if [ $? -ne 0 ]; then
+    echo &quot;Errors found in configuration file, check it with '$BASENAME check'.&quot;
+    return 1
+  fi
+  stop
+  start
+}
+ 
+reload() {
+  if ! [ -s $PIDFILE ]; then
+    return 0
+  fi
+ 
+  quiet_check
+  if [ $? -ne 0 ]; then
+    echo &quot;Errors found in configuration file, check it with '$BASENAME check'.&quot;
+    return 1
+  fi
+  $BIN -D -f $CFG -p $PIDFILE -sf $(cat $PIDFILE)
+}
+ 
+check() {
+  $BIN -c -q -V -f $CFG
+}
+ 
+quiet_check() {
+  $BIN -c -q -f $CFG
+}
+ 
+rhstatus() {
+  status $BASENAME
+}
+ 
+condrestart() {
+  [ -e $LOCKFILE ] &amp;&amp; restart || :
+}
+ 
+# See how we were called.
+case &quot;$1&quot; in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  reload)
+    reload
+    ;;
+  condrestart)
+    condrestart
+    ;;
+  status)
+    rhstatus
+    ;;
+  check)
+    check
+    ;;
+  *)
+    echo $&quot;Usage: $BASENAME {start|stop|restart|reload|condrestart|status|check}&quot;
+    exit 1
+esac
+  
+exit $?
+ 
+复制haproxy文件到/usr/sbin下
+因为上面的haproxy.init启动脚本默认会去/usr/sbin下找
+[root@xuegod63 ~]#cp /usr/local/haproxy/sbin/haproxy  /usr/sbin/
+创建目录和权限
+[root@xuegod63 ~]# mkdir -p /usr/local/haproxy/run
+[root@xuegod63 ~]# chown nobody /usr/local/haproxy/ -R
+ 
+配置日志收集
+[root@xuegod63 ~]# vim /etc/rsyslog.conf    #打开以下两行的注释，不打开收不到日志
+$ModLoad imudp            #取消注释
+$UDPServerRun 514          #取消注释
+local7.*          /var/log/boot.log       #下面添加两行
+local3.*          /var/log/haproxy.log
+local0.*          /var/log/haproxy.log
+[root@xuegod63 ~]# systemctl  restart  rsyslog
+</code></pre>
+<h3 id="5-启动停止-haproxy-服务">5. 启动停止 haproxy 服务</h3>
+<pre><code>特殊启动方法1
+[root@xuegod63 etc]# /usr/local/haproxy/sbin/haproxy -f /usr/local/haproxy/etc/haproxy.cfg
+查看状态：
+[root@xuegod63 etc]# ps -axu | grep haproxy
+nobody    3871  0.0  0.0  12228  1036 ?        Ss   21:53   0:00 /usr/local/haproxy/sbin/haproxy -f /usr/local/haproxy/etc/haproxy.cfg
+ 
+[root@xuegod63 etc]# netstat -antup | grep 80
+tcp        0      0 0.0.0.0:80     0.0.0.0:*        LISTEN      3871/haproxy       
+ 
+##停止
+[root@xuegod63 etc]# killall haproxy   #没有killall命令？安装yum -y install psmisc
+ 
+HAproxy脚本启动方法2
+[root@xuegod63 ~]# /etc/init.d/haproxy start  或 systemctl  restart  haproxy
+</code></pre>
+<h3 id="6-配置-xuegod62xuegod64-后端服务器">6. 配置 xuegod62,xuegod64 后端服务器</h3>
+<pre><code>配置后端服务器： xuegod62
+配置web服务器：
+[root@xuegod62 html]# yum install httpd  php -y
+生成测试文件：
+root@xuegod62 html]#echo 192.168.1.62 &gt; /var/www/html/index.html
+启动apache服务器：
+[root@xuegod62 html]# service httpd restart
+配置后端服务器： xuegod64
+IP： 192.168.1.64
+配置web服务器：
+[root@xuegod64 html]# yum install httpd  php -y
+生成测试文件：
+echo 192.168.1.64 &gt; /var/www/html/index.html
+[root@xuegod64 html]# service httpd restart
+</code></pre>
+<h3 id="7-查看-haproxy-的监控页面">7. 查看 HAproxy 的监控页面</h3>
+<p><strong>http://192.168.1.63/haproxy-stats，类似如下图</strong></p>
+<figure data-type="image" tabindex="3"><img src="https://images2018.cnblogs.com/blog/47893/201807/47893-20180704234824022-287137809.png" alt="img" loading="lazy"></figure>
+<p>测试：反向代理功能<br>
+　　http://192.168.1.63/</p>
+<p>注：<br>
+相关配置文件和启动脚本可以从这个配置模版中获得</p>
+<pre><code>[root@xuegod63 haproxy-1.7.9]# cd /root/haproxy-1.7.9/examples/
+[root@xuegod63 examples]# ls
+配置随机启动
+[root@xuegod63 examples]# chkconfig --add haproxy
+[root@xuegod63 examples]# chkconfig haproxy on
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/ot6q8XwLd/">
+              <span class="post-title">
+                Centos7.4  Keepalived安装配&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

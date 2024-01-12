@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>win10上搭建k8s集群 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="win10上搭建k8s集群 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="win10上搭建k8s集群"/>
+    <meta property="og:url" content="https://jwangkun.github.io/J3AaqcxFd/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/O8dm7s8EZ/" class="tag">Windows10</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>win10上搭建k8s集群</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>前面的系列教程都是在阿里云上实践的，最近自己组装了一台台式电脑，装上了win10系统。为了让更多的小伙伴有机会学习k8s的编排，这里使用了另一个更为简单的方案——Docker for Windows。当然，使用mac的同学也可以使用Docker for Mac。其安装使用方式都大同小异。这里重点讲一下在win10上的安装。</p>
+<!-- more -->
+<h2 id="准备工作">准备工作</h2>
+<h3 id="系统配置">系统配置</h3>
+<figure data-type="image" tabindex="1"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802192227735.png" alt="image-20200802192227735" loading="lazy"></figure>
+<h3 id="开始虚拟化">开始虚拟化</h3>
+<p>先查看CPU是否支持虚拟化和是否已启用虚拟化。</p>
+<figure data-type="image" tabindex="2"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802192011497.png" alt="image-20200802192011497" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802191819382.png" alt="image-20200802191819382" loading="lazy"></figure>
+<p>如果未启用，需要进入到BIOS进行设置，这里略。</p>
+<h3 id="启用hyper-v">启用Hyper-V</h3>
+<p>安装Docker for Windows需要使用虚拟化，可以使用Hyper-V，也可以使用Oracle Virtual Box，如果安装的系统不符合运行Docker for Windows的要求，则可以安装Docker Toolbox。这里不做介绍。</p>
+<p>设置-&gt;应用-&gt;程序和功能-&gt;启用和关闭Windows功能<img src="http://qiniu.mldong.com/mldong-article/images/image-20200802192500716.png" alt="image-20200802192500716" loading="lazy"></p>
+<figure data-type="image" tabindex="4"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802194641122.png" alt="image-20200802194641122" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802194820851.png" alt="image-20200802194820851" loading="lazy"></figure>
+<p>启用Hyper-V</p>
+<figure data-type="image" tabindex="6"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802194915968.png" alt="image-20200802194915968" loading="lazy"></figure>
+<p>后续k8s教程需要，NFS客户端也启用了吧。Telnet客户端也是常用工具，也顺道启用了。</p>
+<figure data-type="image" tabindex="7"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802195039581.png" alt="image-20200802195039581" loading="lazy"></figure>
+<p>启用好后，重启电脑。</p>
+<h3 id="下载地址">下载地址</h3>
+<p>[<strong>Docker for Windows</strong>](https://download.docker.com/win/stable/Docker Desktop Installer.exe)</p>
+<figure data-type="image" tabindex="8"><img src="http://qiniu.mldong.com/mldong-article/images/1535260-20190330155308863-1355580174.png" alt="img" loading="lazy"></figure>
+<p>官网</p>
+<figure data-type="image" tabindex="9"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802193904737.png" alt="image-20200802193904737" loading="lazy"></figure>
+<h2 id="安装docker">安装Docker</h2>
+<figure data-type="image" tabindex="10"><img src="http://qiniu.mldong.com/mldong-article/images/1535260-20190330155308863-1355580174.png" alt="img" loading="lazy"></figure>
+<h3 id="双击上面下载的docker-for-windows-installerexe">双击上面下载的Docker for Windows Installer.exe</h3>
+<figure data-type="image" tabindex="11"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808201918679.png" alt="image-20200808201918679" loading="lazy"></figure>
+<figure data-type="image" tabindex="12"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808201952436.png" alt="image-20200808201952436" loading="lazy"></figure>
+<figure data-type="image" tabindex="13"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808202100659.png" alt="image-20200808202100659" loading="lazy"></figure>
+<p>安装成功，桌面会出现图标</p>
+<figure data-type="image" tabindex="14"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802195611901.png" alt="image-20200802195611901" loading="lazy"></figure>
+<p>右下脚可查看</p>
+<figure data-type="image" tabindex="15"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808202428384.png" alt="image-20200808202428384" loading="lazy"></figure>
+<figure data-type="image" tabindex="16"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808202413149.png" alt="image-20200808202413149" loading="lazy"></figure>
+<p>可以修改镜像加速，这里使用阿里云的。</p>
+<figure data-type="image" tabindex="17"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808202712957.png" alt="image-20200808202712957" loading="lazy"></figure>
+<p>这里只要Docker running为绿色即可，Kubernetes先别管。冒然安装，会安装失败。</p>
+<h3 id="验证安装的docker">验证安装的docker</h3>
+<ul>
+<li>打开终端查看版本：</li>
+</ul>
+<pre><code class="language-shell">docker version
+</code></pre>
+<figure data-type="image" tabindex="18"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808203059617.png" alt="image-20200808203059617" loading="lazy"></figure>
+<ul>
+<li>下载nginx镜像</li>
+</ul>
+<pre><code class="language-shell">docker pull nginx
+</code></pre>
+<figure data-type="image" tabindex="19"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802200335386.png" alt="image-20200802200335386" loading="lazy"></figure>
+<ul>
+<li>运行nginx镜像</li>
+</ul>
+<pre><code class="language-shell">docker run -p 81:80 -d --name mynginx nginx
+</code></pre>
+<p>为了方便使用linux的命令，这里使用了git bash</p>
+<figure data-type="image" tabindex="20"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802201727058.png" alt="image-20200802201727058" loading="lazy"></figure>
+<ul>
+<li>
+<p>浏览器访问<code>http://localhost:81</code></p>
+</li>
+<li>
+<p>清理刚运行的nginx实例</p>
+</li>
+</ul>
+<pre><code class="language-shell"># 停止刚运行的名称为mynginx的实例
+docker ps -a | grep mynginx | awk '{print $1}' | xargs docker stop
+# 删除刚运行的名称为mynginx的实例
+docker ps -a | grep mynginx | awk '{print $1}' | xargs docker rm
+</code></pre>
+<figure data-type="image" tabindex="21"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802201759127.png" alt="image-20200802201759127" loading="lazy"></figure>
+<h2 id="安装kubernetes">安装Kubernetes</h2>
+<h3 id="准备安装镜像">准备安装镜像</h3>
+<p>如果不提前准备好镜像的话，在启用Kubernetes的时候，页面会卡死，原因就是镜像默认会从Kubernetes提供的官方地址下载，该地址在国内是被墙的，所以我们需要将相关镜像先下载到本地。</p>
+<p><a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop">github.com/AliyunConta…</a></p>
+<p>![</p>
+<p>](<a href="http://qiniu.mldong.com/mldong-article/images/image-20200802202935475.png">qiniu.mldong.com/mldong-arti…</a>)</p>
+<ul>
+<li>克隆脚本</li>
+</ul>
+<pre><code class="language-shell">git clone https://github.com/AliyunContainerService/k8s-for-docker-desktop.git
+</code></pre>
+<ul>
+<li>
+<p>进入目录</p>
+<pre><code class="language-shell"></code></pre>
+</li>
+</ul>
+<p>cd k8s-for-docker-desktop</p>
+<pre><code>
+- 检出对应版本分支
+
+```shell
+git checkbot v1.16.5
+</code></pre>
+<ul>
+<li>以管理员身份运行PowerShell</li>
+</ul>
+<figure data-type="image" tabindex="22"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802203245791.png" alt="image-20200802203245791" loading="lazy"></figure>
+<ul>
+<li>重新进入k8s-for-docker-desktop目录</li>
+<li>设置执行脚本权限</li>
+</ul>
+<pre><code class="language-shell">Set-ExecutionPolicy RemoteSigned
+</code></pre>
+<ul>
+<li>执行下载镜像脚本</li>
+</ul>
+<p>脚本的逻辑其实就是</p>
+<ol>
+<li>从阿里云镜像仓库下载镜像</li>
+<li>修改镜像tag为官方地址</li>
+<li>删除阿里镜像</li>
+</ol>
+<pre><code class="language-shell">./load_images.ps1
+
+</code></pre>
+<ul>
+<li>关闭执行脚本权限</li>
+</ul>
+<pre><code class="language-shell">Set-ExecutionPolicy Restricted
+
+</code></pre>
+<figure data-type="image" tabindex="23"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802203748999.png" alt="image-20200802203748999" loading="lazy"></figure>
+<figure data-type="image" tabindex="24"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802203800085.png" alt="image-20200802203800085" loading="lazy"></figure>
+<h3 id="启用kubernetes集群">启用Kubernetes集群</h3>
+<p>安装好镜像后，就可以启用Kubernetes集群了。该过程会有一丢丢久，正常启动后，Kubernetes则会显绿色。</p>
+<figure data-type="image" tabindex="25"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808203137963.png" alt="image-20200808203137963" loading="lazy"></figure>
+<figure data-type="image" tabindex="26"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808210124778.png" alt="image-20200808210124778" loading="lazy"></figure>
+<figure data-type="image" tabindex="27"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200808210510300.png" alt="image-20200808210510300" loading="lazy"></figure>
+<h3 id="下载kubectl客户端">下载Kubectl客户端</h3>
+<p>下载地址：<a href="https://www.kubernetes.org.cn/installkubectl">www.kubernetes.org.cn/installkube…</a></p>
+<figure data-type="image" tabindex="28"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802204540731.png" alt="image-20200802204540731" loading="lazy"></figure>
+<p>配置环境变量，略。</p>
+<h3 id="验证kubernetes集群">验证Kubernetes集群</h3>
+<ul>
+<li>切换当前集群</li>
+</ul>
+<pre><code class="language-shell">kubectl config use-context docker-desktop
+
+</code></pre>
+<ul>
+<li>验证Kubernetes集群状态</li>
+</ul>
+<pre><code class="language-shell">kubectl cluster-info
+kubectl get nodes
+</code></pre>
+<figure data-type="image" tabindex="29"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802204955552.png" alt="image-20200802204955552" loading="lazy"></figure>
+<h2 id="安装ingress-nginx">安装ingress-nginx</h2>
+<p>看过前面系列文章的同学可能知道，Kubernetes总共三种暴露服务的方式。</p>
+<ul>
+<li>LoadBlancer Service</li>
+<li>NodePort Service</li>
+<li>Ingress</li>
+</ul>
+<p>这里不做过多的介绍了，有想了解的同学可以去查资料。我们使用云平台的时候，云平台已经帮安装好ingress-nginx了，我们只需要定义yaml文件使用即可，这里我们需要自己安装。</p>
+<p>ingress-nginx负载均衡调用顺序:用户---&gt;ingress-nginx(pod)---&gt;ingress-nginx(控制器)---&gt;ingress---&gt;service---&gt;pod</p>
+<p>不同版本的Kubernetes，使用的ingress-nginx版本是不一样的，我们可以看一下我们现在对应的版本是啥。</p>
+<p>可以看看k8s-for-docker-desktop/images.properties文件</p>
+<figure data-type="image" tabindex="30"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802211535280.png" alt="image-20200802211535280" loading="lazy"></figure>
+<p>github地址：<a href="https://github.com/kubernetes/ingress-nginx">github.com/kubernetes/…</a></p>
+<figure data-type="image" tabindex="31"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802211644109.png" alt="image-20200802211644109" loading="lazy"></figure>
+<p>是啥版本，就去看对应的文件。</p>
+<ul>
+<li>依次下载yaml文件</li>
+</ul>
+<figure data-type="image" tabindex="32"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802212240083.png" alt="image-20200802212240083" loading="lazy"></figure>
+<figure data-type="image" tabindex="33"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802214633217.png" alt="image-20200802214633217" loading="lazy"></figure>
+<figure data-type="image" tabindex="34"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802214705065.png" alt="image-20200802214705065" loading="lazy"></figure>
+<ul>
+<li>开始安装</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f mandatory.yaml
+kubectl apply -f cloud-generic.yaml
+
+</code></pre>
+<ul>
+<li>查看</li>
+</ul>
+<pre><code class="language-shell">kubectl get pods -n ingress-nginx
+
+</code></pre>
+<figure data-type="image" tabindex="35"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802214929902.png" alt="image-20200802214929902" loading="lazy"></figure>
+<ul>
+<li>浏览器访问<code>http://localhost</code></li>
+</ul>
+<figure data-type="image" tabindex="36"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802214945340.png" alt="image-20200802214945340" loading="lazy"></figure>
+<h2 id="完整地发布一个nginx服务">完整地发布一个nginx服务</h2>
+<h3 id="创建命名空间">创建命名空间</h3>
+<ul>
+<li>nginx-ns.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-ns.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mldong-study
+  
+EOF
+
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-ns.yaml
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get ns
+</code></pre>
+<figure data-type="image" tabindex="37"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802215728932.png" alt="image-20200802215728932" loading="lazy"></figure>
+<h3 id="创建configmap-配置文件">创建ConfigMap-配置文件</h3>
+<ul>
+<li>nginx-cm.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cm
+  namespace: mldong-study
+data:
+  a.conf: |-
+    server {
+      listen       80;
+      server_name  a.study.com;
+      location / {
+        root   /usr/share/nginx/html;
+        index  a.html;
+      }
+      error_page   500 502 503 504  /50x.html;
+      location = /50x.html {
+        root   /usr/share/nginx/html;
+      }
+    }
+  b.conf: |-
+    server {
+      listen       80;
+      server_name  b.study.com;
+      location / {
+        root   /usr/share/nginx/html;
+        index  b.html;
+      }
+      error_page   500 502 503 504  /50x.html;
+      location = /50x.html {
+        root   /usr/share/nginx/html;
+      }
+    }
+    
+  
+EOF
+
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-cm.yaml
+
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get cm -n mldong-study
+</code></pre>
+<figure data-type="image" tabindex="38"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802222243494.png" alt="image-20200802222243494" loading="lazy"></figure>
+<h3 id="创建configmap-html文件">创建ConfigMap-html文件</h3>
+<p>win上使用hostpath不是很方便，后续会使用nfs。这里先以最简单的方式演示。</p>
+<ul>
+<li>nginx-cm-html.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-cm-html.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-cm-html
+  namespace: mldong-study
+data:
+  a.html: |-
+    aaaaaa
+  b.html: |-
+    bbbbbb
+  
+EOF
+
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-cm-html.yaml
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get cm -n mldong-study
+
+</code></pre>
+<h3 id="创建deployment">创建Deployment</h3>
+<ul>
+<li>nginx-deployment.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: mldong-study
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        version/config: V0001
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: port
+              protocol: TCP
+          volumeMounts:
+            - name: nginx-cm-html
+              mountPath: &quot;/usr/share/nginx/html&quot;
+            - name: nginx-cm
+              mountPath: &quot;/etc/nginx/conf.d&quot;ls
+      volumes:
+        - name: nginx-cm-html
+          configMap: 
+            name: nginx-cm-html
+        - name: nginx-cm
+          configMap:
+            name: nginx-cm
+  
+EOF
+
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-deployment.yaml
+
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get pods -n mldong-study
+
+</code></pre>
+<figure data-type="image" tabindex="39"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802222418364.png" alt="image-20200802222418364" loading="lazy"></figure>
+<h3 id="创建service">创建Service</h3>
+<ul>
+<li>nginx-service.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-nodeport
+  namespace: mldong-study
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    #nodePort: 32180 # 这里不指定就会随机(30000-32767)
+  selector:
+    app: nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: mldong-study
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+
+EOF
+
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-service.yaml
+
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get service -n mldong-study
+
+</code></pre>
+<figure data-type="image" tabindex="40"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802222632065.png" alt="image-20200802222632065" loading="lazy"></figure>
+<h3 id="创建ingress">创建Ingress</h3>
+<ul>
+<li>nginx-ingress.yaml</li>
+</ul>
+<pre><code class="language-yaml">cat &lt;&lt; EOF &gt; nginx-ingress.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+  name: mynginx-ingress
+  namespace: mldong-study
+spec:
+  rules:
+    - host: a.study.com
+      http:
+        paths:
+          - backend:
+              serviceName: nginx
+              servicePort: 80
+            path: /
+    - host: b.study.com
+      http:
+        paths:
+          - backend:
+              serviceName: nginx
+              servicePort: 80
+            path: /
+
+  
+EOF
+
+
+</code></pre>
+<ul>
+<li>执行发布命令</li>
+</ul>
+<pre><code class="language-shell">kubectl apply -f nginx-ingress.yaml
+
+</code></pre>
+<ul>
+<li>查看执行结果</li>
+</ul>
+<pre><code class="language-shell">kubectl get ingress -n mldong-study
+
+</code></pre>
+<figure data-type="image" tabindex="41"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802223328697.png" alt="image-20200802223328697" loading="lazy"></figure>
+<h3 id="修改hosts">修改hosts</h3>
+<figure data-type="image" tabindex="42"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802223533643.png" alt="image-20200802223533643" loading="lazy"></figure>
+<h3 id="浏览器访问">浏览器访问</h3>
+<p><a href="http://a.study.com/">a.study.com</a></p>
+<p><a href="http://b.study.com/">b.study.com</a></p>
+<figure data-type="image" tabindex="43"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802230514957.png" alt="image-20200802230514957" loading="lazy"></figure>
+<figure data-type="image" tabindex="44"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802230525836.png" alt="image-20200802230525836" loading="lazy"></figure>
+<p>最后清理现场</p>
+<pre><code class="language-shell">kubectl delete -f nginx-ns.yaml
+</code></pre>
+<p>如需要再次执行，依次执行如下命令:</p>
+<pre><code class="language-shell">kubectl apply -f nginx-ns.yaml
+kubectl apply -f nginx-cm.yaml
+kubectl apply -f nginx-cm-html.yaml
+kubectl apply -f nginx-deployment.yaml
+kubectl apply -f nginx-service.yaml
+kubectl apply -f nginx-ingress.yaml
+
+</code></pre>
+<figure data-type="image" tabindex="45"><img src="http://qiniu.mldong.com/mldong-article/images/image-20200802231134661.png" alt="image-20200802231134661" loading="lazy"></figure>
+<h2 id="小结">小结</h2>
+<p>本文在Win10系统上安装Docker for Windows，并启用了其Kubernetes集群-单节点版，完整的发布了一个nginx的服务。可以这么说，安装好Docker for Windows并成功启用其Kubernetes后，你就可以正式入门学习k8s编排了。当然，在该环境下，不只是可以学习k8s编排，像docker/docker-compose也是自带的，也可以安排上。</p>
+<p>原文链接：https://juejin.im/post/6856407118669742094</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/8l7nJoUol/">
+              <span class="post-title">
+                K8S部署Nacos微服务&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

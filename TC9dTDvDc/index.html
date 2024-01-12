@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>CentOS 7部署FRP服务，实现内网穿透 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="CentOS 7部署FRP服务，实现内网穿透 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="CentOS 7部署FRP服务，实现内网穿透"/>
+    <meta property="og:url" content="https://jwangkun.github.io/TC9dTDvDc/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/bBuBDQI1v/" class="tag">FRP</a>
+            
+        </span>
+            <h1>CentOS 7部署FRP服务，实现内网穿透</h1>
+            <span class="meta">
+            	Posted on
+              2021-02-09，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>frp 是一个可用于内网穿透的高性能的反向代理应用，支持 tcp, udp 协议，为 http 和 https 应用协议提供了额外的能力，且尝试性支持了点对点穿透。</p>
+<p>如果您用过类似花生壳的服务，对FRP这个名词可能不陌生，FRP可实现公网穿透到内网，即使您内网机器不支持公网IP也可以实现。不过花生壳之类的服务通常是限制流量或者需要额外付费，并且存在一定安全风险。如果您自己有VPS也可以轻松搭建FRP，此处分享的是一个来自Github上的开源项目，这篇文章以CentOS 7 X64为例。</p>
+<h3 id="前提说明">前提说明</h3>
+<p>FRP分服务端和客户端两部分组成，接下来我们这篇文章需要实现的目的就是穿透到内网来连接Windows PC，在开始之前先看下FRP结构图。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.xiaoz.me/wp-content/uploads/2019/03/architecture.png" alt="img" loading="lazy"></figure>
+<h3 id="安装frp-server">安装FRP Server</h3>
+<p>作者已经提供了编译好的二进制包，下载解压 - 然后修改配置文件即可。</p>
+<pre><code class="language-bash">#下载server端
+wget https://github.com/fatedier/frp/releases/download/v0.25.0/frp_0.25.0_linux_amd64.tar.gz
+#解压
+tar -zxvf frp_0.25.0_linux_amd64.tar.gz
+#进入目录
+cd frp_0.25.0_linux_amd64
+</code></pre>
+<p>解压后我们会看到里面有好几个文件，Server端我们只需要下面2个</p>
+<pre><code>-rwxrwxr-x 1 mysql mysql 11026848 Mar 11 17:15 frps
+-rw-rw-r-- 1 mysql mysql       26 Mar 11 17:19 frps.ini
+</code></pre>
+<p>继续编辑<code>frps.ini</code>这个文件，写入以下内容：</p>
+<pre><code class="language-bash">[common]
+bind_port = 7000
+
+[mstsc]
+listen_port = 3389
+auth_token = 123456
+</code></pre>
+<ul>
+<li>bind_port: 主服务需要监听的端口，这里使用7000</li>
+<li>listen_port : 需要转发的端口，这里使用3389</li>
+<li>auth_token: 相当于验证密码，这里使用123456，也可以不填写</li>
+</ul>
+<p>配置文件完成后输入命令<code>./frps -c ./frps.ini</code> 启动服务端，当然也别忘记在防火墙放行端口哦。如果需要服务在后台运行，可以将命令替换为：<code>nohup ./frps -c ./frps.ini &amp;</code></p>
+<pre><code class="language-bash">#iptables放行端口
+iptables -A INPUT -p tcp --dport 7000 -j ACCEPT
+iptables -A INPUT -p tcp --dport 3389 -j ACCEPT
+service iptables save
+#firewalld放行端口
+firewall-cmd --zone=public --add-port=7000/tcp --permanent
+firewall-cmd --zone=public --add-port=3389/tcp --permanent
+firewall-cmd --reload
+</code></pre>
+<h3 id="安装windows-客户端">安装Windows 客户端</h3>
+<p>上面已提到FRP分服务端和客户端，上面的步骤已经完成服务端安装，接下来我们在Windows上安装客户端。</p>
+<ul>
+<li>Windows 客户端下载地址：<a href="https://github.com/fatedier/frp/releases/download/v0.25.0/frp_0.25.0_windows_amd64.zip">frp_0.25.0_windows_amd64.zip</a></li>
+</ul>
+<p>解压之后我们需要下面2个文件</p>
+<pre><code>frpc.exe
+frpc.ini
+</code></pre>
+<p>修改配置文件<code>frpc.ini</code>内容如下：</p>
+<pre><code class="language-bash">[common]
+server_addr = 1.1.1.1
+server_port = 7000
+
+[mstsc]
+type = tcp
+local_ip = 127.0.0.1
+local_port = 3389
+remote_port = 3389
+auth_token = 123456
+</code></pre>
+<ul>
+<li>server_addr: 为服务器公网IP</li>
+<li>server_port: FRP主服务监听的端口</li>
+<li>local_ip： 本地电脑IP</li>
+<li>local_port: 本地电脑监听的端口（Windows远程桌面服务默认监听3389）</li>
+<li>remote_port: Server端需要转发的端口</li>
+<li>auth_token: 验证密码，上个步骤我们设置的123456</li>
+</ul>
+<p>在<code>cmd</code>窗口下进入FRP客户端目录，然后执行命令<code>frpc.exe -c frpc.ini</code>，如果不报错，那么客户端也正常运行了。假如您服务器IP是<code>1.1.1.1</code>，当您连接<code>1.1.1.1:3389</code>时，就可以映射到内网的<code>127.0.0.1:3389</code>，从而实现内网穿透。</p>
+<h3 id="总结">总结</h3>
+<p>上面的方法适合本地申请不到公网IP的童鞋，如果本地已经有公网IP，直接使用光猫或路由器的<a href="https://www.xiaoz.me/archives/6741">端口映射</a> 功能即可。上面的工作只是转发了TCP流量，FRP的用途远不止这些，如果有兴趣可以自行深入研究。</p>
+<ul>
+<li>Github项目地址：https://github.com/fatedier/frp</li>
+<li>最新版服务端/客户端下载：https://github.com/fatedier/frp/releases</li>
+<li>此文部分内容参考了：https://github.com/fatedier/frp/blob/master/README_zh.md</li>
+</ul>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/kuIxfdZh7/">
+              <span class="post-title">
+                jiacrontab 2.x发布，简单可信赖的任务管理工具，支持秒级定时任务&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

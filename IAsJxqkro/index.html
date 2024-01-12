@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Maven插件构建Docker镜像并推送到镜像仓库 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Maven插件构建Docker镜像并推送到镜像仓库 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Maven插件构建Docker镜像并推送到镜像仓库"/>
+    <meta property="og:url" content="https://jwangkun.github.io/IAsJxqkro/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/9IyfXdfX6/" class="tag">Docker</a>
+            
+            <a href="https://jwangkun.github.io/HKDpNgMQ_p/" class="tag">Maven</a>
+            
+            <a href="https://jwangkun.github.io/CMrQd0atvo/" class="tag">Harbor</a>
+            
+        </span>
+            <h1>Maven插件构建Docker镜像并推送到镜像仓库</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-14，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Spotify官方已经不再推荐使用docker-maven-plugin，不在进行维护，转而推荐了另外一款由该公司开发的Maven插件dockerfile-maven-plugin。</p>
+<p>今天我们就来介绍下如何使用该插件。</p>
+<h3 id="构建docker镜像">构建Docker镜像</h3>
+<ol>
+<li>配置pom.xml</li>
+</ol>
+<p>首先，在pom.xml中引入dockerfile-maven-plugin插件，并配置该插件。</p>
+<p>如果是镜像仓库Harbor，配置镜像仓库私服地址</p>
+<pre><code>&lt;properties&gt;
+	&lt;!--docker私服地址--&gt;
+	&lt;docker.repostory&gt;harbor.hngtrust.com&lt;/docker.repostory&gt;
+&lt;/properties&gt;
+</code></pre>
+<p>如果是镜像仓库Docker Hub，配置镜像仓库私服地址</p>
+<pre><code>&lt;properties&gt;
+	&lt;!--docker私服地址--&gt;
+	&lt;docker.repostory&gt;docker.io&lt;/docker.repostory&gt;
+&lt;/properties&gt;
+</code></pre>
+<p>增加dockerfile-maven-plugin的配置,以eureka为例：</p>
+<pre><code>&lt;plugin&gt;
+	&lt;groupId&gt;com.spotify&lt;/groupId&gt;
+	&lt;artifactId&gt;dockerfile-maven-plugin&lt;/artifactId&gt;
+	&lt;version&gt;1.4.13&lt;/version&gt;
+	&lt;executions&gt;
+		&lt;execution&gt;
+			&lt;id&gt;harbor&lt;/id&gt;
+			&lt;goals&gt;
+				&lt;goal&gt;build&lt;/goal&gt;
+				&lt;goal&gt;push&lt;/goal&gt;
+			&lt;/goals&gt;
+		&lt;/execution&gt;
+	&lt;/executions&gt;
+	&lt;configuration&gt;
+		&lt;repository&gt;${docker.repostory}/library/${project.artifactId}&lt;/repository&gt;
+		&lt;tag&gt;${project.version}&lt;/tag&gt;
+		&lt;useMavenSettingsForAuth&gt;true&lt;/useMavenSettingsForAuth&gt;
+		&lt;username&gt;admin&lt;/username&gt;
+		&lt;password&gt;Harbor12345&lt;/password&gt;
+		&lt;buildArgs&gt;
+			&lt;JAR_FILE&gt;${project.build.finalName}.jar&lt;/JAR_FILE&gt;
+		&lt;/buildArgs&gt;
+	&lt;/configuration&gt;
+&lt;/plugin&gt;
+</code></pre>
+<p>可以看到，该插件的配置比docker-maven-plugin更简单了。</p>
+<p>repository指定docker镜像的repo名字。</p>
+<p>tag指定docker镜像的tag。</p>
+<p>buildArgs可以指定一个或多个变量，传递给Dockerfile，在Dockerfile中通过ARG指令进行引用。</p>
+<p>另外，可以在execution中同时指定build和push目标。当运行mvn package时，会自动执行build目标，构建Docker镜像。当运行mvn deploy命令时，会自动执行push目标，将Docker镜像push到Docker仓库。</p>
+<ol start="2">
+<li>编写Dockerfile</li>
+</ol>
+<p>该插件不像docker-maven-plugin插件那样，可以不用准备Dockerfile，而是通过配置pom，由插件自动生成Dockerfile，并使用生成的Dockerfile构建Docker镜像。</p>
+<p>该插件要求必须提供Dockerfile文件，而且要求放在项目根目录下，即与pom.xml同级目录。然后不需要像docker-maven-plugin插件那样需要指定Dockerfile文件存放路径的dockerDirectory参数。</p>
+<p>而且，使用该插件，有一个重要的功能是，我们可以在Dockerfile中以target开头的相对路径来引用maven构建的artifact，如jar包。</p>
+<p>如下面的Dockerfile文件内容所示：</p>
+<pre><code>FROM java:8
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &amp;&amp; echo 'Asia/Shanghai' &gt;/etc/timezone
+ENV ACTIVE=&quot;&quot;
+ADD target/dhcc-eureka-server-0.1.1-SNAPSHOT.jar dhcc-eureka-server.jar
+ENTRYPOINT [&quot;java&quot;, &quot;-jar&quot;,&quot;-Dspring.profiles.active=${ACTIVE}&quot;,  &quot;/dhcc-eureka-server.jar&quot;]
+</code></pre>
+<p>我们看到，在ADD指令后面，使用了以target开头的相对路径来引用maven构建的jar包。</p>
+<p>另外，从上面的示例中还看到，我们使用了该插件提供的另外一个新功能。正如前面提到的在pom.xml里通过buildArgs指定的变量，可以在Dockerfile中通过ARG指令引用进来，ENV ACTIVE=&quot;&quot; 然后就可以在Dockerfile的其他地方用${ACTIVE}的方式引用由pom.xml传递进来的变量值，可以实现不同环境启动。</p>
+<ol start="3">
+<li>构建Docker镜像</li>
+</ol>
+<p>使用该插件构建Docker镜像，需要有一个安装好的Docker运行环境。</p>
+<p>且需要在运行该插件的机器上定义DOCKER_HOST环境变量，配置访问Docker的URL，如下：</p>
+<pre><code>export DOCKER_HOST=tcp://localhost:2375
+</code></pre>
+<p>上面的例子，是在Linux环境下定义的DOCKER_HOST环境变量，因为Docker安装在本机上，因此使用localhost。如果你的Docker运行环境不在本机，请使用Docker所在机器的IP</p>
+<p>2375是为Docker开启的远程访问API的端口，如果你开启的是其他端口，请使用具体的端口。如果你的Docker没有开启远程访问API，请自行Google开启。</p>
+<p>如果你要在Windwos上运行该Maven插件，同样需要在Windows上配置DOCKER_HOST环境变量，值为：tcp://localhost:2375，就可以运行maven命令来构建Docker镜像了：</p>
+<pre><code>mvn package
+</code></pre>
+<p>或</p>
+<pre><code>mvn dockerfile:build
+</code></pre>
+<p>命令执行成功后，运行docker命令检查镜像是否存在：</p>
+<pre><code>docker images
+</code></pre>
+<h3 id="推送docker镜像">推送Docker镜像</h3>
+<p>Docker镜像构建好后，我们还可以使用该插件将镜像推送到Docker仓库，如Docker Hub。</p>
+<p>下面介绍如何推送到Docker Hub。</p>
+<ol>
+<li>创建repository</li>
+</ol>
+<p>首先，我们需要登录Docker Hub并创建一个repository，如下图所示，我们创建了config-server的repository：</p>
+<ol start="2">
+<li>配置pom.xml</li>
+</ol>
+<p>docker hub 的repository的格式必须为：</p>
+<p><username>/&lt;repository_name&gt;</p>
+<pre><code>&lt;configuration&gt;
+  &lt;repository&gt;jwangkun/dhcc-eureka-server&lt;/repository&gt;
+  &lt;tag&gt;${project.version}&lt;/tag&gt;
+  &lt;buildArgs&gt;
+    &lt;JAR_FILE&gt;${project.build.finalName}.jar&lt;/JAR_FILE&gt;
+  &lt;/buildArgs&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>username就是登录Docker Hub的用户名，例如我的用户名是jwangkun, repository_name就是上一步在Docker Hub上创建的repository名字。</p>
+<p>Harbor则在pom.xml中为该插件配置Docker镜像的repository名字，如下：</p>
+<pre><code>&lt;configuration&gt;
+  &lt;repository&gt;${docker.repostory}/library/dhcc-eureka-server&lt;/repository&gt;
+  &lt;tag&gt;${project.version}&lt;/tag&gt;
+  &lt;buildArgs&gt;
+    &lt;JAR_FILE&gt;${project.build.finalName}.jar&lt;/JAR_FILE&gt;
+  &lt;/buildArgs&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>注意 ：library为harbor仓库中创建的项目名称 ，${docker.repostory} 则为上面pom.xml 中properties配置的docker.repostory的值</p>
+<ol start="3">
+<li>配置认证</li>
+</ol>
+<p>接下来，需要为插件配置认证信息，即登录Docker Hub的用户名和密码。因为插件在push镜像前，需要登录Docker Hub。</p>
+<p>有三种方式配置认证信息。</p>
+<p>第一种：在pom.xml中配置认证信息</p>
+<p>如下所示，可以直接在pom.xml为插件配置usnername和password：</p>
+<pre><code>&lt;configuration&gt;
+  &lt;repository&gt;jwangkun/dhcc-eureka-server&lt;/repository&gt;
+  &lt;tag&gt;${project.version}&lt;/tag&gt;
+  &lt;username&gt;jwangkun&lt;/username&gt;
+  &lt;password&gt;xxxx&lt;/password&gt;
+  &lt;buildArgs&gt;
+    &lt;JAR_FILE&gt;${project.build.finalName}.jar&lt;/JAR_FILE&gt;
+  &lt;/buildArgs&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>第二种：在settings.xml中配置server</p>
+<p>如下所示，在maven的settings.xml中的servers下增加一个server配置：</p>
+<p>对于Docker Hub，server.id必须是http://docker.io。</p>
+<pre><code>&lt;servers&gt;
+  &lt;server&gt;
+    &lt;id&gt;docker.io&lt;/id&gt;
+    &lt;username&gt;jwangkun&lt;/username&gt;
+    &lt;password&gt;xxxx&lt;/password&gt;
+  &lt;/server&gt;
+&lt;/servers&gt;
+</code></pre>
+<p>对于Harbor，server.id必须是换成Harbor服务地址以及端口即可。</p>
+<pre><code>&lt;servers&gt;
+	&lt;server&gt;
+		&lt;id&gt;192.168.1.1:9001&lt;/id&gt;
+		&lt;username&gt;admin&lt;/username&gt;
+		&lt;password&gt;*****&lt;/password&gt;
+		&lt;configuration&gt;
+			&lt;email&gt;******@qq.com&lt;/email&gt;
+		&lt;/configuration&gt;
+	&lt;/server&gt;
+&lt;/servers&gt;
+</code></pre>
+<p>然后在pom.xml中指定useMavenSettingsForAuth为true：</p>
+<pre><code>&lt;configuration&gt;
+  &lt;repository&gt;jwangkun/dhcc-eureka-server&lt;/repository&gt;
+  &lt;tag&gt;${project.version}&lt;/tag&gt;
+  &lt;useMavenSettingsForAuth&gt;true&lt;/useMavenSettingsForAuth&gt;
+  &lt;buildArgs&gt;
+    &lt;JAR_FILE&gt;${project.build.finalName}.jar&lt;/JAR_FILE&gt;
+  &lt;/buildArgs&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>第三种：直接在mvn命令行上提供认证信息</p>
+<p>如果没有在pom.xml中配置认证信息，也没有在settings.xml中配置认证信息，那么我们还可以简单地在运行的mvn命令行上以参数的形式提供认证信息，如下所示：</p>
+<pre><code>mvn dockerfile:push -Ddockerfile.username=jwangkun -Ddockerfile.password=xxxx
+</code></pre>
+<p>第一种方式，由于需要在pom.xml中配置用户密码，而pom.xml一般都会随着源码一起提交到版本控制系统中，因此有暴露用户密码的风险。</p>
+<p>第三种方式，在每次运行maven命令时，都需要额外提供用户名和密码，比较麻烦。</p>
+<p>因此，一般推荐使用第二种方式。</p>
+<ol start="4">
+<li>push镜像</li>
+</ol>
+<p>接下来，执行maven命令来push镜像。</p>
+<p>对于前两种认证方式，我们可以直接运行mvn goal命令来push镜像：</p>
+<pre><code>mvn deploy
+</code></pre>
+<p>或者</p>
+<pre><code>mvn dockerfile:push
+</code></pre>
+<p>对于第三种认证方式，使用上面提到的命令来push镜像。</p>
+<pre><code>mvn dockerfile:push -Ddockerfile.username=jwangkun -Ddockerfile.password=xxxx
+</code></pre>
+<p>需要注意的是，如果你没有配置部署artifact的maven repository，请不要使用mvn deploy命令，因为它会执行maven-deploy-plugin的deploy目标，而由于没有配置要部署的远程maven repository，会报类似如下的错：</p>
+<p>Deployment failed: repository element<br>
+was not specified in the POM inside distributionManagement element or in -DaltDeploymentRepository=id::layout::url parameter</p>
+<p>在这种情况下，请使用下面的命令来push镜像：</p>
+<pre><code>mvn dockerfile:push
+</code></pre>
+<ol start="4">
+<li>检查镜像maven命令执行成功后，可以登录Docker Hub来检查镜像是否存在。</li>
+</ol>
+<h3 id="推送镜像到harbor仓库">推送镜像到Harbor仓库</h3>
+<p>由于我要推送的仓库是私有的，需要用户名密码，所以，要在maven的配置文件（setting文件）中，添加如下配置：</p>
+<pre><code>&lt;configuration&gt;
+    &lt;repository&gt;${docker.repostory}/library/${project.artifactId}&lt;/repository&gt;
+    &lt;tag&gt;${project.version}&lt;/tag&gt;
+    &lt;useMavenSettingsForAuth&gt;true&lt;/useMavenSettingsForAuth&gt;
+    &lt;username&gt;admin&lt;/username&gt;
+    &lt;password&gt;Harbor12345&lt;/password&gt;
+    &lt;buildArgs&gt;
+    	&lt;JAR_FILE&gt;${project.build.finalName}.jar&lt;/JAR_FILE&gt;
+    &lt;/buildArgs&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>注意如果是Harbor仓库，useMavenSettingsForAuth一定要加上，貌似在maven的settings.xml中的servers没有生效还是其他原因，会报地址错误或者用户名密码登录不上的情况，加上useMavenSettingsForAuth就可以了</p>
+<pre><code> &lt;useMavenSettingsForAuth&gt;true&lt;/useMavenSettingsForAuth&gt;
+</code></pre>
+<p>配置好之后，执行命令：</p>
+<pre><code>mvn dockerfile:push
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/59eFp4SaS/">
+              <span class="post-title">
+                Kubernetes Ingress&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

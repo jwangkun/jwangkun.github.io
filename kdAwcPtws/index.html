@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Git 常用基本操作 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Git 常用基本操作 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Git 常用基本操作"/>
+    <meta property="og:url" content="https://jwangkun.github.io/kdAwcPtws/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/H0YOCYFRJ/" class="tag">Git</a>
+            
+        </span>
+            <h1>Git 常用基本操作</h1>
+            <span class="meta">
+            	Posted on
+              2020-08-08，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/3/1/16937b910efb653f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="git 流程" loading="lazy"></figure>
+<h2 id="分支">分支</h2>
+<h5 id="1-git-branch-branch-name">1. <code>git branch &lt;branch name&gt;</code></h5>
+<p>在本地创建一个新的分支名为<code>&lt;branch name&gt;</code>, 此时在远端看不到该分支, 需要将该分支推送到远端。查看自己本地分支: <code>git branch</code> 查看刚才新创建的分支</p>
+<h5 id="2git-checkout-branch-name">2.<code>git checkout &lt;branch name&gt;</code></h5>
+<p>进行本地分支的切换，切换至上述新建的分支<code>&lt;branch name&gt;</code></p>
+<h5 id="3git-checkout-">3.<code>git checkout -</code></h5>
+<p>切换至上一个分支，命令效果等同于<code>cd -</code></p>
+<h5 id="3git-push-set-upstream-origin-branch-name">3.<code>git push --set-upstream origin &lt;branch name&gt;</code></h5>
+<p>推送该分支到远端，并建立关联。所谓关联是指后续所有提交到该分支，如<code>git push</code>, 如果不进行次操作，<strong>git</strong> 会进行提示</p>
+<h5 id="4-git-branch-c">4. <code>git branch -c</code></h5>
+<p>该命令等同于上述1.2步，新创建分支同时会进行切换到新分支</p>
+<h5 id="5-git-branch-r-git-branch-git-branch-a">5. <code>git branch -r</code>: <code>git branch</code> : <code>git branch -a</code></h5>
+<p>上述都查看分支， 查看远端分支， 查看本地分支， 查看所有分支，操作者当前所在分支用 * 号标记。</p>
+<h5 id="6-git-branch-d-branch-name">6. <code>git branch -d &lt;branch name&gt;</code></h5>
+<p>删除一个<strong>本地分支</strong>，切换至别的分支，否则删除不了。</p>
+<h5 id="7-git-push-origin-delete-branch-name">7. <code>git push origin --delete &lt;branch name&gt;</code></h5>
+<p>删除远端分支</p>
+<h2 id="文件修改提交">文件修改提交</h2>
+<h5 id="8-git-status">8. <code>git status</code></h5>
+<p>查看当前分支工作区、暂存区的工作状态，</p>
+<h5 id="9-git-status-sb">9. <code>git status -sb</code></h5>
+<p>以简洁的方式显示工作区文件状态</p>
+<h5 id="10-git-add-filename">10. <code>git add &lt;filename&gt;</code></h5>
+<p>将该文件加入暂存区</p>
+<h5 id="11-git-add-git-add-a">11. <code>git add . || git add -A</code></h5>
+<p>将所有的新创建的文件加入暂存区, 执行git add命令的时候，git首先会通过hash函数算出文件名A.java对应的sha-1值, 该值是32位16进值，git 取前两位在.git 目录objects目录下创建一个以后30为文件名的文件。</p>
+<h5 id="12-git-diff-xxx">12. <code>git diff xxx</code></h5>
+<p>查看文件的修改</p>
+<h5 id="13-git-commit-m-message-filename">13. <code>git commit -m &quot;&lt;message&gt;&quot; &lt;filename&gt;</code></h5>
+<p>提交该文件至本地仓库, 如果提交所有文件可以使用<code>git commit .</code>命令</p>
+<h5 id="14-git-commit-git-commit-a">14. <code>git commit || git commit -a</code></h5>
+<p>提交所有文件修改，并打开vim界面，填写 <strong>message</strong> , 作用是规范提交的 <strong>message</strong>，效果等同于arc。 可以参照<a href="https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines">Angular 团队的规范</a>。修改自己本地提交 <strong>message</strong> 参照<a href="https://juejin.im/post/6844903606815064077">优雅的提交你的 Git Commit Message</a>。</p>
+<h5 id="15-git-pull">15. <code>git pull</code></h5>
+<p>更新远端的代码并与本地进行合并， 如果自己修改了代码, 获取别人时会产生一次无用的 <code>merge</code>提交记录。</p>
+<h5 id="16-git-pull-rebase">16. <code>git pull --rebase</code></h5>
+<p>同样的拉取远端代码，并与本地代码自动合并，但不会产生上述无用的 <strong>commit</strong> , 让分支节点迭代更加优美、清晰</p>
+<h5 id="17-git-fetch">17. <code>git fetch</code></h5>
+<p>拉取远端代码，但不会进行 <strong>merge</strong> , 需要自己手动执行 <code>git merge &lt;filename&gt;</code> 进行合并</p>
+<h5 id="17-git-push">17. <code>git push</code></h5>
+<p>将本地代码修改推送至远端</p>
+<h2 id="日志查看">日志查看</h2>
+<h5 id="18-git-log-x">18. <code>git log -x</code></h5>
+<p>查看最近<strong>X</strong>的提交日志</p>
+<h5 id="19-git-log-x-prettyoneline">19. <code>git log -x --pretty=oneline</code></h5>
+<p>去除提交日志里的 <strong>date</strong> 以及 <strong>author</strong>, 显示为一行</p>
+<h5 id="20-git-show-stat">20. <code>git show --stat</code></h5>
+<p>显示最近一次的提交日志，并显示修改的文件</p>
+<h5 id="21-git-show-commit-id">21. <code>git show &lt;commit-id&gt;</code></h5>
+<p>查看对应的 <strong>commit-id</strong> 修改详情, 具体的修改内容查看。</p>
+<h5 id="22-git-log-head~1">22. <code>git log HEAD~1</code></h5>
+<p>HEAD 指针指向的最后一次提交，也可以查看最后一次提交的<strong>log</strong></p>
+<h5 id="23-git-show-head~1">23. <code>git show HEAD~1</code></h5>
+<p>查看最近一次的修改内容详情</p>
+<h2 id="文件回滚">文件回滚</h2>
+<h5 id="24-git-checkout-filename">24. <code>git checkout &lt;filename&gt;</code></h5>
+<p>前置条件没有 <strong>commit</strong> 到本地仓库，撤销filename文件在工作区的修改到最近一次git add 或 git commit时的内容，就是清空当前工作区的修改</p>
+<h5 id="25-git-reset-mixed-commit-id">25. <code>git reset --mixed &lt;commit-id&gt;</code></h5>
+<p>没有 <strong>push</strong> 到远端之前，回滚到指定 <strong>commit-id</strong> , <strong>mixed</strong> 是git默认的回滚方式，会清空暂存区保留工作区。如回滚前有两个 <strong>commit-id</strong></p>
+<figure data-type="image" tabindex="2"><img src="https://user-gold-cdn.xitu.io/2019/3/1/16937be7d915d48f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="回滚前" loading="lazy"></figure>
+<p>回滚后如下图：</p>
+<figure data-type="image" tabindex="3"><img src="https://user-gold-cdn.xitu.io/2019/3/1/16937bd747049414?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="回滚后" loading="lazy"></figure>
+<p>文件显示没有被 <strong>add</strong> 到缓存区，但是保留了该文件， 并将 <strong>commit-id</strong> 擦除，擦除的 <strong>commit-id</strong> 可以恢复<code>reflog</code></p>
+<h5 id="26-git-reset-soft-commit-id">26. <code>git reset --soft &lt;commit-id&gt;</code></h5>
+<figure data-type="image" tabindex="4"><img src="https://user-gold-cdn.xitu.io/2019/3/1/16937befda1d6cef?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="soft" loading="lazy"></figure>
+<p>该命令会会同时保存暂存区和工作区内容，并将 <strong>commit-id</strong> 擦除，擦除的 <strong>commit-id</strong> 可以恢复用<code>reflog</code></p>
+<h5 id="27-git-reset-hard-commit-id">27. <code>git reset --hard &lt;commit-id&gt;</code></h5>
+<p>该命令会同时清除工作区和暂存区，并将 <strong>commit-id</strong> 擦除，擦除的 <strong>commit-id</strong> 可以恢复<code>reflog</code></p>
+<h5 id="28-git-revert-commit-id">28. <code>git revert &lt;commit-id&gt;</code></h5>
+<p>在已经将代码 <strong>push</strong> 到远端后，回滚时使用该命令，注意指定的是要回滚的 <strong>commit-id</strong> , 回退结束后任何内容都不会保留。git reset 是把HEAD向后移动了一下，而git revert是HEAD继续前进，只是新的commit的内容和要revert的内容正好相反，能够抵消要被revert的内容。</p>
+<h2 id="分支合并">分支合并</h2>
+<h5 id="29-git-merge-branchname">29. <code>git merge &lt;branchname&gt;</code></h5>
+<p>开始前请切换你的 <strong>target</strong> 分支 ，执行该命令会将 &lt;<strong>source branch</strong>&gt; 代码合并。缺点：git 默认是以 <strong>fast-forward</strong> 方式进行合并，属于“快进方式”，这种情况如果删除分支，则会丢失分支信息。因为在这个过程中没有创建commit。</p>
+<h5 id="30-git-merge-no-ff-branch-name">30. <code>git merge --no-ff &lt;branch name&gt;</code></h5>
+<p>和上一条命令的区别在于下图</p>
+<figure data-type="image" tabindex="5"><img src="https://user-gold-cdn.xitu.io/2019/3/1/16937bfb56e8402a?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="git merge --no-ff" loading="lazy"></figure>
+<p>会保存分支的所有 <strong>commit-id</strong> , 并产生一次新的提交</p>
+<h2 id="git-tag">Git Tag</h2>
+<p>tag 的作用是对某个提交点打上标签，发布版本后打tag，便于以后回滚特定版本。tag 是对某一版本的记录,tag就是一个只读的 branch ,一般为每一个可发布的里程碑版本打一个tag</p>
+<h5 id="31-git-tag-v110">31. <code>git tag v1.1.0</code></h5>
+<p>在本地对当前分支打 <strong>tag</strong></p>
+<h5 id="32-git-push-origin-tag">32. <code>git push origin --tag</code></h5>
+<p>将创建的 <strong>tag</strong> 提交至远端</p>
+<h5 id="33-git-tag-d-v100">33. <code>git tag -d v1.0.0</code></h5>
+<p>删除本地tag</p>
+<h5 id="34-git-push-delete-origin-v100">34. <code>git push --delete origin v1.0.0</code></h5>
+<p>删除远端的 tag</p>
+<h5 id="35-git-show-tag-name">35. <code>git show &lt;tag name&gt;</code></h5>
+<figure data-type="image" tabindex="6"><img src="https://user-gold-cdn.xitu.io/2019/3/1/16937c03a8190a02?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="git tag" loading="lazy"></figure>
+<p>记录了对应的 <strong>commi-id</strong> 可以直接用于回滚使用</p>
+<h2 id="git-与-svn-操作对比">Git 与 SVN 操作对比</h2>
+<table>
+<thead>
+<tr>
+<th>SVN</th>
+<th>Git</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>svn checkout</td>
+<td>git clone</td>
+<td>检出项目</td>
+</tr>
+<tr>
+<td>svn update</td>
+<td>git pull git fetch</td>
+<td>更新</td>
+</tr>
+<tr>
+<td>svn commit</td>
+<td>git commit git push</td>
+<td>提交</td>
+</tr>
+<tr>
+<td>svn add</td>
+<td>git add</td>
+<td>添加</td>
+</tr>
+<tr>
+<td>svn mv</td>
+<td>git mv</td>
+<td>移动</td>
+</tr>
+<tr>
+<td>svn rm</td>
+<td>git rm</td>
+<td>删除</td>
+</tr>
+<tr>
+<td>svn status</td>
+<td>git status</td>
+<td>查看状态</td>
+</tr>
+<tr>
+<td>svn log</td>
+<td>git log</td>
+<td>查看log</td>
+</tr>
+<tr>
+<td>svn diff</td>
+<td>git diff</td>
+<td>查看差异</td>
+</tr>
+<tr>
+<td>svn revert</td>
+<td>git checkout git reset git revert</td>
+<td>回滚 、撤销</td>
+</tr>
+<tr>
+<td>svn copy</td>
+<td>git branch</td>
+<td>且分支</td>
+</tr>
+<tr>
+<td>svn switch</td>
+<td>git checkout</td>
+<td>切换分支</td>
+</tr>
+<tr>
+<td>svn copy</td>
+<td>git tag</td>
+<td>创建tag</td>
+</tr>
+<tr>
+<td>svn merge</td>
+<td>git merge</td>
+<td>合并分支</td>
+</tr>
+</tbody>
+</table>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/angular-huan-jing-da-jian/">
+              <span class="post-title">
+                Angular 环境搭建&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

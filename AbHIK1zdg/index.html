@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>NFS 高可用方案（NFS+keepalived+Sersync） | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="NFS 高可用方案（NFS+keepalived+Sersync） | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="NFS 高可用方案（NFS+keepalived+Sersync）"/>
+    <meta property="og:url" content="https://jwangkun.github.io/AbHIK1zdg/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/jY1_HHrkR/" class="tag">NFS</a>
+            
+        </span>
+            <h1>NFS 高可用方案（NFS+keepalived+Sersync）</h1>
+            <span class="meta">
+            	Posted on
+              2021-12-07，12 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="1-简述">1. 简述</h2>
+<h3 id="11-介绍">1.1 介绍</h3>
+<p>本方案 NFS 的高可用方案，应用服务器为 Client ，两台文件服务器分别 Master 和 Slave，使用 keepalived 生成一个虚拟 IP，使用 Sersync 进行 Master 与 Slave 之间文件相互同步，确保高可用。</p>
+<h2 id="2-安装前准备">2. 安装前准备</h2>
+<p>服务器信息：</p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>系统版本</th>
+<th>ip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>虚拟 ip（Vip）</td>
+<td>无</td>
+<td>192.168.50.143</td>
+</tr>
+<tr>
+<td>Client</td>
+<td>centos 7.5</td>
+<td>192.168.51.246</td>
+</tr>
+<tr>
+<td>Master</td>
+<td>centos 7.5</td>
+<td>192.168.50.8</td>
+</tr>
+<tr>
+<td>Slave</td>
+<td>centos 7.5</td>
+<td>192.168.50.71</td>
+</tr>
+</tbody>
+</table>
+<p>服务器环境准备：</p>
+<p>在 Master 和 Slave 上创建共享目录</p>
+<pre><code>mkdir /data
+</code></pre>
+<p>在 Client 上创建挂载目录</p>
+<pre><code>mkdir /qiyuesuodata
+</code></pre>
+<p>关闭 Client 、Master 和 Slave 服务器上的防火墙</p>
+<pre><code># 关闭防火墙
+systemctl stop firewalld
+# 关闭开机自启
+systemctl disable firewalld
+</code></pre>
+<h2 id="3-安装-nfs-并配置">3. 安装 NFS 并配置</h2>
+<p>在 Client 、Master 和 Slave 服务器上安装 NFS 服务</p>
+<pre><code>yum -y install nfs-utils rpcbind
+</code></pre>
+<p><strong>配置 NFS 共享目录</strong></p>
+<p>在 Master 上执行</p>
+<pre><code># 其中/data 为共享的目录，192.168.51.246 为 Client ip，如有多个私有云服务集群可用空格分隔
+# 如 echo '/data 192.168.51.246(rw,sync,all_squash) 192.168.51.247(rw,sync,all_squash)' &gt;&gt; /etc/exports
+ echo '/data 192.168.51.246(rw,sync,all_squash)' &gt;&gt; /etc/exports
+# 开启服务
+ systemctl start rpcbind &amp;&amp; systemctl start nfs
+# 设置开机自启
+ systemctl enable rpcbind &amp;&amp; systemctl enable nfs
+# 出现：Created symlink from /etc/systemd/system/multi-user.target.wants/nfs-server.service to /usr/lib/systemd/system/nfs-server.service.即成功
+</code></pre>
+<p>在 Slave 上执行</p>
+<pre><code># 其中/data 为共享的目录，192.168.51.246 为 Client ip，如有多个私有云服务集群可用空格分隔
+# 如 echo '/data 192.168.51.246(rw,sync,all_squash) 192.168.51.247(rw,sync,all_squash)' &gt;&gt; /etc/exports
+ echo '/data 192.168.51.246(rw,sync,all_squash)' &gt;&gt; /etc/exports
+# 开启服务
+ systemctl start rpcbind &amp;&amp; systemctl start nfs
+# 设置开机自启
+ systemctl enable rpcbind &amp;&amp; systemctl enable nfs
+# # 出现：Created symlink from /etc/systemd/system/multi-user.target.wants/nfs-server.service to /usr/lib/systemd/system/nfs-server.service.即成功
+</code></pre>
+<p><strong>测试挂载是否成功</strong></p>
+<p>在 Client 上执行挂载测试</p>
+<pre><code># 测试 Master 
+# 其中 ip 为 Master 的 ip，/data为 Master 共享的目录，/qiyuesuodata 为需要挂载至 Client 的目录
+ mount -t nfs 192.168.50.8:/data /qiyuesuodata
+# 检查 
+df -Th 
+# 出现  192.168.50.8:/data      nfs4       29G  7.6G   22G  27% /qiyuesuodata 即为成功
+# 去除挂载
+umount /qiyuesuodata
+
+# 测试 Slave
+# 其中 ip 为 Master 的 ip，/data为 Master 共享的目录，/qiyuesuodata 为需要挂载至 Client 的目录
+ mount -t nfs 192.168.50.71:/data /qiyuesuodata
+# 检查 
+df -Th 
+# 出现  192.168.50.71:/data      nfs4       29G  7.6G   22G  27% /qiyuesuodata 即为成功
+# 去除挂载
+umount /qiyuesuodata
+</code></pre>
+<h2 id="4-配置文件同步">4. 配置文件同步</h2>
+<h4 id="在-slave-进行同步-master-数据">在 Slave 进行同步 Master 数据</h4>
+<pre><code># 安装 rsync
+yum -y install rsync.x86_64
+# 修改 /etc/rsyncd.conf 如下,其中 hosts allow 填写 master ip
+uid = nfsnobody
+gid = nfsnobody
+port = 873
+pid file = /var/rsyncd.pid
+log file = /var/log/rsyncd.log
+use chroot = no
+max connections = 200
+read only = false
+list = false
+fake super = yes
+ignore errors
+[data]
+path = /data
+auth users = qiyuesuo
+secrets file = /etc/rsync_salve.pass
+hosts allow = 192.168.50.8
+
+# 生成认证文件
+echo 'qiyuesuo:qiyuesuo123' &gt; /etc/rsync_salve.pass
+chmod 600 /etc/rsync_salve.pass
+# 修改 文件夹权限
+chown -R nfsnobody:nfsnobody /data/
+# 启动服务
+ rsync --daemon --config=/etc/rsyncd.conf 
+</code></pre>
+<p>在 Master 上测试</p>
+<pre><code>yum -y install rsync.x86_64
+chown -R nfsnobody:nfsnobody /data/
+echo &quot;qiyuesuo123&quot; &gt; /etc/rsync.pass
+chmod 600 /etc/rsync.pass
+#创建测试文件,测试推送
+cd /data/
+echo &quot;This is test file&quot; &gt; file.txt
+rsync -arv /data/ qiyuesuo@192.168.50.71::data --password-file=/etc/rsync.pass
+#在 slave 上测试
+ls /data 
+# 出现 file.txt 即可
+</code></pre>
+<p>在 Master 上配置自动同步</p>
+<pre><code> cd /usr/local/
+ wget https://dl.qiyuesuo.com/private/nfs/sersync2.5.4_64bit_binary_stable_final.tar.gz
+ tar xvf sersync2.5.4_64bit_binary_stable_final.tar.gz
+ mv GNU-Linux-x86/ sersync
+ cd sersync/
+ # 修改配置文件
+sed -ri 's#&lt;delete start=&quot;true&quot;/&gt;#&lt;delete start=&quot;false&quot;/&gt;#g' confxml.xml
+sed -ri '24s#&lt;localpath watch=&quot;/opt/tongbu&quot;&gt;#&lt;localpath watch=&quot;/data&quot;&gt;#g' confxml.xml
+sed -ri '25s#&lt;remote ip=&quot;127.0.0.1&quot; name=&quot;tongbu1&quot;/&gt;#&lt;remote ip=&quot;192.168.50.71&quot; name=&quot;data&quot;/&gt;#g' confxml.xml
+sed -ri '30s#&lt;commonParams params=&quot;-artuz&quot;/&gt;#&lt;commonParams params=&quot;-az&quot;/&gt;#g' confxml.xml
+sed -ri '31s#&lt;auth start=&quot;false&quot; users=&quot;root&quot; passwordfile=&quot;/etc/rsync.pas&quot;/&gt;#&lt;auth start=&quot;true&quot; users=&quot;qiyuesuo&quot; passwordfile=&quot;/etc/rsync.pass&quot;/&gt;#g' confxml.xml
+sed -ri '33s#&lt;timeout start=&quot;false&quot; time=&quot;100&quot;/&gt;&lt;!-- timeout=100 --&gt;#&lt;timeout start=&quot;true&quot; time=&quot;100&quot;/&gt;&lt;!-- timeout=100 --&gt;#g' confxml.xml
+#启动Sersync
+/usr/local/sersync/sersync2 -dro /usr/local/sersync/confxml.xml
+</code></pre>
+<p>测试</p>
+<pre><code># 在 master 中的/data 目录创建文件
+touch test
+# 查看 salve 中的 /data 是否有该文件
+</code></pre>
+<p>以上就做完了 salve 同步 master 的文件，但是当 master 宕机后恢复，master 无法同步 salve 文件，所以要配置 master 同步 salve 文件</p>
+<h4 id="在-master-进行同步-slave-数据">在 Master 进行同步 slave 数据</h4>
+<pre><code># 修改 /etc/rsyncd.conf 如下,其中 hosts allow 填写 slave ip
+uid = nfsnobody
+gid = nfsnobody
+port = 873
+pid file = /var/rsyncd.pid
+log file = /var/log/rsyncd.log
+use chroot = no
+max connections = 200
+read only = false
+list = false
+fake super = yes
+ignore errors
+[data]
+path = /data
+auth users = qiyuesuo
+secrets file = /etc/rsync_master.pass
+hosts allow = 192.168.50.71
+
+
+# 生成认证文件
+echo 'qiyuesuo:qiyuesuo123' &gt; /etc/rsync_master.pass
+chmod 600 /etc/rsync_master.pass
+# 修改 文件夹权限
+chown -R nfsnobody:nfsnobody /data/
+# 启动服务
+ rsync --daemon --config=/etc/rsyncd.conf 
+</code></pre>
+<p>在 Slave 上测试</p>
+<pre><code>chown -R nfsnobody:nfsnobody /data/
+echo &quot;qiyuesuo123&quot; &gt; /etc/rsync.pass
+chmod 600 /etc/rsync.pass
+#创建测试文件,测试推送
+cd /data/
+echo &quot;This is test file&quot; &gt; file.2.txt
+rsync -arv /data/ qiyuesuo@192.168.50.8::data --password-file=/etc/rsync.pass
+#在 slave 上测试
+ls /data 
+# 出现 file.2.txt 即可
+</code></pre>
+<p>在 Slave 上配置自动同步</p>
+<pre><code> cd /usr/local/
+ wget https://dl.qiyuesuo.com/private/nfs/sersync2.5.4_64bit_binary_stable_final.tar.gz
+ tar xvf sersync2.5.4_64bit_binary_stable_final.tar.gz
+ mv GNU-Linux-x86/ sersync
+ cd sersync/
+ # 修改配置文件
+sed -ri 's#&lt;delete start=&quot;true&quot;/&gt;#&lt;delete start=&quot;false&quot;/&gt;#g' confxml.xml
+sed -ri '24s#&lt;localpath watch=&quot;/opt/tongbu&quot;&gt;#&lt;localpath watch=&quot;/data&quot;&gt;#g' confxml.xml
+sed -ri '25s#&lt;remote ip=&quot;127.0.0.1&quot; name=&quot;tongbu1&quot;/&gt;#&lt;remote ip=&quot;192.168.50.8&quot; name=&quot;data&quot;/&gt;#g' confxml.xml
+sed -ri '30s#&lt;commonParams params=&quot;-artuz&quot;/&gt;#&lt;commonParams params=&quot;-az&quot;/&gt;#g' confxml.xml
+sed -ri '31s#&lt;auth start=&quot;false&quot; users=&quot;root&quot; passwordfile=&quot;/etc/rsync.pas&quot;/&gt;#&lt;auth start=&quot;true&quot; users=&quot;qiyuesuo&quot; passwordfile=&quot;/etc/rsync.pass&quot;/&gt;#g' confxml.xml
+sed -ri '33s#&lt;timeout start=&quot;false&quot; time=&quot;100&quot;/&gt;&lt;!-- timeout=100 --&gt;#&lt;timeout start=&quot;true&quot; time=&quot;100&quot;/&gt;&lt;!-- timeout=100 --&gt;#g' confxml.xml
+#启动Sersync
+/usr/local/sersync/sersync2 -dro /usr/local/sersync/confxml.xml
+</code></pre>
+<p>至此我们已经做好了主从相互同步的操作</p>
+<p>##5. 安装 Keepalived</p>
+<p>在 Master 上执行</p>
+<pre><code>yum -y install keepalived.x86_64
+# 修改 /etc/keepalived/keepalived.conf
+# 其中 enp0s3 为绑定网卡名称，可以使用 ip addr 命令查看
+# 其中 192.168.50.143  为虚拟 ip ，注意不要和其它 ip 冲突
+! Configuration File for keepalived
+
+global_defs {
+   router_id NFS-Master
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface enp0s3
+    virtual_router_id 51
+    priority 150
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass qiyuesuo123
+    }
+    virtual_ipaddress {
+        192.168.50.143  
+    }
+}
+# 启动服务
+systemctl start  keepalived.service &amp;&amp; systemctl enable keepalived.service
+</code></pre>
+<p>在 Slave 上执行</p>
+<pre><code>yum -y install keepalived.x86_64
+# 修改 /etc/keepalived/keepalived.conf
+# 其中 enp0s3 为绑定网卡名称，可以使用 ip addr 命令查看
+# 其中 192.168.50.143  为虚拟 ip ，注意不要和其它 ip 冲突
+! Configuration File for keepalived
+
+global_defs {
+   router_id NFS-Slave
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface enp0s3
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass qiyuesuo123
+    }
+    virtual_ipaddress {
+        192.168.50.143  
+    }
+}
+# 启动服务
+systemctl start  keepalived.service &amp;&amp; systemctl enable keepalived.service
+</code></pre>
+<p><strong>查看虚拟 IP 是否存在</strong></p>
+<p>在 Master 上执行：</p>
+<pre><code>ip a | grep  192.168.50.143
+# 出现
+# inet 192.168.50.143/32 scope global enp0s3
+# 即成功
+</code></pre>
+<p><strong>VIP 挂载测试</strong></p>
+<p>在 Client 上通过 vip 挂载测试</p>
+<pre><code>mount -t nfs 192.168.50.143:/data /qiyuesuodata
+# 如/qiyuesuodata目录中有共享目录中文件则说明挂载成功
+umount /qiyuesuodata/
+</code></pre>
+<p>模拟机器 Down 机, 测试虚拟 IP 地址是否会漂移</p>
+<pre><code># 在 Master 上关闭 keepalived
+systemctl stop keepalived.service
+# 执行ip a | grep  192.168.50.143会无输出则关闭成功
+# 在 Slave 上查看
+ip a | grep  192.168.50.143
+# 出现
+# inet 192.168.50.143/32 scope global enp0s3
+# 即成功
+</code></pre>
+<p>则说明 ip 漂移成功</p>
+<h2 id="设置-keepalived-脚本">设置 keepalived 脚本</h2>
+<p>因为 ip 的漂移是根据 keepalived 的存活来判断的，所以在 nfs 宕机之后需要手动停止 keepalived 服务来进行 ip 的切换，这里在 Master 上编写一个定时任务来检测 nfs 服务是否宕机</p>
+<pre><code>cd /usr/local/sbin
+# 生成文件check_nfs.sh
+#!/bin/sh
+# 每秒执行一次
+step=1 #间隔的秒数，不能大于60 
+for (( i = 0; i &lt; 60; i=(i+step) )); do 
+  ###检查nfs可用性：进程和是否能够挂载
+  /sbin/service nfs status &amp;&gt;/dev/null
+  if [ $? -ne 0 ];then
+    ###如果服务状态不正常，先尝试重启服务
+    /sbin/service nfs restart
+    /sbin/service nfs status &amp;&gt;/dev/null
+    if [ $? -ne 0 ];then
+       # 如服务仍不正常，停止 keepalived
+       systemctl stop keepalived.service
+    fi
+  fi
+  sleep $step 
+done 
+</code></pre>
+<p>加入定时任务</p>
+<pre><code>chmod 777 /usr/local/sbin/check_nfs.sh
+crontab -e
+# 输入定时任务
+* * * * *  /usr/local/sbin/check_nfs.sh &amp;&gt; /dev/null
+</code></pre>
+<p>在 Client 添加定时任务，当 Master 宕机时进行重新挂载</p>
+<pre><code>cd /usr/local/sbin
+# 生成文件check_mount.sh
+
+#!/bin/sh
+# 每秒执行一次
+step=1 #间隔的秒数，不能大于60 
+for (( i = 0; i &lt; 60; i=(i+step) )); do 
+  mount=`df -Th|grep qiyuesuodata`
+  if [ $mount = &quot;&quot; ];then
+     umount /qiyuesuodata
+     mount mount -t nfs 192.168.50.143:/data /qiyuesuodata
+  fi
+  sleep $step 
+done 
+</code></pre>
+<p>加入定时任务</p>
+<pre><code>chmod 777 /usr/local/sbin/check_mount.sh
+crontab -e
+# 输入定时任务
+* * * * *  /usr/local/sbin/check_nfs.sh &amp;&gt; /dev/null
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/LAiVBbLo2/">
+              <span class="post-title">
+                 DRBD+HEARTBEAT  搭建NFS 服务高可用方案&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

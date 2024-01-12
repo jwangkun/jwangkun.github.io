@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>kubectl基本命令 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="kubectl基本命令 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="kubectl基本命令"/>
+    <meta property="og:url" content="https://jwangkun.github.io/HwKdS3aOl/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/vxCR_6-GF/" class="tag">kubectl</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>kubectl基本命令</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="设置命令自动补全">设置命令自动补全</h3>
+<pre><code class="language-bash"># 首先下载这个命令，补全命令才能生效
+yum install -y bash-completion
+# 1、当前shell生效
+yum install -y bash-completion
+
+
+#2、总是会生效
+# vi  .bashrc    (/etc/profile)
+source &lt;(kubectl completion bash)
+
+source ~/.bashrc
+</code></pre>
+<h3 id="对节点的操作">对节点的操作</h3>
+<p>获取集群节点信息</p>
+<pre><code class="language-bash">kubectl get nodes  # 获取集群节点信息
+
+# 输出不同的格式
+kubectl get nodes -o wide
+kubectl get nodes -o json
+kubectl get nodes -o yaml
+
+kubectl get nodes node2 -o wide # 查看某个节点的信息
+</code></pre>
+<p>增加节点</p>
+<pre><code class="language-bash"># 在主节点上master执行命令
+# kubeadm token create --print-join-command
+# node节点上执行上述命令输出的内容
+kubeadm join apiserver.demo:6443 --token l9y210.bzx98ovq27i7an20     --discovery-token-ca-cert-hash sha256:274bcf2916f6c94b594098043aa697aef5137941b4e8f972f9183547d88323b3
+</code></pre>
+<p>移除节点</p>
+<pre><code class="language-bash"># 只在 worker 节点执行
+kubeadm reset
+# 只在 master 节点执行
+kubectl delete node demo-worker-x-x
+</code></pre>
+<h3 id="对节点标签进行操作">对节点标签进行操作</h3>
+<p>获取标签信息</p>
+<pre><code class="language-bash">kubectl get nodes --show-labels
+kubectl get nodes node2 --show-labels # 查看某个节点的标签信息
+</code></pre>
+<p>添加标签</p>
+<pre><code class="language-bash"># 标签以key=value的形式存在
+
+# 设置node2节点的label是  disktype: node2
+kubectl label  nodes  node2 disktype:node2
+#会输出 node2 labeled
+
+kubectl get nodes node2 --show-labels
+# 输出节点对应的内容  查看输出label内容   
+</code></pre>
+<p>删除标签</p>
+<pre><code class="language-bash">kubectk label nodes node2 disktype-
+# 删除标签，只需要对应标签的key加减号(-)
+</code></pre>
+<h3 id="设置角色">设置角色</h3>
+<pre><code class="language-bash"># 刚加入集群  node的角色定义是none，我们可以查看master的标签，查看角色对应的label
+kubectl get nodes master --show-labels
+#会看到 node-role.kubernetes.io/master= 这样的一个标签
+# 修改对应的角色即可
+
+#将node1，node2的角色定义为worker
+kubectl label nodes node1 node-role.kubernetes.io/worker=
+kubectl label nodes node2 node-role.kubernetes.io/worker=
+</code></pre>
+<h3 id="对pod的操作">对pod的操作</h3>
+<p>创建pod</p>
+<pre><code class="language-bash">kubectl  create -f xxx.yml
+</code></pre>
+<p>删除pod</p>
+<pre><code class="language-bash">kubectl delete -f xxx.yml
+</code></pre>
+<p>获取pod信息</p>
+<pre><code class="language-bash">kubectl get pods  # 获取当前名称空间的pod
+kubectl get pods --namespace demo  # 获取指定名称空间的pod
+</code></pre>
+<p>进入指定pod的指定的容器内</p>
+<pre><code class="language-bash">#kubectl exec -it pod_name -c container_name sh
+kubectl exec -it nginx -c nginx sh
+</code></pre>
+<h3 id="namespace">namespace</h3>
+<p>获取命名空间</p>
+<pre><code class="language-bash">kubectl get namespace
+</code></pre>
+<p>创建命名空间</p>
+<pre><code class="language-bash"># kubectl create namespace namespace_name
+kubectl create namespace demo
+</code></pre>
+<p>删除命名空间</p>
+<pre><code class="language-bash"># kubectl delete namespace namespace_name
+kubectl delete namespace demo
+</code></pre>
+<p>创建一个指定命令空间的pod的yaml文件</p>
+<pre><code class="language-bash">apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  namespace: demo  # 指定名称空间
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+</code></pre>
+<pre><code class="language-bash">kubectl create namespace demo # 创建对应的名称空间
+kubectl create -f nginx_namespace.yml
+kubectl get pods # 在当前名称空间查看pod，查找不到刚才创建的pod
+kubectl get pods --namespace demo # 查看指定名称空间的pod
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/fdMXY3LCV/">
+              <span class="post-title">
+                使用kubeadm快速部署一个K8s集群&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

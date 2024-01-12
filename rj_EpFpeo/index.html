@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>docsify部署及配置 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="docsify部署及配置 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="docsify部署及配置"/>
+    <meta property="og:url" content="https://jwangkun.github.io/rj_EpFpeo/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/YEao8c65U/" class="tag">docsify</a>
+            
+        </span>
+            <h1>docsify部署及配置</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，6 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="官方推荐部署">官方推荐部署</h2>
+<blockquote>
+<p>docsify 快速开始文档：https://docsify.js.org/#/quickstart</p>
+</blockquote>
+<h3 id="快速开始">快速开始</h3>
+<p>安装 <code>docsify-cli</code> 工具：</p>
+<pre><code>npm i docsify-cli -g
+</code></pre>
+<p>初始化项目：</p>
+<pre><code>docsify init ./docs
+</code></pre>
+<p>预览网站：</p>
+<pre><code>docsify serve docs
+</code></pre>
+<h3 id="部署到服务器">部署到服务器</h3>
+<blockquote>
+<p>docsify 部署文档：https://docsify.js.org/#/deploy</p>
+</blockquote>
+<p>可以选择部署到以下服务：</p>
+<ul>
+<li><a href="https://docsify.js.org/#/deploy?id=github-pages">GitHub Pages</a></li>
+<li><a href="https://docsify.js.org/#/deploy?id=gitlab-pages">GitLab Pages</a></li>
+<li><a href="https://docsify.js.org/#/deploy?id=firebase-hosting">Firebase Hosting</a></li>
+<li><a href="https://docsify.js.org/#/deploy?id=vps">VPS</a></li>
+<li><a href="https://docsify.js.org/#/deploy?id=netlify">Netlify</a></li>
+<li><a href="https://docsify.js.org/#/deploy?id=zeit-now">ZEIT Now</a></li>
+<li><a href="https://docsify.js.org/#/deploy?id=aws-amplify">AWS Amplify</a></li>
+</ul>
+<h2 id="我自己的部署">我自己的部署</h2>
+<h3 id="初始化项目">初始化项目</h3>
+<p>我在本地使用官方的构建工具进行初始化项目：</p>
+<pre><code>docsify init wiki
+</code></pre>
+<p>初始化之后其实有三个文件，<code>index.html</code>、<code>README.md</code>、<code>.nojekyll</code>。</p>
+<ul>
+<li><code>index.html</code>：入口文件，docsify 的各项配置都在此页面设置。</li>
+<li><code>README.md</code>：默认展示的首页就是 <code>README.md</code> 里的内容。</li>
+<li><code>.nojekyll</code>：用于阻止 GitHub Pages 会忽略掉下划线开头的文件。</li>
+</ul>
+<p>在本地编辑好文档，通过下面命令即可本地预览：</p>
+<pre><code>docsify serve wiki
+</code></pre>
+<h3 id="上传到git">上传到Git</h3>
+<p>添加了文档之后，我将整个 wiki 文件夹上到了「 <a href="https://gitee.com/">Gitee</a>」，为什么选 Gitee 呢，当然是国内访问快而且免费了。</p>
+<h3 id="部署到nginx">部署到Nginx</h3>
+<p>登陆我的服务器，生成 <code>SSH 公钥</code>，生成方式可以参考「<a href="https://gitee.com/help/articles/4181">生成/添加SSH公钥</a>」，然后添加到 Gitee 的 「<a href="https://gitee.com/profile/sshkeys">SSH 公钥</a>」。</p>
+<p>然后在服务器使用 git 拉取 Wiki 项目，当然要使用 SSH 地址，以后本地文档更新推送到 Gitee 之后，只要在服务器上拉取更新就可以了。</p>
+<p>拉取之后，配置 Nginx 如下，即可通过域名访问：</p>
+<ul>
+<li>设置 root 目录为 wiki 文件夹。</li>
+<li>设置 index 为 <code>index.html</code>。</li>
+<li>设置不缓存。</li>
+</ul>
+<pre><code>server {
+  listen 80;
+  server_name  wiki.juemuren4449.com;
+    location / {
+      try_files $uri $uri/ /index.html;
+      root /usr/local/wiki;
+      index  index.html index.htm;
+      add_header Cache-Control &quot;no-cache, no-store&quot;;
+  }
+}
+</code></pre>
+<p>设置不缓存这个因人而异，我个人的 Wiki 刚开始积累，还在不断的完善，如果允许缓存，可能导致最新更新的内容不显示，等以后趋于完善，应该会设置允许缓存，或者直接放到 CDN 上。</p>
+<h3 id="为什么没用cdn">为什么没用CDN</h3>
+<p>由于 docsify 搭建的 Wiki 都是源文件，不需要自己编译，所以完全可以把整个文档放到又拍云或者七牛云等 CDN 上，访问速度会更快。</p>
+<p>但目前我还是把 Wiki 部署到了我的服务器上，为什么不直接放到 CDN 上呢，有以下几个原因：</p>
+<ul>
+<li>CDN 默认是有缓存的，如果文件更新，访问的可能不是最新的文件。</li>
+<li>我设置了 routerMode 为 history，使用 CDN 访问非首页，再次刷新会找不到文件。</li>
+<li>如果开启了 <code>relativePath: true</code>，文件可以找到，但是侧栏上边的标题点击又有点问题。</li>
+</ul>
+<p>如果使用默认的 routerMode，放在 CDN 上完全可行。</p>
+<h2 id="自定义配置">自定义配置</h2>
+<blockquote>
+<p>docsify 自定义配置文档：https://docsify.js.org/#/configuration</p>
+</blockquote>
+<p>各项配置都在 <code>window.$docsify</code> 里。</p>
+<p>我添加了如下配置，更多配置请参考上方文档链接。</p>
+<h3 id="loadsidebar">loadSidebar</h3>
+<blockquote>
+<p>加载自定义侧边栏，具体可以参考 https://docsify.js.org/#/more-pages。</p>
+</blockquote>
+<pre><code>loadSidebar: true,
+</code></pre>
+<p>增加 <code>_sidebar.md</code> 文件，编写文件格式如下：</p>
+<pre><code>- [CentOS](centos.md)
+- [Docker](docker.md)
+- [Mac](mac.md)
+- [NPM](npm.md)
+- [推荐](recommend.md)
+</code></pre>
+<h3 id="submaxlevel">subMaxLevel</h3>
+<blockquote>
+<p>自定义侧边栏后默认不会再生成目录，需要通过设置生成目录的最大层级开启这个功能。</p>
+</blockquote>
+<pre><code>subMaxLevel: 2,
+</code></pre>
+<p>配合 loadSidebar，效果如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://img.juemuren4449.com/20200513143519.png" alt="subMaxLevel" loading="lazy"></figure>
+<h3 id="auto2top">auto2top</h3>
+<blockquote>
+<p>切换页面后是否自动跳转到页面顶部。</p>
+</blockquote>
+<pre><code>auto2top: true,
+</code></pre>
+<h3 id="name">name</h3>
+<blockquote>
+<p>文档标题，显示在侧栏顶部。</p>
+</blockquote>
+<pre><code>name: '掘墓人的 Wiki',
+</code></pre>
+<h3 id="namelink">nameLink</h3>
+<blockquote>
+<p>点击文档标题后跳转的链接地址。</p>
+</blockquote>
+<pre><code>nameLink: '/',
+</code></pre>
+<p>点击后跳转到 Wiki 首页。</p>
+<h3 id="routermode">routerMode</h3>
+<blockquote>
+<p>设置路由模式。</p>
+</blockquote>
+<pre><code>routerMode: 'history',
+</code></pre>
+<p>设置为 history 之后，浏览器链接里不会出现 #，个人习惯。</p>
+<p>注意，设置为 history，如果使用的是 Nginx 部署的项目，一定要加上下面的配置，否则在非首页刷新会找不到页面。</p>
+<pre><code>try_files $uri $uri/ /index.html;
+</code></pre>
+<h3 id="coverpage">coverpage</h3>
+<blockquote>
+<p>设置是否启用封面页，默认不启用。</p>
+</blockquote>
+<p>我没有启用封面，因为我的 Wiki 不涉及到宣传，就是自己查阅，所以应该打开就可以看到内容。</p>
+<p>不过 docsify 的封面还是很好看的。</p>
+<figure data-type="image" tabindex="2"><img src="https://img.juemuren4449.com/20200513143104.png" alt="docsify" loading="lazy"></figure>
+<h3 id="topmargin">topMargin</h3>
+<blockquote>
+<p>让你的内容页在滚动到指定的锚点时，距离页面顶部有一定空间。</p>
+</blockquote>
+<pre><code>topMargin: 40,
+</code></pre>
+<p>设置之后，点击侧栏的二级标题之后，页面的标题不会距离顶部太近。</p>
+<h2 id="插件">插件</h2>
+<blockquote>
+<p>docsify 插件文档：https://docsify.js.org/#/plugins</p>
+</blockquote>
+<p>docsify 有丰富的插件，可以按需添加。</p>
+<h3 id="full-text-search">Full text search</h3>
+<blockquote>
+<p>全局搜索</p>
+</blockquote>
+<pre><code>search: {
+  paths: 'auto',
+  placeholder: '请输入要搜索的关键字',
+  noData: '没有结果',
+  depth: 6,
+},
+</code></pre>
+<p>开启全局搜索需要引入两个 js 文件：</p>
+<pre><code>&lt;script src=&quot;//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>效果如下：</p>
+<figure data-type="image" tabindex="3"><img src="https://img.juemuren4449.com/20200513142942.png" alt="Full text search" loading="lazy"></figure>
+<h3 id="copy-to-clipboard">Copy to Clipboard</h3>
+<blockquote>
+<p>复制到剪贴板，在所有的代码块上添加一个简单的 <code>Copy to Clipboard</code> 按钮来允许用户从你的文档中复制代码。</p>
+</blockquote>
+<p>需要引入 js 文件：</p>
+<pre><code>&lt;script src=&quot;//cdn.jsdelivr.net/npm/docsify-copy-code&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>效果如下：</p>
+<figure data-type="image" tabindex="4"><img src="https://img.juemuren4449.com/20200513142715.png" alt="Copy to Clipboard" loading="lazy"></figure>
+<h3 id="pagination">Pagination</h3>
+<blockquote>
+<p>分页导航，在文档的最下方会展示上一个文档和下一个文档。</p>
+</blockquote>
+<pre><code>pagination: {
+  previousText: '上一章节',
+  nextText: '下一章节',
+}
+</code></pre>
+<p>需要引入两个 js 文件：</p>
+<pre><code>&lt;script src=&quot;//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;//cdn.jsdelivr.net/npm/docsify-pagination/dist/docsify-pagination.min.js&quot;&gt;&lt;/script&gt;
+</code></pre>
+<p>效果如下：</p>
+<figure data-type="image" tabindex="5"><img src="https://img.juemuren4449.com/20200513142559.png" alt="Pagination" loading="lazy"></figure>
+<h3 id="关于js文件">关于js文件</h3>
+<p>插件需要引入 js 文件，为了访问更稳定，我把所有的 js 文件都上传到了又拍云。</p>
+<p>截止到发文，docsify 的最新版本是 <code>4.11.3</code>，查询更多版本请查看「<a href="https://github.com/docsifyjs/docsify/releases">docsify releases</a>」。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/7cozIUIJM/">
+              <span class="post-title">
+                 Docker 安装部署RabbitMQ&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

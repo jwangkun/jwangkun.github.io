@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> Ceph集群的搭建与运维 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" Ceph集群的搭建与运维 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" Ceph集群的搭建与运维"/>
+    <meta property="og:url" content="https://jwangkun.github.io/H6mPk4-w4/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/NuKABzdBlt/" class="tag">Ceph</a>
+            
+        </span>
+            <h1> Ceph集群的搭建与运维</h1>
+            <span class="meta">
+            	Posted on
+              2021-05-19，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="ceph的存储过程">Ceph的存储过程</h2>
+<blockquote>
+<p>文件-&gt;obj-&gt;pool-&gt;pg-&gt;osd-&gt;disk</p>
+</blockquote>
+<ul>
+<li>文件被分片成对象</li>
+<li>对象存放于特定的pool</li>
+<li>pool由多个pg组成</li>
+<li>pg对应多个osd</li>
+<li>osd直接对应disk</li>
+</ul>
+<h2 id="机器环境">机器环境</h2>
+<ul>
+<li>4台centos7机器</li>
+<li>默认最小集群是一个mon节点，两个osd节点</li>
+</ul>
+<pre><code class="language-text">admin             10.37.129.10
+ceph-node1        10.37.129.11
+ceph-node2        10.37.129.12
+ceph-node3        10.37.129.13
+</code></pre>
+<h2 id="设置ssh免密码登陆">设置ssh免密码登陆</h2>
+<ul>
+<li>各节点修改/etc/hosts文件</li>
+</ul>
+<pre><code class="language-text">admin             10.37.129.10
+ceph-node1        10.37.129.11
+ceph-node2        10.37.129.12
+ceph-node3        10.37.129.13
+</code></pre>
+<ul>
+<li>在admin节点生成密钥对并派发</li>
+</ul>
+<pre><code class="language-text"># 在admin节点
+
+ssh-keygen -t rsa 
+
+ssh-copy-id  root@ceph-node1
+ssh-copy-id  root@ceph-node2
+ssh-copy-id  root@ceph-node3
+</code></pre>
+<h2 id="各节点环境配置">各节点环境配置</h2>
+<ul>
+<li>各节点关闭防火墙</li>
+</ul>
+<pre><code class="language-text">sudo systemctl stop firewalld.service     #停止 firewall
+sudo systemctl disable firewalld.service  #禁止 firewall 开机启动
+</code></pre>
+<ul>
+<li>各节点关闭selinux</li>
+</ul>
+<pre><code class="language-text">vi /etc/selinux/config
+SELINUX=disabled
+reboot
+</code></pre>
+<ul>
+<li>各节点安装时间同步工具</li>
+</ul>
+<pre><code class="language-text">yum install chrony -y 
+systemctl restart  chronyd
+systemctl enable  chronyd
+chronyc source -v （查看时间是否同步，*表示同步完成）
+</code></pre>
+<ul>
+<li>各节点配置yum源</li>
+</ul>
+<pre><code class="language-text">vi  /etc/yum.repo.d/ceph.repo
+
+[Ceph]
+name=Ceph packages for $basearch
+baseurl=http://mirrors.163.com/ceph/rpm-kraken/el7/$basearch
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=https://download.ceph.com/keys/release.asc
+
+[Ceph-noarch]
+name=Ceph noarch packages
+baseurl=http://mirrors.163.com/ceph/rpm-kraken/el7/noarch
+enabled=1
+priority=1
+gpgcheck=1
+gpgkey=https://download.ceph.com/keys/release.asc
+
+[ceph-source]
+name=Ceph source packages
+baseurl=http://mirrors.163.com/ceph/rpm-kraken/el7/SRPMS
+enabled=0
+priority=1
+gpgcheck=1
+gpgkey=https://download.ceph.com/keys/release.asc
+</code></pre>
+<h2 id="在admin节点部署">在admin节点部署</h2>
+<ul>
+<li>在admin节点安装部署工具</li>
+</ul>
+<pre><code class="language-text">yum -y install ceph-deploy
+</code></pre>
+<ul>
+<li>创建部署文件目录</li>
+</ul>
+<pre><code class="language-text">mkdir -p /etc/ceph
+cd /etc/ceph
+</code></pre>
+<ul>
+<li>创建一个集群（创建mon节点）</li>
+</ul>
+<pre><code class="language-text">ceph-deploy new ceph-node1 ceph-node2  （也就是定义2各mon节点）
+</code></pre>
+<ul>
+<li>配置ceph.conf</li>
+</ul>
+<pre><code class="language-text">vi ceph.conf
+加入：
+public network =10.37.129.0/24
+</code></pre>
+<ul>
+<li>开始部署</li>
+</ul>
+<pre><code class="language-text">ceph-deploy install admin ceph-node1 ceph-node2  ceph-node3
+</code></pre>
+<ul>
+<li>初始化 mon节点 并收集所有的秘钥</li>
+</ul>
+<pre><code class="language-text">ceph-deploy mon create-initial
+</code></pre>
+<ul>
+<li>创建osd</li>
+</ul>
+<pre><code class="language-text">ceph-deploy osd  create ceph-node1:/dev/sdb   ceph-node2:/dev/sdb
+</code></pre>
+<ul>
+<li>使用ceph-deploy把配置文件和admin秘钥推送到管理节点和ceph节点</li>
+</ul>
+<pre><code class="language-text">ceph-deploy admin admin ceph-node1 ceph-node2 ceph-node3
+</code></pre>
+<ul>
+<li>给每一个节点的keyring 增加 r 权限（各节点执行）</li>
+</ul>
+<pre><code class="language-text">chmod +r /ect/ceph/ceph.client.admin.keyring
+</code></pre>
+<ul>
+<li>检查集群状况</li>
+</ul>
+<pre><code class="language-text">ceph health
+</code></pre>
+<h2 id="新增一个osd节点和mon节点">新增一个osd节点和mon节点</h2>
+<ul>
+<li>在admin节点操作</li>
+</ul>
+<pre><code class="language-text">1、新增一个osd ceph-node3 
+ceph-deploy osd create ceph-node3:/dev/sdb
+
+2、在ceph-node1增加一个元数据的角色 
+ceph-deploy mds create ceph-node1 
+
+3、增加一个新的mon在ceph-node3 上面
+ceph-deploy mon add ceph-node3
+</code></pre>
+<h2 id="误删osd恢复流程">误删osd恢复流程</h2>
+<ul>
+<li>记录osd状态：ceph osd tree</li>
+</ul>
+<pre><code class="language-text">ID WEIGHT  TYPE NAME           UP/DOWN REWEIGHT PRIMARY-AFFINITY 
+-1 0.01469 root default                                          
+-2 0.00490     host ceph-node1                                   
+ 0 0.00490         osd.0            up  1.00000          1.00000 
+-3 0.00490     host ceph-node2                                   
+ 1 0.00490         osd.1            up  1.00000          1.00000 
+-4 0.00490     host ceph-node3                                   
+ 2 0.00490         osd.2            up  1.00000          1.00000
+</code></pre>
+<ul>
+<li>模拟删除osd.2</li>
+</ul>
+<pre><code class="language-text">ceph osd out osd.2
+systemctl stop ceph-osd@2 (osd id)
+ceph osd crush remove osd.2
+ceph auth del osd.2
+ceph osd rm  osd.2
+</code></pre>
+<ul>
+<li>在删除的osd节点上进行恢复操作</li>
+</ul>
+<pre><code class="language-text">进入到其挂载的目录 例如
+cd /var/lib/ceph/osd/ceph-1
+
+more fsid
+ceph osd create  uuid
+ceph auth add osd.2 osd 'allow *' mon 'allow rwx' -i /var/lib/ceph/osd/ceph-1/keyring
+ceph osd crush add 2 osd.2(osd id） 0.0049 (权重） host=ceph-node3
+ceph osd in osd.2
+systemctl start  ceph-osd@2
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/uAEbfXDtD/">
+              <span class="post-title">
+                Docker 部署Jira8.1.0&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

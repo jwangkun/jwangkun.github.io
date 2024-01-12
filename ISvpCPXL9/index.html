@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot整合Swagger生成接口文档 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot整合Swagger生成接口文档 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot整合Swagger生成接口文档"/>
+    <meta property="og:url" content="https://jwangkun.github.io/ISvpCPXL9/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/jhU14D-wE/" class="tag">Swagger</a>
+            
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1>SpringBoot整合Swagger生成接口文档</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>目前，大多数公司都采用了前后端分离的开发模式，为了解决前后端人员的沟通问题，后端人员在开发接口的时候会选择使用swagger2来生成对应的接口文档，swagger2提供了强大的页面调试功能，这样可以有效解决前后端人员沟通难的问题。</p>
+<p>下面我们使用SpringBoot结合swagger2生成Restful API文档。</p>
+<h3 id="一-搭建项目引入依赖">一 搭建项目，引入依赖</h3>
+<p>新建一个<code>spring-boot-swaager</code>的项目，引入swaager2的依赖，由于swagger2的ui不是很美观，这里将使用开源的<code>swagger-bootstrap-ui</code>做为ui。</p>
+<p><strong>引入依赖</strong></p>
+<pre><code>&lt;!-- swaager2依赖 --&gt;    
+&lt;dependency&gt;
+    &lt;groupId&gt;io.springfox&lt;/groupId&gt;
+    &lt;artifactId&gt;springfox-swagger2&lt;/artifactId&gt;
+    &lt;version&gt;2.9.2&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- swaager2ui --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.github.xiaoymin&lt;/groupId&gt;
+    &lt;artifactId&gt;swagger-bootstrap-ui&lt;/artifactId&gt;
+    &lt;version&gt;1.9.6&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p><strong>项目中配置swagger相关信息</strong></p>
+<pre><code>@Configuration
+@EnableSwagger2
+public class configuration {
+
+    @Bean
+    public Docket createRestApi(){
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .select()
+                .apis(RequestHandlerSelectors.basePackage(&quot;com.javatrip.swagger.controller&quot;))
+                .paths(PathSelectors.any())
+                .build();
+    }
+
+    private ApiInfo apiInfo(){
+        return new ApiInfoBuilder()
+                // 标题
+                .title(&quot;某某项目接口文档&quot;)
+                // 描述
+                .description(&quot;swagger2接口文档使用演示&quot;)
+                // 版本
+                .version(&quot;1.0&quot;)
+                // 许可证
+                .license(&quot;MIT&quot;)
+                // 许可证地址
+                .licenseUrl(&quot;www.xx.com&quot;)
+                // 服务端地址
+                .termsOfServiceUrl(&quot;https://www.cnblogs.com/zhixie/&quot;)
+                // 联系信息
+                .contact(new Contact(&quot;java旅途&quot;,&quot;https://www.cnblogs.com/zhixie/&quot;,&quot;binzh303@163.com&quot;))
+                .build();
+    }
+}
+</code></pre>
+<p><strong>访问路径，查看生成效果</strong></p>
+<p>文章中使用的这个ui，接口文档地址为<code>ip:port/doc.html</code>，生成的文档信息如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201006001126958-1412347851.png" alt="img" loading="lazy"></figure>
+<h3 id="二-编写restful接口">二 编写Restful接口</h3>
+<p><strong>新建实体类</strong></p>
+<pre><code>@ApiModel(&quot;用户实体类&quot;)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Person {
+    @ApiModelProperty(&quot;姓名&quot;)
+    private String name;
+    @ApiModelProperty(value = &quot;年龄&quot;)
+    private int age;
+}
+</code></pre>
+<p><strong>新建Restful接口</strong></p>
+<pre><code>@Api(tags = &quot;用户接口&quot;)
+@RestController
+@RequestMapping(&quot;person&quot;)
+public class PersonController {
+
+    @ApiOperation(value = &quot;获取用户列表&quot;,notes = &quot;根据name获取用户列表&quot;)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = &quot;name&quot;,value = &quot;用户姓名&quot;,dataType = &quot;String&quot;,required = true),
+            @ApiImplicitParam(name = &quot;age&quot;,value = &quot;年龄&quot;,dataType = &quot;int&quot;,required = true)
+    })
+    @GetMapping(&quot;/{name}&quot;)
+    public Person getPerson(@PathVariable(&quot;name&quot;) String name,@RequestParam int age){
+        return new Person(name,age);
+    }
+
+    @ApiOperation(value = &quot;新增用户&quot;,notes = &quot;根据用户实体类新增用户&quot;)
+    @ApiImplicitParam(name = &quot;person&quot;,value = &quot;用户实体类&quot;,dataType = &quot;Person&quot;,required = true)
+    @PostMapping(&quot;add&quot;)
+    public int addPerson(@RequestBody Person person){
+        if(StringUtils.isEmpty(person)){
+            return -1;
+        }
+        return 1;
+    }
+
+    @ApiOperation(value = &quot;更新用户信息&quot;,notes = &quot;根据用户实体更新用户信息&quot;)
+    @ApiImplicitParam(name = &quot;person&quot;,value = &quot;用户实体类&quot;,dataType = &quot;Person&quot;,required = true)
+    @PutMapping(&quot;update&quot;)
+    public int updatePerson(@RequestBody Person person){
+        if(StringUtils.isEmpty(person)){
+            return -1;
+        }
+        return 1;
+    }
+
+    @ApiOperation(value = &quot;删除用户信息&quot;,notes = &quot;根据用户名删除用户信息&quot;)
+    @ApiImplicitParam(name = &quot;name&quot;,value = &quot;用户姓名&quot;,dataType = &quot;String&quot;,required = true)
+    @DeleteMapping(&quot;/{name}&quot;)
+    public int deletePerson(@PathVariable(name = &quot;name&quot;) String name){
+        if(StringUtils.isEmpty(name)){
+            return -1;
+        }
+        return 1;
+    }
+}
+</code></pre>
+<h3 id="三-swagger文档简介">三 swagger文档简介</h3>
+<p>我就直接用图来表示了，这样看着也更加直观</p>
+<figure data-type="image" tabindex="2"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201006001145223-1187525431.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201006001202385-1722148301.png" alt="img" loading="lazy"></figure>
+<p>swagger2注解对应到文档上的表现形式如上。swagger2支持在线调试，打开某个具体的接口，根据提示填写对应的参数，点击发送就可返回响应结果。</p>
+<figure data-type="image" tabindex="4"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201006001227983-932615173.png" alt="img" loading="lazy"></figure>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/zOrU_AC_7/">
+              <span class="post-title">
+                SpringBoot 全局异常处理&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

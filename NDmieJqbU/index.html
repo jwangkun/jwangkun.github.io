@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> Kubernetes 集群升级指南：从理论到实践 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" Kubernetes 集群升级指南：从理论到实践 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" Kubernetes 集群升级指南：从理论到实践"/>
+    <meta property="og:url" content="https://jwangkun.github.io/NDmieJqbU/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1> Kubernetes 集群升级指南：从理论到实践</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-13，12 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>原创 高相林（禅鸣） [阿里巴巴云原生](javascript:void(0)😉</p>
+<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8Gg0dtQYSV3z6IwqBe4BFlSdyvFyUZBCVxMBIpZaZd6To5AZcvg3Acg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="" loading="lazy"></figure>
+<p>作者 | 高相林（禅鸣）</p>
+<p>**导读：**集群升级是 Kubernetes 集群生命周期中最为重要的一环，也是众多使用者最为谨慎对待的操作之一。为了更好地理解集群升级这件事情的内涵外延，我们首先会对集群升级的必要性和难点进行阐述；随后会对集群升级前必须要做的前置检查进行逐一讲解；接下来会对两种常见的升级方式进行展开介绍；最后对集群升级的三个步骤进行讲解，帮助读者从理论走入实践。<img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></p>
+<!-- more -->
+<p><strong>升级的必要性&amp;难点</strong></p>
+<p>在 Kubernetes 领域，得益于活跃的开源社区，Kubernetes 的迭代速度较快，目前保持在每个季度发行一个新版本的节奏。新版本的 Kubernetes 有着更为先进的新特性、更加全面的安全加固和漏洞修复。前一段时间社区刚刚完成了 1.19 版本的正式发布。</p>
+<p>对于发展如此快速的开源项目，跟上社区的步伐就显得更为重要，而集群升级能力就是帮助我们跟上社区步伐的不二选择。我们可以从以下两个方面对集群升级的必要性进行说明：</p>
+<ul>
+<li>
+<p><strong>对于 Kubernetes 集群的使用者</strong>：更新的 Kubernetes 版本意味着更新的 feature，更加全面的安全补丁，和诸多的 bugfix。我们可以通过集群升级功能充分享受活跃的 Kubernetes 开源社区带来的发展红利；</p>
+</li>
+<li>
+<p><strong>对于 Kubernetes 集群的运维者</strong>：通过集群升级功能可以拉齐所管理的集群版本，减少集群版本的碎片化，从而减少 Kubernetes 版本碎片化带来的管理成本和维护成本。</p>
+</li>
+</ul>
+<p>讲完了集群升级的必要性，我们来详细看一下集群升级的难点。</p>
+<p>目前多数 Kubernetes 使用者对集群升级这件事持有着非常保守的态度，害怕集群在升级的过程中出现不可预期的情况，也有使用者将集群升级称之为“给飞行中的飞机换引擎”。那么，使用者对于升级的保守态度主要来源于什么原因呢？我认为有以下几点：</p>
+<ul>
+<li>
+<p>经过长时间的运行后，Kubernetes 集群已经累计了复杂的运行时状态；</p>
+</li>
+<li>
+<p>Kubernetes 集群运维者会根据集群承载的不同业务，对集群进行不同的配置，从而导致每个集群都有自己的差异化配置，可能会造成“千集群千面”；</p>
+</li>
+<li>
+<p>对于云上运行的 Kubernetes 集群来说，其使用了大量的云计算底层资源。众多的底层云资源就会带来众多的不确定性因素。</p>
+</li>
+</ul>
+<p>“千集群千面”的情况的存在，导致了集群升级需要以一套逻辑完成各种不同情况集群的升级工作，这也正是集群升级的困难之处。</p>
+<figure data-type="image" tabindex="2"><img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></figure>
+<p><strong>升级预检</strong></p>
+<p>正如我们前面所说，给正在对外提供服务的 Kubernetes 集群升级，就好比是“给飞行中的飞机换引擎”。因为集群升级面临着众多难点，也使得众多的 Kubernetes 集群维护者对集群升级这件事情比较紧张。</p>
+<p>我们可以通过详细的升级预检，来消除集群升级的不确定性。对于上面列举的集群升级的难点，我们也可以分别进行详细的升级预检，对症下药，将难点逐一击破。升级预检主要可以分为三个方面：</p>
+<ul>
+<li>核心组件健康检查</li>
+<li>节点配置检查</li>
+<li>云资源检查</li>
+</ul>
+<h3 id="1-核心组件健康检查"><strong>1. 核心组件健康检查</strong></h3>
+<p>说到核心组件健康检查，就不得不剖析一下集群的健康对于集群升级的重要性。一个不健康的集群很可能会在升级中出现各种异常的问题，就算侥幸完成了升级，各种问题也会在后续使用中逐渐凸显出来。</p>
+<p>有人会说，我的集群看起来挺健康的，但是升级之后就出现问题了。一般来说，之所以会发生这种情况，是因为在集群在升级之前，这个问题已经存在了，只不过是在经历了集群升级之后才显现出来。</p>
+<p>在了解了核心组件健康检查的必要性之后，我们来看一下都需要对那些组件进行检查：</p>
+<ul>
+<li>网络组件：需要确保网络组件版本和需要升级到的目标 Kubernetes 版本兼容；</li>
+<li>apiservice：需要确保集群内的 apiservice 都可用；</li>
+<li>节点：需要确定节点全部健康。</li>
+</ul>
+<h3 id="2-节点配置检查"><strong>2. 节点配置检查</strong></h3>
+<p>节点作为承载 Kubernetes 的底层元计算资源，不仅运行着 Kubelet、Docker 等重要的系统进程，也充当着集群和底层硬件交互接口的角色。</p>
+<p>确保节点的健康性和配置的正确性是确保整个集群健康性重要的一环。下面就对所需的检查项进行讲解。</p>
+<ul>
+<li>操作系统配置：需要确定基础的系统组件（yum、systemd 和 ntp 等系统服务是否正常）和内核参数是否配置合理；</li>
+<li>kubelet：需要确定 kubelet 的进程健康、配置正确；</li>
+<li>Docker：需要确定 Docker 的进程健康、配置正确。</li>
+</ul>
+<h3 id=""></h3>
+<h3 id="3-云资源检查"><strong>3. 云资源检查</strong></h3>
+<p>运行在云上的 Kubernetes 集群依赖着众多云资源，一旦集群所依赖的云资源不健康或者配置错误，就会影响到整个集群的正常运行。我们主要对下列云资源的状态和配置进行预检：</p>
+<ul>
+<li>apiserver 所使用的 SLB：需要确定实例的健康状态和端口配置（转发配置和访问控制配置等）；</li>
+<li>集群所使用的 VPC 和 VSwitch：需要确定实例的健康状况；</li>
+<li>集群内的 ECS 实例：需要确定其健康状况和网络配置。</li>
+</ul>
+<figure data-type="image" tabindex="3"><img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></figure>
+<p><strong>两种常见的升级方式</strong></p>
+<p>在软件升级领域，有两种主流的软件升级方式，即原地升级和替换升级。这两种升级方式同样适用于 Kubernetes 集群，它们采用了不同软件升级思路，但也都存在着各自的利弊。下面我们来对这两种集群升级方式进行逐一讲解。</p>
+<h3 id="-2"></h3>
+<h3 id="1-原地升级"><strong>1. 原地升级</strong></h3>
+<p>原地升级是一种精细化的、对这个那个集群改动量相对较小的一种升级方式。在升级容器的 worker 节点时，该升级方式会通过在 ECS 上原地替换 Kubernetes 组件的方式（主要为 kubelet 和其相关组件），完成整个集群的升级工作。阿里云容器服务 Kubernetes 为客户提供的集群升级就是基于这种方式的。</p>
+<p>以将 Kubernetes 的版本从 1.14 升级到 1.16 为例。首先我们会对 ECS A 上的原本为 1.14 的 Kubelet 及其配置升级为 1.16，在完成节点 ECS A 上的组件升级之后，该节点也就被成功的升级到了 1.16。然后我们再对 ECS B 进行相同的操作，将其升级为 1.16，从而完成整个集群的升级工作。</p>
+<p>在这个过程中节点保持运行，ECS 的相关配置也不会被修改。如图所示：</p>
+<figure data-type="image" tabindex="4"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8qiaHeIqCFuZ3r7bYiat3G0f29ODXwLd26fLKIYDZPrnsbTXib36OkOPHg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="image.png" loading="lazy"></figure>
+<h3 id="1优点"><strong>1）优点</strong></h3>
+<ul>
+<li>
+<p>原地升级通过原地替换 kubelet 组件的方式对节点进行版本升级，从而保证了节点上的 Pod 不会因为集群升级而重建，确保了业务的连贯性；</p>
+</li>
+<li>
+<p>该种升级方式不会对底层 ECS 本身进行修改和替换，保证了依赖特定节点调度的业务可以正常运行，也对 ECS 的包年包月客户更加友好。</p>
+</li>
+</ul>
+<h3 id="2缺点"><strong>2）缺点</strong></h3>
+<ul>
+<li>
+<p>原地升级方式需要在节点上进行一系列升级操作，才能完成整个节点的升级工作，这就导致整个升级过程不够原子化，可能会在中间的某一步骤失败，从而导致该节点升级失败；</p>
+</li>
+<li>
+<p>原地升级的另一个缺点是需要预留一定量的资源，只有在资源足够的情况下升级程序才能在 ECS 上完成对节点的升级。</p>
+</li>
+</ul>
+<h3 id="-3"></h3>
+<h3 id="2-替换升级"><strong>2. 替换升级</strong></h3>
+<p>替换升级又称轮转升级，相对于原地升级，替换升级是一种更加粗狂和原子化的升级方式。替换升级会逐个将旧版本的节点从集群中移除，并用新版本全新的节点来替换，从而完成整个 Kubernetes 集群的升级工作。</p>
+<p>同样以将 Kubernetes 的版本从 1.14 升级到 1.16 为例。使用替代轮转方式的情况下，我们会将集群中 1.14 版本的节点依次进行排水并从集群中移除，并直接加入 1.16 版本的节点。即将 1.14 节点的 ECS A 从节点剔除，并将 1.16 节点的 ECS C 加入集群，再将 ECS B 从集群中删除，最后将 ECS D 加入到集群中。</p>
+<p>这样就完成了所有节点的轮转工作，整个集群就也就升级到 1.16 了。如图所示：</p>
+<figure data-type="image" tabindex="5"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8zlkoL6tgFcG4pLUpfoS1icC49PZRgGbprf1L64tWULyAFcT18oic29ow/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="image.png" loading="lazy"></figure>
+<h3 id="1优点-2"><strong>1）优点</strong></h3>
+<p>替代升级通过将旧版本的节点替换为新版本的节点从而完成集群升级。这个替换的过程相较于原地升级更为原子化，也不存在那么复杂的中间状态，所以也不需要在升级之前进行太多的前置检查。相对应地，升级过程中可能会出现的各种稀奇古怪的问题也会减少很多。</p>
+<h3 id="2缺点-2"><strong>2）缺点</strong></h3>
+<ul>
+<li>
+<p>替代升级将集群内的节点全部进行替换和重置，所有节点都会经历排水的过程，这就会使集群内的 pod 进行大量迁移重建，对于 pod 重建容忍度比较低的业务、只有单副本的应用、stateful set 等相关应用不够友好，可能会因此发生不可用或者故障；</p>
+</li>
+<li>
+<p>所有的节点经历重置，储存在节点本地磁盘上的数据都会丢失；</p>
+</li>
+<li>
+<p>这种升级方式可能会带来宿主机 IP 变化等问题，对包年包月用户也不够友好。</p>
+</li>
+</ul>
+<h2 id="-4"></h2>
+<figure data-type="image" tabindex="6"><img src="https://mmbiz.qpic.cn/mmbiz_gif/US10Gcd0tQGY9ddd5GpbmVRuaRfuaESAUBGE7uHX5G0nxxLSub2QTKZdu538V7GaHXS5jsTCebYCUibaHsjg0ow/640?wx_fmt=gif&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1" alt="动态黑色音符" loading="lazy"></figure>
+<p><strong>集群升级三部曲</strong></p>
+<p>一个 Kubernetes 集群主要由负责集群管控的 master，执行工作负载的 worker 和众多功能性的系统组件组成。对一个 Kubernetes 集群升级，也就是对集群中的这三个部分进行分别升级。</p>
+<p>故集群升级的三部曲为：</p>
+<ul>
+<li>滚动升级 master</li>
+<li>分批升级 worker</li>
+<li>系统组件升级（主要为 CoreDNS，kube-proxy 等核心组件）</li>
+</ul>
+<figure data-type="image" tabindex="7"><img src="https://mmbiz.qpic.cn/mmbiz_jpg/yvBJb5IiafvnMFaOoAklrxdOvPwLJwOS8XdjExtDy2zPSuMBWibKkJiamWeIR3EWY7otC99pkFyVG7wuevsRHp9NA/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="image.png" loading="lazy"></figure>
+<p>下面我们来对集群升级三部曲进行详细的讲解。</p>
+<h3 id="1-滚动升级-master"><strong>1. 滚动升级 master</strong></h3>
+<p>master 作为集群的大脑，承担了与使用者交互、任务调度和各种功能性的任务处理。集群 master 的部署方式也比较多样，可以通过 static pod 进行部署，可以通过本地进程进行部署，也可以通过 Kubernetes on Kubernetes 的方式在另一个集群内通过 pod 的方式部署。</p>
+<p>总而言之，无论 master 为哪种部署方式，想要升级 master 主要就是对 master 中的三大件进行版本升级，主要包括：</p>
+<ul>
+<li>升级 kube-apiserver</li>
+<li>升级 kube-controller-manager</li>
+<li>升级 kube-scheduler</li>
+</ul>
+<p>需要注意，为了保证 Kubernetes apiserver 的可用性不中断，master 中的 kube-apiserver 最少需要有两个，这样才可以实现滚动升级，从而保证 apiserver 不会出现 downtime。</p>
+<h3 id="2-分批升级-worker"><strong>2. 分批升级 worker</strong></h3>
+<p>在完成 master 的升级工作之后，我们才可以开始对 worker 进行升级。Worker 升级主要是对节点上的 kubelet 及其依赖组件（如 cni 等）进行升级。为了保证集群中 worker 不会同时发生大批量的 kubelet 重启，所以我们需要对 worker 节点进行分批升级。</p>
+<p>需要注意，我们必须要先升级 master，再升级 worker。因为高版本的 kubelet 在连接低版本的 master 时，很可能会出现不兼容的情况，从而导致节点 not ready。对于低版本的 kubelet 连接高版本的 apiserver，开源社区保证了 apiserver 对于 kubelet 两个版本的向后兼容性，即 1.14 的 kubelet 可以连接到 1.16 的 apiserver，而不会发生兼容性问题。</p>
+<h3 id="-5"></h3>
+<h3 id="3-核心系统组件升级"><strong>3. 核心系统组件升级</strong></h3>
+<p>为了保证集群中各个组件的兼容性，我们需要在升级集群的同时对集群中的核心系统组件进行同步升级，主要包括：</p>
+<ul>
+<li><strong>Dns 组件</strong>：根据社区的版本兼容矩阵，将 CoreDNS 的版本升级为与集群版本相对应的版本；</li>
+</ul>
+<p><strong>社区的版本兼容矩阵</strong>：https://github.com/coredns/deployment/blob/master/kubernetes/CoreDNS-k8s_version.md</p>
+<ul>
+<li><strong>网络转发组件</strong>：Kube-proxy 的版本是跟随 Kubernetes 的版本进行演进的，所有我们需要将 kube-proxy 的版本升级到与 Kubernetes 版本相同的版本。</li>
+</ul>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/IC6DrTsc6/">
+              <span class="post-title">
+                Kubernetes 网络插件工作原理&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

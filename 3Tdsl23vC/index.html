@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Centos 7 安装Nginx | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Centos 7 安装Nginx | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Centos 7 安装Nginx"/>
+    <meta property="og:url" content="https://jwangkun.github.io/3Tdsl23vC/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/S4vm1SSFL/" class="tag">Nginx</a>
+            
+        </span>
+            <h1>Centos 7 安装Nginx</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-06，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="安装所需环境">安装所需环境</h2>
+<p>Nginx 是 C语言 开发，建议在 Linux 上运行，当然，也可以安装 Windows 版本，本篇则使用 <a href="http://www.linuxidc.com/topicnews.aspx?tid=14">CentOS</a> 7 作为安装环境。</p>
+<p><strong>一. gcc 安装</strong><br>
+安装 nginx 需要先将官网下载的源码进行编译，编译依赖 gcc 环境，如果没有 gcc 环境，则需要安装：</p>
+<pre><code>yum install gcc-c++
+</code></pre>
+<p><strong>二. PCRE pcre-devel 安装</strong><br>
+PCRE(Perl Compatible Regular Expressions) 是一个Perl库，包括 perl 兼容的正则表达式库。nginx 的 http 模块使用 pcre 来解析正则表达式，所以需要在 linux 上安装 pcre 库，pcre-devel 是使用 pcre 开发的一个二次开发库。nginx也需要此库。命令：</p>
+<pre><code>yum install -y pcre pcre-devel
+</code></pre>
+<p><strong>三. zlib 安装</strong><br>
+zlib 库提供了很多种压缩和解压缩的方式， nginx 使用 zlib 对 http 包的内容进行 gzip ，所以需要在 Centos 上安装 zlib 库。</p>
+<pre><code>yum install -y zlib zlib-devel
+</code></pre>
+<p><strong>四. OpenSSL 安装</strong><br>
+OpenSSL 是一个强大的安全套接字层密码库，囊括主要的密码算法、常用的密钥和证书封装管理功能及 SSL 协议，并提供丰富的应用程序供测试或其它目的使用。<br>
+nginx 不仅支持 http 协议，还支持 https（即在ssl协议上传输http），所以需要在 Centos 安装 OpenSSL 库。</p>
+<pre><code>yum install -y openssl openssl-devel
+</code></pre>
+<h2 id="官网下载">官网下载</h2>
+<p>1.直接下载<code>.tar.gz</code>安装包，地址：https://nginx.org/en/download.html</p>
+<figure data-type="image" tabindex="1"><img src="https://images2015.cnblogs.com/blog/26794/201704/26794-20170415143759345-1159867247.png" alt="img" loading="lazy"></figure>
+<p>2.使用<code>wget</code>命令下载（推荐）。确保系统已经安装了wget，如果没有安装，执行 yum install wget 安装。</p>
+<pre><code>wget -c https://nginx.org/download/nginx-1.12.0.tar.gz
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://images2015.cnblogs.com/blog/26794/201704/26794-20170415143847533-1700322865.png" alt="img" loading="lazy"></figure>
+<p>我下载的是1.12.0版本，这个是目前的稳定版。</p>
+<h2 id="解压">解压</h2>
+<p>依然是直接命令：</p>
+<pre><code>tar -zxvf nginx-1.12.0.tar.gz
+cd nginx-1.12.0
+</code></pre>
+<h2 id="配置">配置</h2>
+<p>其实在 nginx-1.12.0 版本中你就不需要去配置相关东西，默认就可以了。当然，如果你要自己配置目录也是可以的。<br>
+1.使用默认配置</p>
+<pre><code>./configure
+</code></pre>
+<p>2.自定义配置（不推荐）</p>
+<pre><code>./configure \
+--prefix=/usr/local/nginx \
+--conf-path=/usr/local/nginx/conf/nginx.conf \
+--pid-path=/usr/local/nginx/conf/nginx.pid \
+--lock-path=/var/lock/nginx.lock \
+--error-log-path=/var/log/nginx/error.log \
+--http-log-path=/var/log/nginx/access.log \
+--with-http_gzip_static_module \
+--http-client-body-temp-path=/var/temp/nginx/client \
+--http-proxy-temp-path=/var/temp/nginx/proxy \
+--http-fastcgi-temp-path=/var/temp/nginx/fastcgi \
+--http-uwsgi-temp-path=/var/temp/nginx/uwsgi \
+--http-scgi-temp-path=/var/temp/nginx/scgi
+</code></pre>
+<blockquote>
+<p>注：将临时文件目录指定为/var/temp/nginx，需要在/var下创建temp及nginx目录</p>
+</blockquote>
+<h2 id="编译安装">编译安装</h2>
+<pre><code>make
+make install
+</code></pre>
+<p>查找安装路径：</p>
+<pre><code>whereis nginx
+</code></pre>
+<h2 id="启动-停止nginx">启动、停止nginx</h2>
+<pre><code>cd /usr/local/nginx/sbin/
+./nginx 
+./nginx -s stop
+./nginx -s quit
+./nginx -s reload
+启动时报80端口被占用:
+nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+
+</code></pre>
+<p><code> 解决办法：1、安装net-tool 包：</code>yum install net-tools</p>
+<pre><code> 
+</code></pre>
+<blockquote>
+<p><code>./nginx -s quit</code>:此方式停止步骤是待nginx进程处理任务完毕进行停止。<br>
+<code>./nginx -s stop</code>:此方式相当于先查出nginx进程id再使用kill命令强制杀掉进程。</p>
+</blockquote>
+<p>查询nginx进程：</p>
+<pre><code>ps aux|grep nginx
+</code></pre>
+<h2 id="重启-nginx">重启 nginx</h2>
+<p>1.先停止再启动（推荐）：<br>
+对 nginx 进行重启相当于先停止再启动，即先执行停止命令再执行启动命令。如下：</p>
+<pre><code>./nginx -s quit
+./nginx
+</code></pre>
+<p>2.重新加载配置文件：<br>
+当 ngin x的配置文件 nginx.conf 修改后，要想让配置生效需要重启 nginx，使用<code>-s reload</code>不用先停止 ngin x再启动 nginx 即可将配置信息在 nginx 中生效，如下：<br>
+./nginx -s reload</p>
+<p>启动成功后，在浏览器可以看到这样的页面：</p>
+<figure data-type="image" tabindex="3"><img src="http://www.linuxidc.com/upload/2016_09/160905180451093.png" alt="nginx-welcome.png" loading="lazy"></figure>
+<h2 id="开机自启动">开机自启动</h2>
+<p>即在<code>rc.local</code>增加启动代码就可以了。</p>
+<pre><code>vi /etc/rc.local
+</code></pre>
+<p>增加一行 <code>/usr/local/nginx/sbin/nginx</code><br>
+设置执行权限：</p>
+<pre><code>chmod 755 rc.local
+</code></pre>
+<figure data-type="image" tabindex="4"><img src="http://www.linuxidc.com/upload/2016_09/160905180451095.png" alt="nginx-rclocal.png" loading="lazy"></figure>
+<p>到这里，nginx就安装完毕了，启动、停止、重启操作也都完成了，当然，你也可以添加为系统服务，我这里就不在演示了。</p>
+<pre><code>firewall-cmd --zone=public --add-port=80/tcp --permanent 
+ 
+命令含义：
+  
+--zone #作用域
+  
+--add-port=80/tcp  #添加端口，格式为：端口/通讯协议
+  
+--permanent   #永久生效，没有此参数重启后失效
+</code></pre>
+<p>重启防火墙：</p>
+<pre><code>systemctl stop firewalld.service 
+systemctl start firewalld.service 
+</code></pre>
+<p>文章转自：https://www.cnblogs.com/liujuncm5/p/6713784.html</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/YNaOOJ8rC/">
+              <span class="post-title">
+                MinIO 分布式集群搭建&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

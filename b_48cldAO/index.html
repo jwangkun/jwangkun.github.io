@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Centos破解密码 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Centos破解密码 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Centos破解密码"/>
+    <meta property="og:url" content="https://jwangkun.github.io/b_48cldAO/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/l-lwQxp4GJ/" class="tag">Centos</a>
+            
+        </span>
+            <h1>Centos破解密码</h1>
+            <span class="meta">
+            	Posted on
+              2021-09-18，1 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>第一步：启动系统</p>
+<p>到这里之后，点击一下屏幕，输入e</p>
+<figure data-type="image" tabindex="1"><img src="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183432009-1869195008.png" alt="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183432009-1869195008.png" loading="lazy"></figure>
+<p>第二步：输入rd.break</p>
+<p>在linux16开头的行的结尾输入rd.break</p>
+<figure data-type="image" tabindex="2"><img src="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183517876-48407515.png" alt="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183517876-48407515.png" loading="lazy"></figure>
+<p>第三步：ctrl+x</p>
+<p>输入ctrl+x运行</p>
+<p>进入到如下的界面</p>
+<figure data-type="image" tabindex="3"><img src="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183548747-425684509.png" alt="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183548747-425684509.png" loading="lazy"></figure>
+<p>第四步：重新挂载根</p>
+<p>现在的根为只读状态，需要挂载为读写状态以便进行修改</p>
+<p>输入红框内的内容</p>
+<figure data-type="image" tabindex="4"><img src="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183629026-224394110.png" alt="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183629026-224394110.png" loading="lazy"></figure>
+<p>第五步：切换根</p>
+<p>进入到sh，即为你真正的系统</p>
+<figure data-type="image" tabindex="5"><img src="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183659499-2145547384.png" alt="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183659499-2145547384.png" loading="lazy"></figure>
+<p>第六步：修改密码</p>
+<p>需要输入两次密码进行确认</p>
+<p>结尾看到successfully即为修改成功</p>
+<figure data-type="image" tabindex="6"><img src="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183735320-484187296.png" alt="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183735320-484187296.png" loading="lazy"></figure>
+<p>第七步：退出并重启</p>
+<figure data-type="image" tabindex="7"><img src="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183824089-2018340256.png" alt="https://img2018.cnblogs.com/blog/1629933/201905/1629933-20190526183824089-2018340256.png" loading="lazy"></figure>
+<p>第八步：进入系统</p>
+<p>可以发现我们使用修改后的密码成功进入系统</p>
+<p>工作中推荐使用此种方法</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Zw_DyvWxQ/">
+              <span class="post-title">
+                OpenVPN 安装使用&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

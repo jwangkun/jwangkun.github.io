@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>CentOS7 中 MySQL 5.7 主主互备配置 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="CentOS7 中 MySQL 5.7 主主互备配置 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="CentOS7 中 MySQL 5.7 主主互备配置"/>
+    <meta property="og:url" content="https://jwangkun.github.io/hqQgwrBYd/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/_JVrn2ZGG/" class="tag">MySQL</a>
+            
+        </span>
+            <h1>CentOS7 中 MySQL 5.7 主主互备配置</h1>
+            <span class="meta">
+            	Posted on
+              2021-09-17，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>先从 MySQL 对数据库复制的能力看，MySQL 支持单向、异步的复制。复制过程中一个服务器充当主服务器，而一个或多个其它服务器充当从服务器。主服务器将更新写入二进制日志文件，并维护日志文件的一个索引以跟踪日志循环。当一个从服务器连接到主服务器时，它通知主服务器从服务器在日志中读取的最后一次成功更新的位置。从服务器接收从那时起发生的任何更新，然后封锁并等待主服务器通知下一次更新。</p>
+<p>现在公司中很多都用到了云服务器，无论是服务器还是数据库，但是我们在开发阶段一般还是公司自己的服务器，在没有 dba 的情况就需要开发人员自己去搭建数据库集群，但是对于小公司来说，两台数据库服务器互为主备也许对开发人员来说就是比较理想的。当然有运维同事帮忙的话会更好，使用 keepalived 搭建个高可用的服务器集群（后面再去研究如何使用 keepalived 搭建）。下面我们就介绍下 CentOS7 中如何搭建 MySQL 主主互备服务器。</p>
+<h3 id="1-主机环境与软件版本"><strong>1. 主机环境与软件版本</strong></h3>
+<ul>
+<li>主机系统：CentOS7.6 64 位</li>
+<li>两个虚拟机：</li>
+</ul>
+<p>主机 (master-1)：IP 地址： 10.213.116.11</p>
+<p>主机 (master-2)：IP 地址： 10.213.116.12</p>
+<ul>
+<li>MySQL 版本：mysql-5.7.22</li>
+</ul>
+<h3 id="2-mysql-安装"><strong>2. MySQL 安装</strong></h3>
+<ul>
+<li>参考：<a href="https://blog.csdn.net/hongguo_cheng/article/details/80293264">https://blog.csdn.net/hongguo_cheng/article/details/80293264</a>，要在两个虚拟机中均安装成功。</li>
+</ul>
+<h3 id="3-mysql-配置"><strong>3. MySQL 配置</strong></h3>
+<p>既然是主主互备，就说明两个数据库都要对外进行服务，为了防止 id 重复，我们需要在配置文件中对两个数据库的自增长的 offset 设置为不同的值，具体如下：</p>
+<p>master-1 服务器中文件 <strong>/etc/my.cnf</strong> 中添加如下配置：</p>
+<pre><code>server-id=1                             #server的唯一标识
+auto_increment_offset=1                  #自增id起始值
+auto_increment_increment=2                #每次自增数字
+
+log-bin = mysql-bin                           #打开二进制功能,MASTER主服务器必须打开此项
+max_binlog_size=1024M                          #binlog单文件最大值
+
+replicate-ignore-db = mysql                    #忽略不同步主从的数据库
+replicate-ignore-db = information_schema
+replicate-ignore-db = performance_schema
+replicate-ignore-db = test
+
+</code></pre>
+<p>master-2 服务器中文件 <strong>/etc/my.cnf</strong> 中添加如下配置：</p>
+<pre><code>server-id = 2                               #server的唯一标识
+auto_increment_offset = 2                   #自增id起始值
+auto_increment_increment = 2                 #每次自增数字
+
+log-bin = mysql-bin                           #打开二进制功能,MASTER主服务器必须打开此项
+max_binlog_size=1024M                          #binlog单文件最大值
+
+replicate-ignore-db = mysql                    #忽略不同步主从的数据库
+replicate-ignore-db = information_schema
+replicate-ignore-db = performance_schema
+replicate-ignore-db = test
+</code></pre>
+<h3 id="4-mysql-重启"><strong>4. MySQL 重启</strong></h3>
+<pre><code>shell&gt; service mysql restart
+</code></pre>
+<h3 id="5-主从配置"><strong>5. 主从配置</strong></h3>
+<h3 id="51-添加主从同步账户"><strong>5.1 添加主从同步账户</strong></h3>
+<p>在 master-1 中添加 repl 用户:</p>
+<pre><code>mysql&gt; grant replication slave on *.* to 'repl'@' 10.213.116.12' identified by '1234asdF';
+</code></pre>
+<p>在 master-2 中添加 repl 用户:</p>
+<pre><code>mysql&gt; grant replication slave on *.* to 'repl'@' 10.213.116.11' identified by '1234asdF';
+</code></pre>
+<h3 id="52-查看主库的状态"><strong>5.2 查看主库的状态</strong></h3>
+<p>在 master-1 上执行如下命令：</p>
+<pre><code>mysql&gt; show master status;
+</code></pre>
+<p><a href="https://img-blog.csdn.net/20180512180426454?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hvbmdndW9fY2hlbmc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70">https://img-blog.csdn.net/20180512180426454?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hvbmdndW9fY2hlbmc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70</a></p>
+<p>在 master-2 上执行如下命令：</p>
+<pre><code>mysql&gt; show master status;
+</code></pre>
+<p><a href="https://img-blog.csdn.net/20180512180444504?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hvbmdndW9fY2hlbmc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70">https://img-blog.csdn.net/20180512180444504?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hvbmdndW9fY2hlbmc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70</a></p>
+<h3 id="53-配置同步数据"><strong>5.3 配置同步数据</strong></h3>
+<p>在 master-1 上执行如下命令：</p>
+<pre><code>mysql&gt; change master to master_host='10.213.116.12',\
+master_port=3306,master_user='repl',master_password='1234asdF',\
+master_log_file='mysql-bin.000001',master_log_pos=738;
+
+mysql&gt; start slave;
+
+mysql&gt; show slave status\G;
+</code></pre>
+<p>下面这两个状态表示正常：</p>
+<pre><code>Slave_IO_Running: Yes
+
+Slave_SQL_Running: Yes
+</code></pre>
+<p>在 master-2 上执行如下命令：</p>
+<pre><code>mysql&gt; change master to master_host='10.213.116.11',\
+master_port=3306,master_user='repl',master_password='1234asdF',\
+master_log_file='mysql-bin.000001',master_log_pos=446;
+
+mysql&gt; start slave;
+
+mysql&gt; show slave status\G;
+</code></pre>
+<p>下面这两个状态表示正常：</p>
+<pre><code>Slave_IO_Running: Yes
+
+Slave_SQL_Running: Yes
+</code></pre>
+<p><strong>说明</strong>：</p>
+<p><strong>master_log_file</strong>： master 的日志文件，则 master-1 互指 master-2 中的数据，根据上图可以得到此值。</p>
+<p><strong>master_log_pos</strong>： master 的日志文件起始位置，则 master-1 互指 master-2 中的数据，根据上图可以得到此值。</p>
+<h3 id="6-测试主从同步"><strong>6. 测试主从同步</strong></h3>
+<p>在 master-1 上执行如下 sql 脚本进行测试：</p>
+<pre><code>mysql&gt; show databases;
+
++--------------------+
+
+| Database           |
+
++--------------------+
+
+| information_schema |
+
+| mysql              |
+
+| performance_schema |
+
+| test               |
+
++--------------------+
+rows in set (0.00 sec)
+
+mysql&gt; create database test1;
+
+Query OK, 1 row affected (0.00 sec)
+
+mysql&gt; show databases;
+
++--------------------+
+
+| Database           |
+
++--------------------+
+
+| information_schema |
+
+| mysql              |
+
+| performance_schema |
+
+| test               |
+
+| test01             |
+
++--------------------+
+rows in set (0.00 sec)
+</code></pre>
+<p>同时查看 master-2 中是否创建了数据库 test1</p>
+<pre><code>mysql&gt; show databases;
+
++--------------------+
+
+| Database           |
+
++--------------------+
+
+| information_schema |
+
+| mysql              |
+
+| performance_schema |
+
+| test               |
+
+| test1             |
+
++--------------------+
+rows in set (0.00 sec)
+</code></pre>
+<p>对表的操作可自行进行测试。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/ByamJf1rO/">
+              <span class="post-title">
+                Linux关闭防火墙命令&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

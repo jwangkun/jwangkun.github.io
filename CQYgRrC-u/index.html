@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot  整合Kafka | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot  整合Kafka | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot  整合Kafka"/>
+    <meta property="og:url" content="https://jwangkun.github.io/CQYgRrC-u/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/guCYjOiLe/" class="tag">Kafka</a>
+            
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1>SpringBoot  整合Kafka</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，6 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="kafka简介">kafka简介</h2>
+<p>kafka是用Scala和Java语言开发的，高吞吐量的分布式消息中间件。高吞吐量使它在大数据领域具有天然的优势，被广泛用来记录日志。</p>
+<h3 id="kafka架构分析">kafka架构分析</h3>
+<figure data-type="image" tabindex="1"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201013101359300-985908753.png" alt="img" loading="lazy"></figure>
+<p>注1：图中的红色箭头表示消息的流动过程，蓝色表示分区备份，绿色表示kafka集群注册到zookeeper。</p>
+<p>注2：在kafka0.9版本之前，消费者消费消息的位置记录在zookeeper中，在0.9版本之后，消费消息的位置记录在kafka的一个topic上。</p>
+<p><strong>kafka名词简介</strong>：</p>
+<ol>
+<li>Producer：消息生产者</li>
+<li>Consumer：消息消费者</li>
+<li>Consumer Group（CG）：消费者组，一个topic可以有多个CG，每个Partition只会把消息发送给GG中的一个Consumer</li>
+<li>Broker：一台kafka服务器就是一个broker，一个broker有多个topic</li>
+<li>Topic：消息主题，消息分类，可看作队列</li>
+<li>Partition：分区，为了实现扩展，一个大的topic可能分布到多个broker上，一个topic可以分为多个partition，partition中的每条消息都会被分配一个有序的id（offset），每个partiton中的消息是有序的。</li>
+<li>Offset：kafka的存储文件都是按照offset.kafka来命名的，方便查找，第一个offset为0000000000.kafka。</li>
+<li>Leader：分区具有被备份，主分区</li>
+<li>Follower：从分区</li>
+</ol>
+<h4 id="1-生产者分区策略">1. 生产者分区策略</h4>
+<ol>
+<li>指定分区。</li>
+<li>没有指定分区但有key值，将key的hash值与当前topic的分区个数进行取余得到分区。</li>
+<li>如果既没有指定分区又没有指定key，第一次调用时随机生成一个整数（以后调用每次在这个整数上自增），将这个随机数与该topic的分区数取余得到分区。</li>
+</ol>
+<h4 id="2-消息可靠性问题">2. 消息可靠性问题</h4>
+<p>采用ack确认机制来保证消息的可靠性。</p>
+<p>kafka在发送消息后会同步到其他分区副本，等所有副本都接收到消息后，kafka才会发送ack进行确认。采用这种模式的劣势就是当其中一个副本宕机后，则消息生产者就不会收到kafka的ack。</p>
+<p>kafka采用<strong>ISR</strong>来解决这个问题。</p>
+<p><strong>ISR</strong>：Leader维护的一个和leader保持同步的follower集合。</p>
+<p>当ISR中的folower完成数据同步之后，leader就会向follower发送ack，如果follower长时间未向leader同步数据，则该follower就会被踢出ISR，该时间阀值的设置参数为<code>replica.lag.time.max.ms</code>，默认时间为10s，leader发生故障后，就会从ISR中选举新的leader。</p>
+<blockquote>
+<p>注：本文所讲的kafka版本为0.11，在0.9版本以前成为ISR还有一个条件，就是同步消息的条数。</p>
+</blockquote>
+<p><strong>ack参数配置</strong></p>
+<p>0：生产者不等待broker的ack。</p>
+<p>1：leader分区接收到消息向生产者发送ack。</p>
+<p>-1（all）：ISR中的leader和follower同步成功后，向生产者发送ack。</p>
+<h4 id="3-消息一致性问题">3. 消息一致性问题</h4>
+<p>假如leader中有10条消息，向两个follower同步数据，follower A同步了8条，follower B同步了9条。这时候leader宕机了，follower A和follower B中的消息是不一致的，剩下两个follower就会重新选举出一个leader。</p>
+<ul>
+<li>LEO（log end offset）：每个副本的最后一个offset</li>
+<li>HW（high watermark）：所有副本中最小的offset</li>
+</ul>
+<p>为了保证数据的一致性，所有的follower会将各自的log文件<strong>高出HW的部分</strong>截掉，然后再从新的leader中同步数据。</p>
+<h4 id="4-消息重复性问题">4. 消息重复性问题</h4>
+<p>在kafka0.11版本中引入了一个新特性：幂等性。启用幂等性后，ack默认为-1。将生产者中的<code>enable.idompotence</code>设置为true，即启用了幂等性。</p>
+<p>开启幂等性的Producer在初始化的时候会被分配一个PID，发往同一Partition的消息会附带Sequence Number。Broker端会对&lt;PID,Partition,SeqNumber&gt;做缓存，当具有相同主键的消息提交时，Broker只会缓存一条。但是每次重启PID就会发生变化，因此只能保证一次会话同一分区的消息不重复。</p>
+<h4 id="5-消费者组分区分配策略">5. 消费者组分区分配策略</h4>
+<p>kafka有两种分配策略，一种是RoundRobin，另一种是Range</p>
+<p><strong>RoundRobin</strong>是按照消费者组以轮询的方式去给消费者分配分区的方式，前提条件是消费者组中的消费者需要订阅同一个topic。</p>
+<p><strong>Range</strong>是kafka默认的分配策略，它是通过当前的topic按照一定范围来分配的，假如有3个分区，消费者组有两个消费者，则消费者A去消费1和2分区，消费者B去消费3分区。</p>
+<h4 id="6-消费者offset维护">6. 消费者offset维护</h4>
+<p>Kafka 0.9 版本之前，consumer默认将offset保存在zookeeper中，0.9 版本开始，offset保存在kafka的一个内置topic中，该topic为<code>_consumer_offsets</code>。</p>
+<h4 id="7-生产者事务">7. 生产者事务</h4>
+<p>为了实现跨分区会话的事务，需要引入一个全局唯一的Tracscation ID，并将Producer 获得的PID与之绑定。这样当Producer重启后就可以通过正在进行的Transaction ID获得原来的PID。</p>
+<p>为了管理Transcation ID，kafka引入了一个新的组件Transcation Coordinator。Producer就是通过和Transcation Coordinator交互获得Transction ID对应的任务状态。</p>
+<h2 id="spring-boot-整合kafka">Spring Boot 整合kafka</h2>
+<h3 id="1-引入kafka依赖">1. 引入kafka依赖</h3>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.kafka&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-kafka&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="2-配置kafka服务信息">2. 配置kafka服务信息</h3>
+<pre><code>spring:
+  kafka:
+    # kafka服务地址
+    bootstrap-servers: 47.104.155.182:9092
+    producer:
+      # 生产者消息key序列化方式
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # 生产者消息value序列化方式
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      # 消费者组
+      group-id: test-consumer-group
+      # 消费者消息value反序列化方式
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # 消费者消息value反序列化方式
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+</code></pre>
+<h3 id="3-消费者">3. 消费者</h3>
+<pre><code>@Component
+@Slf4j
+@KafkaListener(topics = {&quot;first-topic&quot;},groupId = &quot;test-consumer-group&quot;)
+public class Consumer {
+
+    @KafkaHandler
+    public void receive(String message){
+        
+        log.info(&quot;我是消费者，我接收到的消息是：&quot;+message);
+    }
+}
+</code></pre>
+<h3 id="4-生产者">4. 生产者</h3>
+<pre><code>@RestController
+public class Producer {
+
+    @Autowired
+    private KafkaTemplate kafkaTemplate;
+
+    @GetMapping(&quot;send&quot;)
+    public void send(){
+
+        String message = &quot;你好，我是Java旅途&quot;;
+        // 第一个参数 topic
+        // 第二个参数 消息
+        kafkaTemplate.send(&quot;first-topic&quot;,message);
+    }
+}
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/2Rm5SfDig/">
+              <span class="post-title">
+                SpringBoot 整合RabbitMQ&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

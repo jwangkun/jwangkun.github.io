@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot实现邮件发送功能 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot实现邮件发送功能 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot实现邮件发送功能"/>
+    <meta property="og:url" content="https://jwangkun.github.io/Pw8vFa6Zm/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/lI4DQjUG5/" class="tag">邮件发送</a>
+            
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1>SpringBoot实现邮件发送功能</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>在项目开发中，除了需要短信验证外，有时候为了节省 短信费也会使用邮件发送。在Spring项目中发送邮件需要封装复杂的消息体，不太方便。而在Spring Boot项目中发送邮件就太简单了，下面一起来看看Spring Boot如何发送邮件。</p>
+<p>本文以126邮箱为例进行邮件发送功能，其他邮箱的配置也都大同小异。</p>
+<h3 id="1-获取授权码">1. 获取授权码</h3>
+<p>常用的电子协议有<code>POP3</code>，<code>SMTP</code>，<code>IMAP</code>，协议的具体区别就不进行详细介绍了。这里选择<code>smtp</code>协议进行演示。登录邮箱，在设置中找到协议地址，点击开启。授权码只会显示一次，需要保存好。</p>
+<figure data-type="image" tabindex="1"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201022155023383-597650873.png" alt="img" loading="lazy"></figure>
+<p>下面是126邮箱对应的三种协议主机地址：</p>
+<figure data-type="image" tabindex="2"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201022155039545-225503795.png" alt="img" loading="lazy"></figure>
+<h3 id="2-添加依赖">2. 添加依赖</h3>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-mail&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="3-配置邮箱信息">3. 配置邮箱信息</h3>
+<p>需要注意的是<code>password</code>不是邮箱登录密码，而是第一步中获取的授权码。</p>
+<pre><code>spring:
+  mail:
+    default-encoding: utf-8
+    # 主机地址
+    host: smtp.126.com
+    # 邮箱名
+    username: xxx@126.com
+    # 授权码（不是密码）
+    password: xxxxxxxxxx
+</code></pre>
+<h3 id="4-发送邮件">4. 发送邮件</h3>
+<p>封装<code>SimpleMailMessage</code>消息内容，注入<code>JavaMailSender</code>调用其<code>send()</code>方法，完成邮件发送。其中收件人和抄送人支持多个发送，多个地址用<code>,</code>拼接起来完成批量发送。</p>
+<pre><code>@RestController
+public class Email {
+
+    @Autowired
+    private JavaMailSender mailSender;
+    @GetMapping(&quot;send&quot;)
+    private void send(){
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        // 发件人
+        message.setFrom(&quot;xxx@126.com&quot;);
+        // 收件人
+        message.setTo(&quot;xxx@163.com&quot;);
+        // 邮件标题
+        message.setSubject(&quot;Java发送邮件第二弹&quot;);
+        // 邮件内容
+        message.setText(&quot;你好，这是一条用于测试Spring Boot邮件发送功能的邮件！哈哈哈~~~&quot;);
+        // 抄送人
+        message.setCc(&quot;xxx@qq.com&quot;);
+        mailSender.send(message);
+    }
+}
+</code></pre>
+<h3 id="5-发送效果">5. 发送效果</h3>
+<p>最后一起来看看上面内容中涉及到的三个邮箱是否接收到数据了。</p>
+<p>发件人：</p>
+<figure data-type="image" tabindex="3"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201022155108754-1026062882.png" alt="img" loading="lazy"></figure>
+<p>收件人：</p>
+<figure data-type="image" tabindex="4"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201022155125613-404977354.png" alt="img" loading="lazy"></figure>
+<p>抄送人：</p>
+<figure data-type="image" tabindex="5"><img src="https://img2020.cnblogs.com/blog/1719198/202010/1719198-20201022155146283-246371517.png" alt="img" loading="lazy"></figure>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/cTw-2dnqX/">
+              <span class="post-title">
+                SpringBoot Quartz实现动态定时任务&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

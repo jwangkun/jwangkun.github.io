@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Kubernetes之Pod, Replicaset, Deployment, Label, Service | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes之Pod, Replicaset, Deployment, Label, Service | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Kubernetes之Pod, Replicaset, Deployment, Label, Service"/>
+    <meta property="og:url" content="https://jwangkun.github.io/oVB0pVA68/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Kubernetes之Pod, Replicaset, Deployment, Label, Service</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，6 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p><strong>Pod:</strong></p>
+<p>Pod是一组紧密关联的容器集合，它们共享PID、IPC、Network和UTS namespace，是Kubernetes调度的基本单位。Pod的设计理念是支持多个容器在一个Pod中共享网络和文件系统，可以通过进程间通信和文件共享这种简单高效的方式组合完成服务.</p>
+<!-- more -->
+<p>缺点: 不支持高并发, 高可用, 当Pod当机后无法自动恢复.</p>
+<p>1.创建Pod</p>
+<p># vi pod.yaml</p>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: demo
+spec:
+  containers:
+  - image: httpd
+    name: httpd
+    imagePullPolicy: Always
+</code></pre>
+<p># kubectl create -f pod.yaml</p>
+<p>2.查看Pod</p>
+<p># kubectl get pods</p>
+<pre><code>NAME    READY     STATUS    RESTARTS   AGE
+demo    1/1       Running      0       8d
+</code></pre>
+<p># kubectl describe pods</p>
+<p>3.删除Pod</p>
+<p># kubectl delete pod demo</p>
+<p><strong>Replicaset:</strong></p>
+<p>Replicaset在继承Pod的所有特性的同时, 它可以利用预先创建好的模板定义副本数量并自动控制, 通过改变Pod副本数量实现Pod的扩容和缩容</p>
+<p>缺点: 无法修改template模板, 也就无法发布新的镜像版本</p>
+<p>1.创建Replicaset</p>
+<p># vi replicaset.yaml</p>
+<pre><code>apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: demo-rc
+  labels:
+    app: demo-rc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-rc
+  template:
+    metadata:
+      labels:
+        app: demo-rc
+    spec:
+      containers:
+      - name: httpd
+        image: httpd
+        imagePullPolicy: Always
+</code></pre>
+<p># kubectl create -f replicaset.yaml</p>
+<p>2.查看replicaset</p>
+<p># kubectl get replicaset</p>
+<pre><code>NAME      READY     STATUS    RESTARTS   AGE
+demo-rc    1/1       Running      0       8d
+</code></pre>
+<p># kubectl describe replicaset</p>
+<p>3.删除replicaset</p>
+<p># kubectl delete replicaset demo-rc</p>
+<p><strong>Deployment</strong></p>
+<p>Deployment在继承Pod和Replicaset的所有特性的同时, 它可以实现对template模板进行实时滚动更新并具备我们线上的Application life circle的特性.</p>
+<p>1.创建Deployment</p>
+<p># vi deployment.yaml</p>
+<pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-deployment
+  labels:
+    app: httpd-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: httpd-demo
+  template:
+    metadata:
+      labels:
+        app: httpd-demo
+    spec:
+      containers:
+      - name: httpd
+        image: httpd
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: VERSION
+          value: &quot;v1&quot;
+</code></pre>
+<p># kubectl create -f deployment.yaml</p>
+<p>2.查看Deployment</p>
+<p># kubectl get deployment</p>
+<pre><code>NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+httpd-deployment   2         2         2            2           8d
+</code></pre>
+<p># kubectl get pods -o wide</p>
+<pre><code>NAME                               READY     STATUS    RESTARTS   AGE       IP            NODE
+httpd-deployment-956697567-8mqch   1/1       Running   0          8d        10.244.0.36   kube-master
+httpd-deployment-956697567-wcbs6   1/1       Running   0          8d        10.244.0.37   kube-master
+</code></pre>
+<p># kubectl describe deployment</p>
+<p>3.更新deployment</p>
+<p>通过此命令可以呼出vi编辑器对模板进行编辑.</p>
+<p># kubectl edit -f deployment.yaml</p>
+<p>通过此命令使当前编辑结果生效.</p>
+<p># kubectl apply -f deployment.yaml</p>
+<p>再次查看可以看到老版本的deployment已经下架, 新版本的已经生效.</p>
+<p># kubectl get deployment</p>
+<pre><code>NAME                          DESIRED   CURRENT   READY     AGE
+httpd-deployment-6b98d94474   0         0         0         1m
+httpd-deployment-956697567    2         2         2         7m
+</code></pre>
+<p>4.扩容与缩容</p>
+<p>可以修改replicas的赋值对deployment进行扩容与缩容</p>
+<p># kubectl scale deployment/httpd-deployment --replicas=1</p>
+<p>5.删除deployment</p>
+<p># kubectl delete deployment httpd-deployment</p>
+<p><strong>Lable</strong></p>
+<p>Label是attach到Pod的一对键/值对，用来传递用户定义的属性。比如，你可能创建了一个&quot;tier&quot;和“app”标签，通过Label（tier=frontend, app=myapp）来标记前端Pod容器，使用Label（tier=backend, app=myapp）标记后台Pod。然后可以使用Selectors选择带有特定Label的Pod，让具体某一个Pod或者Deployment去使用某一个Service实现特定的网络配置.</p>
+<p><strong>Service</strong></p>
+<p>Service是应用服务的抽象，通过labels为应用提供负载均衡和服务发现。匹配labels的Pod IP和端口列表组成endpoints，由kube-proxy负责将服务IP负载均衡到这些endpoints上。<br>
+每个Service都会自动分配一个cluster IP（仅在集群内部可访问的虚拟地址）和DNS名，其他容器可以通过该地址或DNS来访问服务，而不需要了解后端容器的运行。</p>
+<p>1.更改NodePort限制</p>
+<p>Kubernetes默认对外的NodePort限制范围为30000-32767, 这里如果要使用一些常用的端口(80, 8080, 443)需将这个范围放大.</p>
+<p># vi /etc/kubernetes/manifests/kube-apiserver.yaml</p>
+<p>在--service-cluster-ip-range与insecure-port间添加如下node port配置</p>
+<pre><code class="language-bsh">...
+- --service-cluster-ip-range=10.96.0.0/12
+- --service-node-port-range=0-32767
+- --insecure-port=0
+....
+</code></pre>
+<p>重启服务</p>
+<p># systemctl restart kubelet</p>
+<p>2.创建Service</p>
+<p># vi svc.yaml</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: demo
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 80
+  selector:
+    app: httpd-demo
+</code></pre>
+<p># kubectl create -f svc.yaml</p>
+<p>Tip: 如果要对某一Pod或deployment添加对外访问端口, 这里service添加的selector的键值需与之相对应.</p>
+<p>3.查看开放端口</p>
+<p># kubectl get svc demo</p>
+<pre><code class="language-bsh">NAME      TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)     AGE
+demo      NodePort   10.100.96.157   &lt;none&gt;        80:80/TCP   1h
+</code></pre>
+<p># kubectl describe service demo</p>
+<pre><code class="language-bsh">Name:                     demo
+Namespace:                default
+Labels:                   &lt;none&gt;
+Annotations:              &lt;none&gt;
+Selector:                 app=httpd-demo
+Type:                     NodePort
+IP:                       10.100.96.157
+Port:                     &lt;unset&gt;  80/TCP
+TargetPort:               80/TCP
+NodePort:                 &lt;unset&gt;  80/TCP
+Endpoints:                10.244.0.36:80,10.244.0.37:80
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   &lt;none&gt;
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Dt_TnP5GH/">
+              <span class="post-title">
+                Harbor搭建私有Docker仓库&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

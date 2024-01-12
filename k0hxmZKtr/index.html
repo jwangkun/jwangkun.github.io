@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>keepalived 安装以及主备配置详解 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="keepalived 安装以及主备配置详解 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="keepalived 安装以及主备配置详解"/>
+    <meta property="og:url" content="https://jwangkun.github.io/k0hxmZKtr/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+        </span>
+            <h1>keepalived 安装以及主备配置详解</h1>
+            <span class="meta">
+            	Posted on
+              2021-09-17，6 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="一-keepalived-的安装"><strong>一. keepalived 的安装</strong></h3>
+<p>首先我们再安装 keepalived 之前我们需要安装依赖包:</p>
+<pre><code>yum install -y curl gcc openssl-devel libnl3-devel net-snmp-devel
+</code></pre>
+<p>安装好依赖包之后我们再使用 yum 进行安装:</p>
+<pre><code>yum install keepalived  -y
+</code></pre>
+<p>再我们配置 keepalived 之前还是要检查防火墙和 slinux 是否关闭以及时间同步问题.</p>
+<h3 id="二-keepalived-高可用的具体配置"><strong>二. keepalived 高可用的具体配置</strong></h3>
+<p>/usr/sbin/keepalived        keepalived 主指令文件</p>
+<p>/etc/keepalived/keepalived.conf         keepalived 主配置文件</p>
+<p>/usr/lib/system/system/keepalived.service    相当于 keepalived 服务启停脚本</p>
+<p>/usr/share/doc/keepalived-2.0.11/samples/   keepalived 众多配置的模板</p>
+<pre><code>! Configuration File for keepalived
+
+global_defs {
+   notification_email {
+     acassen@firewall.loc
+    
+   }
+   notification_email_from root@director_server
+   smtp_server 127.0.0.1
+   smtp_connect_timeout 30
+   router_id LVS_DEVEL
+   vrrp_skip_check_adv_addr
+#   vrrp_strict
+   vrrp_garp_interval 0
+   vrrp_gna_interval 0
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+interface eth0
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    mcast_src_ip 192.168.204.130
+    nopreempt
+    authentication {
+        auth_type PASS
+        auth_pass 11613
+    }
+    virtual_ipaddress {
+       10.213.116.13
+     }
+ }
+</code></pre>
+<p>具体配置如上所示, 我们需要注意的是 vrrp_stritc 需要注释掉, 这里的两个 ip 地址, 第一个是本机 ip, 第二个是虚拟 ip, 在第一部分 global_defs 的最后面需要加上用户名和主机名, 还有第二部分的 notification_email_from 后面需要修改为用户名 @主机名, 具体的有不懂的都可以参考上面我的配置文件, 后面的部分暂时用不上都可以注释掉了.</p>
+<h3 id="三-keepalived-主备模式的配置"><strong>三. keepalived 主备模式的配置</strong></h3>
+<p>主机的配置如下所示:</p>
+<pre><code>global_defs {
+   notification_email {
+     acassen@firewall.loc
+    
+   }
+   notification_email_from root@director_server
+   smtp_server 127.0.0.1
+   smtp_connect_timeout 30
+   router_id LVS_DEVEL
+   vrrp_skip_check_adv_addr
+#   vrrp_strict
+   vrrp_garp_interval 0
+   vrrp_gna_interval 0
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 51
+   priority 100
+    advert_int 1
+    mcast_src_ip 10.213.116.11
+    nopreempt
+    authentication {
+        auth_type PASS
+        auth_pass 11613
+    }
+    virtual_ipaddress {
+        10.213.116.13
+     }
+
+}
+</code></pre>
+<p>这里需要注意的除了上面的 ip 需要修改, 另外就是主机的 state 需要修改为 MASTER.</p>
+<p>下面就是从机的配置:</p>
+<pre><code>global_defs {
+   notification_email {
+     acassen@firewall.loc
+    
+   }
+   notification_email_from root@real_server1
+   smtp_server 127.0.0.1
+   smtp_connect_timeout 30
+   router_id LVS_DEVEL
+   vrrp_skip_check_adv_addr
+#  vrrp_strict
+   vrrp_garp_interval 0
+   vrrp_gna_interval 0
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens36
+    virtual_router_id 51
+    priority 90
+    advert_int 1
+    mcast_src_ip 10.213.116.12
+    nopreempt
+    authentication {
+        auth_type PASS
+        auth_pass 11613
+    }
+    virtual_ipaddress {
+         10.213.116.13
+    }
+
+}
+</code></pre>
+<p>从机这里的 state 就要改为 BACKUP, 我们还需要注意的是我们在每一次修改配置文件之后都需要重启服务, 否则配置文件将无法生效. 如果重启失败就是我们的配置文件书写有问题, 我们要特别注意大小写, 尽量避免因为粗心而产生的语法错误, 免得后期排错麻烦.</p>
+<h3 id="四-双主模式的具体配置"><strong>四. 双主模式的具体配置</strong></h3>
+<p>双主模式也就是互为主备模式, 还是需要两台虚拟机, 具体配置如下, 我就只写一台的配置, 另外一台的区别也就是修改一下本机 ip, 两台主机的 VI_1 虚拟 ip 一致, VI_2 的虚拟 ip 也要一致, 另外就是第一台的 VI_1state 为 MASTER, 那么第二台的 VI_1 的 state 就要为 BACKUP, 第一台虚拟机的 VI_2 的 state 就要为 BACKUP, 第二台为 MASTER. 具体配置如下:</p>
+<pre><code>! Configuration File for keepalived
+
+global_defs {
+   notification_email {
+     acassen@firewall.loc
+     failover@firewall.loc
+     sysadmin@firewall.loc
+        root@director_server
+   }
+   notification_email_from root@director_server
+   smtp_server 127.0.0.1
+   smtp_connect_timeout 30
+   router_id LVS_DEVEL
+   vrrp_skip_check_adv_addr
+#  vrrp_strict
+   vrrp_garp_interval 0
+   vrrp_gna_interval 0
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 51
+    interval 1
+    #weight -20
+}
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 51
+    priority 100
+    advert_int 1
+    mcast_src_ip 192.168.204.130
+    nopreempt
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.204.196
+     }
+}
+
+vrrp_instance VI_2 {
+    state BACKUP
+    interface ens33
+    virtual_router_id 52
+    priority 90
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.204.198
+    }
+}
+</code></pre>
+<h3 id="五-相关测试"><strong>五. 相关测试</strong></h3>
+<pre><code class="language-jsx">systemctl start keepalived
+systemctl enable keepalived
+
+systemctl status keepalived
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/b0fd2f6d-d9b2-4283-b752-ef6b4ddda645/Untitled.png" alt="Untitled" loading="lazy"></figure>
+<p>我们在修改好配置文件之后, 需要重启服务, 使用 ip a 命令查看本机 ip</p>
+<figure data-type="image" tabindex="2"><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/05502f34-9fd5-4e65-ad23-dea7cc3e9692/Untitled.png" alt="Untitled" loading="lazy"></figure>
+<p>这个是我主机的 ip 地址, 红色圈出来的部分就是我们的虚拟 ip, 我们可以停止的主机的 keepalived 服务, 模拟机器的宕机, 那么我们的虚拟 ip 就会跳转到另一台机器也就是从机上, 保持正常运行状态.</p>
+<h3 id="六-报错及总结"><strong>六. 报错及总结</strong></h3>
+<p>从最后两张图我们可以清晰的发现在主机的 keepalived 服务停止后, 我们的虚拟 IP 跳转到了从机上, 那么当我们主机服务恢复之后, 我们会发现虚拟 IP 会再次回到主机, 这就是我们本次 keepalived 服务的优点之处, 在虚拟机模拟服务器的宕机时, 就算原本主机出现故障, 也不会影响服务的继续进行, 从机会继续接替主机的身份保持服务的继续进行.</p>
+<p>我在做 keepalived 的配置过程中具体没有出现什么报错, 在我看来最重要的就是配置文件, 在上面的具体配置中我在需要注意的地方都做了红色标注, 另外就是我们每一次修改配置文件之后都需要再次重启服务配置文件才会生效, 具体在遇到什么问题可以积极留言, 我看到之后都会积极尽力解答. 希望本次分享对大家的学习有所帮助.</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/hqQgwrBYd/">
+              <span class="post-title">
+                CentOS7 中 MySQL 5.7 主主互备配置&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

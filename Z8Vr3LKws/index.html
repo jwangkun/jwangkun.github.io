@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Docker安装单机ElasticSearch | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Docker安装单机ElasticSearch | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Docker安装单机ElasticSearch"/>
+    <meta property="og:url" content="https://jwangkun.github.io/Z8Vr3LKws/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/R-H9gtYSF/" class="tag">ElasticSearch</a>
+            
+            <a href="https://jwangkun.github.io/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>Docker安装单机ElasticSearch</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-21，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>搜索ElasticSearch镜像</p>
+<pre><code>docker search elasticsearch
+</code></pre>
+<p>拉取镜像</p>
+<pre><code>docker pull docker.io/elasticsearch:版本号
+</code></pre>
+<p>拉取镜像的时候，可以指定版本，如果不指定，默认使用latest。</p>
+<p>查看镜像</p>
+<pre><code>docker images
+</code></pre>
+<p>运行容器</p>
+<pre><code>docker run -d --name es2 -p 9200:9200 -p 9300:9300  --restart=always -e &quot;discovery.type=single-node&quot;  elasticsearch
+</code></pre>
+<p>通过镜像启动容器，然后查看容器。</p>
+<pre><code>docker ps   # 列出正在运行的容器
+docker ps -a    # 列出所有容器，包括未运行的
+</code></pre>
+<p>明明启动了容器，为什么会自动退出了呢？这里通过查看日志来看看是什么原因。</p>
+<pre><code>docker logs 676164fb24b3   	# 查看某个容器的日志
+</code></pre>
+<p>经过相关资料证实，这是因为内存不足导致的。所以在启动的时候，调整内存的分配，重新启动。<br>
+“ES_JAVA_OPTS=-Xms512m -Xmx512m”</p>
+<p>通过上图可知，容器已经启动完成。现在就可以在浏览器输入 ip + 端口号 访问了。</p>
+<p>配置跨域<br>
+通过项目中的配置，发现 cluster.name 这个与刚刚启动的不一致，ElasticSearch默认的cluster.name为elasticsearch，所以，这里需要进行修改。<br>
+首先进入容器。</p>
+<pre><code>docker exec -it es2 /bin/bash
+</code></pre>
+<p>我们需要对红框框圈中的文件&quot;elasticsearch.yml&quot;进行修改。</p>
+<p>这里使用vim和vi命令，都提示&quot;没有发现这个命令&quot;，这是因为Docker容器内部没有安装。所以，这里需要进行安装。</p>
+<p>apt-get update  # 获取最新的软件包<br>
+apt-get install vim   # 下载</p>
+<p>依次使用上面的命令即可安装成功，然后对&quot;elasticsearch.yml&quot;这个文件修改，增加如下内容。</p>
+<pre><code>cluster.name: &quot;qfcwx-cluster&quot;   
+network.host: 0.0.0.0
+http.cors.enabled: true
+http.cors.allow-origin: &quot;*&quot;
+</code></pre>
+<p>cluster.name：自定义集群名称。<br>
+network.host：当前es节点绑定的ip地址，默认127.0.0.1，如果需要开放对外访问这个属性必须设置。<br>
+http.cors.enabled：是否支持跨域，默认为false。<br>
+http.cors.allow-origin：当设置允许跨域，默认为*，表示支持所有域名，如果我们只是允许某些网站能访问，那么可以使用正则表达式。</p>
+<p>重启ElasticSearch容器<br>
+使用exit命令从容器内部退出。</p>
+<p>注意，这里是重启ElasticSearch容器，并不是重新启动一个新的容器。</p>
+<pre><code>docker restart es2
+使用浏览器进行访问。
+</code></pre>
+<p>可以看到集群的名称已经变成我们自己设置的了。</p>
+<p>查看ElasticSearch内部信息<br>
+如果没有指定版本号，就从Docker镜像仓库中拉取镜像的话，你是不知道版本号的。如果在Java中操作ElasticSearch，需要导入相应的约束或者jar包。这就需要和ElasticSearch版本号对应，不然就会报莫名的异常，所以，就需要查看当前ElasticSearch的本版号了，这里有两种方法。</p>
+<p>①、通过 ip+端口号 可以看到返回的json数据中，version下面的number就是版本号。<br>
+②、通过查看ElasticSearch容器内部信息。</p>
+<p>docker inspect 5acf0e8da90b     # 查看容器内部信息</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/l4YYAE4Ff/">
+              <span class="post-title">
+                 Docker安装单机Zookeeper&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

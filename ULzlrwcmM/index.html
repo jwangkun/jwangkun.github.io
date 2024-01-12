@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Redis 的几种数据导入导出方式 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Redis 的几种数据导入导出方式 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Redis 的几种数据导入导出方式"/>
+    <meta property="og:url" content="https://jwangkun.github.io/ULzlrwcmM/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/R2P-hE8zq/" class="tag">Redis</a>
+            
+        </span>
+            <h1>Redis 的几种数据导入导出方式</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-21，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>环境说明：<br>
+202.102.221.11 redis 源实例<br>
+202.102.221.12 redis 目标实例<br>
+202.102.221.13 任意 linux 系统</p>
+<h2 id="一-redis-dump-方式">一、redis-dump 方式</h2>
+<p>1. 安装 redis-dump 工具</p>
+<pre><code>[root@202.102.221.13 ~]# yum install ruby rubygems ruby-devel -y
+</code></pre>
+<p>更改gem源</p>
+<pre><code>[root@202.102.221.13 ~]# gem sources -a http://ruby.taobao.org
+Error fetching http://ruby.taobao.org:
+bad response Not Found 404 (http://ruby.taobao.org/specs.4.8.gz)
+　　访问http://ruby.taobao.org，公告通知镜像维护站点已迁往Ruby China镜像
+
+#gem sources --add https://gems.ruby-china.org/ --remove https://rubygems.org/
+[root@202.102.221.13 ~]# gem sources --add http://gems.ruby-china.org/ --remove http://rubygems.org/
+http://gems.ruby-china.org/ added to sources
+source http://rubygems.org/ not present in cache
+[root@202.102.221.13 ~]# gem sources -l
+*** CURRENT SOURCES ***
+
+http://gems.ruby-china.org/
+[root@202.102.221.13 ~]# gem install redis-dump -V
+</code></pre>
+<p>2.redis-dump 导出</p>
+<pre><code>[root@202.102.221.13 ~]# redis-dump -u :password@202.102.221.11:6379 &gt; 202.102.221.11.json
+</code></pre>
+<p>3.redis-load 导入</p>
+<pre><code>[root@202.102.221.13 ~]# cat 202.102.221.11.json | redis-load -u :password@202.102.221.12:6379
+</code></pre>
+<h2 id="二-aof-导入方式">二、aof 导入方式</h2>
+<p>1. 源实例生成 aof 数据</p>
+<p>清空上文目标实例全部数据</p>
+<p>[root@202.102.221.11 ~]# redis-cli -h 202.102.221.12 -a password flushall<br>
+OK</p>
+<p>源实例开启aof功能，将在dir目录下生成appendonly.aof文件</p>
+<pre><code>[root@202.102.221.11 ~]# redis-cli -h 202.102.221.11 -a password config set appendonly yes
+OK
+</code></pre>
+<p>2. 目标实例导入 aof 数据</p>
+<p>假设appendonly.aof就在当前路径下</p>
+<pre><code>[root@202.102.221.11 ~]# redis-cli -h 202.102.221.12 -a password --pipe &lt; appendonly.aof
+All data transferred. Waiting for the last reply...
+Last reply received from server.
+errors: 0, replies: 5
+</code></pre>
+<p>源实例关闭aof功能</p>
+<pre><code>[root@202.102.221.11 ~]# redis-cli -h 202.102.221.11 -a password config set appendonly no
+OK
+</code></pre>
+<h2 id="三-rdb-文件迁移方式">三、rdb 文件迁移方式</h2>
+<p>（1）关闭要迁移到的服务器的 redis 的 aof 日志功能（我的要迁移到的是本机的 redis6380.conf）</p>
+<p>vim redis6380.conf，将 appendonly yes 修改为 appendonly no</p>
+<p>（2）我们先看一下当前 redis 的数据，并将数据用 save 命令固化到 rdb 文件中，我的 rdb 文件为 / var/rdb/dump6379.rdb</p>
+<p>（3）杀掉当前 redis 的进程，否则下一步的复制 rdb 文件，rdb 处于打开的状态，复制的文件，会占用同样的句柄</p>
+<p>（4）复制当前 redis 的 rdb 文件，名字为你要迁移的 redis 的 rdb 文件名（我的要迁移的 redis 的文件名为 /var/rdb/dump6380.rdb），记住，一定要杀掉当前 redis 的进程，还有关闭要迁移的服务器的 aof 功能（如果不关闭 aof，默认用 aof 文件来恢复数据）</p>
+<p>（5）启动 6380 的 redis，我们会发现，6380 多出了 name 的数据，这个数据，就是 6379 固化到 rdb 的数据</p>
+<p>以上就是在不同的 redis 之间进行 rdb 的数据迁移，思路就是，复制 rdb 文件，然后让要迁移的 redis 加载这个 rdb 文件就 ok 了</p>
+<h2 id="四-源实例-db0-迁移至目标实例-db1">四、源实例 db0 迁移至目标实例 db1</h2>
+<pre><code>[root@202.102.221.11 ~]# cat redis_mv.sh
+</code></pre>
+<pre><code>#!/bin/bash
+redis-cli -h 202.102.221.11 -p 6379 -a password -n 0 keys &quot;*&quot; | while read key
+do
+redis-cli -h 202.102.221.11 -p 6379 -a password -n 0 --raw dump $key | perl -pe 'chomp if eof' | redis-cli -h 202.102.221.12 -p 6379 -a password -n 1 -x restore $key 0
+echo &quot;migrate key $key&quot;
+done
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Z8Vr3LKws/">
+              <span class="post-title">
+                Docker安装单机ElasticSearch&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

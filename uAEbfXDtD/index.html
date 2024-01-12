@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Docker 部署Jira8.1.0 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Docker 部署Jira8.1.0 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Docker 部署Jira8.1.0"/>
+    <meta property="og:url" content="https://jwangkun.github.io/uAEbfXDtD/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/4xrbPGxh2/" class="tag">Jira</a>
+            
+            <a href="https://jwangkun.github.io/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>Docker 部署Jira8.1.0</h1>
+            <span class="meta">
+            	Posted on
+              2021-03-08，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Jira与Confluence一样，都需要用到独立的数据库，对于数据库的安装我们不做介绍，主要介绍如何用Docker部署Jira以及对Jira进行破解的操作。</p>
+<p>1、数据库准备</p>
+<blockquote>
+<p>关于数据库官方文档说明：https://confluence.atlassian.com/adminjiraserver/connecting-jira-applications-to-mysql-5-7-966063305.html</p>
+</blockquote>
+<pre><code>## 创建数据库及授权``CREATE` `DATABASE` `jiradb ``CHARACTER` `SET` `utf8mb4 ``COLLATE` `utf8mb4_bin;``GRANT` `ALL` `on` `jiradb.* ``TO` `'jira'``@``'%'` `IDENTIFIED ``BY` `'Jira#123'``;``flush ``privileges``;
+</code></pre>
+<p>注意：我使用的数据库版本为mysql5.7，请认真阅读官方文档中给出的不同版本不同的mysql授权命令，以及对应的参数修改，否则下面安装时会失败。</p>
+<p>2、Jira安装</p>
+<p>1）获取镜像</p>
+<p>官方镜像地址：<a href="https://hub.docker.com/r/cptactionhank/atlassian-jira-software/tags">cptactionhank/atlassian-jira-software:8.1.0</a></p>
+<pre><code>[root@vanje-dev01 ~]# docker pull cptactionhank/atlassian-jira-software:8.1.0
+</code></pre>
+<ol>
+<li>启动jira</li>
+</ol>
+<pre><code>docker run -d -p 7081:8080 \
+    --name jira-software \　　 -v /etc/localtime:/etc/localtime:ro \
+    cptactionhank/atlassian-jira-software:8.1.0
+</code></pre>
+<p>这里并没有对数据持久化(后面会想办法优化)，因为jira容器中是daemon启动的jira服务，如果进行数据持久化，需要在宿主机目录授权对应目录让daemon用户有权限访问；7081为jira外部访问端口。</p>
+<p>3）配置</p>
+<p>浏览器打开http://172.16.11.248:7081</p>
+<p>a) 选择语言(选择适合自己的语言)</p>
+<figure data-type="image" tabindex="1"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514155044676-405505669.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514155134995-1887902840.png" alt="img" loading="lazy"></figure>
+<p>b) 配置数据库信息(信息填好，点击下面的测试连接，显示成功即可，否则根据提示去官网文档查看是否修改对mysql应参数)</p>
+<figure data-type="image" tabindex="3"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514155311780-1462393335.png" alt="img" loading="lazy"></figure>
+<p>注意：点击下一步，需要等待一会因为程序需要往数据库中写数据。</p>
+<p>c) 获取授权码</p>
+<blockquote>
+<p>这里破解跟confluence略有不同，jira破解需要先按照提示去官方获取试用授权码，这样才可以进入系统，然后进行破解包的替换，重启服务即可。</p>
+</blockquote>
+<figure data-type="image" tabindex="4"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514160018707-1460682128.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514160135313-1608144949.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="6"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514160317428-1421844681.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="7"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514160442964-916478558.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="8"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514160525283-5049646.png" alt="img" loading="lazy"></figure>
+<p>d) 创建admin用户，然后按照提示点击下一步，即可完成jira的安装</p>
+<figure data-type="image" tabindex="9"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514160737786-178093634.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="10"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514160802197-1149294553.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="11"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514160925556-191535560.png" alt="img" loading="lazy"></figure>
+<p>4）破解</p>
+<p>a）下载破解包</p>
+<p>地址：<a href="https://files.cnblogs.com/files/tchua/atlassian-extras-3.2.rar">atlassian-extras-3.2.jar</a></p>
+<p>b）替换破解包</p>
+<blockquote>
+<p>通过docker ps 获取jira容器id，然后把破解包上传至宿主机通过docker cp 命令复制到容器中，重启jira容器</p>
+</blockquote>
+<pre><code>[root@vanje-dev01 tmp]# docker cp atlassian-extras-3.2.jar  cc9cbeac803e0084:/opt/atlassian/jira/atlassian-jira/WEB-INF/lib
+[root@vanje-dev01 tmp]# docker restart cc9cbeac803e0084
+</code></pre>
+<p>c) 查看破解</p>
+<p>登陆jira&gt;&gt;右上角设置按钮&gt;&gt;应用程序，即可看到破解已成功</p>
+<figure data-type="image" tabindex="12"><img src="https://img2018.cnblogs.com/blog/1143489/201905/1143489-20190514161554153-327630432.png" alt="img" loading="lazy"></figure>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/vc4o94rO6/">
+              <span class="post-title">
+                使用Docker运行SQL Server&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

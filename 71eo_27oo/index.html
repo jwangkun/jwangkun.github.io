@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Docker Desktop for Mac/Windows 开启 Kubernetes | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Docker Desktop for Mac/Windows 开启 Kubernetes | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Docker Desktop for Mac/Windows 开启 Kubernetes"/>
+    <meta property="og:url" content="https://jwangkun.github.io/71eo_27oo/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/not7t826s/" class="tag">Docker Desktop</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Docker Desktop for Mac/Windows 开启 Kubernetes</h1>
+            <span class="meta">
+            	Posted on
+              2020-12-31，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>由于中所周知 的原因，本来是一件很简单的事情，但是开启 Kubernetes一直未能成功，一直在starting中，所以借助阿里的加速来开启桌面版的Kubernetes</p>
+<p>说明:</p>
+<ul>
+<li>
+<p>需安装 Docker Desktop 的 Mac 或者 Windows 版本，如果没有请下载<a href="https://store.docker.com/search?type=edition&amp;offering=community">下载 Docker CE最新版本</a></p>
+</li>
+<li>
+<p>当前 master 分支已经在 Docker for Mac/Windows 2.5.0.0 (包含 Docker CE 20.10.0 和 Kubernetes 1.19.3) 版本测试通过</p>
+</li>
+<li>
+<p>如果需要测试其他版本，请查看 Docker Desktop版本，Docker -&gt; About Docker Desktop</p>
+<ul>
+<li>如Kubernetes版本为 v1.18.8, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.18.8">v1.18.8 分支</a> <code>git checkout v1.18.8</code></li>
+<li>如Kubernetes版本为 v1.18.6, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.18.6">v1.18.6 分支</a> <code>git checkout v1.18.6</code></li>
+<li>如Kubernetes版本为 v1.18.3, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.18.3">v1.18.3 分支</a> <code>git checkout v1.18.3</code></li>
+<li>如Kubernetes版本为 v1.16.5, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.16.5">v1.16.5 分支</a> <code>git checkout v1.16.5</code></li>
+<li>如Kubernetes版本为 v1.15.5, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.15.5">v1.15.5 分支</a> <code>git checkout v1.15.5</code></li>
+<li>如Kubernetes版本为 v1.15.4, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.15.4">v1.15.4 分支</a> <code>git checkout v1.15.4</code></li>
+<li>如Kubernetes版本为 v1.14.8, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.14.8">v1.14.8 分支</a> <code>git checkout v1.14.8</code></li>
+<li>如Kubernetes版本为 v1.14.7, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.14.7">v1.14.7 分支</a> <code>git checkout v1.14.7</code></li>
+<li>如Kubernetes版本为 v1.14.6, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.14.6">v1.14.6 分支</a> <code>git checkout v1.14.6</code></li>
+<li>如Kubernetes版本为 v1.14.3, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.14.3">v1.14.3 分支</a> <code>git checkout v1.14.3</code></li>
+<li>如Kubernetes版本为 v1.14.1, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.14.1">v1.14.1 分支</a> <code>git checkout v1.14.1</code></li>
+<li>如Kubernetes版本为 v1.13.0, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.13.0">v1.13.0 分支</a> <code>git checkout v1.13.0</code></li>
+<li>如Kubernetes版本为 v1.10.11, 请使用下面命令切换 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/tree/v1.10.11">v1.10.11 分支</a> <code>git checkout v1.10.11</code></li>
+</ul>
+</li>
+</ul>
+<p>注：如果发现K8s版本与您的环境不一致，可以修改<code>images.properties</code>文件指明所需镜像版本，欢迎Pull Request。</p>
+<h3 id="开启-kubernetes">开启 Kubernetes</h3>
+<p>为 Docker daemon 配置镜像加速，参考<a href="https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors">阿里云镜像服务</a> 或中科大镜像加速地址<code>https://docker.mirrors.ustc.edu.cn</code></p>
+<figure data-type="image" tabindex="1"><a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/blob/master/images/mirror.png"><img src="https://github.com/AliyunContainerService/k8s-for-docker-desktop/raw/master/images/mirror.png" alt="mirror" loading="lazy"></a></figure>
+<p>可选操作: 为 Kubernetes 配置 CPU 和 内存资源，建议分配 4GB 或更多内存。</p>
+<figure data-type="image" tabindex="2"><a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/blob/master/images/resource.png"><img src="https://github.com/AliyunContainerService/k8s-for-docker-desktop/raw/master/images/resource.png" alt="resource" loading="lazy"></a></figure>
+<p>从阿里云镜像服务下载 Kubernetes 所需要的镜像</p>
+<p>在 Mac 上执行如下脚本</p>
+<pre><code>./load_images.sh
+</code></pre>
+<p>在Windows上，使用 PowerShell</p>
+<pre><code> .\load_images.ps1
+</code></pre>
+<p>说明:</p>
+<ul>
+<li>如果因为安全策略无法执行 PowerShell 脚本，请在 “以管理员身份运行” 的 PowerShell 中执行 <code>Set-ExecutionPolicy RemoteSigned</code> 命令。</li>
+<li>如果需要，可以通过修改 <code>images.properties</code> 文件自行加载你自己需要的镜像</li>
+</ul>
+<p>开启 Kubernetes，并等待 Kubernetes 开始运行 <a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/blob/master/images/k8s.png"><img src="https://github.com/AliyunContainerService/k8s-for-docker-desktop/raw/master/images/k8s.png" alt="k8s" loading="lazy"></a></p>
+<p><strong>TIPS</strong>：</p>
+<p>在Mac上:</p>
+<p>如果在Kubernetes部署的过程中出现问题，可以通过docker desktop应用日志获得实时日志信息：</p>
+<pre><code>pred='process matches &quot;.*(ocker|vpnkit).*&quot;
+  || (process in {&quot;taskgated-helper&quot;, &quot;launchservicesd&quot;, &quot;kernel&quot;} &amp;&amp; eventMessage contains[c] &quot;docker&quot;)'
+/usr/bin/log stream --style syslog --level=debug --color=always --predicate &quot;$pred&quot;
+</code></pre>
+<p>在Windows上:</p>
+<p>如果在Kubernetes部署的过程中出现问题，可以在 C:\ProgramData\DockerDesktop下的service.txt 查看Docker日志; 如果看到 Kubernetes一直在启动状态，请参考 <a href="https://github.com/docker/for-win/issues/3769#issuecomment-486046718">Issue 3769(comment)</a> 和 <a href="https://github.com/docker/for-win/issues/1962#issuecomment-431091114">Issue 1962(comment)</a></p>
+<h3 id="配置-kubernetes">配置 Kubernetes</h3>
+<p>可选操作: 切换Kubernetes运行上下文至 docker-desktop (之前版本的 context 为 docker-for-desktop)</p>
+<pre><code>kubectl config use-context docker-desktop
+</code></pre>
+<p>验证 Kubernetes 集群状态</p>
+<pre><code>kubectl cluster-info
+kubectl get nodes
+</code></pre>
+<h3 id="配置-kubernetes-控制台">配置 Kubernetes 控制台</h3>
+<h4 id="部署-kubernetes-dashboard">部署 Kubernetes dashboard</h4>
+<pre><code>$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.4/aio/deploy/recommended.yaml
+</code></pre>
+<p>或</p>
+<pre><code>kubectl create -f kubernetes-dashboard.yaml
+</code></pre>
+<p>检查 kubernetes-dashboard 应用状态</p>
+<pre><code>kubectl get pod -n kubernetes-dashboard
+</code></pre>
+<p>开启 API Server 访问代理</p>
+<pre><code>kubectl proxy
+</code></pre>
+<p>通过如下 URL 访问 Kubernetes dashboard</p>
+<p>http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/</p>
+<h4 id="配置控制台访问令牌">配置控制台访问令牌</h4>
+<p>对于Mac环境</p>
+<pre><code>TOKEN=$(kubectl -n kube-system describe secret default| awk '$1==&quot;token:&quot;{print $2}')
+kubectl config set-credentials docker-for-desktop --token=&quot;${TOKEN}&quot;
+echo $TOKEN
+</code></pre>
+<p>对于Windows环境</p>
+<pre><code>$TOKEN=((kubectl -n kube-system describe secret default | Select-String &quot;token:&quot;) -split &quot; +&quot;)[1]
+kubectl config set-credentials docker-for-desktop --token=&quot;${TOKEN}&quot;
+echo $TOKEN
+</code></pre>
+<h4 id="登录dashboard的时候">登录dashboard的时候</h4>
+<figure data-type="image" tabindex="3"><a href="https://github.com/AliyunContainerService/k8s-for-docker-desktop/blob/master/images/k8s_credentials.png"><img src="https://github.com/AliyunContainerService/k8s-for-docker-desktop/raw/master/images/k8s_credentials.png" alt="resource" loading="lazy"></a></figure>
+<p>选择 <strong>令牌</strong></p>
+<p>输入上文控制台输出的内容</p>
+<p>或者选择 <strong>Kubeconfig</strong> 文件,路径如下：</p>
+<pre><code>Mac: $HOME/.kube/config
+Win: %UserProfile%\.kube\config
+</code></pre>
+<p>点击登陆，进入Kubernetes Dashboard</p>
+<h3 id="配置-ingress">配置 Ingress</h3>
+<p>说明：如果测试 Istio，不需要安装 Ingress</p>
+<h4 id="安装-ingress">安装 Ingress</h4>
+<p><a href="https://github.com/kubernetes/ingress-nginx/blob/master/docs/deploy/index.md">源地址安装说明</a></p>
+<pre><code>- 若安装脚本无法安装，可以跳转到该地址查看最新操作
+</code></pre>
+<p>安装</p>
+<pre><code>kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-0.32.0/deploy/static/provider/cloud/deploy.yaml
+</code></pre>
+<p>验证</p>
+<pre><code>kubectl get pods --all-namespaces -l app.kubernetes.io/name=ingress-nginx
+</code></pre>
+<h4 id="测试示例应用">测试示例应用</h4>
+<p>部署测试应用，详情参见<a href="https://matthewpalmer.net/kubernetes-app-developer/articles/kubernetes-ingress-guide-nginx-example.html">社区文章</a></p>
+<pre><code>kubectl create -f sample/apple.yaml
+kubectl create -f sample/banana.yaml
+kubectl create -f sample/ingress.yaml
+</code></pre>
+<p>测试示例应用</p>
+<pre><code>$ curl -kL http://localhost/apple
+apple
+$ curl -kL http://localhost/banana
+banana
+</code></pre>
+<p>删除示例应用</p>
+<pre><code>kubectl delete -f sample/apple.yaml
+kubectl delete -f sample/banana.yaml
+kubectl delete -f sample/ingress.yaml
+</code></pre>
+<h4 id="删除-ingress">删除 Ingress</h4>
+<pre><code>kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-0.32.0/deploy/static/provider/cloud/deploy.yaml
+</code></pre>
+<h3 id="安装-helm">安装 Helm</h3>
+<p>可以根据文档安装 helm v3 https://helm.sh/docs/intro/install/</p>
+<h4 id="在-mac-os-上安装">在 Mac OS 上安装</h4>
+<h5 id="通过-brew-安装">通过 brew 安装</h5>
+<pre><code># Use homebrew on Mac
+brew install helm
+
+# Add helm repo
+helm repo add stable http://mirror.azure.cn/kubernetes/charts/
+
+# Update charts repo
+helm repo update
+</code></pre>
+<h4 id="在windows上安装">在Windows上安装</h4>
+<p>如果在后续使用 helm 安装组件的过程中出现版本兼容问题，可以参考 <code>通过二进制包安装</code> 思路安装匹配的版本</p>
+<pre><code># Use Chocolatey on Windows
+# 注：安装的时候需要保证网络能够访问googleapis这个域名
+choco install kubernetes-helm
+
+# Change helm repo
+helm repo add stable http://mirror.azure.cn/kubernetes/charts/
+
+# Update charts repo
+helm repo update
+</code></pre>
+<h4 id="测试-helm-可选">测试 Helm (可选)</h4>
+<p>安装 Wordpress</p>
+<pre><code>helm install wordpress stable/wordpress
+</code></pre>
+<p>查看 wordpress 发布状态</p>
+<pre><code>helm status wordpress
+</code></pre>
+<p>卸载 wordpress 发布</p>
+<pre><code>helm uninstall wordpress
+</code></pre>
+<h3 id="配置-istio">配置 Istio</h3>
+<p>说明：Istio Ingress Gateway和Ingress缺省的端口冲突，请移除Ingress并进行下面测试</p>
+<p>可以根据文档安装 Istio https://istio.io/docs/setup/getting-started/</p>
+<h4 id="下载-istio-150">下载 Istio 1.5.0</h4>
+<pre><code>curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.5.0 sh -
+cd istio-1.5.0
+export PATH=$PWD/bin:$PATH
+</code></pre>
+<p>在Windows上，您可以手工下载Istio安装包，或者把<code>getLatestIstio.ps1</code>拷贝到你希望下载 Istio 的目录，并执行 - 说明：根据社区提供的<a href="https://gist.github.com/kameshsampath/796060a806da15b39aa9569c8f8e6bcf">安装脚本</a>修改而来</p>
+<pre><code>.\getLatestIstio.ps1
+</code></pre>
+<h4 id="安装-istio">安装 Istio</h4>
+<pre><code>istioctl manifest apply --set profile=demo
+</code></pre>
+<h4 id="检查-istio-状态">检查 Istio 状态</h4>
+<pre><code>kubectl get pods -n istio-system
+</code></pre>
+<h4 id="为-default-名空间开启自动-sidecar-注入">为 <code>default</code> 名空间开启自动 sidecar 注入</h4>
+<pre><code>kubectl label namespace default istio-injection=enabled
+kubectl get namespace -L istio-injection
+</code></pre>
+<h4 id="安装-book-info-示例">安装 Book Info 示例</h4>
+<p>请参考 https://istio.io/docs/examples/bookinfo/</p>
+<pre><code>kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
+</code></pre>
+<p>查看示例应用资源</p>
+<pre><code>kubectl get svc,pod
+</code></pre>
+<p>确认示例应用在运行中</p>
+<pre><code>kubectl exec -it $(kubectl get pod -l app=ratings -o jsonpath='{.items[0].metadata.name}') -c ratings -- curl productpage:9080/productpage | grep -o &quot;&lt;title&gt;.*&lt;/title&gt;&quot;
+</code></pre>
+<p>创建 Ingress Gateway</p>
+<pre><code>kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
+</code></pre>
+<p>查看 Gateway 配置</p>
+<pre><code>kubectl get gateway
+</code></pre>
+<p>确认示例应用可以访问</p>
+<pre><code>export GATEWAY_URL=localhost:80
+curl -s http://${GATEWAY_URL}/productpage | grep -o &quot;&lt;title&gt;.*&lt;/title&gt;&quot;
+</code></pre>
+<p>可以通过浏览器访问</p>
+<p>http://localhost/productpage</p>
+<h4 id="删除实例应用">删除实例应用</h4>
+<pre><code>samples/bookinfo/platform/kube/cleanup.sh
+</code></pre>
+<h3 id="卸载-istio">卸载 Istio</h3>
+<pre><code>istioctl manifest generate --set profile=demo | kubectl delete -f -
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/eHz3HPe1M/">
+              <span class="post-title">
+                基于Docker安装破解版Jira&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

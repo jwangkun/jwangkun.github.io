@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> SpringBoot实现多文件上传 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" SpringBoot实现多文件上传 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" SpringBoot实现多文件上传"/>
+    <meta property="og:url" content="https://jwangkun.github.io/6wK8TcXuW/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/y0LmRL0xp/" class="tag">文件上传</a>
+            
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1> SpringBoot实现多文件上传</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Spring Boot默认上传的单个文件大小<code>1MB</code>，一次上传的总文件大小为<code>10MB</code>。</p>
+<p>单个文件上传使用MultipartFile参数来接收文件，多文件使用MultipartFile[]数组来接收，然后遍历它，当成单文件来处理。</p>
+<p><strong>问题一</strong>：如何配置上传文件大小限制？</p>
+<pre><code>@Configuration
+public class FileConfig implements WebMvcConfigurer {
+    @Bean
+    public MultipartConfigElement multipartConfigElement(){
+        MultipartConfigFactory factory = new MultipartConfigFactory();
+        // 单个文件大小
+        factory.setMaxFileSize(DataSize.parse(&quot;10240MB&quot;));
+        // 上传的总文件大小
+        factory.setMaxRequestSize(DataSize.parse(&quot;20480MB&quot;));
+        return factory.createMultipartConfig();
+    }
+}
+</code></pre>
+<p><strong>思考</strong>：SpringBoot项目推荐使用jar包的方式来运行项目，而实际应用中我们也发现jar包运行项目更加方便。但是当打完jar包后，这个jar的大小就固定好了，上传的文件肯定传不到jar包里面了。SpringBoot提供了一种方式，将文件上传到服务器物理路径下，然后做个映射关系，让图片可以正常被访问，具体操作如下：</p>
+<pre><code>@Configuration
+public class FileConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {        registry.addResourceHandler(&quot;/static/**&quot;).addResourceLocations(&quot;file:&quot;+&quot;D://uploadfile/&quot;);
+    }
+}
+</code></pre>
+<blockquote>
+<p>addResourceHandler(&quot;/static/**&quot;)表示访问路径为/static/文件名，addResourceLocations(&quot;file:&quot;+&quot;D://uploadfile/&quot;)表示文件存储的物理路径，&quot;file:&quot;为固定写法。</p>
+</blockquote>
+<h3 id="文件上传后台实现">文件上传后台实现</h3>
+<pre><code>@RestController
+@Slf4j
+public class FileUpload {
+
+    @PostMapping(&quot;uploadFile&quot;)
+    public List uploadFile(@RequestParam(&quot;files&quot;) MultipartFile[] files) {
+
+        // 存储上传成功的文件名，响应给客户端
+        List&lt;String&gt; list = new ArrayList&lt;&gt;();
+        // 判断文件数组长度
+        if(files.length &lt;= 0){
+            list.add(&quot;请选择文件&quot;);
+            return list;
+        }
+        for(MultipartFile file : files){
+            // 源文件名
+            String originalFilename = file.getOriginalFilename();
+            // 文件格式
+            String suffix = originalFilename.substring(originalFilename.lastIndexOf(&quot;.&quot;));
+            // 新文件名，避免文件名重复，造成文件替换问题
+            String fileName = UUID.randomUUID()+&quot;.&quot;+suffix;
+            // 文件存储路径
+            String filePath = &quot;D:/uploadFile/&quot;;
+            // 文件全路径
+            File targetFile = new File(filePath+fileName);
+
+            // 判断文件存储目录是否存在，不存在则新建目录
+            if(!targetFile.getParentFile().exists()){
+                targetFile.getParentFile().mkdir();
+            }
+            try {
+                // 将图片保存
+                file.transferTo(targetFile);
+                list.add(originalFilename);
+            } catch (IOException e) {
+                log.info(&quot;文件上传异常={}&quot;,e);
+            }
+        }
+        return list;
+    }
+}
+</code></pre>
+<h3 id="静态资源问题">静态资源问题</h3>
+<p>SpringBoot静态资源默认路径为：<code>classpath:/META-INF/resources/</code> ，<code>classpath:/resources/</code>，<code>classpath:/static/</code>，<code>classpath:/public/</code>。也就是说如果想访问静态资源，则需要将静态资源 文件放在这四个路径下面。</p>
+<blockquote>
+<p>注：classpath 指的是 SpringBoot项目resources</p>
+</blockquote>
+<p>如果想自定义静态资源路径有两种方式，</p>
+<p><strong>application.yml中指定</strong></p>
+<pre><code>spring:
+  resources:
+    static-locations: classpath:/templates/
+</code></pre>
+<p><strong>代码实现WebMvcConfigurer</strong></p>
+<pre><code>@Configuration
+public class FileConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler(&quot;/**&quot;).addResourceLocations(&quot;classpath:/templates/&quot;);
+    }
+</code></pre>
+<blockquote>
+<p>注：当配置了自定义静态资源路径后，其默认配置将失效</p>
+</blockquote>
+<h3 id="文件上传前端实现">文件上传前端实现</h3>
+<p>在静态资源路径下，新建file.html文件，浏览器访问ip:port/file.html，进入file页面</p>
+<pre><code>&lt;form enctype=&quot;multipart/form-data&quot; method=&quot;post&quot; action=&quot;/uploadFile&quot;&gt;
+    文件：&lt;input type=&quot;file&quot; name=&quot;files&quot;/&gt;
+    &lt;input type=&quot;submit&quot; value=&quot;上传&quot;/&gt;
+&lt;/form&gt;
+</code></pre>
+<p>这里需要注意的是文件上传表单的enctype为<strong>multipart/form-data</strong>。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/hhJPNNNqQ/">
+              <span class="post-title">
+                SpringBoot读取配置文件的几种方式&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

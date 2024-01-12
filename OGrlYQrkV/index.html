@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Docker 安装 FastDFS | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Docker 安装 FastDFS | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Docker 安装 FastDFS"/>
+    <meta property="og:url" content="https://jwangkun.github.io/OGrlYQrkV/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/wo90NuciW/" class="tag">FastDFS</a>
+            
+            <a href="https://jwangkun.github.io/9IyfXdfX6/" class="tag">Docker</a>
+            
+        </span>
+            <h1>Docker 安装 FastDFS</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-20，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ol>
+<li>安装 fastdfs 必要组件 tracker 什么都不用改</li>
+</ol>
+<pre><code>docker run -d --network=host --name tracker -v /var/fdfs/tracker:/var/fdfs delron/fastdfs tracker 
+</code></pre>
+<ol start="2">
+<li>安装 fastdfs 存储地址 storage 除了 ip 其他的都不用改</li>
+</ol>
+<pre><code>docker run -d --network=host --name storage -e TRACKER_SERVER=你服务器自己的ip:22122 -v /var/fdfs/storage:/var/fdfs -e GROUP_NAME=group1 delron/fastdfs storage 
+</code></pre>
+<ol start="3">
+<li>进入容器修改配置 一定要，要不然链接不上</li>
+</ol>
+<pre><code>docker exec -it tracker bash 
+</code></pre>
+<ol start="4">
+<li>修改配置</li>
+</ol>
+<pre><code>vi /etc/fdfs/client.conf 
+</code></pre>
+<p><strong>将配置 tracker_server = 你自己的 ip:22122</strong></p>
+<p>到这其实 fastDFS 就配好了</p>
+<p>5.创建项目测试</p>
+<p>命令行测试</p>
+<pre><code> /usr/bin/fdfs_upload_file /etc/fdfs/client.conf  lk.log
+</code></pre>
+<p>我这里用的是 <strong><strong>springBoot</strong></strong> 进行整合。<strong><strong>swagger-ui</strong></strong> 进行图片上传</p>
+<p>​	5.1.pom 依赖</p>
+<pre><code>&lt;!-- FastDFS依赖 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.github.tobato&lt;/groupId&gt;
+     &lt;artifactId&gt;fastdfs-client&lt;/artifactId&gt;
+    &lt;version&gt;1.26.5&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- Swagger2 核心依赖 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.springfox&lt;/groupId&gt;
+    &lt;artifactId&gt;springfox-swagger2&lt;/artifactId&gt;
+    &lt;version&gt;2.6.1&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.springfox&lt;/groupId&gt;
+    &lt;artifactId&gt;springfox-swagger-ui&lt;/artifactId&gt;
+    &lt;version&gt;2.6.1&lt;/version&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<p>​	5.2配置 yml 需要修改 ip</p>
+<pre><code>  spring:
+    servlet:
+      multipart:
+        max-file-size: 100MB # 最大支持文件大小
+        max-request-size: 100MB # 最大支持请求大小
+  # 分布式文件系统FDFS配置
+  fdfs:
+    # 链接超时
+    connect-timeout: 600
+    # 读取时间
+    so-timeout: 600
+    # 生成缩略图参数
+    thumb-image:
+      width: 150
+      height: 150
+    tracker-list: 你自己的ip:22122
+</code></pre>
+<p>​	5.3配置文件（两个）</p>
+<p>SwaggerConfig.java  一定要改成你自己项目的 controller 包路径，这里会扫描你的接口</p>
+<pre><code>  @Configuration
+  public class SwaggerConfig {
+      @Bean
+      public Docket createRestApi() {
+          return new Docket(DocumentationType.SWAGGER_2)
+                  .apiInfo(apiInfo())
+                  .select()
+                  .apis(RequestHandlerSelectors.basePackage(&quot;top.mail.email.controller&quot;))
+                  .paths(PathSelectors.any())
+                  .build();
+      }
+      private ApiInfo apiInfo() {
+          return new ApiInfoBuilder()
+                  .title(&quot;SpringBoot利用Swagger构建API文档&quot;)
+                  .description(&quot;使用RestFul风格, 创建人：知了一笑&quot;)
+                  .termsOfServiceUrl(&quot;https://github.com/cicadasmile&quot;)
+                  .version(&quot;version 1.0&quot;)
+                  .build();
+      }
+  }
+</code></pre>
+<p>DfsConfig.java</p>
+<pre><code>@Configuration
+@Import(FdfsClientConfig.class)
+// Jmx重复注册bean的问题
+@EnableMBeanExport(registration = RegistrationPolicy.IGNORE_EXISTING)
+public class DfsConfig {
+}
+</code></pre>
+<p>​	5.4.工具类</p>
+<p>FileDfsUtil.java</p>
+<pre><code>  @Component
+  public class FileDfsUtil {
+      private static final Logger LOGGER = LoggerFactory.getLogger(FileDfsUtil.class);
+      @Resource
+      private FastFileStorageClient storageClient ;
+      /**
+       * 上传文件
+       */
+      public String upload(MultipartFile file) throws Exception{
+          StorePath storePath = storageClient.uploadFile(file.getInputStream(),file.getSize(), FilenameUtils.getExtension(file.getOriginalFilename()),null);
+          return storePath.getFullPath() ;
+      }
+      /**
+       * 删除文件
+       */
+      public void deleteFile(String fileUrl) {
+          if (StringUtils.isEmpty(fileUrl)) {
+              LOGGER.info(&quot;fileUrl == &gt;&gt;文件路径为空...&quot;);
+              return;
+          }
+          try {
+              StorePath storePath = StorePath.parseFromUrl(fileUrl);
+              storageClient.deleteFile(storePath.getGroup(), storePath.getPath());
+          } catch (Exception e) {
+              LOGGER.info(e.getMessage());
+          }
+      }
+  }
+</code></pre>
+<p>​	5.5.controller 接口</p>
+<p>FileController.java</p>
+<pre><code>@RestController
+public class FileController {
+     @Resource
+     private FileDfsUtil fileDfsUtil ;
+     /**
+      * 文件上传
+      */
+     @ApiOperation(value=&quot;上传文件&quot;, notes=&quot;测试FastDFS文件上传&quot;)
+     @RequestMapping(value = &quot;/uploadFile&quot;,headers=&quot;content-type=multipart/form-data&quot;, method = RequestMethod.POST)
+     public ResponseEntity&lt;String&gt; uploadFile (@RequestParam(&quot;file&quot;) MultipartFile file){
+         String result ;
+         try{
+             String path = fileDfsUtil.upload(file) ;
+             if (!StringUtils.isEmpty(path)){
+                 result = path ;
+             } else {
+                result = &quot;上传失败&quot; ;
+             }
+         } catch (Exception e){
+             e.printStackTrace() ;
+             result = &quot;服务异常&quot; ;
+         }
+         return ResponseEntity.ok(result);
+     }
+     /**
+      * 文件删除
+      */
+     @RequestMapping(value = &quot;/deleteByPath&quot;, method = RequestMethod.GET)
+     public ResponseEntity&lt;String&gt; deleteByPath (){
+         String filePathName = &quot;group1/M00/00/00/wKhIgl0n4AKABxQEABhlMYw_3Lo825.png&quot; ;
+         fileDfsUtil.deleteFile(filePathName);
+         return ResponseEntity.ok(&quot;SUCCESS&quot;) ;
+     }
+}
+</code></pre>
+<ol start="5">
+<li>6.springBoot 启动类</li>
+</ol>
+<pre><code> @SpringBootApplication
+ @EnableSwagger2
+ public class EmailApplication {
+ 
+     public static void main(String[] args) {
+         SpringApplication.run(EmailApplication.class, args);
+     }
+ 
+ }
+
+</code></pre>
+<p><strong>启动项目</strong></p>
+<p>访问：http://localhost:8080/swagger-ui.html</p>
+<figure data-type="image" tabindex="1"><a href="https://img2020.cnblogs.com/blog/1997369/202010/1997369-20201026160455607-84316543.png"><img src="https://img2020.cnblogs.com/blog/1997369/202010/1997369-20201026160455607-84316543.png" alt="img" loading="lazy"></a></figure>
+<p>返回地址表示上传成功。</p>
+<p>怎么访问呢？</p>
+<p><strong>默认的话，是通过你的 ip:8888 / 上面返回的地址  如果你是阿里云服务就要手动开放 8888、22122、23000 这三个端口</strong></p>
+<figure data-type="image" tabindex="2"><a href="https://img2020.cnblogs.com/blog/1997369/202010/1997369-20201026160828368-580775312.png"><img src="https://img2020.cnblogs.com/blog/1997369/202010/1997369-20201026160828368-580775312.png" alt="img" loading="lazy"></a></figure>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Ov0CrYjjG/">
+              <span class="post-title">
+                Docker 部署 Confluence(破解版)&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

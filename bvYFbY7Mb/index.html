@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>RabbitMQ集群搭建 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="RabbitMQ集群搭建 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="RabbitMQ集群搭建"/>
+    <meta property="og:url" content="https://jwangkun.github.io/bvYFbY7Mb/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/KJ3g3usfx/" class="tag">RabbitMQ集群</a>
+            
+            <a href="https://jwangkun.github.io/U--UdMU4B/" class="tag">RabbitMQ</a>
+            
+        </span>
+            <h1>RabbitMQ集群搭建</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="rabbimq简介">RabbiMQ简介</h2>
+<blockquote>
+<p>RabbiMQ是用Erang开发的，集群非常方便，因为Erlang天生就是一门分布式语言，但其本身并不支持负载均衡。</p>
+</blockquote>
+<h2 id="rabbimq模式">RabbiMQ模式</h2>
+<blockquote>
+<p>RabbitMQ模式大概分为以下三种:<br>
+(1)单一模式。<br>
+(2)普通模式(默认的集群模式)。<br>
+(3) 镜像模式(把需要的队列做成镜像队列，存在于多个节点，属于RabbiMQ的HA方案，在对业务可靠性要求较高的场合中比较适用)。<br>
+要实现镜像模式，需要先搭建一个普通集群模式，在这个模式的基础上再配置镜像模式以实现高可用。</p>
+</blockquote>
+<h2 id="rabbimq特点">RabbiMQ特点</h2>
+<blockquote>
+<p>RabbitMQ的集群节点包括内存节点、磁盘节点。RabbitMQ支持消息的持久化<br>
+也就是数据写在磁盘上，最合适的方案就是既有内存节点，又有磁盘节点。</p>
+</blockquote>
+<h2 id="环境">环境：</h2>
+<table>
+<thead>
+<tr>
+<th>IP地址</th>
+<th>主机名</th>
+<th>操作系统</th>
+<th>防火墙和SELinux</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>192.168.100.143</td>
+<td>mq01</td>
+<td>CentOS7.4(64位)</td>
+<td>关闭</td>
+<td>磁盘节点</td>
+</tr>
+<tr>
+<td>192.168.100.144</td>
+<td>mq02</td>
+<td>CentOS7.4(64位)</td>
+<td>关闭</td>
+<td>内存节点</td>
+</tr>
+<tr>
+<td>192.168.100.145</td>
+<td>mq03</td>
+<td>CentOS7.4(64位)</td>
+<td>关闭</td>
+<td>内存节点</td>
+</tr>
+</tbody>
+</table>
+<p>注意，这里三台服务器都连接上互联网，另外RabbitMQ集群节点必须在同一网段里，如果是跨广域网，效果会变差。</p>
+<h2 id="rabbitmq普通集群配置">RabbitMQ普通集群配置</h2>
+<h3 id="1-配置hosts文件">1. 配置hosts文件</h3>
+<p>更改三台MQ节点的计算机名分别为mq01、mq02 和mq03，然后修改hosts配置文件</p>
+<pre><code>vim /etc/hostname    //其他两台相同
+  mq01.localdomain
+
+vi /etc/hosts
+192.168.100.143 mq01  //注意不能带.注意-主机名称也要更改
+192.168.100.144 mq02
+192.168.100.145 mq03
+</code></pre>
+<h3 id="2三个节点配置yum源安装rabbitmq软件">2.三个节点配置yum源，安装rabbitmq软件</h3>
+<pre><code>yum install -y epel-release
+
+yum install -y rabbitmq-server
+</code></pre>
+<h3 id="3拷贝erlangcookie">3.拷贝erlang.cookie</h3>
+<p>Rabbitmq的集群是依附于erlang的集群来工作的,所以必须先构建起erlang的集群景象。Erlang的集群中各节点是经由过程一个magic cookie来实现的,这个cookie存放在/var/lib/rabbitmq/.erlang.cookie中，文件是400的权限。所以必须保证各节点cookie一致,不然节点之间就无法通信。</p>
+<pre><code>[root@mq01 ~]# cat /var/lib/rabbitmq/.erlang.cookie 
+XAHPZVPYUQDWWJIOHUPQ
+</code></pre>
+<p>用scp的方式将mq01节点的.erlang.cookie的值复制到其他两个节点中。</p>
+<pre><code>scp /var/lib/rabbitmq/.erlang.cookie root@192.168.100.144:/var/lib/rabbitmq/.erlang.cookie
+
+scp /var/lib/rabbitmq/.erlang.cookie root@192.168.100.145:/var/lib/rabbitmq/.erlang.cookie
+</code></pre>
+<h3 id="4分别查看三个节点并添加管理服务最后启动rabbitmq服务">4.分别查看三个节点并添加管理服务，最后启动rabbitmq服务</h3>
+<p>RabbitMQ提供了一个非常友好的图形化监控页面插件（rabbitmq_management），让我们可以一目了然看见Rabbit的状态或集群状态。</p>
+<pre><code>/usr/lib/rabbitmq/bin/rabbitmq-plugins list //查看插件安装情况
+
+/usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management //启用rabbitmq_management服务
+
+service rabbitmq-server start
+</code></pre>
+<h3 id="5查看监听端口插件监控的端口是15672">5.查看监听端口（插件监控的端口是15672）</h3>
+<figure data-type="image" tabindex="1"><img src="https://s4.51cto.com/images/blog/201808/07/a50276b95a3ad3e604583ca22622797e.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"></figure>
+<h3 id="6将mq02-mq03作为内存节点加入mq01节点集群中">6.将mq02、mq03作为内存节点加入mq01节点集群中</h3>
+<p>在mq02、mq03执行如下命令：</p>
+<pre><code>rabbitmqctl stop_app    //停掉rabbit应用
+
+rabbitmqctl join_cluster --ram rabbit@mq01 //加入到磁盘节点
+
+rabbitmqctl start_app  //启动rabbit应用
+</code></pre>
+<p><img src="https://s4.51cto.com/images/blog/201808/07/39fa26012a70dc7c70f07ba3c276d25c.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+<img src="https://s4.51cto.com/images/blog/201808/07/fd5a84b2828a65b48ba58bb8e5357182.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"></p>
+<blockquote>
+<p>（1）默认rabbitmq启动后是磁盘节点，在这个cluster命令下，mq02和mq03是内存节点，mq01是磁盘节点。<br>
+（2）如果要使mq02、mq03都是磁盘节点，去掉--ram参数即可。<br>
+（3）如果想要更改节点类型，可以使用命令<strong>rabbitmqctl change_cluster_node_type disc(ram)</strong>,前提是必须停掉rabbit应用</p>
+</blockquote>
+<h3 id="7查看集群状态">7.查看集群状态</h3>
+<figure data-type="image" tabindex="2"><img src="https://s4.51cto.com/images/blog/201808/07/4a9381511ca1b015f037bf2de964534e.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"></figure>
+<h3 id="8登录rabbitmq-web管理控制台创建新的队列">8.登录rabbitmq web管理控制台，创建新的队列</h3>
+<p>打开浏览器输入http://192.168.100.143:15672, 输入默认的Username：guest，输入默认的Password:guest ,登录后出现如图所示的界面。<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/1913fde064f05da6e2bba72e992546c5.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+根据界面提示创建一条队列<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/df9b752ada7c1dccba209021869fe9f9.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+<img src="https://s4.51cto.com/images/blog/201808/07/6b4c231a156fa8e999f67615dac88926.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"></p>
+<blockquote>
+<p>在RabbitMQ集群集群中，必须至少有一个磁盘节点，否则队列元数据无法写入到集群中，当磁盘节点宕掉时，集群将无法写入新的队列元数据信息。</p>
+</blockquote>
+<h2 id="rabbitmq镜像集群配置">RabbitMQ镜像集群配置</h2>
+<blockquote>
+<p>上面已经完成RabbitMQ默认集群模式，但并不保证队列的高可用性，尽管交换机、绑定这些可以复制到集群里的任何一个节点，但是队列内容不会复制。虽然该模式解决一项目组节点压力，但队列节点宕机直接导致该队列无法应用，只能等待重启，所以要想在队列节点宕机或故障也能正常应用，就要复制队列内容到集群里的每个节点，必须要创建镜像队列。</p>
+<p>镜像队列是基于普通的集群模式的，然后再添加一些策略，所以你还是得先配置普通集群，然后才能设置镜像队列，我们就以上面的集群接着做。</p>
+</blockquote>
+<p><strong>设置的镜像队列可以通过开启的网页的管理端，也可以通过命令，这里说的是其中的网页设置方式。</strong></p>
+<h3 id="1创建rabbitmq策略">1.创建rabbitmq策略</h3>
+<p>在mq01节点的控制台上创建策略</p>
+<p>（1）点击admin菜单–&gt;右侧的Policies选项–&gt;左侧最下下边的Add/update a policy。</p>
+<p>（2）按照图中的内容根据自己的需求填写。<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/55205bf8af1c32ee14f15d4856d5fef5.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"></p>
+<blockquote>
+<ul>
+<li>Name:策略名称</li>
+<li>Pattern：匹配的规则，这里表示匹配a开头的队列，如果是匹配所有的队列，那就是^.</li>
+<li>Definition:使用ha-mode模式中的all，也就是同步所有匹配的队列。问号链接帮助文档。</li>
+</ul>
+</blockquote>
+<p>（3）点击Add policy添加策略<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/baebde5a463383df13479c12af95b4b7.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+此时分别登陆mq02、mq03两个节点的控制台，可以看到上面添加的这个策略，如图所示：<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/6e44a444d0dee294082251c5f9714cc1.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+<img src="https://s4.51cto.com/images/blog/201808/07/6ad261b93512237f39c6b51b0b3d4720.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"></p>
+<h3 id="2添加队列">2.添加队列</h3>
+<p>在mq01节点的控制台上添加队列<br>
+（1）点击Queues菜单–&gt;左侧下边的Add a new queue<br>
+（2）输入Name和Arguments参数的值，别的值默认即可<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/d17898a65308e2f11853cf5e989785d5.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"></p>
+<blockquote>
+<ul>
+<li>Name:队列名称</li>
+<li>Durability:队列是否持久化</li>
+<li>Node：消息队列的节点</li>
+<li>Auto delete：自动删除</li>
+<li>Arguments:使用的策略类型</li>
+</ul>
+</blockquote>
+<p>（3）点击Add queue<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/18c2c9bd93de80318184dd103396701d.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+将鼠标指向+2可以显示出另外两台消息节点。</p>
+<h3 id="3创建消息">3.创建消息</h3>
+<p>（1）点击ab队列按钮<br>
+（2）拖动滚动条，点击publish message<br>
+（3）填写相关内容<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/e727d36ee9c32a62ccb8332075f74dd4.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"></p>
+<blockquote>
+<ul>
+<li>2-Persistent:表示持久化</li>
+<li>Headers:随便填写即可</li>
+<li>Properties:点击问号，选择一个消息ID号</li>
+<li>Payload:消息内容</li>
+</ul>
+</blockquote>
+<p>（4）点击Publish message按钮<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/358039461f49043a1619dfa4a3003cd2.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+点击queue按钮，发现ab队列的Ready和Total中多了一条消息记录。<br>
+<img src="https://s4.51cto.com/images/blog/201808/07/4af62a6f22d1550c3e2b812e97a4a549.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"></p>
+<h3 id="4做破坏性测试">4.做破坏性测试</h3>
+<p>（1）将mq01节点的服务关闭，再通过mq02和mq03查看消息记录是否还存在。</p>
+<pre><code>rabbitmqctl stop_app  //停掉mq01的rabbit应用
+</code></pre>
+<p><img src="https://s4.51cto.com/images/blog/201808/07/5d18b3e15ae08127ada73f30d4be1ef0.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+<img src="https://s4.51cto.com/images/blog/201808/07/65ecedcd026b7b9e78349f699360b697.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+从中可以看到ab队列已经从之前的+2显示成+1了，而且消息记录是存在的。</p>
+<p>（2）再将mq02节点的服务关闭，通过mq03查看消息记录是否还存在。</p>
+<pre><code>rabbitmqctl stop_app  //停掉mq02的rabbit应用
+</code></pre>
+<p><img src="https://s4.51cto.com/images/blog/201808/07/eb932cf7abb3ff5339c34f8954d43d2b.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+从中可以看到ab队列和消息记录还是存在的，只是变成了一个节点了。</p>
+<p>（3）将mq01和mq02的服务再启动起来</p>
+<pre><code>rabbitmqctl start_app   //启动mq01、mq02的rabbit应用
+</code></pre>
+<p><img src="https://s4.51cto.com/images/blog/201808/07/92b7b40b992ddc1ec585e77d23b044ae.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+从中可以看到ab队列后面+2变成了粉色，鼠标指上去显示镜像无法同步。如果这时候停掉mq03节点的服务，那么队列里面的消息将会丢失。</p>
+<p>采取的解决办法是选择在mq02节点上执行同步命令。</p>
+<pre><code>rabbitmqctl sync_queue ab  //同步ab队列
+</code></pre>
+<p><img src="https://s4.51cto.com/images/blog/201808/07/14a8b95cb59cc0f31d3b1d6ae66ed68d.png?x-oss-process=image/watermark,size_16,text_QDUxQ1RP5Y2a5a6i,color_FFFFFF,t_100,g_se,x_10,y_10,shadow_90,type_ZmFuZ3poZW5naGVpdGk=" alt="RabbitMQ集群搭建" loading="lazy"><br>
+同步完成后，+2又变成了蓝色。</p>
+<p>这样，我们就测试了rabbitmq集群的破坏性测试，说明集群配置成功。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/3Tdsl23vC/">
+              <span class="post-title">
+                Centos 7 安装Nginx&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

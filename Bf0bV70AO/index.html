@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>在K8S上搭建Redis集群 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="在K8S上搭建Redis集群 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="在K8S上搭建Redis集群"/>
+    <meta property="og:url" content="https://jwangkun.github.io/Bf0bV70AO/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/R2P-hE8zq/" class="tag">Redis</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>在K8S上搭建Redis集群</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="问题分析">问题分析</h2>
+<p>本质上来说，在k8s上部署一个redis集群和部署一个普通应用没有什么太大的区别，但需要注意下面几个问题：</p>
+<ol>
+<li>
+<p><strong>REDIS是一个有状态应用</strong></p>
+<p>这是部署redis集群时我们最需要注意的问题，当我们把redis以pod的形式部署在k8s中时，每个pod里缓存的数据都是不一样的，而且pod的IP是会随时变化，这时候如果使用普通的deployment和service来部署redis-cluster就会出现很多问题，因此需要改用StatefulSet + Headless Service来解决</p>
+</li>
+<li>
+<p><strong>数据持久化</strong></p>
+<p>redis虽然是基于内存的缓存，但还是需要依赖于磁盘进行数据的持久化，以便服务出现问题重启时可以恢复已经缓存的数据。在集群中，我们需要使用共享文件系统 + PV（持久卷）的方式来让整个集群中的所有pod都可以共享同一份持久化储存</p>
+</li>
+</ol>
+<h2 id="概念介绍">概念介绍</h2>
+<p>在开始之前先来详细介绍一下几个概念和原理</p>
+<h3 id="headless-service">Headless Service</h3>
+<p>简单的说，Headless Service就是没有指定Cluster IP的Service，相应的，在k8s的dns映射里，Headless Service的解析结果不是一个Cluster IP，而是它所关联的所有Pod的IP列表</p>
+<h3 id="statefulset">StatefulSet</h3>
+<ul>
+<li><a href="https://wiki.shileizcc.com/confluence/display/KUB/Kubernetes+StatefulSet">参考介绍</a></li>
+</ul>
+<p><code>StatefulSet</code>是k8s中专门用于解决有状态应用部署的一种资源，总的来说可以认为它是<code>Deployment/RC</code>的一个变种，它有以下几个特性：</p>
+<ol>
+<li>StatefulSet管理的每个Pod都有唯一的文档/网络标识，并且按照数字规律生成，而不是像Deployment中那样名称和IP都是随机的（比如StatefulSet名字为redis，那么pod名就是redis-0, redis-1 ...）</li>
+<li>StatefulSet中ReplicaSet的启停顺序是严格受控的，操作第N个pod一定要等前N-1个执行完才可以</li>
+<li>StatefulSet中的Pod采用稳定的持久化储存，并且对应的PV不会随着Pod的删除而被销毁</li>
+</ol>
+<p>另外需要说明的是，StatefulSet必须要配合Headless Service使用，它会在Headless Service提供的DNS映射上再加一层，最终形成精确到每个pod的域名映射，格式如下：</p>
+<pre><code>$(podname).$(headless service name)
+
+</code></pre>
+<p>有了这个映射，就可以在配置集群时使用域名替代IP，实现有状态应用集群的管理</p>
+<h2 id="方案">方案</h2>
+<p>借助StatefulSet和Headless Service，集群的部署方案设计如下（图片来自参考文章）：</p>
+<figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430bfb7fdee5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p>配置步骤大概罗列如下：</p>
+<ol>
+<li>配置共享文件系统NFS</li>
+<li>创建PV和PVC</li>
+<li>创建ConfigMap</li>
+<li>创建Headless Service</li>
+<li>创建StatefulSet</li>
+<li>初始化redis集群</li>
+</ol>
+<h2 id="实际操作">实际操作</h2>
+<p>由于使用的是minikube的单node环境，为了简化复杂度，这次先不配置PV和PVC，直接通过普通Volume的方式来挂载数据</p>
+<h3 id="创建configmap">创建ConfigMap</h3>
+<p>先创建<code>redis.conf</code>配置文件</p>
+<pre><code>appendonly yes
+cluster-enabled yes
+cluster-config-file /var/lib/redis/nodes.conf
+cluster-node-timeout 5000
+dir /var/lib/redis
+port 6379
+
+</code></pre>
+<p>然后<code>kubectl create configmap redis-conf --from-file=redis.conf</code>来创建ConfigMap</p>
+<h3 id="创建headlessservice">创建HeadlessService</h3>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  labels:
+    app: redis
+spec:
+  ports:
+  - name: redis-port
+    port: 6379
+  clusterIP: None
+  selector:
+    app: redis
+    appCluster: redis-cluster
+
+</code></pre>
+<h3 id="创建statefulset">创建StatefulSet</h3>
+<pre><code>apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: redis-app
+spec:
+  serviceName: &quot;redis-service&quot;
+  replicas: 6
+  template:
+    metadata:
+      labels:
+        app: redis
+        appCluster: redis-cluster
+    spec:
+      terminationGracePeriodSeconds: 20
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - redis
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: redis
+        image: &quot;registry.cn-qingdao.aliyuncs.com/gold-faas/gold-redis:1.0&quot;
+        command:
+          - &quot;redis-server&quot;
+        args:
+          - &quot;/etc/redis/redis.conf&quot;
+          - &quot;--protected-mode&quot;
+          - &quot;no&quot;
+        resources:
+          requests:
+            cpu: &quot;100m&quot;
+            memory: &quot;100Mi&quot;
+        ports:
+            - name: redis
+              containerPort: 6379
+              protocol: &quot;TCP&quot;
+            - name: cluster
+              containerPort: 16379
+              protocol: &quot;TCP&quot;
+        volumeMounts:
+          - name: &quot;redis-conf&quot;
+            mountPath: &quot;/etc/redis&quot;
+          - name: &quot;redis-data&quot;
+            mountPath: &quot;/var/lib/redis&quot;
+      volumes:
+      - name: &quot;redis-conf&quot;
+        configMap:
+          name: &quot;redis-conf&quot;
+          items:
+            - key: &quot;redis.conf&quot;
+              path: &quot;redis.conf&quot;
+      - name: &quot;redis-data&quot;
+        emptyDir: {} 
+
+</code></pre>
+<h3 id="初始化redis集群">初始化redis集群</h3>
+<p>StatefulSet创建完毕后，可以看到6个pod已经启动了，但这时候整个redis集群还没有初始化，需要使用官方提供的<code>redis-trib</code>工具。</p>
+<p>我们当然可以在任意一个redis节点上运行对应的工具来初始化整个集群，但这么做显然有些不太合适，我们希望每个节点的职责尽可能地单一，所以最好单独起一个pod来运行整个集群的管理工具。</p>
+<p>在这里需要先介绍一下<code>redis-trib</code>，它是官方提供的redis-cluster管理工具，可以实现redis集群的创建、更新等功能，在早期的redis版本中，它是以源码包里<code>redis-trib.rb</code>这个ruby脚本的方式来运作的（pip上也可以拉到python版本，但我运行失败），现在（我使用的<code>5.0.3</code>）已经被官方集成进<code>redis-cli</code>中。</p>
+<p>开始初始化集群，首先在k8s上创建一个ubuntu的pod，用来作为管理节点：</p>
+<pre><code>kubectl run -i --tty redis-cluster-manager --image=ubuntu --restart=Never /bin/bash
+
+</code></pre>
+<p>进入pod内部先安装一些工具，包括<code>wget</code>,<code>dnsutils</code>，然后下载和安装redis：</p>
+<pre><code>wget http://download.redis.io/releases/redis-5.0.3.tar.gz
+tar -xvzf redis-5.0.3.tar.gz
+cd redis-5.0.3.tar.gz &amp;&amp; make
+
+</code></pre>
+<p>编译完毕后<code>redis-cli</code>会被放置在<code>src</code>目录下，把它放进<code>/usr/local/bin</code>中方便后续操作</p>
+<p>接下来要获取已经创建好的6个节点的host ip，可以通过<code>nslookup</code>结合StatefulSet的域名规则来查找，举个例子，要查找<code>redis-app-0</code>这个pod的ip，运行如下命令：</p>
+<pre><code>root@redis-cluster-manager:/# nslookup redis-app-0.redis-service
+Server:		10.96.0.10
+Address:	10.96.0.10#53
+
+Name:	redis-app-0.redis-service.gold.svc.cluster.local
+Address: 172.17.0.10
+
+</code></pre>
+<p><code>172.17.0.10</code>就是对应的ip。这次部署我们使用0，1，2作为Master节点；3，4，5作为Slave节点，先运行下面的命令来初始化集群的Master节点：</p>
+<pre><code>redis-cli --cluster create 172.17.0.10:6379 172.17.0.11:6379 172.17.0.12:6379
+
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430c059eb555?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p>然后给他们分别附加对应的Slave节点，这里的<code>cluster-master-id</code>在上一步创建的时候会给出：</p>
+<pre><code>redis-cli --cluster add-node 172.17.0.13:6379 172.17.0.10:6379 --cluster-slave --cluster-master-id adf443a4d33c4db2c0d4669d61915ae6faa96b46
+
+redis-cli --cluster add-node 172.17.0.14:6379 172.17.0.11:6379 --cluster-slave --cluster-master-id 6e5adcb56a871a3d78343a38fcdec67be7ae98f8
+
+redis-cli --cluster add-node 172.17.0.16:6379 172.17.0.12:6379 --cluster-slave --cluster-master-id c061e37c5052c22f056fff2a014a9f63c3f47ca0
+
+</code></pre>
+<p>集群初始化后，随意进入一个节点检查一下集群信息：</p>
+<figure data-type="image" tabindex="3"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430bfb9fac37?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p>至此，集群初始化完毕，我们进入一个节点来试试，注意在集群模式下<code>redis-cli</code>必须加上<code>-c</code>参数才能够访问其他节点上的数据：</p>
+<figure data-type="image" tabindex="4"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430bfb99c5d8?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="创建service">创建Service</h3>
+<p>现在进入redis集群中的任意一个节点都可以直接进行操作了，但是为了能够对集群其他的服务提供访问，还需要建立一个service来实现服务发现和负载均衡（注意这里的service和我们之前创建的headless service不是一个东西）</p>
+<p>yaml文件如下：</p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: gold-redis
+  labels:
+    app: redis
+spec:
+  ports:
+  - name: redis-port
+    protocol: &quot;TCP&quot;
+    port: 6379
+    targetPort: 6379
+  selector:
+    app: redis
+    appCluster: redis-cluster
+
+</code></pre>
+<p>部署完做个测试：</p>
+<figure data-type="image" tabindex="5"><img src="https://user-gold-cdn.xitu.io/2019/3/25/169b430bfba191df?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p>很nice，到这里所有的工作就完毕了~</p>
+<p>原文链接：https://juejin.im/post/6844903806719754254</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/NmSmQLSLI/">
+              <span class="post-title">
+                 k8s安装ELK与EFK&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

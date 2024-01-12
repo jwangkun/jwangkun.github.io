@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> 使用easzup 快速部署一个 kubernetes的高可用集群 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" 使用easzup 快速部署一个 kubernetes的高可用集群 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" 使用easzup 快速部署一个 kubernetes的高可用集群"/>
+    <meta property="og:url" content="https://jwangkun.github.io/-6mGRsKnd/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1> 使用easzup 快速部署一个 kubernetes的高可用集群</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，6 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="下载文件">下载文件</h3>
+<ul>
+<li>通过 Rainbond 加速下载工具脚本 easzup  <code>2.1.0</code>版本，easzup 的不同 release 影响可以安装的 kubernetes 版本，具体对应信息可查看<a href="https://github.com/easzlab/kubeasz/releases">easzup版本</a></li>
+</ul>
+<pre><code class="language-bash">wget https://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/pkg/easzup &amp;&amp; chmod +x easzup
+</code></pre>
+<ul>
+<li>使用工具脚本下载其他文件，主要包括离线镜像，二进制文件等，保存在/etc/ansible目录中</li>
+</ul>
+<pre><code class="language-bash">./easzup -D
+</code></pre>
+<h3 id="配置免密钥登录">配置免密钥登录</h3>
+<pre><code class="language-bash">ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
+ssh-copy-id $IP  # $IP 为所有节点地址包括自身，按照提示输入 yes 和 root 密码
+</code></pre>
+<h3 id="在ansible控制端编排k8s安装">在ansible控制端编排k8s安装</h3>
+<ul>
+<li>容器化运行 kubeasz，详见<a href="https://github.com/easzlab/kubeasz/blob/master/docs/setup/docker_kubeasz.md">文档</a></li>
+</ul>
+<pre><code class="language-bash">./easzup -S
+</code></pre>
+<ul>
+<li>使用默认配置安装 aio 集群</li>
+</ul>
+<pre><code class="language-bash">docker exec -it kubeasz easzctl start-aio
+</code></pre>
+<ul>
+<li>完成后复制kubectl工具到<code>/usr/bin/kubectl</code></li>
+<li>需要扩展node节点时，配置对应节点免密钥登录后，执行以下操作添加node节点</li>
+</ul>
+<pre><code class="language-bash">docker exec -it kubeasz easzctl add-node $NEW_NODE_IP
+</code></pre>
+<h3 id="验证安装结果">验证安装结果</h3>
+<p><em><strong>如果提示kubectl: command not found，退出重新ssh登录一下，环境变量生效即可</strong></em></p>
+<pre><code class="language-bash">$ kubectl version                   # 验证集群版本     
+$ kubectl get componentstatus       # 验证 scheduler/controller-manager/etcd等组件状态
+$ kubectl get node                  # 验证节点就绪 (Ready) 状态
+$ kubectl get pod --all-namespaces  # 验证集群pod状态，默认已安装网络插件、coredns、metrics-server等
+$ kubectl get svc --all-namespaces  # 验证集群服务状态
+</code></pre>
+<p>完成Kubernetes的安装，<a href="../minimal_install/">开始Rainbond的安装</a></p>
+<h2 id="kubernetes的高可用安装">kubernetes的高可用安装</h2>
+<h3 id="高可用集群所需节点配置如下">高可用集群所需节点配置如下：</h3>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>数量</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>部署节点</td>
+<td>1</td>
+<td>运行ansible/easzctl脚本，可以复用master，建议使用独立节点</td>
+</tr>
+<tr>
+<td>etcd节点</td>
+<td>3</td>
+<td>注意etcd集群需要1,3,5,7...奇数个节点，一般复用master节点</td>
+</tr>
+<tr>
+<td>master节点</td>
+<td>2</td>
+<td>高可用集群至少2个master节点</td>
+</tr>
+<tr>
+<td>node节点</td>
+<td>3</td>
+<td>运行应用负载的节点，可根据需要提升机器配置/增加节点数</td>
+</tr>
+</tbody>
+</table>
+<h3 id="在各节点安装依赖工具">在各节点安装依赖工具</h3>
+<ul>
+<li>Ubuntu 16.04 请执行以下脚本：</li>
+</ul>
+<pre><code class="language-bash"># 文档中脚本默认均以root用户执行
+apt-get update &amp;&amp; apt-get upgrade -y &amp;&amp; apt-get dist-upgrade -y
+# 安装python2
+apt-get install python2.7
+# Ubuntu16.04可能需要配置以下软连接
+ln -s /usr/bin/python2.7 /usr/bin/python
+</code></pre>
+<ul>
+<li>CentOS 7 请执行以下脚本：</li>
+</ul>
+<pre><code class="language-bash"># 文档中脚本默认均以root用户执行
+yum update
+# 安装python
+yum install python -y
+</code></pre>
+<h3 id="配置免密码登录">配置免密码登录</h3>
+<ul>
+<li>在部署节点执行以下操作：</li>
+</ul>
+<pre><code class="language-bash">ssh-keygen -t rsa -b 2048 -N '' -f ~/.ssh/id_rsa
+ssh-copy-id $IPs #$IPs为所有节点地址包括自身，按照提示输入yes 和root密码
+</code></pre>
+<h3 id="在ansible控制端编排k8s安装-2">在ansible控制端编排k8s安装</h3>
+<ul>
+<li>通过 Rainbond 加速下载工具脚本 easzup  <code>2.1.0</code>版本</li>
+</ul>
+<pre><code class="language-bash">wget https://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/pkg/easzup &amp;&amp; chmod +x easzup
+</code></pre>
+<ul>
+<li>使用脚本工具下载离线镜像等文件，文件保存在/etc/ansible目录中</li>
+</ul>
+<pre><code class="language-bash">./easzup -D
+</code></pre>
+<ul>
+<li>配置集群参数</li>
+</ul>
+<pre><code class="language-bash">cd /etc/ansible &amp;&amp; cp example/hosts.multi-node hosts
+</code></pre>
+<p><strong>将集群配置模版拷贝到指定位置后，必须按照模版格式，依照自己的节点规划修改/etc/ansible/hosts文件，否则无法安装集群，该文件中包括主机列表及部分集群配置</strong></p>
+<pre><code># etcd集群节点数应为1、3、5...等奇数个，不可设置为偶数
+# 变量NODE_NAME为etcd节点在etcd集群中的唯一名称，不可相同
+# etcd节点主机列表
+[etcd] 
+192.168.1.1   NODE_NAME=etcd1
+192.168.1.2   NODE_NAME=etcd2
+192.168.1.3   NODE_NAME=etcd3
+
+# kubernetes master节点主机列表
+[kube-master]
+192.168.1.1
+192.168.1.2
+
+# kubernetes node节点主机列表
+[kube-node]
+192.168.1.3
+192.168.1.4
+
+# [可选] harbor服务，docker 镜像仓库
+# 'NEW_INSTALL':设置为 yes 会安装harbor服务；设置为 no 不安装harbor服务
+# 'SELF_SIGNED_CERT':设置为 no 你需要将 harbor.pem 和 harbor-key.pem 文件放在 down 目录下
+[harbor]
+#192.168.1.8 HARBOR_DOMAIN=&quot;harbor.yourdomain.com&quot; NEW_INSTALL=no SELF_SIGNED_CERT=yes
+
+# [可选] 外部负载均衡节点主机列表
+[ex-lb]
+#192.168.1.6 LB_ROLE=backup EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
+#192.168.1.7 LB_ROLE=master EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
+
+# [可选] 集群ntp服务器列表
+[chrony]
+#192.168.1.1
+
+[all:vars]
+# --------- Main Variables ---------------
+# 可以选择的kubernetes集群运行时: docker, containerd
+CONTAINER_RUNTIME=&quot;docker&quot;
+
+# kubernetes网络插件: calico, flannel, kube-router, cilium, kube-ovn
+CLUSTER_NETWORK=&quot;flannel&quot;
+
+# kube-proxy服务代理模式: 'iptables' or 'ipvs'
+PROXY_MODE=&quot;ipvs&quot;
+
+# K8S Service CIDR, 不可与主机网络重叠
+SERVICE_CIDR=&quot;10.68.0.0/16&quot;
+
+# Cluster CIDR (Pod CIDR), 不可与主机网络重叠
+CLUSTER_CIDR=&quot;172.20.0.0/16&quot;
+
+# Node端口范围
+NODE_PORT_RANGE=&quot;20000-40000&quot;
+
+# 集群DNS域名
+CLUSTER_DNS_DOMAIN=&quot;cluster.local.&quot;
+
+# -------- Additional Variables (don't change the default value right now) ---
+# 二进制文件目录
+bin_dir=&quot;/opt/kube/bin&quot;
+
+# 证书文件目录
+ca_dir=&quot;/etc/kubernetes/ssl&quot;
+
+# 部署目录 (kubeasz工作空间)
+base_dir=&quot;/etc/ansible&quot;
+</code></pre>
+<ul>
+<li>容器化运行kubeasz</li>
+</ul>
+<pre><code class="language-bash">./easzup -S
+</code></pre>
+<ul>
+<li>使用ansible安装kubernetes集群</li>
+</ul>
+<pre><code class="language-bash">docker exec -it kubeasz ansible-playbook /etc/ansible/90.setup.yml
+</code></pre>
+<ul>
+<li>需要扩展node节点时，配置对应节点免密钥登录后，执行以下操作添加node节点</li>
+</ul>
+<pre><code class="language-bash">docker exec -it kubeasz easzctl add-node $NEW_NODE_IP
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/NOhi3BQeN/">
+              <span class="post-title">
+                Kubernetes 部署 Wordpress+MySQL&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

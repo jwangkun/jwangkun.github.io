@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Kubernetes Volume(持久化卷) | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes Volume(持久化卷) | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Kubernetes Volume(持久化卷)"/>
+    <meta property="og:url" content="https://jwangkun.github.io/meYDSyEo3/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Kubernetes Volume(持久化卷)</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Persistent Volume(持久化卷)简称PV, 是一个K8S资源对象，我们可以单独创建一个PV, 它不和Pod直接发生关系, 而是通过Persistent Volume Claim, 简称PVC来实现动态绑定, 我们会在Pod定义里指定创建好的PVC, 然后PVC会根据Pod的要求去自动绑定合适的PV给Pod使用.</p>
+<!-- more -->
+<p>持久化卷下PV和PVC概念:</p>
+<p>Persistent Volume（PV）是由管理员设置的存储，它是群集的一部分。就像节点是集群中的资源一样，PV 也是集群中的资源。 PV 是 Volume 之类的卷插件，但具有独立于使用 PV 的 Pod 的生命周期。此 API 对象包含存储实现的细节，即 NFS、iSCSI 或特定于云供应商的存储系统</p>
+<p>PersistentVolumeClaim（PVC）是用户存储的请求。它与 Pod 相似。Pod 消耗节点资源，PVC 消耗 PV 资源。Pod 可以请求特定级别的资源（CPU 和内存）。PVC声明可以请求特定的大小和访问模式（例如，可以以读/写一次或 只读多次模式挂载）</p>
+<p>它和普通Volume的区别是什么呢？</p>
+<p>普通Volume和使用它的Pod之间是一种静态绑定关系，在定义Pod的文件里，同时定义了它使用的Volume。Volume是Pod的附属品，我们无法单独创建一个Volume，因为它不是一个独立的K8S资源对象。</p>
+<p>如何简单理解持久化卷?</p>
+<p>我们需要首先创建一个独立的持久化卷(PV)资源对象, 然后创建一个与PV绑定的PVC存储请求, 这个请求会事先定义accessModes, resources等资源配置, 最终我们会在Pod中挂载定义好的PVC以供我们数据存储使用</p>
+<p><strong>一. NFS安装配置</strong></p>
+<p>我们这里利用NFS去实现<a href="http://www.showerlee.com/archives/tag/k8s">k8s</a>持久化卷的配置</p>
+<p>1,安装NFS server</p>
+<pre><code># yum install nfs-utils -y
+</code></pre>
+<p>2.启动NFS服务</p>
+<pre><code># systemctl enable nfs-server
+# systemctl start nfs-server
+</code></pre>
+<p>3.配置NFS共享目录</p>
+<pre><code># mkdir /srv/pv-demo
+# chown nfsnobody:nfsnobody /srv/pv-demo
+# chmod 755 /srv/pv-demo
+# echo -e &quot;/srv/pv-demo  kube-master(rw,sync)&quot; &gt; /etc/export
+</code></pre>
+<p>4.生效共享目录</p>
+<pre><code># exportfs -a
+</code></pre>
+<p>因为资源有限, 我们最终在Master上创建一个NFS共享目录/srv/pv-demo, 以供我们后面的持久化卷使用, 有富裕的小伙伴可以创建一台与kube-master同一网段的独立server去充当NFS服务器,</p>
+<p><strong>二. Persistent Volume配置</strong></p>
+<p>1.创建Persistent Volume</p>
+<p># vi pv.yaml</p>
+<pre><code>apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-demo
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  nfs:
+    path: /srv/pv-demo
+    server: kube-master
+</code></pre>
+<p>Tip: 这里的定义卷的大小为5G, 使用的accessmodes为ReadWriteOnce, PVC policy为Recycle, NFS共享目录为我们之前在master创建好的/srv/pv-demo, server为我们定义好的本地host kube-master</p>
+<p># kubectl create -f pv.yaml</p>
+<ol start="2">
+<li>查看PV</li>
+</ol>
+<p># kubectl get pv pv-demo</p>
+<pre><code>NAME      CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS    CLAIM              STORAGECLASS   REASON    AGE
+pv-demo   5Gi        RWO            Recycle          Bound     default/pvc-demo                            1h
+</code></pre>
+<p>3.创建Persistent Volume Claim</p>
+<p>Tip: 这里PVC可以理解为在PV请求的资源, 也就是说所有我们的数据都会保存在PVC里, 任何PVC的删除操作都会清除我们存储在这里的数据.</p>
+<pre><code>kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-demo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+</code></pre>
+<p># kubectl create -f pvc.yaml</p>
+<p>4.查看PVC</p>
+<p># kubectl get pvc pvc-demo</p>
+<pre><code>NAME       STATUS    VOLUME    CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+pvc-demo   Bound     pv-demo   5Gi        RWO                           1h
+</code></pre>
+<p>5.创建一个Pod并使用该PVC</p>
+<p># vi pvpod.yaml</p>
+<pre><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: httpd-pod
+spec:
+  containers:
+  - image: httpd
+    name: httpd-pod
+    imagePullPolicy: Always
+    volumeMounts:
+    - mountPath: &quot;/usr/local/apache2/htdocs/&quot;
+      name: httpd-volume
+  volumes:
+    - name: httpd-volume
+      persistentVolumeClaim:
+        claimName: pvc-demo
+</code></pre>
+<p>Tip: 这里需要保证claimName的值与我们之前创建的PVC name一致.</p>
+<p># kubectl create -f pvpod.yaml</p>
+<p>Tip: 这里我们将PVC挂载到Pod的Apache根目录&quot;/usr/local/apache2/htdocs/&quot;, 用来最终测试效果.</p>
+<ol start="6">
+<li>查看Pod是否挂载PVC</li>
+</ol>
+<p># kubectl describe pv</p>
+<pre><code>Name:            pv-demo
+Labels:          &lt;none&gt;
+Annotations:     pv.kubernetes.io/bound-by-controller=yes
+StorageClass:
+Status:          Bound
+Claim:           default/pvc-demo
+Reclaim Policy:  Recycle
+Access Modes:    RWO
+Capacity:        5Gi
+Message:
+Source:
+    Type:      NFS (an NFS mount that lasts the lifetime of a pod)
+    Server:    kube-master
+    Path:      /srv/pv-demo
+    ReadOnly:  false
+Events:        &lt;none&gt;
+</code></pre>
+<p># kubectl describe pods</p>
+<pre><code>Name:         httpd-pod
+Namespace:    default
+Node:         kube-master/172.17.2.153
+Start Time:   Fri, 23 Feb 2018 15:38:55 +0800
+Labels:       &lt;none&gt;
+Annotations:  &lt;none&gt;
+Status:       Running
+IP:           10.244.0.46
+Containers:
+  httpd-pod:
+    Container ID:   docker://b7e5fd2732864934b732fdbd4bb24b3ccc8949c2e9d8832a36e271f2ee350b2b
+    Image:          httpd
+    Image ID:       docker-pullable://httpd@sha256:6e61d60e4142ea44e8e69b22f1e739d89e1dc8a2764182d7eecc83a5bb31181e
+    Port:           &lt;none&gt;
+    State:          Running
+      Started:      Fri, 23 Feb 2018 15:38:59 +0800
+    Ready:          True
+    Restart Count:  0
+    Environment:    &lt;none&gt;
+    Mounts:
+      /usr/local/apache2/htdocs from httpd-volume (rw)
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-bnkxx (ro)
+Conditions:
+  Type           Status
+  Initialized    True
+  Ready          True
+  PodScheduled   True
+Volumes:
+  httpd-volume:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  pvc-demo
+    ReadOnly:   false
+  default-token-bnkxx:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-bnkxx
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  &lt;none&gt;
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type    Reason                 Age   From                  Message
+  ----    ------                 ----  ----                  -------
+  Normal  Scheduled              58m   default-scheduler     Successfully assigned httpd-pod to kube-master
+  Normal  SuccessfulMountVolume  58m   kubelet, kube-master  MountVolume.SetUp succeeded for volume &quot;default-token-bnkxx&quot;
+  Normal  SuccessfulMountVolume  58m   kubelet, kube-master  MountVolume.SetUp succeeded for volume &quot;pv-demo&quot;
+  Normal  Pulling                58m   kubelet, kube-master  pulling image &quot;httpd&quot;
+  Normal  Pulled                 58m   kubelet, kube-master  Successfully pulled image &quot;httpd&quot;
+  Normal  Created                58m   kubelet, kube-master  Created container
+  Normal  Started                58m   kubelet, kube-master  Started container
+</code></pre>
+<p>通过返回打印的信息我们可以看到PVC已经成功mount到我们定义好的Pod的apache根目录下</p>
+<ol start="7">
+<li>向Pod下apache根目录写入index.html</li>
+</ol>
+<p># kubectl exec -ti httpd-pod -- /bin/sh -c &quot;echo 'This is a persistent volume from httpd-pod' &gt; /usr/local/apache2/htdocs/index.html&quot;</p>
+<p>8.确认文件写入</p>
+<p># kubectl exec -ti httpd-pod -- cat /usr/local/apache2/htdocs/index.html</p>
+<pre><code class="language-bsh">This is a persistent volume from httpd-pod
+</code></pre>
+<ol start="9">
+<li>删除并重新创建Pod来验证数据是否会随Pod销毁而丢失.</li>
+</ol>
+<p># kubectl delete pod httpd-pod<br>
+# kubectl create -f pvpod.yaml<br>
+# kubectl exec -ti httpd-pod -- cat /usr/local/apache2/htdocs/index.html</p>
+<pre><code class="language-bsh">This is a persistent volume from httpd-pod
+</code></pre>
+<p>可以看到我们之前写入的index.html仍旧存储在PVC中, 证明其不会随Pod销毁而丢失.</p>
+<p>10.查看Pod内网IP</p>
+<p># kubectl get pods -o wide</p>
+<pre><code class="language-bsh">NAME        READY     STATUS    RESTARTS   AGE       IP            NODE
+httpd-pod   1/1       Running   0          1m        10.244.0.46   kube-master
+</code></pre>
+<p>11.利用curl验证写入的index.html</p>
+<p># curl 10.244.0.46</p>
+<pre><code>This is a persistent volume from httpd-pod
+</code></pre>
+<p>这里我们成功在Pod下将PVC挂载到apache的家目录, 并返回HTML返回内容.</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/cIJwT12am/">
+              <span class="post-title">
+                 基于kubekey部署kubernetes生产级集群&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>elasticsearch集群 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="elasticsearch集群 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="elasticsearch集群"/>
+    <meta property="og:url" content="https://jwangkun.github.io/fja0PWFwF/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/QjNCxGJlK/" class="tag">elasticsearch集群</a>
+            
+            <a href="https://jwangkun.github.io/FGzdK7Xb8q/" class="tag">elasticsearch</a>
+            
+        </span>
+            <h1>elasticsearch集群</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="elasticsearch-为什么要集群集群有什么作用">elasticsearch 为什么要集群？集群有什么作⽤</h3>
+<p>⾼可⽤<br>
+⾼可⽤（High Availability）是分布式系统架构设计中必须考虑的因素之⼀，它通常是指，通过设<br>
+计减少系统不能提供服务的时间。如果系统每运⾏ 100 个时间单位，会有 1 个时间单位⽆法提供服<br>
+务，我们说系统的可⽤性是 99%。</p>
+<p>负载均衡<br>
+将流量均衡的分布在不同的节点上，每个节点都可以处理⼀部分负载，并且可以在节点之间动态分<br>
+配负载，以实现平衡。</p>
+<p>⾼性能<br>
+将流量分发到不同机器，充分利⽤多机器多 CPU，从串⾏计算到并⾏计算提⾼系统性能。</p>
+<p>Elasticsearch 天生就是分布式的，会在后台自动执行</p>
+<ul>
+<li>分配文档到不同的容器 或 分片 中，文档可以储存在一个或多个节点中</li>
+<li>按集群节点来均衡分配这些分片，从而对索引和搜索过程进行负载均衡</li>
+<li>复制每个分片以支持数据冗余，从而防止硬件故障导致的数据丢失</li>
+<li>将集群中任一节点的请求路由到存有相关数据的节点</li>
+<li>集群扩容时无缝整合新节点，重新分配分片以便从离群节点恢复</li>
+</ul>
+<p>ES 在设计时就尽可能地屏蔽了分布式系统的复杂性，无需了解内部机制就可以使用 ES。</p>
+<h3 id="es-集群的基本核心概念">es 集群的基本核⼼概念</h3>
+<p>Elasticsearch 的配置⽂件中可以通过 node.master、node.data 来<br>
+设置节点类型。<br>
+node.master：是否是主节点（是否有竞选资格）<br>
+node.data：是否存储数据，如果为 true 则为数据节点</p>
+<p>每个索引有⼀个或多个分⽚，每个分⽚存储不同的数据。分⽚可分为</p>
+<ul>
+<li>主分⽚（ primary shard）</li>
+<li>复制分⽚（replica shard）</li>
+</ul>
+<p>复制分⽚是主分⽚的拷⻉，可以分担系统压力、流量。默认每个主分⽚有⼀个复制分⽚，⼀个索引的复制分⽚的数量可以动态地调整，复制分⽚从不与它的主分⽚在同⼀个节点上。</p>
+<h3 id="搭建-es-集群">搭建 es 集群</h3>
+<p>1、拷⻉ elasticsearch-7.2.0 安装包 3 份，分别命名 es-a, es-b，es-c</p>
+<p>2、分别修改配置⽂件 elasticsearch.yml</p>
+<pre><code>#集群名称
+cluster.name: my-application
+
+#节点名称
+node.name: node-1
+
+#是不是有资格主节点
+node.master: true
+#是否存储数据
+node.data: true
+
+#最⼤集群节点数
+node.max_local_storage_nodes: 3
+
+#⽹关地址，常配置为实际ip
+network.host: 0.0.0.0
+#端⼝
+http.port: 9200
+
+#内部节点之间沟通端⼝
+transport.tcp.port: 9300
+
+#es7.x 之后新增的配置，写⼊候选主节点的设备地址，在开启服务后可以被选为主节点。此处在同一机器的不同端口模拟多个节点
+discovery.seed_hosts: [&quot;localhost:9200&quot;,&quot;localhost:9201&quot;,&quot;localhost:9202&quot;]
+#es7.x 之后新增的配置，初始化⼀个新的集群时需要此配置来选举master
+cluster.initial_master_nodes: [&quot;node-1&quot;, &quot;node-2&quot;,&quot;node-3&quot;]
+
+#数据和存储路径
+path.data: /Users/louis.chen/Documents/study/search/storage/a/data
+path.logs: /Users/louis.chen/Documents/study/search/storage/a/logs
+</code></pre>
+<p>3、分别启动 a ,b ,c 三个节点</p>
+<p>4、访问 localhost:9200/_cat/health?v , 如果返回的 node.total 是 3，代表集群搭建成功</p>
+<p>但这种方式看到的集群信息很抽象，可以在 kibana 的可视化地查看集群信息，且信息更详细。带星号的是 master 节点。</p>
+<p>先在 kibana.yml 中配置集群节点</p>
+<pre><code>elasticsearch.hosts: [&quot;http://localhost:9200&quot;,&quot;http://localhost:
+9201&quot;,&quot;http://localhost:9202&quot;]
+</code></pre>
+<p>启动 kibana，访问 localhost:5601 在 monitor 中即可看到 es 集群的信息</p>
+<h3 id="集群的分片管理">集群的分片管理</h3>
+<p>分片是针对 index 而言的</p>
+<p>分⽚ (shard): 因为 ES 是个分布式的搜索引擎, 所以索引通常都会分解成不同部分, ⽽这些分布在不同节点的数据就是分⽚. ES ⾃动管理和组织分⽚, 并在必要的时候对分⽚数据进⾏再平衡分配, 所以⽤户基本上不⽤担⼼分⽚的处理细节。</p>
+<p>副本 (replica):ES 默认为⼀个索引创建 1 个主分⽚, 并分别为其创建⼀个副本分⽚. 也就是说每个索引都由 1 个主分⽚成本, ⽽每个主分⽚都相应的有⼀个 copy.</p>
+<p>Elastic search7.x 之后，如果不指定索引分⽚，默认会创建 1 个主分⽚和⼀个副分⽚，⽽ 7.x 版本之前的⽐如 6.x 版本，默认是 5 个主分⽚</p>
+<p>创建索引 (指定分⽚数量)</p>
+<pre><code>PUT nba
+#指定分片数量
+{&quot;settings&quot;:{&quot;number_of_shards&quot;:3,&quot;number_of_replicas&quot;:1},&quot;mappings&quot;:
+{&quot;properties&quot;:{&quot;birthDay&quot;:{&quot;type&quot;:&quot;date&quot;},&quot;birthDayStr&quot;:
+{&quot;type&quot;:&quot;keyword&quot;},&quot;age&quot;:{&quot;type&quot;:&quot;integer&quot;},&quot;code&quot;:
+{&quot;type&quot;:&quot;text&quot;},&quot;country&quot;:{&quot;type&quot;:&quot;text&quot;},&quot;countryEn&quot;:
+{&quot;type&quot;:&quot;text&quot;},&quot;displayAffiliation&quot;:{&quot;type&quot;:&quot;text&quot;},&quot;displayName&quot;:
+{&quot;type&quot;:&quot;text&quot;},&quot;displayNameEn&quot;:{&quot;type&quot;:&quot;text&quot;},&quot;draft&quot;:
+{&quot;type&quot;:&quot;long&quot;},&quot;heightValue&quot;:{&quot;type&quot;:&quot;float&quot;},&quot;jerseyNo&quot;:
+{&quot;type&quot;:&quot;text&quot;},&quot;playYear&quot;:{&quot;type&quot;:&quot;long&quot;},&quot;playerId&quot;:
+{&quot;type&quot;:&quot;keyword&quot;},&quot;position&quot;:{&quot;type&quot;:&quot;text&quot;},&quot;schoolType&quot;:
+{&quot;type&quot;:&quot;text&quot;},&quot;teamCity&quot;:{&quot;type&quot;:&quot;text&quot;},&quot;teamCityEn&quot;:
+{&quot;type&quot;:&quot;text&quot;},&quot;teamConference&quot;:
+{&quot;type&quot;:&quot;keyword&quot;},&quot;teamConferenceEn&quot;:{&quot;type&quot;:&quot;keyword&quot;},&quot;teamName&quot;:
+{&quot;type&quot;:&quot;keyword&quot;},&quot;t
+</code></pre>
+<p>修改副分⽚数量</p>
+<pre><code>PUT /nba/_settings
+{
+ &quot;number_of_replicas&quot;: 2
+}
+</code></pre>
+<h3 id="es-集群健康管理">es 集群健康管理</h3>
+<p>1、查看集群的健康状态</p>
+<pre><code>http://127.0.0.1:9200/_cat/health?v
+</code></pre>
+<ul>
+<li>status ：集群的状态，red 红表示集群不可⽤，有故障。yellow ⻩表示集群不可靠但可⽤，⼀般单节点时就是此状态。green 正常状态，表示集群⼀切正常。</li>
+<li>node.total ：节点数，这⾥是 3，表示该集群有三个节点。</li>
+<li>node.data ：数据节点数，存储数据的节点数，这⾥是 3。</li>
+<li>shards ：表示我们把数据分成多少块存储。</li>
+<li>pri ：主分⽚数，primary shards</li>
+<li>active_shards_percent ：激活的分⽚百分⽐，这⾥可以理解为加载的数据分⽚数，只有加载所有的分⽚数，集群才算正常启动，在启动的过程中，如果我们不断刷新这个⻚⾯，我们会发现这个百分⽐会不断加⼤。</li>
+</ul>
+<p>2、查看集群的索引数</p>
+<pre><code>http://127.0.0.1:9200/_cat/indices?v
+</code></pre>
+<p>返回了集群中的所有索引信息，我们可以看到所有索引的健康情况和具体信息</p>
+<ul>
+<li>health ： 索引健康，green 为正常，yellow 表示索引不可靠（单节点），red 索引不可⽤。与集群健康状态⼀致。</li>
+<li>status ： 状态表明索引是否打开，只索引是可以关闭的。</li>
+<li>index ： 索引的名称</li>
+<li>uuid ： 索引内部分配的名称，索引的唯⼀表示</li>
+<li>pri ： 集群的主分⽚数量</li>
+<li>docs.count ： 这⾥统计了⽂档的数量。</li>
+<li>docs.deleted ： 这⾥统计了被删除⽂档的数量。</li>
+<li>store.size ： 索引的存储的总容量</li>
+<li>pri.store.size ： 主分别的容量</li>
+</ul>
+<p>3、查看磁盘的分配情况</p>
+<pre><code>http://127.0.0.1:9200/_cat/allocation?v
+</code></pre>
+<p>返回每个节点的磁盘情况。</p>
+<ul>
+<li>shards ： 该节点的分⽚数量</li>
+<li>disk.indices ： 该节点中所有索引在该磁盘所点的空间。</li>
+<li>disk.used ： 该节点已经使⽤的磁盘容量</li>
+<li>disk.avail ： 该节点可以使⽤的磁盘容量</li>
+<li>disk.total ： 该节点的磁盘容量</li>
+</ul>
+<p>4、查看集群的节点信息</p>
+<pre><code>http://127.0.0.1:9200/_cat/nodes?v
+</code></pre>
+<p>URL 返回了集群中各节点的情况。</p>
+<ul>
+<li>ip ： ip 地址</li>
+<li>heap.percent ： 堆内存使⽤情况</li>
+<li>ram.percent ： 运⾏内存使⽤情况</li>
+<li>cpu ： cpu 使⽤情况</li>
+<li>master ： 是否是主节点</li>
+</ul>
+<p>5、查看集群的其他信息</p>
+<pre><code>http://127.0.0.1:9200/_cat
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/bvYFbY7Mb/">
+              <span class="post-title">
+                RabbitMQ集群搭建&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

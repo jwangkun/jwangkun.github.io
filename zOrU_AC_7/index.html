@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot 全局异常处理 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot 全局异常处理 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot 全局异常处理"/>
+    <meta property="og:url" content="https://jwangkun.github.io/zOrU_AC_7/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/AX-7DSchn/" class="tag">全局异常</a>
+            
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1>SpringBoot 全局异常处理</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>在开发中，我们经常会使用<code>try/catch块</code>来捕获异常进行处理，如果有些代码中忘记捕获异常或者不可见的一些异常出现，就会响应给前端一些不友好的提示，这时候我们可以使用全局异常处理。这样就不用在代码中写那些烦人的<code>try/catch块了</code>，代码的可读性也会提高。</p>
+<p>SpringBoot提供的的注解<code>@ControllerAdvice</code>表示开启全局异常捕获，在自定义的异常方法上使用<code>ExceptionHandler</code>来进行统一处理。</p>
+<p>下面一起看看如何优雅的处理全局异常！</p>
+<h3 id="一-定义响应状态码及信息的枚举类">一 定义响应状态码及信息的枚举类</h3>
+<pre><code>@Getter
+public enum CodeEnum {
+    
+    SUCCESS(0,&quot;请求成功&quot;),
+    ERROR(500,&quot;未知异常&quot;),
+    ERROR_EMPTY_RESULT(1001,&quot;查询结果为空&quot;),
+    ERROR_INCOMPLETE_RESULT(1002,&quot;请求参数不全&quot;);
+    
+    private int code;
+    private String message;
+    CodeEnum(int code,String message){
+        this.code = code;
+        this.message = message;
+    }
+}
+</code></pre>
+<h3 id="二-定义响应数据的实体类">二 定义响应数据的实体类</h3>
+<pre><code>@Slf4j
+@Data
+public class R&lt;T&gt; implements Serializable {
+
+    private static final long serialVersionUID = 572235155491705152L;
+    /**
+     * 响应的状态码
+     */
+    private int code;
+    /***
+     * 响应的信息
+     */
+    private String message;
+    /**
+     * 响应数据
+     */
+    private T data;
+
+    /**
+     * 放入响应码并返回
+     * @param code
+     * @param msg
+     * @return
+     */
+    public R fillCode(int code,String msg){
+        this.code = code;
+        this.message = msg;
+        return this;
+    }
+
+    /**
+     * 放入响应码并返回
+     * @param codeEnum
+     * @return
+     */
+    public R fillCode(CodeEnum codeEnum){
+        this.code = codeEnum.getCode();
+        this.message = codeEnum.getMessage();
+        return this;
+    }
+
+    /**
+     * 放入数据并响应成功状态
+     * @param data
+     * @return
+     */
+    public R fillData(T data){
+        this.code = CodeEnum.SUCCESS.getCode();
+        this.message = CodeEnum.SUCCESS.getMessage();
+        this.data = data;
+        return this;
+    }
+}
+</code></pre>
+<h3 id="三-自定义两个异常">三 自定义两个异常</h3>
+<p>根据业务需求自定义异常，在本文中我定义了两个异常，分别用作响应结果为空时处理和请求参数错误时处理。</p>
+<pre><code>@Data
+public class EmptyResutlException extends RuntimeException {
+
+    private static final long serialVersionUID = -8839210969758687047L;
+    private int code;
+    private String message;
+
+    public EmptyResutlException(CodeEnum codeEnum){
+        this.code = codeEnum.getCode();
+        this.message = codeEnum.getMessage();
+    }
+}
+@Data
+public class RequestParamException extends RuntimeException {
+
+    private static final long serialVersionUID = 4748844811214637041L;
+    private int code;
+    private String message;
+
+    public RequestParamException(CodeEnum codeEnum){
+        this.code = codeEnum.getCode();
+        this.message = codeEnum.getMessage();
+    }
+}
+</code></pre>
+<h3 id="四-定义全局异常处理类">四 定义全局异常处理类</h3>
+<p>由于这里我想要响应的结果为实体类对象，因此我直接用<code>@RestControllerAdvice</code>来代替了<code>@ControllerAdvice</code>，这两个注解的差别跟<code>@Controller</code>和<code>@RestController</code>一样，rest的响应体为json格式的数据。</p>
+<pre><code>@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    /**
+     * 查询结果为空时处理
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(EmptyResutlException.class)
+    public R emptyResultExceptionHandler(EmptyResutlException e){
+        log.error(&quot;查询结果为空：{}&quot;,e.getMessage());
+        R result = new R();
+        result.fillCode(e.getCode(),e.getMessage());
+        return result;
+    }
+
+    /**
+     * 请求参数错误时处理
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(RequestParamException.class)
+    public R requestParamExceptionHandler(RequestParamException e){
+        log.error(&quot;请求参数不合法：{}&quot;,e.getMessage());
+        R result = new R();
+        result.fillCode(e.getCode(),e.getMessage());
+        return result;
+    }
+
+    /**
+     * 处理其他异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(Exception.class)
+    public R exceptionHandler(Exception e){
+        log.error(&quot;未知异常：{}&quot;,e.getMessage());
+        R result = new R();
+        result.fillCode(CodeEnum.ERROR);
+        return result;
+    }
+}
+</code></pre>
+<h3 id="五-自定义接口测试异常">五 自定义接口测试异常</h3>
+<pre><code>@RestController
+public class TestController {
+
+    @GetMapping(&quot;getString&quot;)
+    public R getString(String name){
+
+        if(StringUtils.isEmpty(name)){
+            throw new RequestParamException(1002,&quot;请求参数name为空&quot;);
+        }else if (&quot;Java旅途&quot;.equals(name)) {
+            // 这里没有查询操作，当请求参数是Java旅途的时候，模拟成查询结果为空
+            throw new EmptyResutlException(1001,&quot;查询结果为空&quot;);
+        }
+        // 这里模拟一下除自定义异常外的其他两种异常
+        int i = 0;
+        i = 5/i;
+        return new R().fillData(name);
+    }
+}
+</code></pre>
+<p>在实际开发中可以自定义响应状态码的枚举类和自定义异常以满足需求。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/6wK8TcXuW/">
+              <span class="post-title">
+                 SpringBoot实现多文件上传&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

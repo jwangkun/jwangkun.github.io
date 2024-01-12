@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>MySQL  集群环境搭建 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="MySQL  集群环境搭建 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="MySQL  集群环境搭建"/>
+    <meta property="og:url" content="https://jwangkun.github.io/aXLFZey34/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/_JVrn2ZGG/" class="tag">MySQL</a>
+            
+        </span>
+            <h1>MySQL  集群环境搭建</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-11，4 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="mysql主从复制配置">MySQL主从复制配置</h2>
+<p>主节点服务器 地址 192.168.0.105</p>
+<p>从节点服务器 地址 192.168.0.107</p>
+<p>主节点服务器安装好之后，直接clone 一个即可，不需要重复安装2次。</p>
+<h3 id="主节点服务器配置">主节点服务器配置</h3>
+<h4 id="1进入配置页面命令">1.进入配置页面命令</h4>
+<pre><code>  vi /etc/my.cnf 
+</code></pre>
+<h4 id="2配置服务器id-server_id">2.配置服务器id server_id</h4>
+<p>这里的server_id 尽量配置为服务器地址的后3位 以用来区分</p>
+<pre><code> server_id=105
+</code></pre>
+<h4 id="3开启日志文件binlog">3.开启日志文件(binLog)</h4>
+<pre><code> log-bin=mysql-bin 
+</code></pre>
+<p>配置文件的地址应该在 ： # Recommended in standard MySQL setup，否则配置不起作用</p>
+<h4 id="4重启mysql服务">4.重启mysql服务</h4>
+<pre><code>service mysqld restart
+</code></pre>
+<p>验证是否已经配置成功</p>
+<pre><code>show variables like '%server_id%';
+</code></pre>
+<p>能够查询对应配置文件中的server_id 说明已经配置成功，如下图，则表示配置成功。server_id=105</p>
+<pre><code>show master status;
+</code></pre>
+<p>能够看到同步的文件，和行数说明已经配置成功。</p>
+<h2 id="从服务器节点">从服务器节点</h2>
+<h4 id="1进入配置页面命令-2">1.进入配置页面命令</h4>
+<pre><code>  vi /etc/my.cnf 
+</code></pre>
+<h4 id="2配置服务器id-server_id-2">2.配置服务器id server_id</h4>
+<p>这里的server_id 尽量配置为服务器地址的后3位 以用来区分</p>
+<pre><code> server_id=105
+</code></pre>
+<h4 id="3开启日志文件binlog-2">3.开启日志文件(binLog)</h4>
+<pre><code> log-bin=mysql-bin 
+</code></pre>
+<h4 id="4添加需用同步的数据库">4.添加需用同步的数据库</h4>
+<pre><code>binlog_do_db=test  
+</code></pre>
+<h4 id="5重启mysql服务">5.重启mysql服务</h4>
+<pre><code>service mysqld restart
+</code></pre>
+<p>验证是否已经配置成功</p>
+<pre><code>show variables like '%server_id%';
+</code></pre>
+<p>能够查询对应配置文件中的server_id 说明已经配置成功</p>
+<h4 id="7从服务器同步主服务器配置">7.从服务器同步主服务器配置</h4>
+<p>master_host 主服务器地址</p>
+<p>master_user 主服务器用户名</p>
+<p>master_password 主服务器密码</p>
+<p>master_log_file 主服务器配置文件</p>
+<p>master_log_pos 主服务器读取配置文件的开始位置，也就是从第多少行开始读取。</p>
+<pre><code>change master to master_host='192.168.0.105',master_user='root',master_password='root',master_log_file='mysql-bin.000001',master_log_pos=120;
+</code></pre>
+<h4 id="8开始同步"><strong>8.开始同步</strong></h4>
+<pre><code>start slave
+</code></pre>
+<h4 id="9检查从服务器复制功能状态">9.检查从服务器复制功能状态</h4>
+<pre><code>SHOW SLAVE STATUS
+</code></pre>
+<p>**如果二个从服务器是克隆主服务器的，**这时候就会出现如下图的情况，二个服务器的server-uuid 是相同的，因为是克隆过来的。这时候运行 SHOW SLAVE STATUS 就会出现 Slave_IO_Running 为 No，而Slave_SQL_Running为Yes。说明IO同步出错，在Last_IO_Error 字段可以看到错误信息，如下。错误信息的意思就是server-uuid 重复了。也就是下图展示的效果。</p>
+<p>Fatal error: The slave I/O thread stops because master and slave have equal MySQL server UUIDs; these UUIDs must be different for replication to work。</p>
+<p>如果出现这种情况，需要将 <strong>/var/lib/mysql</strong> 文件下的生成uuid 的文件删除，然后再重新启动 mysql 服务，就会重新在生成一个 server-uuid，在下图2中 也 显示了这个重新生成的server-uuid。</p>
+<p><strong>如果你的从服务器不是克隆主服务器而是重新安装的</strong>，那么就不会出现这种情况。直接运行 SHOW SLAVE STATUS 命令，如下图。则表示同步成功</p>
+<p>存放server-uuid的 地址，可以在 /etc/my.cnf 文件中查看，如下图。</p>
+<p>如果同步执行出错，作如下修改。</p>
+<pre><code>show variables like '%server_id%';
+show master status;
+STOP SLAVE;
+set GLOBAL sql_slave_skip_counter=1;
+start slave;
+SHOW SLAVE STATUS;
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/O2hEa3Tlz/">
+              <span class="post-title">
+                Centos7.4 安装MySQL 教程&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

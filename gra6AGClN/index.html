@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> SpringBoot 整合 Rabbitmq | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" SpringBoot 整合 Rabbitmq | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" SpringBoot 整合 Rabbitmq"/>
+    <meta property="og:url" content="https://jwangkun.github.io/gra6AGClN/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/U--UdMU4B/" class="tag">RabbitMQ</a>
+            
+        </span>
+            <h1> SpringBoot 整合 Rabbitmq</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，12 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="一-消息中间件的应用场景">一、消息中间件的应用场景</h2>
+<h3 id="异步处理">异步处理</h3>
+<p>场景：用户注册，信息写入数据库后，需要给用户发送注册成功的邮件，再发送注册成功的邮件。</p>
+<p>1.同步调用：注册成功后，顺序执行发送邮件方法，发送短信方法，最后响应用户 <img src="http://image.itwolfed.com/springboot-8/1-1.png" alt="img" loading="lazy"></p>
+<p>2.并行调用：注册成功后，用多线程的方式并发执行发邮件和发短信方法，最后响应用户 <img src="http://image.itwolfed.com/springboot-8/2-2.png" alt="img" loading="lazy"></p>
+<p>3.消息队列：注册成功后，将要发送的消息用很短的时间写入消息队列中，之后响应用户；发送邮件的服务和发送短息的服务就可以从消息队列中异步读去，然后发送任务。 <img src="http://image.itwolfed.com/springboot-8/3-3.png" alt="img" loading="lazy"></p>
+<h3 id="应用解耦">应用解耦</h3>
+<p>场景：购物下单后，调用库存系统，更新库存。</p>
+<p>1.耦合的方式：订单系统，写调用库存系统的逻辑。 <img src="http://image.itwolfed.com/springboot-8/4-4.png" alt="img" loading="lazy"></p>
+<p>2.解耦的方式：订单系统，将下达的消息写入消息队列，库存系统从消息队列中读取消息，更新库存。 <img src="http://image.itwolfed.com/springboot-8/5-5.png" alt="img" loading="lazy"></p>
+<h3 id="流量削峰">流量削峰</h3>
+<p>秒杀场景中，我们可以设置一个定长的消息队列，秒杀开始，谁快谁先进入队列，然后快速返回用户是否秒到 ，之后在平稳的处理秒杀后的业务。 <img src="http://image.itwolfed.com/springboot-8/6-6.png" alt="img" loading="lazy"></p>
+<h1 id="二-消息服务中间件概述">二、消息服务中间件概述</h1>
+<ul>
+<li>
+<ol>
+<li>大多应用中，可通过消息服务中间件来提升系统异步通信、扩展解耦能力</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>消息服务中两个重要概念: 消息代理(message broker)和目的地(destination) 当消息发送者发送消息以后，将由消息代理接管，消息代理保证消息传递到指定目 的地。</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>消息队列主要有两种形式的目的地</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>队列(queue):点对点消息通信(point-to-point)</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>主题(topic):发布(publish)/订阅(subscribe)消息通信</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>点对点式:</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>消息发送者发送消息，消息代理将其放入一个队列中，消息接收者从队列中获取消息内容， 消息读取后被移出队列</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>消息只有唯一的发送者和接受者，但并不是说只能有一个接收者</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>发布订阅式:</li>
+</ol>
+</li>
+<li>发送者(发布者)发送消息到主题，多个接收者(订阅者)监听(订阅)这个主题，那么 就会在消息到达时同时收到消息</li>
+<li>
+<ol>
+<li>JMS(Java Message Service)JAVA消息服务:</li>
+</ol>
+</li>
+<li>基于JVM消息代理的规范。ActiveMQ、HornetMQ是JMS实现</li>
+<li>
+<ol>
+<li>AMQP(Advanced Message Queuing Protocol)</li>
+</ol>
+</li>
+<li>高级消息队列协议，也是一个消息代理的规范，兼容JMS</li>
+<li>RabbitMQ是AMQP的实现</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-8/7.png" alt="img" loading="lazy"></figure>
+<ul>
+<li>
+<ol>
+<li>Spring支持</li>
+</ol>
+</li>
+<li>spring-jms提供了对JMS的支持</li>
+<li>spring-rabbit提供了对AMQP的支持</li>
+<li>需要ConnectionFactory的实现来连接消息代理</li>
+<li>提供JmsTemplate、RabbitTemplate来发送消息</li>
+<li>@JmsListener(JMS)、@RabbitListener(AMQP)注解在方法上监听消息代理发 布的消息</li>
+<li>@EnableJms、@EnableRabbit开启支持</li>
+<li>
+<ol>
+<li>Spring Boot自动配置</li>
+</ol>
+</li>
+<li>JmsAutoConfiguration</li>
+<li>RabbitAutoConfiguration</li>
+</ul>
+<h2 id="三-rabbitmq简介">三、RabbitMQ简介</h2>
+<p>RabbitMQ是一个由erlang开发的AMQP(Advanved Message Queue Protocol)的开源实现。</p>
+<h3 id="1-核心概念">1. 核心概念</h3>
+<ul>
+<li><strong>Message</strong> ：消息，消息是不具名的，它由消息头和消息体组成。消息体是不透明的，而消息头则由一系列的可选属性组 成，这些属性包括routing-key(路由键)、priority(相对于其他消息的优先权)、delivery-mode(指出 该消息可能需要持久性存储)等。</li>
+<li><strong>Publisher</strong> ：消息的生产者，也是一个向交换器发布消息的客户端应用程序。</li>
+<li><strong>Exchange</strong> ：交换器，用来接收生产者发送的消息并将这些消息路由给服务器中的队列。Exchange有4种类型:direct(默认)，fanout, topic, 和headers，不同类型的Exchange转发消息的策略有所区别</li>
+<li><strong>Queue</strong> ：消息队列，用来保存消息直到发送给消费者。它是消息的容器，也是消息的终点。一个消息可投入一个或多个队列。消息一直在队列里面，等待消费者连接到这个队列将其取走。</li>
+<li><strong>Binding</strong> ：绑定，用于消息队列和交换器之间的关联。一个绑定就是基于路由键将交换器和消息队列连接起来的路由规则，所以可以将交换器理解成一个由绑定构成的路由表。Exchange 和Queue的绑定可以是多对多的关系。</li>
+<li><strong>Connection</strong> ：网络连接，比如一个TCP连接。</li>
+<li><strong>Channel</strong> ：信道，多路复用连接中的一条独立的双向数据流通道。信道是建立在真实的TCP连接内的虚 拟连接，AMQP 命令都是通过信道发出去的，不管是发布消息、订阅队列还是接收消息，这 些动作都是通过信道完成。因为对于操作系统来说建立和销毁 TCP 都是非常昂贵的开销，所 以引入了信道的概念，以复用一条 TCP 连接。</li>
+<li><strong>Consumer</strong> ：消息的消费者，表示一个从消息队列中取得消息的客户端应用程序。</li>
+<li><strong>Virtual Host</strong> ：虚拟主机，表示一批交换器、消息队列和相关对象。虚拟主机是共享相同的身份认证和加 密环境的独立服务器域。每个 vhost 本质上就是一个 mini 版的 RabbitMQ 服务器，拥有 自己的队列、交换器、绑定和权限机制。vhost 是 AMQP 概念的基础，必须在连接时指定， RabbitMQ 默认的 vhost 是 / 。</li>
+<li><strong>Broker</strong> ：表示消息队列服务器实体。 <img src="http://image.itwolfed.com/springboot-8/8.png" alt="img" loading="lazy"></li>
+</ul>
+<h2 id="四-rabbitmq运行机制">四、RabbitMQ运行机制</h2>
+<h3 id="amqp-中的消息路由">AMQP 中的消息路由</h3>
+<p>AMQP 中消息的路由过程和 Java 开发者熟悉的 JMS 存在一些差别，AMQP 中增加了 Exchange 和 Binding 的角色。生产者把消息发布到 Exchange 上，消息最终到达队列并被 消费者接收，而 Binding 决定交换器的消息应该发送到那个队列。 <img src="http://image.itwolfed.com/springboot-8/9.png" alt="img" loading="lazy"></p>
+<h3 id="exchange-类型">Exchange 类型</h3>
+<p>Exchange分发消息时根据类型的不同分发策略有区别，目前共四种类型：direct、fanout、topic、headers 。headers 匹配 AMQP 消息的 header 而不是路由键， headers 交换器和 direct 交换器完全一致，但性能差很多，目前几乎用不到了，所以直接看另外三种类型： <img src="http://image.itwolfed.com/springboot-8/10.png" alt="img" loading="lazy"> <img src="http://image.itwolfed.com/springboot-8/11.png" alt="img" loading="lazy"> <img src="http://image.itwolfed.com/springboot-8/12.png" alt="img" loading="lazy"></p>
+<h2 id="五-rabbitmq安装">五、RabbitMQ安装</h2>
+<p>我们使用 docker 来安装 RabbitMQ。<br>
+我们在 docker hub上选择官方的带management管理界面的最新版本。 <img src="http://image.itwolfed.com/springboot-8/13.png" alt="img" loading="lazy"></p>
+<pre><code>#获取rabbitmq镜像
+docker pull rabbitmq:3-management
+#启动 rabbitmq镜像，5672是mq通信端口，15672是mq的web管理界面端口
+run -d -p 5672:5672 -p 15672:15672 --name myrabbitmq 镜像ID
+</code></pre>
+<p>访问127.0.0.1:15672 ，用账号：guest 密码：guest 登录，界面如下：</p>
+<figure data-type="image" tabindex="2"><img src="http://image.itwolfed.com/springboot-8/14.png" alt="img" loading="lazy"></figure>
+<p>对rabbitmq的详细使用在这里，就不讲解了，我们这节的重点是整合rabbitmq。</p>
+<h2 id="六-整合rabbitmq">六、整合RabbitMQ</h2>
+<p>创建项目引入rabbitmq依赖。</p>
+<h3 id="1-pomxml">1. pom.xml</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+	&lt;groupId&gt;com.gf&lt;/groupId&gt;
+	&lt;artifactId&gt;springboot-rabbitmq&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
+
+	&lt;name&gt;springboot-rabbitmq&lt;/name&gt;
+	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+	&lt;parent&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+		&lt;version&gt;2.0.5.RELEASE&lt;/version&gt;
+		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+	&lt;/parent&gt;
+
+	&lt;properties&gt;
+		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+		&lt;java.version&gt;1.8&lt;/java.version&gt;
+	&lt;/properties&gt;
+
+	&lt;dependencies&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+			&lt;scope&gt;test&lt;/scope&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+
+	&lt;build&gt;
+		&lt;plugins&gt;
+			&lt;plugin&gt;
+				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+			&lt;/plugin&gt;
+		&lt;/plugins&gt;
+	&lt;/build&gt;
+
+&lt;/project&gt;
+</code></pre>
+<h3 id="2-myamqpconfig">2. MyAMQPConfig</h3>
+<pre><code class="language-java">package com.gf.config;
+
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.support.converter.MessageConverter;
+
+/**
+ * 自定义消息转换器，默认是jdk的序列化转换器，我们自定义为json的
+ */
+@Configuration
+public class MyAMQPConfig {
+
+    @Bean
+    public MessageConverter messageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+
+}
+</code></pre>
+<h3 id="3-springboot-测试类">3. springboot 测试类</h3>
+<p>我们测试创建管理配置、发送消息、接收消息</p>
+<pre><code class="language-java">package com.gf;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.amqp.core.AmqpAdmin;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.FanoutExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringbootRabbitmqApplicationTests {
+
+	@Autowired
+	RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	AmqpAdmin amqpAdmin;
+
+	@Test
+	public void contextLoads() {
+	}
+
+	@Test
+	public void create(){
+		//创建Exchange
+		amqpAdmin.declareExchange( new DirectExchange( &quot;exchange.direct&quot;) );
+		amqpAdmin.declareExchange( new FanoutExchange( &quot;exchange.fanout&quot;) );
+		amqpAdmin.declareExchange( new TopicExchange( &quot;exchange.topic&quot;) );
+
+		//创建Queue
+		amqpAdmin.declareQueue( new Queue( &quot;direct.queue&quot; , true ) );
+		amqpAdmin.declareQueue( new Queue( &quot;fanout.queue&quot; , true ) );
+
+		//绑定Queue
+		amqpAdmin.declareBinding( new Binding( &quot;direct.queue&quot; , Binding.DestinationType.QUEUE , &quot;exchange.direct&quot; , &quot;direct.queue&quot; , null ) );
+		amqpAdmin.declareBinding( new Binding( &quot;fanout.queue&quot; , Binding.DestinationType.QUEUE , &quot;exchange.direct&quot; , &quot;fanout.queue&quot; , null ) );
+		amqpAdmin.declareBinding( new Binding( &quot;direct.queue&quot; , Binding.DestinationType.QUEUE , &quot;exchange.fanout&quot; , &quot;&quot; , null ) );
+		amqpAdmin.declareBinding( new Binding( &quot;fanout.queue&quot; , Binding.DestinationType.QUEUE , &quot;exchange.fanout&quot; , &quot;&quot; , null ) );
+		amqpAdmin.declareBinding( new Binding( &quot;direct.queue&quot; , Binding.DestinationType.QUEUE , &quot;exchange.topic&quot; , &quot;direct.#&quot; , null ) );
+		amqpAdmin.declareBinding( new Binding( &quot;fanout.queue&quot; , Binding.DestinationType.QUEUE , &quot;exchange.topic&quot; , &quot;direct.*&quot; , null ) );
+
+
+	}
+
+	@Test
+	public void send2Direct() {
+		Map&lt;String , Object&gt; map = new HashMap&lt;&gt;();
+		map.put( &quot;msg&quot; , &quot;这是一条点对点消息&quot; );
+		map.put( &quot;data&quot; , Arrays.asList(&quot;helloworld&quot; , 123 , true) );
+
+		rabbitTemplate.convertAndSend( &quot;exchange.direct&quot; , &quot;direct.queue&quot; , map );
+
+	}
+
+	@Test
+	public void send2Topic() {
+		Map&lt;String , Object&gt; map = new HashMap&lt;&gt;();
+		map.put( &quot;msg&quot; , &quot;这是一条广播消息&quot; );
+		map.put( &quot;data&quot; , Arrays.asList(&quot;topic消息&quot; , 123 , true) );
+
+		rabbitTemplate.convertAndSend( &quot;exchange.fanout&quot; , &quot;&quot;, map );
+
+	}
+
+	@Test
+	public void receive() {
+		Object o = rabbitTemplate.receiveAndConvert( &quot;direct.queue&quot; );
+		o.getClass();
+		System.out.println(o.getClass());
+		System.out.println(o);
+	}
+
+}
+</code></pre>
+<p>监听消息</p>
+<h3 id="4-启动类">4. 启动类</h3>
+<pre><code class="language-java">package com.gf;
+
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ * 自动配置
+ * 1. RabbitAutoConfiguration
+ * 2. 自动配置了连接工厂ConnectionFactory
+ * 3. RabbitProperties 封装了RabbitMQ的配置
+ * 4. RabbitTemplate : 给RabbitMQ发送和接受消息
+ * 5. AmqpAdmin : RabbitMQ系统管理功能组件
+ * 6. @EnableRabbit + @RabbitListener
+ */
+@EnableRabbit
+@SpringBootApplication
+public class SpringbootRabbitmqApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SpringbootRabbitmqApplication.class, args);
+	}
+}
+</code></pre>
+<h3 id="5-mqservice">5. MQService</h3>
+<pre><code class="language-java">package com.gf.service;
+
+
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Service;
+
+@Service
+public class MQService {
+
+    @RabbitListener(queues = &quot;fanout.queue&quot;)
+    public void receive(Message message) {
+        System.out.println(&quot;收到消息 : &quot; + new String(message.getBody()));
+
+    }
+
+}
+</code></pre>
+<p>源码下载：https://github.com/gf-huanchupk/SpringBootLearning</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/68vxPD-UY/">
+              <span class="post-title">
+                SpringBoot 整合 spring cache&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

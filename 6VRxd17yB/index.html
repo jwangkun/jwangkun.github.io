@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Spring Boot Security OAuth2 实现支持JWT令牌的授权服务器 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Spring Boot Security OAuth2 实现支持JWT令牌的授权服务器 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Spring Boot Security OAuth2 实现支持JWT令牌的授权服务器"/>
+    <meta property="og:url" content="https://jwangkun.github.io/6VRxd17yB/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/tdBXFmuve/" class="tag">JWT</a>
+            
+            <a href="https://jwangkun.github.io/PqVGdLz9h/" class="tag">OAuth2</a>
+            
+            <a href="https://jwangkun.github.io/IfTf9fmmN/" class="tag">Spring Boot Security</a>
+            
+        </span>
+            <h1>Spring Boot Security OAuth2 实现支持JWT令牌的授权服务器</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="概要">概要</h2>
+<p>之前的两篇文章，讲述了Spring Security 结合 OAuth2 、JWT 的使用，这一节要求对 OAuth2、JWT 有了解，若不清楚，先移步到下面两篇提前了解下。</p>
+<p><a href="https://mp.weixin.qq.com/s/0PAUErDh0qmcR4SUsTn15Q">Spring Boot Security 整合 OAuth2 设计安全API接口服务</a></p>
+<p><a href="https://mp.weixin.qq.com/s/QO5L1-RCR-jmIuHlZIfkqQ">Spring Boot Security 整合 JWT 实现 无状态的分布式API接口</a></p>
+<p>这一篇我们来实现 支持 JWT令牌 的授权服务器。</p>
+<h2 id="优点">优点</h2>
+<p>使用 OAuth2 是向认证服务器申请令牌，客户端拿这令牌访问资源服务服务器，资源服务器校验了令牌无误后，如果资源的访问用到用户的相关信息，那么资源服务器还需要根据令牌关联查询用户的信息。</p>
+<p>使用 JWT 是客户端通过用户名、密码 请求服务器获取 JWT，服务器判断用户名和密码无误之后，可以将用户信息和权限信息经过加密成 JWT 的形式返回给客户端。在之后的请求中，客户端携带 JWT 请求需要访问的资源，如果资源的访问用到用户的相关信息，那么就直接从JWT中获取到。</p>
+<p>所以，如果我们在使用 OAuth2 时结合JWT ，就能节省集中式令牌校验开销，实现无状态授权认证。</p>
+<h2 id="快速上手">快速上手</h2>
+<h3 id="项目说明">项目说明</h3>
+<table>
+<thead>
+<tr>
+<th>工程名</th>
+<th>端口</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jwt-authserver</td>
+<td>8080</td>
+<td>授权服务器</td>
+</tr>
+<tr>
+<td>jwt-resourceserver</td>
+<td>8081</td>
+<td>资源服务器</td>
+</tr>
+</tbody>
+</table>
+<h3 id="授权服务器">授权服务器</h3>
+<h4 id="pomxml">pom.xml</h4>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-oauth2-resource-server&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-oauth2-client&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.security.oauth.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-security-oauth2-autoconfigure&lt;/artifactId&gt;
+    &lt;version&gt;2.1.3.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.security&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-security-jwt&lt;/artifactId&gt;
+    &lt;version&gt;1.0.10.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h4 id="websecurityconfig">WebSecurityConfig</h4>
+<pre><code class="language-java">@Configuration
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.
+             authorizeRequests().antMatchers(&quot;/**&quot;).permitAll();
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+            .inMemoryAuthentication()
+            .withUser(&quot;user&quot;).password(&quot;123456&quot;).roles(&quot;USER&quot;);
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence charSequence) {
+                return charSequence.toString();
+            }
+
+            @Override
+            public boolean matches(CharSequence charSequence, String s) {
+                return Objects.equals(charSequence.toString(),s);
+            }
+        };
+    }
+
+}
+</code></pre>
+<p>为了方便，使用内存模式，在内存中创建一个用户 user 密码 123456。</p>
+<h4 id="oauth2authorizationserver">OAuth2AuthorizationServer</h4>
+<pre><code class="language-java">/**
+ * 授权服务器
+ */
+@Configuration
+@EnableAuthorizationServer
+public class OAuth2AuthorizationServer extends AuthorizationServerConfigurerAdapter {
+
+    /**
+     * 注入AuthenticationManager ，密码模式用到
+     */
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    /**
+     * 对Jwt签名时，增加一个密钥
+     * JwtAccessTokenConverter：对Jwt来进行编码以及解码的类
+     */
+    @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
+        converter.setSigningKey(&quot;test-secret&quot;);
+        return converter;
+    }
+
+    /**
+     * 设置token 由Jwt产生，不使用默认的透明令牌
+     */
+    @Bean
+    public JwtTokenStore jwtTokenStore() {
+        return new JwtTokenStore(accessTokenConverter());
+    }
+
+    @Override
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+        endpoints
+                .authenticationManager(authenticationManager)
+                .tokenStore(jwtTokenStore())
+                .accessTokenConverter(accessTokenConverter());
+    }
+
+    @Override
+    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+        clients.inMemory()
+                .withClient(&quot;clientapp&quot;)
+                .secret(&quot;123&quot;)
+                .scopes(&quot;read&quot;)
+                //设置支持[密码模式、授权码模式、token刷新]
+                .authorizedGrantTypes(
+                        &quot;password&quot;,
+                        &quot;authorization_code&quot;,
+                        &quot;refresh_token&quot;);
+    }
+
+
+}
+</code></pre>
+<h3 id="资源服务器">资源服务器</h3>
+<h4 id="pomxml-2">pom.xml</h4>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-oauth2-resource-server&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-oauth2-client&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.security.oauth.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-security-oauth2-autoconfigure&lt;/artifactId&gt;
+    &lt;version&gt;2.1.3.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.security&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-security-jwt&lt;/artifactId&gt;
+    &lt;version&gt;1.0.10.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h4 id="hellocontroller">HelloController</h4>
+<pre><code class="language-java">@RestController(&quot;/api&quot;)
+public class HelloController {
+
+    @PostMapping(&quot;/api/hi&quot;)
+    public String say(String name) {
+        return &quot;hi , &quot; + name;
+    }
+
+}
+</code></pre>
+<h4 id="oauth2resourceserver">OAuth2ResourceServer</h4>
+<pre><code class="language-java">/**
+ * 资源服务器
+ */
+@Configuration
+@EnableResourceServer
+public class OAuth2ResourceServer extends ResourceServerConfigurerAdapter {
+
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests()
+            .anyRequest().authenticated().and()
+            .requestMatchers().antMatchers(&quot;/api/**&quot;);
+    }
+}
+</code></pre>
+<h4 id="applicationyml">application.yml</h4>
+<pre><code>server:
+  port: 8081
+
+security:
+  oauth2:
+    resource:
+      jwt:
+        key-value: test-secret
+</code></pre>
+<p>参数说明：</p>
+<ul>
+<li>security.oauth2.resource.jwt.key-value：设置签名key 保持和授权服务器一致。</li>
+<li>security.oauth2.resource.jwt：项目启动过程中，检查到配置文件中有 security.oauth2.resource.jwt 的配置，就会生成 jwtTokenStore 的 bean，对令牌的校验就会使用 jwtTokenStore 。</li>
+</ul>
+<h3 id="验证">验证</h3>
+<p>请求令牌</p>
+<pre><code class="language-shell">curl -X POST --user 'clientapp:123' -d 'grant_type=password&amp;username=user&amp;password=123456' http://localhost:8080/oauth/token
+</code></pre>
+<p>返回JWT令牌</p>
+<pre><code class="language-json">{
+	&quot;access_token&quot;: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NTQ0MzExMDgsInVzZXJfbmFtZSI6InVzZXIiLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiOGM0YWMyOTYtMDQwYS00Y2UzLTg5MTAtMWJmNjZkYTQwOTk3IiwiY2xpZW50X2lkIjoiY2xpZW50YXBwIiwic2NvcGUiOlsicmVhZCJdfQ.YAaSRN0iftmlR6Khz9UxNNEpHHn8zhZwlQrCUCPUmsU&quot;,
+	&quot;token_type&quot;: &quot;bearer&quot;,
+	&quot;refresh_token&quot;: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJ1c2VyIiwic2NvcGUiOlsicmVhZCJdLCJhdGkiOiI4YzRhYzI5Ni0wNDBhLTRjZTMtODkxMC0xYmY2NmRhNDA5OTciLCJleHAiOjE1NTY5Nzk5MDgsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJqdGkiOiI0ZjA5M2ZjYS04NmM0LTQxZWUtODcxZS1kZTY2ZjFhOTI0NTAiLCJjbGllbnRfaWQiOiJjbGllbnRhcHAifQ.vvAE2LcqggBv8pxuqU6RKPX65bl7Zl9dfcoIbIQBLf4&quot;,
+	&quot;expires_in&quot;: 43199,
+	&quot;scope&quot;: &quot;read&quot;,
+	&quot;jti&quot;: &quot;8c4ac296-040a-4ce3-8910-1bf66da40997&quot;
+}
+</code></pre>
+<p>携带JWT令牌请求资源</p>
+<pre><code class="language-shell">curl -X POST -H &quot;authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NTQ0MzExMDgsInVzZXJfbmFtZSI6InVzZXIiLCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiOGM0YWMyOTYtMDQwYS00Y2UzLTg5MTAtMWJmNjZkYTQwOTk3IiwiY2xpZW50X2lkIjoiY2xpZW50YXBwIiwic2NvcGUiOlsicmVhZCJdfQ.YAaSRN0iftmlR6Khz9UxNNEpHHn8zhZwlQrCUCPUmsU&quot; -d 'name=zhangsan' http://localhost:8081/api/hi
+</code></pre>
+<p>返回</p>
+<pre><code>hi , zhangsan
+</code></pre>
+<h3 id="源码">源码</h3>
+<p>https://github.com/gf-huanchupk/SpringBootLearning/tree/master/springboot-security-oauth2-jwt</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/ve15MnaEq/">
+              <span class="post-title">
+                Spring Boot Security 整合 JWT 实现 无状态的分布式API接口&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

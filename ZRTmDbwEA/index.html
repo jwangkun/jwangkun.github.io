@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Minikube - Kubernetes本地实验环境 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Minikube - Kubernetes本地实验环境 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Minikube - Kubernetes本地实验环境"/>
+    <meta property="og:url" content="https://jwangkun.github.io/ZRTmDbwEA/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/_bZOPAB1c/" class="tag">Minikube</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>Minikube - Kubernetes本地实验环境</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-19，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p><strong>简介：</strong> 为了方便大家本地开发和体验Kubernetes，社区提供了可以在本机部署的Minikube。本文介绍利用阿里云的镜像地址在Windows/Mac/Linux上来部署和配置Minikube</p>
+<figure data-type="image" tabindex="1"><img src="https://ucc.alicdn.com/pic/developer-ecology/3923c02976574632b9293a7df64ae055.jpg" alt="minikube.jpg" loading="lazy"></figure>
+<p>为了方便大家开发和体验Kubernetes，社区提供了可以在本地部署的<a href="https://github.com/kubernetes/minikube">Minikube</a>。由于网络访问原因，很多朋友无法直接使用minikube进行实验。在最新的Minikube中，已经提供了配置化的方式，可以帮助大家利用阿里云的镜像地址来获取所需Docker镜像和配置。</p>
+<p>注：</p>
+<ul>
+<li>本文已更新到 Minikube v1.13.0/Kubernetes v1.19+</li>
+<li>如需更新minikube，需要更新 minikube 安装包
+<ul>
+<li><code>minikube delete</code> 删除现有虚机，删除 <code>~/.minikube</code> 目录缓存的文件</li>
+<li>重新创建 minikube 环境</li>
+</ul>
+</li>
+</ul>
+<h3 id="配置">配置</h3>
+<h4 id="先决条件">先决条件</h4>
+<ul>
+<li>安装 <a href="https://kubernetes.io/docs/tasks/kubectl/install/">kubectl</a></li>
+</ul>
+<p>Minikube在不同操作系统上支持不同的驱动</p>
+<ul>
+<li>macOS
+<ul>
+<li><a href="https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#xhyve-driver">xhyve driver</a> 缺省驱动, <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> 或 <a href="https://www.vmware.com/products/fusion">VMware Fusion</a></li>
+</ul>
+</li>
+<li>Linux
+<ul>
+<li><a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> 或 <a href="https://minikube.sigs.k8s.io/docs/drivers/kvm2/">KVM2</a></li>
+<li><a href="https://minikube.sigs.k8s.io/docs/drivers/docker/">Docker</a></li>
+</ul>
+</li>
+<li>Windows
+<ul>
+<li><a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> 或 <a href="https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperV-driver">Hyper-V</a> - 请参考下文</li>
+</ul>
+</li>
+</ul>
+<p>注：</p>
+<ul>
+<li>由于minikube复用了docker-machine，在其软件包中已经支持了相应的VirtualBox, VMware Fusion驱动</li>
+<li>VT-x/AMD-v 虚拟化必须在 BIOS 中开启</li>
+<li>在Windows环境下，如果开启了Hyper-V，不支持VirtualBox方式</li>
+</ul>
+<h4 id="安装minikube">安装Minikube</h4>
+<p>您可以参考 https://minikube.sigs.k8s.io/docs/start/ 安装配置，下面提供了阿里云团队构建的版本</p>
+<p>注：有问题和需求请到 Github 提 issue，https://github.com/AliyunContainerService/minikube/issues<br>
+<strong>Mac OSX</strong></p>
+<pre><code>curl -Lo minikube https://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/releases/v1.13.0/minikube-darwin-amd64 &amp;&amp; chmod +x minikube &amp;&amp; sudo mv minikube /usr/local/bin/
+</code></pre>
+<p><strong>Linux</strong></p>
+<pre><code>curl -Lo minikube https://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/releases/v1.13.0/minikube-linux-amd64 &amp;&amp; chmod +x minikube &amp;&amp; sudo mv minikube /usr/local/bin/
+</code></pre>
+<p><strong>Windows</strong></p>
+<p>下载 <a href="https://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/releases/v1.13.0/minikube-windows-amd64.exe">minikube-windows-amd64.exe</a> 文件，并重命名为 <code>minikube.exe</code></p>
+<h3 id="启动">启动</h3>
+<pre><code>minikube start
+</code></pre>
+<p>为了访问海外的资源，阿里云提供了一系列基础设施，请按照如下参数进行配置。其中常见参数</p>
+<ul>
+<li><code>--driver=***</code> 从1.5.0版本开始，Minikube缺省使用本地最好的驱动来创建Kubernetes本地环境，测试过的版本 <code>docker</code>, <code>kvm</code></li>
+<li><code>--image-mirror-country cn</code> 将缺省利用 registry.cn-hangzhou.aliyuncs.com/google_containers 作为安装Kubernetes的容器镜像仓库 （阿里云版本可选）</li>
+<li><code>--iso-url=***</code> 利用阿里云的镜像地址下载相应的 .iso 文件 （阿里云版本可选）</li>
+<li><code>--registry-mirror=***</code>为了拉取Docker Hub镜像，需要为 Docker daemon 配置镜像加速，参考<a href="https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors">阿里云镜像服务</a></li>
+<li><code>--cpus=2</code>: 为minikube虚拟机分配CPU核数</li>
+<li><code>--memory=2048mb</code>: 为minikube虚拟机分配内存数</li>
+<li><code>--kubernetes-version=***</code>: minikube 虚拟机将使用的 kubernetes 版本</li>
+</ul>
+<p>安装minikube，缺省驱动</p>
+<pre><code>minikube start --cpus=4 --memory=4096mb
+</code></pre>
+<p>安装minikube，Docker驱动</p>
+<pre><code>minikube start --driver=docker
+</code></pre>
+<p>安装minikube，KVM2驱动</p>
+<pre><code>minikube start --driver=kvm2
+</code></pre>
+<p>打开Kubernetes控制台</p>
+<pre><code>.\minikube.exe dashboard --url=true
+http://192.168.99.100:30000
+</code></pre>
+<p><img src="https://yqfile.alicdn.com/45690620c348d7be4a804880e3b7046f19e74c29.png" alt="image" loading="lazy">)</p>
+<p>对于使用Hyper-V环境的用户，首先应该打开Hyper-V管理器创建一个外部虚拟交换机，</p>
+<figure data-type="image" tabindex="2"><img src="https://yqfile.alicdn.com/d165308ee88baf4adbe46c09b6d2596dea7bdfef.png" alt="create" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://yqfile.alicdn.com/208a65dae18028cab8e9782803c7784ad110e0a6.png" alt="hyper_v" loading="lazy"></figure>
+<p>之后，我们可以用如下命令来创建基于Hyper-V的Kubernetes测试环境</p>
+<pre><code>.\minikube.exe start --image-mirror-country cn \
+    --iso-url=https://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/iso/minikube-v1.5.0.iso \
+    --registry-mirror=https://xxxxxx.mirror.aliyuncs.com \
+    --vm-driver=&quot;hyperv&quot; \
+    --hyperv-virtual-switch=&quot;MinikubeSwitch&quot; \
+    --memory=4096 
+</code></pre>
+<p>注：需要管理员权限来创建Hyper-V虚拟机</p>
+<h2 id="使用virtualbox来安装minikube">使用virtualbox来安装Minikube</h2>
+<p>下载virtualbox](https://www.virtualbox.org/wiki/Downloads)，自行安装</p>
+<p>安装完成后下载 <a href="https://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/releases/v1.13.0/minikube-windows-amd64.exe">minikube-windows-amd64.exe</a> 文件，并重命名为 <code>minikube.exe</code></p>
+<pre><code>.\minikube.exe start --image-mirror-country cn --iso-url=https://kubernetes.oss-cn-hangzhou.aliyuncs.com/min ikube/iso/minikube-v1.5.0.iso --registry-mirror=https://xxxxxx.mirror.aliyuncs.com --vm-driver=&quot;virtualbox&quot;
+</code></pre>
+<h2 id="使用minikube">使用Minikube</h2>
+<p>Minikube利用本地虚拟机环境部署Kubernetes，其基本架构如下图所示。<br>
+<img src="https://yqfile.alicdn.com/c03a43e0731ca579d1844fb44269fd2fd257bfb3.jpeg" alt="4" loading="lazy"></p>
+<p>用户使用Minikube CLI管理虚拟机上的Kubernetes环境，比如：启动，停止，删除，获取状态等。一旦Minikube虚拟机启动，用户就可以使用熟悉的Kubectl CLI在Kubernetes集群上执行操作。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/UbCNkIkc8/">
+              <span class="post-title">
+                Centos7.4配置nfs网络文件共享&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> 常用的 JVM 性能调优监控工具 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" 常用的 JVM 性能调优监控工具 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" 常用的 JVM 性能调优监控工具"/>
+    <meta property="og:url" content="https://jwangkun.github.io/zCVHQl6PG/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/vFSLNPd29/" class="tag">JVM</a>
+            
+        </span>
+            <h1> 常用的 JVM 性能调优监控工具</h1>
+            <span class="meta">
+            	Posted on
+              2021-01-06，13 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>现实企业级Java开发中，有时候我们会碰到下面这些问题：</p>
+<ul>
+<li>
+<p>OutOfMemoryError，内存不足</p>
+</li>
+<li>
+<p>内存泄露</p>
+</li>
+<li>
+<p>线程死锁</p>
+</li>
+<li>
+<p>锁争用（Lock Contention）</p>
+</li>
+<li>
+<p>Java进程消耗CPU过高</p>
+</li>
+<li>
+<p>......</p>
+<p>这些问题在日常开发中可能被很多人忽视（比如有的人遇到上面的问题只是重启服务器或者调大内存，而不会深究问题根源），但能够理解并解决这些问题是Java程序员进阶的必备要求。本文将对一些常用的JVM性能调优监控工具进行介绍，希望能起抛砖引玉之用。本文参考了网上很多资料，难以一一列举，在此对这些资料的作者表示感谢！关于JVM性能调优相关的资料，请参考文末。</p>
+</li>
+</ul>
+<p><strong>A、</strong> jps(Java Virtual Machine Process Status Tool)</p>
+<p>jps主要用来输出JVM中运行的进程状态信息。语法格式如下：</p>
+<pre><code>jps [options] [hostid]
+</code></pre>
+<p>如果不指定hostid就默认为当前主机或服务器。</p>
+<p>命令行参数选项说明如下：</p>
+<pre><code>-q 不输出类名、Jar名和传入main方法的参数
+-m 输出传入main方法的参数
+-l 输出main类或Jar的全限名
+-v 输出传入JVM的参数
+</code></pre>
+<p>比如下面：</p>
+<pre><code>root@ubuntu:/# jps -m -l
+2458 org.artifactory.standalone.main.Main /usr/local/artifactory-2.2.5/etc/jetty.xml
+29920 com.sun.tools.hat.Main -port 9998 /tmp/dump.dat
+3149 org.apache.catalina.startup.Bootstrap start
+30972 sun.tools.jps.Jps -m -l
+8247 org.apache.catalina.startup.Bootstrap start
+25687 com.sun.tools.hat.Main -port 9999 dump.dat
+21711 mrf-center.jar
+</code></pre>
+<p><strong>B、</strong> jstack</p>
+<p>jstack主要用来查看某个Java进程内的线程堆栈信息。语法格式如下：</p>
+<pre><code>jstack [option] pid
+jstack [option] executable core
+jstack [option] [server-id@]remote-hostname-or-ip
+</code></pre>
+<p>命令行参数选项说明如下：</p>
+<pre><code>-l long listings，会打印出额外的锁信息，在发生死锁时可以用jstack -l pid来观察锁持有情况
+-m mixed mode，不仅会输出Java堆栈信息，还会输出C/C++堆栈信息（比如Native方法）
+</code></pre>
+<p>jstack可以定位到线程堆栈，根据堆栈信息我们可以定位到具体代码，所以它在JVM性能调优中使用得非常多。下面我们来一个实例找出某个Java进程中最耗费CPU的Java线程并定位堆栈信息，用到的命令有ps、top、printf、jstack、grep。</p>
+<p>第一步先找出Java进程ID，我部署在服务器上的Java应用名称为mrf-center：</p>
+<pre><code>root@ubuntu:/# ps -ef | grep mrf-center | grep -v grep
+root     21711     1  1 14:47 pts/3    00:02:10 java -jar mrf-center.jar
+</code></pre>
+<p>得到进程ID为21711，第二步找出该进程内最耗费CPU的线程，可以使用ps -Lfp pid或者ps -mp pid -o THREAD, tid, time或者top -Hp pid，我这里用第三个，输出如下：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/1QxwhpDy7ia1qQOCp3NwqEwN8tONaX7GAHibDNjvIDibJS0g1kMCtarhkibn7KiapuSN1Nu6r4lgcdqhQcLbIypSbww/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy">img</p>
+<p>TIME列就是各个Java线程耗费的CPU时间，CPU时间最长的是线程ID为21742的线程，用</p>
+<pre><code>printf &quot;%x\n&quot; 21742
+</code></pre>
+<p>得到21742的十六进制值为54ee，下面会用到。</p>
+<p>OK，下一步终于轮到jstack上场了，它用来输出进程21711的堆栈信息，然后根据线程ID的十六进制值grep，如下：</p>
+<pre><code>root@ubuntu:/# jstack 21711 | grep 54ee
+&quot;PollIntervalRetrySchedulerThread&quot; prio=10 tid=0x00007f950043e000 nid=0x54ee in Object.wait() [0x00007f94c6eda000]
+</code></pre>
+<p>可以看到CPU消耗在PollIntervalRetrySchedulerThread这个类的Object.wait()，我找了下我的代码，定位到下面的代码：</p>
+<pre><code>// Idle wait
+getLog().info(&quot;Thread [&quot; + getName() + &quot;] is idle waiting...&quot;);
+schedulerThreadState = PollTaskSchedulerThreadState.IdleWaiting;
+long now = System.currentTimeMillis();
+long waitTime = now + getIdleWaitTime();
+long timeUntilContinue = waitTime - now;
+synchronized(sigLock) {
+ try {
+     if(!halted.get()) {
+      sigLock.wait(timeUntilContinue);
+     }
+    } 
+ catch (InterruptedException ignore) {
+    }
+}
+</code></pre>
+<p>它是轮询任务的空闲等待代码，上面的sigLock.wait(timeUntilContinue)就对应了前面的Object.wait()。</p>
+<p><strong>C、</strong> jmap（Memory Map）和jhat（Java Heap Analysis Tool）</p>
+<p>jmap用来查看堆内存使用状况，一般结合jhat使用。</p>
+<p>jmap语法格式如下：</p>
+<pre><code>jmap [option] pid
+jmap [option] executable core
+jmap [option] [server-id@]remote-hostname-or-ip
+</code></pre>
+<p>如果运行在64位JVM上，可能需要指定-J-d64命令选项参数。</p>
+<pre><code>jmap -permstat pid
+</code></pre>
+<p>打印进程的类加载器和类加载器加载的持久代对象信息，输出：类加载器名称、对象是否存活（不可靠）、对象地址、父类加载器、已加载的类大小等信息，如下图：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/1QxwhpDy7ia1qQOCp3NwqEwN8tONaX7GAeiaAo0EY7oE7ltKIYFFozHsbIqbzCjmPUKOX3icpJqAq7BLjjObEvx4Q/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy">img</p>
+<p>使用jmap -heap pid查看进程堆内存使用情况，包括使用的GC算法、堆配置参数和各代中堆内存使用情况。比如下面的例子：</p>
+<pre><code>root@ubuntu:/# jmap -heap 21711
+Attaching to process ID 21711, please wait...
+Debugger attached successfully.
+Server compiler detected.
+JVM version is 20.10-b01
+
+using thread-local object allocation.
+Parallel GC with 4 thread(s)
+
+Heap Configuration:
+   MinHeapFreeRatio = 40
+   MaxHeapFreeRatio = 70
+   MaxHeapSize      = 2067791872 (1972.0MB)
+   NewSize          = 1310720 (1.25MB)
+   MaxNewSize       = 17592186044415 MB
+   OldSize          = 5439488 (5.1875MB)
+   NewRatio         = 2
+   SurvivorRatio    = 8
+   PermSize         = 21757952 (20.75MB)
+   MaxPermSize      = 85983232 (82.0MB)
+
+Heap Usage:
+PS Young Generation
+Eden Space:
+   capacity = 6422528 (6.125MB)
+   used     = 5445552 (5.1932830810546875MB)
+   free     = 976976 (0.9317169189453125MB)
+   84.78829520089286% used
+From Space:
+   capacity = 131072 (0.125MB)
+   used     = 98304 (0.09375MB)
+   free     = 32768 (0.03125MB)
+   75.0% used
+To Space:
+   capacity = 131072 (0.125MB)
+   used     = 0 (0.0MB)
+   free     = 131072 (0.125MB)
+   0.0% used
+PS Old Generation
+   capacity = 35258368 (33.625MB)
+   used     = 4119544 (3.9287033081054688MB)
+   free     = 31138824 (29.69629669189453MB)
+   11.683876009235595% used
+PS Perm Generation
+   capacity = 52428800 (50.0MB)
+   used     = 26075168 (24.867218017578125MB)
+   free     = 26353632 (25.132781982421875MB)
+   49.73443603515625% used
+   ....
+</code></pre>
+<p>使用jmap -histo[:live] pid查看堆内存中的对象数目、大小统计直方图，如果带上live则只统计活对象，如下：</p>
+<pre><code>root@ubuntu:/# jmap -histo:live 21711 | more
+
+ num     #instances         #bytes  class name
+----------------------------------------------
+   1:         38445        5597736  &lt;constMethodKlass&gt;
+   2:         38445        5237288  &lt;methodKlass&gt;
+   3:          3500        3749504  &lt;constantPoolKlass&gt;
+   4:         60858        3242600  &lt;symbolKlass&gt;
+   5:          3500        2715264  &lt;instanceKlassKlass&gt;
+   6:          2796        2131424  &lt;constantPoolCacheKlass&gt;
+   7:          5543        1317400  [I
+   8:         13714        1010768  [C
+   9:          4752        1003344  [B
+  10:          1225         639656  &lt;methodDataKlass&gt;
+  11:         14194         454208  java.lang.String
+  12:          3809         396136  java.lang.Class
+  13:          4979         311952  [S
+  14:          5598         287064  [[I
+  15:          3028         266464  java.lang.reflect.Method
+  16:           280         163520  &lt;objArrayKlassKlass&gt;
+  17:          4355         139360  java.util.HashMap$Entry
+  18:          1869         138568  [Ljava.util.HashMap$Entry;
+  19:          2443          97720  java.util.LinkedHashMap$Entry
+  20:          2072          82880  java.lang.ref.SoftReference
+  21:          1807          71528  [Ljava.lang.Object;
+  22:          2206          70592  java.lang.ref.WeakReference
+  23:           934          52304  java.util.LinkedHashMap
+  24:           871          48776  java.beans.MethodDescriptor
+  25:          1442          46144  java.util.concurrent.ConcurrentHashMap$HashEntry
+  26:           804          38592  java.util.HashMap
+  27:           948          37920  java.util.concurrent.ConcurrentHashMap$Segment
+  28:          1621          35696  [Ljava.lang.Class;
+  29:          1313          34880  [Ljava.lang.String;
+  30:          1396          33504  java.util.LinkedList$Entry
+  31:           462          33264  java.lang.reflect.Field
+  32:          1024          32768  java.util.Hashtable$Entry
+  33:           948          31440  [Ljava.util.concurrent.ConcurrentHashMap$HashEntry;
+</code></pre>
+<p>class name是对象类型，说明如下：</p>
+<pre><code>B  byte
+C  char
+D  double
+F  float
+I  int
+J  long
+Z  boolean
+[  数组，如[I表示int[]
+[L+类名 其他对象
+</code></pre>
+<p>还有一个很常用的情况是：用jmap把进程内存使用情况dump到文件中，再用jhat分析查看。jmap进行dump命令格式如下：</p>
+<pre><code>jmap -dump:format=b,file=dumpFileName pid
+</code></pre>
+<p>我一样地对上面进程ID为21711进行Dump：</p>
+<pre><code>root@ubuntu:/# jmap -dump:format=b,file=/tmp/dump.dat 21711     
+Dumping heap to /tmp/dump.dat ...
+Heap dump file created
+</code></pre>
+<p>dump出来的文件可以用MAT、VisualVM等工具查看，这里用jhat查看：</p>
+<pre><code>root@ubuntu:/# jhat -port 9998 /tmp/dump.dat
+Reading from /tmp/dump.dat...
+Dump file created Tue Jan 28 17:46:14 CST 2014
+Snapshot read, resolving...
+Resolving 132207 objects...
+Chasing references, expect 26 dots..........................
+Eliminating duplicate references..........................
+Snapshot resolved.
+Started HTTP server on port 9998
+Server is ready.
+</code></pre>
+<p>注意如果Dump文件太大，可能需要加上-J-Xmx512m这种参数指定最大堆内存，即jhat -J-Xmx512m -port 9998 /tmp/dump.dat。然后就可以在浏览器中输入主机地址:9998查看了：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/1QxwhpDy7ia1qQOCp3NwqEwN8tONaX7GAojmYzgeWcCVdDfA4nbxZYR5eYC984MMCFqLOAs7DCjhc6WMOwWZNAA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy">img</p>
+<p>上面红线框出来的部分大家可以自己去摸索下，最后一项支持OQL（对象查询语言）。</p>
+<p>**D、**jstat（JVM统计监测工具）</p>
+<p>语法格式如下：</p>
+<pre><code>jstat [ generalOption | outputOptions vmid [interval[s|ms] [count]] ]
+</code></pre>
+<p>vmid是Java虚拟机ID，在Linux/Unix系统上一般就是进程ID。interval是采样时间间隔。count是采样数目。比如下面输出的是GC信息，采样时间间隔为250ms，采样数为4：</p>
+<pre><code>root@ubuntu:/# jstat -gc 21711 250 4
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       PC     PU    YGC     YGCT    FGC    FGCT     GCT   
+192.0  192.0   64.0   0.0    6144.0   1854.9   32000.0     4111.6   55296.0 25472.7    702    0.431   3      0.218    0.649
+192.0  192.0   64.0   0.0    6144.0   1972.2   32000.0     4111.6   55296.0 25472.7    702    0.431   3      0.218    0.649
+192.0  192.0   64.0   0.0    6144.0   1972.2   32000.0     4111.6   55296.0 25472.7    702    0.431   3      0.218    0.649
+192.0  192.0   64.0   0.0    6144.0   2109.7   32000.0     4111.6   55296.0 25472.7    702    0.431   3      0.218    0.649
+</code></pre>
+<p>要明白上面各列的意义，先看JVM堆内存布局：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_jpg/1QxwhpDy7ia1qQOCp3NwqEwN8tONaX7GAepicuGWHRtXTvTQcSib9Sqwq1icEleMINrjL2OaDicsVe2XTWMaOOQlOZg/640?wx_fmt=jpeg&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="图片" loading="lazy">img</p>
+<p>可以看出：</p>
+<pre><code>堆内存 = 年轻代 + 年老代 + 永久代
+年轻代 = Eden区 + 两个Survivor区（From和To）
+</code></pre>
+<p>现在来解释各列含义：</p>
+<pre><code>S0C、S1C、S0U、S1U：Survivor 0/1区容量（Capacity）和使用量（Used）
+EC、EU：Eden区容量和使用量
+OC、OU：年老代容量和使用量
+PC、PU：永久代容量和使用量
+YGC、YGT：年轻代GC次数和GC耗时
+FGC、FGCT：Full GC次数和Full GC耗时
+GCT：GC总耗时
+</code></pre>
+<p>**E、**hprof（Heap/CPU Profiling Tool）</p>
+<p>hprof能够展现CPU使用率，统计堆内存使用情况。</p>
+<p>语法格式如下：</p>
+<pre><code>java -agentlib:hprof[=options] ToBeProfiledClass
+java -Xrunprof[:options] ToBeProfiledClass
+javac -J-agentlib:hprof[=options] ToBeProfiledClass
+</code></pre>
+<p>完整的命令选项如下：</p>
+<pre><code>Option Name and Value  Description                    Default
+---------------------  -----------                    -------
+heap=dump|sites|all    heap profiling                 all
+cpu=samples|times|old  CPU usage                      off
+monitor=y|n            monitor contention             n
+format=a|b             text(txt) or binary output     a
+file=&lt;file&gt;            write data to file             java.hprof[.txt]
+net=&lt;host&gt;:&lt;port&gt;      send data over a socket        off
+depth=&lt;size&gt;           stack trace depth              4
+interval=&lt;ms&gt;          sample interval in ms          10
+cutoff=&lt;value&gt;         output cutoff point            0.0001
+lineno=y|n             line number in traces?         y
+thread=y|n             thread in traces?              n
+doe=y|n                dump on exit?                  y
+msa=y|n                Solaris micro state accounting n
+force=y|n              force output to &lt;file&gt;         y
+verbose=y|n            print messages about dumps     y
+</code></pre>
+<p>来几个官方指南上的实例。</p>
+<p>CPU Usage Sampling Profiling(cpu=samples)的例子：</p>
+<pre><code>java -agentlib:hprof=cpu=samples,interval=20,depth=3 Hello
+</code></pre>
+<p>上面每隔20毫秒采样CPU消耗信息，堆栈深度为3，生成的profile文件名称是java.hprof.txt，在当前目录。</p>
+<p>CPU Usage Times Profiling(cpu=times)的例子，它相对于CPU Usage Sampling Profile能够获得更加细粒度的CPU消耗信息，能够细到每个方法调用的开始和结束，它的实现使用了字节码注入技术（BCI）：</p>
+<pre><code>javac -J-agentlib:hprof=cpu=times Hello.java
+</code></pre>
+<p>Heap Allocation Profiling(heap=sites)的例子：</p>
+<pre><code>javac -J-agentlib:hprof=heap=sites Hello.java
+</code></pre>
+<p>Heap Dump(heap=dump)的例子，它比上面的Heap Allocation Profiling能生成更详细的Heap Dump信息：</p>
+<pre><code>javac -J-agentlib:hprof=heap=dump Hello.java
+</code></pre>
+<p><strong>虽然在JVM启动参数中加入-Xrunprof:heap=sites参数可以生成CPU/Heap Profile文件，但对JVM性能影响非常大，不建议在线上服务器环境使用。</strong></p>
+<p>其他JVM性能调优参考资料：</p>
+<p>《Java虚拟机规范》</p>
+<p>《Java Performance》</p>
+<p>《Trouble Shooting Guide for JavaSE 6 with HotSpot VM》: http://www.oracle.com/technetwork/java/javase/tsg-vm-149989.pdf</p>
+<p>《Effective Java》</p>
+<p>VisualVM: http://docs.oracle.com/javase/7/docs/technotes/guides/visualvm/</p>
+<p>jConsole: http://docs.oracle.com/javase/1.5.0/docs/guide/management/jconsole.html</p>
+<p>Monitoring and Managing JavaSE 6 Applications: http://www.oracle.com/technetwork/articles/javase/monitoring-141801.html</p>
+<p>BTrace：https://kenai.com/projects/btrace</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/u4xV9bWHm/">
+              <span class="post-title">
+                MyBatis Plus 讲解&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

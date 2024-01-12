@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot使用logback生产日志文件 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot使用logback生产日志文件 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot使用logback生产日志文件"/>
+    <meta property="og:url" content="https://jwangkun.github.io/SsY627xmA/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/HebdBggJ2/" class="tag">logback</a>
+            
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+        </span>
+            <h1>SpringBoot使用logback生产日志文件</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>日志是一个系统非常重要的一部分，我们经常需要通过查看日志来定位问题，今天我们一起来学习一下Spring Boot的日志系统。有很多同学习惯性的在生产代码中使用System.out来输出日志，这是不推荐的一种做法，因为System.out是一个同步操作，会在一定程度上影响系统性能，而Logger是一个异步操作。</p>
+<p>Spring Boot默认的日志系统是<code>logback</code>，当然我们并不需要去引用<code>logback</code>的依赖，因为在<code>spring-boot-starter</code>中已经应用了<code>logback</code>的依赖。</p>
+<h3 id="一-控制台日志信息介绍">一、控制台日志信息介绍</h3>
+<h3 id="11-日志级别">1.1 日志级别</h3>
+<p>日志级别从高到低为：<code>TRACE</code> &lt; <code>DEBUG</code> &lt; <code>INFO</code> &lt; <code>WARN</code> &lt; <code>ERROR</code> &lt; <code>ALL</code> &lt; <code>OFF</code>。</p>
+<p>如果日志设置为<code>ERROR</code>，那么低于<code>ERROR</code>级别的日志将不会输出。</p>
+<p>如果我们想要设置某个包的日志级别，则在pom文件中加入下面这行配置：</p>
+<pre><code>logging:
+  level:
+      # 包名
+    com.javatrip: warn
+</code></pre>
+<p>如果想修改Spring Boot默认级别，则将包名改为<code>root</code>。</p>
+<pre><code>logging:
+  level:
+    root: warn
+</code></pre>
+<h3 id="12-控制台日志介绍">1.2 控制台日志介绍</h3>
+<p>默认情况下，Spring Boot会将<code>INFO</code>级别的日志输出到控制台。控制台输出信息如下：</p>
+<figure data-type="image" tabindex="1"><img src="https://segmentfault.com/img/remote/1460000037483026" alt="img" loading="lazy"></figure>
+<p>日志输出内容具体含义如下：</p>
+<ul>
+<li>时间日期：精确到毫秒</li>
+<li>日志级别：ERROR, WARN, INFO, DEBUG or TRACE</li>
+<li>进程ID</li>
+<li>分隔符：<code>---</code> 标识实际日志的开始</li>
+<li>线程名：方括号括起来（可能会截断控制台输出）</li>
+<li>Logger名：通常使用源代码的类名</li>
+<li>日志内容</li>
+</ul>
+<h2 id="二-日志文件输出">二、日志文件输出</h2>
+<p>在实际项目中，我们需要将日志输出为文件，以便快速定位问题。Spring Boot关于日志文件的信息可以参考官网<code>https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-logging</code>。</p>
+<blockquote>
+<p>Because the standard <code>logback.xml</code> configuration file is loaded too early, you cannot use extensions in it. You need to either use <code>logback-spring.xml</code> or define a <code>logging.config</code> property.</p>
+</blockquote>
+<p>这句话的意思大概就是：由于标准的logback.xml配置文件加载得太早，因此您不能在其中使用扩展名。您需要使用logback-spring.xml或定义logging.config属性。</p>
+<p>因此我们来定义一个<code>logback-spring.xml</code>的文件来进行日志信息的配置。</p>
+<p><code>logback-spring.xml</code>文件定义及注释：</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;configuration&gt;
+    &lt;!-- 日志文件名 --&gt;
+    &lt;property name=&quot;LOG_FILE&quot; value=&quot;myLog&quot; /&gt;
+    &lt;!-- 日志文件路径 --&gt;
+    &lt;property name=&quot;LOG_PATH&quot; value=&quot;D://log//dev&quot; /&gt;
+    &lt;!-- 控制台日志输出格式 --&gt;
+    &lt;property name=&quot;LOG_PATTERN_CONSOLE&quot; value=&quot;%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} --&gt; %msg%n&quot; /&gt;
+    &lt;!-- 文件日志输出格式 --&gt;
+    &lt;property name=&quot;LOG_PATTERN_FILE&quot; value=&quot;%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} --&gt; %msg%n&quot; /&gt;
+    &lt;!--- 设置控制台日志 --&gt;
+    &lt;appender name=&quot;consoleLog&quot; class=&quot;ch.qos.logback.core.ConsoleAppender&quot;&gt;
+        &lt;encoder&gt;
+            &lt;pattern&gt;${LOG_PATTERN_CONSOLE}&lt;/pattern&gt;
+        &lt;/encoder&gt;
+    &lt;/appender&gt;
+    &lt;!-- 设置日志文件 --&gt;
+    &lt;appender name=&quot;fileLog&quot; class=&quot;ch.qos.logback.core.rolling.RollingFileAppender&quot;&gt;
+        &lt;encoder&gt;
+            &lt;pattern&gt;${LOG_PATTERN_FILE}&lt;/pattern&gt;
+        &lt;/encoder&gt;
+        &lt;!-- 总文件日志 --&gt;
+        &lt;file&gt;${LOG_PATH}/${LOG_FILE}.log&lt;/file&gt;
+        &lt;rollingPolicy class=&quot;ch.qos.logback.core.rolling.TimeBasedRollingPolicy&quot;&gt;
+            &lt;!-- 每天的文件日志 --&gt;
+            &lt;fileNamePattern&gt;${LOG_PATH}/${LOG_FILE}-%d{yyyy-MM-dd}.log&lt;/fileNamePattern&gt;
+            &lt;!-- 日志文件保存7天，超过7天的自动删除 --&gt;
+            &lt;maxHistory&gt;7&lt;/maxHistory&gt;
+        &lt;/rollingPolicy&gt;
+    &lt;/appender&gt;
+
+    &lt;!-- 设置日志级别，及需要记录日志的类 --&gt;
+    &lt;root level=&quot;INFO&quot;&gt;
+        &lt;appender-ref ref=&quot;consoleLog&quot; /&gt;
+        &lt;appender-ref ref=&quot;fileLog&quot; /&gt;
+    &lt;/root&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>启动项目后，在<code>D:\log\dev</code>中会生产我们的日志文件<code>myLog.log</code>，加入我们系统一直运行，则在我们的文件目录下会生成一个<code>myLog.log</code>文件和7个最近日志的文件<code>myLog-某年-某月-某日.log</code>。</p>
+<h4 id=""></h4>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/CQYgRrC-u/">
+              <span class="post-title">
+                SpringBoot  整合Kafka&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

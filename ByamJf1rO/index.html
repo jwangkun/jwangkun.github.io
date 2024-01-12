@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Linux关闭防火墙命令 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Linux关闭防火墙命令 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Linux关闭防火墙命令"/>
+    <meta property="og:url" content="https://jwangkun.github.io/ByamJf1rO/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+        </span>
+            <h1>Linux关闭防火墙命令</h1>
+            <span class="meta">
+            	Posted on
+              2021-06-07，9 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h1 id="linux关闭防火墙命令">Linux关闭防火墙命令</h1>
+<h2 id="一-下面是red-hatcentos7关闭防火墙的命令">一、<strong>下面是red hat/CentOs7关闭防火墙的命令!</strong></h2>
+<p><strong>1:查看防火状态</strong></p>
+<p><strong>systemctl status firewalld</strong></p>
+<p><strong>service  iptables status</strong></p>
+<p><strong>2:暂时关闭防火墙</strong></p>
+<p><strong>systemctl stop firewalld</strong></p>
+<p><em><strong>*service  iptables stop*</strong></em></p>
+<p><strong>3:永久关闭防火墙</strong></p>
+<p><strong>systemctl disable firewalld</strong></p>
+<p><em><strong>*chkconfig iptables off*</strong></em></p>
+<p><strong>4:重启防火墙</strong></p>
+<p><strong>systemctl enable firewalld</strong></p>
+<p><strong>service iptables restart</strong></p>
+<p><strong>5:永久关闭后重启</strong></p>
+<p>//暂时还没有试过</p>
+<p><strong>chkconfig iptables on</strong></p>
+<h2 id="二-firewalld">二、firewalld</h2>
+<p>Centos7默认安装了firewalld，如果没有安装的话，可以使用 <em><strong>yum install firewalld firewalld-config</strong></em>进行安装。</p>
+<p>1.启动防火墙</p>
+<pre><code>systemctl start firewalld 
+</code></pre>
+<p>2.禁用防火墙</p>
+<pre><code>systemctl stop firewalld
+</code></pre>
+<p>3.设置开机启动</p>
+<pre><code>systemctl enable firewalld
+</code></pre>
+<p>4.停止并禁用开机启动</p>
+<pre><code>sytemctl disable firewalld
+</code></pre>
+<p>5.重启防火墙</p>
+<pre><code>firewall-cmd --reload
+</code></pre>
+<p>6.查看状态</p>
+<pre><code>systemctl status firewalld或者 firewall-cmd --state
+</code></pre>
+<p>7.查看版本</p>
+<pre><code>firewall-cmd --version
+</code></pre>
+<p>8.查看帮助</p>
+<pre><code>firewall-cmd --help
+</code></pre>
+<p>9.查看区域信息</p>
+<pre><code>firewall-cmd --get-active-zones
+</code></pre>
+<p>10.查看指定接口所属区域信息</p>
+<pre><code>firewall-cmd --get-zone-of-interface=eth0
+</code></pre>
+<p>11.拒绝所有包</p>
+<pre><code>firewall-cmd --panic-on
+</code></pre>
+<p>12.取消拒绝状态</p>
+<pre><code>firewall-cmd --panic-off
+</code></pre>
+<p>13.查看是否拒绝</p>
+<pre><code>firewall-cmd --query-panic
+</code></pre>
+<p>14.将接口添加到区域(默认接口都在public)</p>
+<pre><code>firewall-cmd --zone=public --add-interface=eth0(永久生效再加上 --permanent 然后reload防火墙)
+</code></pre>
+<p>15.设置默认接口区域</p>
+<pre><code>firewall-cmd --set-default-zone=public(立即生效，无需重启)
+</code></pre>
+<p>16.更新防火墙规则</p>
+<pre><code>firewall-cmd --reload或firewall-cmd --complete-reload(两者的区别就是第一个无需断开连接，就是firewalld特性之一动态
+添加规则，第二个需要断开连接，类似重启服务)
+</code></pre>
+<p>17.查看指定区域所有打开的端口</p>
+<pre><code>firewall-cmd --zone=public --list-ports
+</code></pre>
+<p>18.在指定区域打开端口（记得重启防火墙）</p>
+<pre><code>firewall-cmd --zone=public --add-port=80/tcp(永久生效再加上 --permanent)
+</code></pre>
+<blockquote>
+<p>说明：<br>
+–zone 作用域<br>
+–add-port=8080/tcp 添加端口，格式为：端口/通讯协议<br>
+–permanent #永久生效，没有此参数重启后失效</p>
+</blockquote>
+<h3 id="补充">补充：</h3>
+<h3 id="centos-7-下使用-firewall">CentOS 7 下使用 Firewall</h3>
+<p>在 CentOS 7 中，引入了一个新的服务，<strong>Firewalld</strong>，下面一张图，让大家明确的了解 Firewall 与 iptables 之间的关系与区别。</p>
+<figure data-type="image" tabindex="1"><img src="https://www.havee.me/cdn/images/2015/01/firewall_stack.png" alt="firewall stack" loading="lazy"></figure>
+<p>安装它，只需</p>
+<pre><code># yum install firewalld
+</code></pre>
+<p>如果需要图形界面的话，则再安装</p>
+<pre><code># yum install firewall-config
+</code></pre>
+<p>一、介绍</p>
+<p>防火墙守护 firewalld 服务引入了一个信任级别的概念来管理与之相关联的连接与接口。它支持 ipv4 与 ipv6，并支持网桥，采用 firewall-cmd (command) 或 firewall-config (gui) 来动态的管理 kernel netfilter 的临时或永久的接口规则，并实时生效而无需重启服务。</p>
+<p>zone</p>
+<p>Firewall 能将不同的网络连接归类到不同的信任级别，Zone 提供了以下几个级别</p>
+<ul>
+<li>drop: 丢弃所有进入的包，而不给出任何响应</li>
+<li>block: 拒绝所有外部发起的连接，允许内部发起的连接</li>
+<li>public: 允许指定的进入连接</li>
+<li>external: 同上，对伪装的进入连接，一般用于路由转发</li>
+<li>dmz: 允许受限制的进入连接</li>
+<li>work: 允许受信任的计算机被限制的进入连接，类似 workgroup</li>
+<li>home: 同上，类似 homegroup</li>
+<li>internal: 同上，范围针对所有互联网用户</li>
+<li>trusted: 信任所有连接</li>
+</ul>
+<p>过滤规则</p>
+<ul>
+<li>source: 根据源地址过滤</li>
+<li>interface: 根据网卡过滤</li>
+<li>service: 根据服务名过滤</li>
+<li>port: 根据端口过滤</li>
+<li>icmp-block: icmp 报文过滤，按照 icmp 类型配置</li>
+<li>masquerade: ip 地址伪装</li>
+<li>forward-port: 端口转发</li>
+<li>rule: 自定义规则</li>
+</ul>
+<p>其中，过滤规则的优先级遵循如下顺序</p>
+<ol>
+<li>source</li>
+<li>interface</li>
+<li>firewalld.conf</li>
+</ol>
+<p>二、使用方法</p>
+<pre><code># systemctl start firewalld         # 启动,
+
+
+
+# systemctl enable firewalld        # 开机启动
+
+
+
+# systemctl stop firewalld          # 关闭
+
+
+
+# systemctl disable firewalld       # 取消开机启动
+</code></pre>
+<p>具体的规则管理，可以使用 <code>firewall-cmd</code>，具体的使用方法可以</p>
+<pre><code>$ firewall-cmd --help
+
+
+
+ 
+
+
+
+--zone=NAME                         # 指定 zone
+
+
+
+--permanent                         # 永久修改，--reload 后生效
+
+
+
+--timeout=seconds                   # 持续效果，到期后自动移除，用于调试，不能与 --permanent 同时使用
+</code></pre>
+<p>\1. 查看规则</p>
+<p>查看运行状态</p>
+<pre><code>$ firewall-cmd --state
+</code></pre>
+<p>查看已被激活的 Zone 信息</p>
+<pre><code>$ firewall-cmd --get-active-zones
+
+
+
+public
+
+
+
+  interfaces: eth0 eth1
+</code></pre>
+<p>查看指定接口的 Zone 信息</p>
+<pre><code>$ firewall-cmd --get-zone-of-interface=eth0
+
+
+
+public
+</code></pre>
+<p>查看指定级别的接口</p>
+<pre><code>$ firewall-cmd --zone=public --list-interfaces
+
+
+
+eth0
+</code></pre>
+<p>查看指定级别的所有信息，譬如 public</p>
+<pre><code>$ firewall-cmd --zone=public --list-all
+
+
+
+public (default, active)
+
+
+
+  interfaces: eth0
+
+
+
+  sources:
+
+
+
+  services: dhcpv6-client http ssh
+
+
+
+  ports:
+
+
+
+  masquerade: no
+
+
+
+  forward-ports:
+
+
+
+  icmp-blocks:
+
+
+
+  rich rules:
+</code></pre>
+<p>查看所有级别被允许的信息</p>
+<pre><code>$ firewall-cmd --get-service
+</code></pre>
+<p>查看重启后所有 Zones 级别中被允许的服务，即永久放行的服务</p>
+<pre><code>$ firewall-cmd --get-service --permanent
+</code></pre>
+<p>\2. 管理规则</p>
+<pre><code># firewall-cmd --panic-on           # 丢弃
+
+
+
+# firewall-cmd --panic-off          # 取消丢弃
+
+
+
+# firewall-cmd --query-panic        # 查看丢弃状态
+
+
+
+# firewall-cmd --reload             # 更新规则，不重启服务
+
+
+
+# firewall-cmd --complete-reload    # 更新规则，重启服务
+</code></pre>
+<p>添加某接口至某信任等级，譬如添加 eth0 至 public，永久修改</p>
+<pre><code># firewall-cmd --zone=public --add-interface=eth0 --permanent
+</code></pre>
+<p>设置 public 为默认的信任级别</p>
+<pre><code># firewall-cmd --set-default-zone=public
+</code></pre>
+<p>a. 管理端口</p>
+<p>列出 dmz 级别的被允许的进入端口</p>
+<pre><code># firewall-cmd --zone=dmz --list-ports
+</code></pre>
+<p>允许 tcp 端口 8080 至 dmz 级别</p>
+<pre><code># firewall-cmd --zone=dmz --add-port=8080/tcp
+</code></pre>
+<p>允许某范围的 udp 端口至 public 级别，并永久生效</p>
+<pre><code># firewall-cmd --zone=public --add-port=5060-5059/udp --permanent
+</code></pre>
+<p>b. 网卡接口</p>
+<p>列出 public zone 所有网卡</p>
+<pre><code># firewall-cmd --zone=public --list-interfaces
+</code></pre>
+<p>将 eth0 添加至 public zone，永久</p>
+<pre><code># firewall-cmd --zone=public --permanent --add-interface=eth0
+</code></pre>
+<p>eth0 存在与 public zone，将该网卡添加至 work zone，并将之从 public zone 中删除</p>
+<pre><code># firewall-cmd --zone=work --permanent --change-interface=eth0
+</code></pre>
+<p>删除 public zone 中的 eth0，永久</p>
+<pre><code># firewall-cmd --zone=public --permanent --remove-interface=eth0
+</code></pre>
+<p>c. 管理服务</p>
+<p>添加 smtp 服务至 work zone</p>
+<pre><code># firewall-cmd --zone=work --add-service=smtp
+</code></pre>
+<p>移除 work zone 中的 smtp 服务</p>
+<pre><code># firewall-cmd --zone=work --remove-service=smtp
+</code></pre>
+<p>d. 配置 external zone 中的 ip 地址伪装</p>
+<p>查看</p>
+<pre><code># firewall-cmd --zone=external --query-masquerade
+</code></pre>
+<p>打开伪装</p>
+<pre><code># firewall-cmd --zone=external --add-masquerade
+</code></pre>
+<p>关闭伪装</p>
+<pre><code># firewall-cmd --zone=external --remove-masquerade
+</code></pre>
+<p>e. 配置 public zone 的端口转发</p>
+<p>要打开端口转发，则需要先</p>
+<pre><code># firewall-cmd --zone=public --add-masquerade
+</code></pre>
+<p>然后转发 tcp 22 端口至 3753</p>
+<pre><code># firewall-cmd --zone=public --add-forward-port=port=22:proto=tcp:toport=3753
+</code></pre>
+<p>转发 22 端口数据至另一个 ip 的相同端口上</p>
+<pre><code># firewall-cmd --zone=public --add-forward-port=port=22:proto=tcp:toaddr=192.168.1.100
+</code></pre>
+<p>转发 22 端口数据至另一 ip 的 2055 端口上</p>
+<pre><code># firewall-cmd --zone=public --add-forward-port=port=22:proto=tcp:toport=2055:toaddr=192.168.1.100
+</code></pre>
+<p>f. 配置 public zone 的 icmp</p>
+<p>查看所有支持的 icmp 类型</p>
+<pre><code># firewall-cmd --get-icmptypes
+
+
+
+destination-unreachable echo-reply echo-request parameter-problem redirect router-advertisement router-solicitation source-quench time-exceeded
+</code></pre>
+<p>列出</p>
+<pre><code># firewall-cmd --zone=public --list-icmp-blocks
+</code></pre>
+<p>添加 echo-request 屏蔽</p>
+<pre><code># firewall-cmd --zone=public --add-icmp-block=echo-request [--timeout=seconds]
+</code></pre>
+<p>移除 echo-reply 屏蔽</p>
+<pre><code># firewall-cmd --zone=public --remove-icmp-block=echo-reply
+</code></pre>
+<p>g. IP 封禁</p>
+<pre><code># firewall-cmd --permanent --add-rich-rule=&quot;rule family='ipv4' source address='222.222.222.222' reject&quot;
+</code></pre>
+<p>当然，我们仍然可以通过 ipset 来封禁 ip</p>
+<p>封禁 ip</p>
+<pre><code># firewall-cmd --permanent --zone=public --new-ipset=blacklist --type=hash:ip
+
+
+
+# firewall-cmd --permanent --zone=public --ipset=blacklist --add-entry=222.222.222.222
+</code></pre>
+<p>封禁网段</p>
+<pre><code># firewall-cmd --permanent --zone=public --new-ipset=blacklist --type=hash:net
+
+
+
+# firewall-cmd --permanent --zone=public --ipset=blacklist --add-entry=222.222.222.0/24
+</code></pre>
+<p>导入 ipset 的 blacklist 规则</p>
+<pre><code># firewall-cmd --permanent --zone=public --new-ipset-from-file=/path/blacklist.xml
+</code></pre>
+<p>如果已经存 blacklist，则需要先删除</p>
+<pre><code># firewall-cmd --get-ipsets
+
+
+
+blacklist
+
+
+
+# firewall-cmd --permanent --zone=public --delete-ipset=blacklist
+</code></pre>
+<p>然后封禁 blacklist</p>
+<pre><code># firewall-cmd --permanent --zone=public --add-rich-rule='rule source ipset=blacklist drop'
+</code></pre>
+<p>重新载入以生效</p>
+<pre><code># firewall-cmd --reload
+</code></pre>
+<p>查看 blacklist</p>
+<pre><code># firewall-cmd --ipset=blacklist --get-entries
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/-jMPY-rPe/">
+              <span class="post-title">
+                linux 系统分区 格式化及挂载磁盘&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

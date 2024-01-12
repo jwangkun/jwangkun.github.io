@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot 整合 elasticsearch | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot 整合 elasticsearch | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot 整合 elasticsearch"/>
+    <meta property="og:url" content="https://jwangkun.github.io/5Kswfs5K9/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/FGzdK7Xb8q/" class="tag">elasticsearch</a>
+            
+        </span>
+            <h1>SpringBoot 整合 elasticsearch</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="一-简介">一、简介</h2>
+<p>我们的应用经常需要添加检索功能，开源的 ElasticSearch 是目前全文搜索引擎的 首选。他可以快速的存储、搜索和分析海量数据。Spring Boot通过整合Spring Data ElasticSearch为我们提供了非常便捷的检索功能支持;<br>
+Elasticsearch是一个分布式搜索服务，提供Restful API，底层基于Lucene，采用 多shard(分片)的方式保证数据安全，并且提供自动resharding的功能，github 等大型的站点也是采用了ElasticSearch作为其搜索服务，</p>
+<h2 id="二-安装elasticsearch">二、安装elasticsearch</h2>
+<p>我们采用 docker镜像安装的方式。</p>
+<pre><code>#下载镜像
+docker pull elasticsearch
+#启动镜像，elasticsearch 启动是会默认分配2G的内存 ，我们启动是设置小一点，防止我们内存不够启动失败
+#9200是elasticsearch 默认的web通信接口，9300是分布式情况下，elasticsearch个节点通信的端口
+docker run -e ES_JAVA_OPTS=&quot;-Xms256m -Xmx256m&quot; -d -p 9200:9200 -p 9300:9300 --name es01 5c1e1ecfe33a
+</code></pre>
+<p>访问 127.0.0.1:9200 如下图，说明安装成功</p>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-9/1.png" alt="img" loading="lazy"></figure>
+<h2 id="三-elasticsearch的一些概念">三、elasticsearch的一些概念</h2>
+<ul>
+<li>以 <strong>员工文档</strong> 的形式存储为例:一个<strong>文档</strong>代表一个员工数据。存储数据到 ElasticSearch 的行为叫做<strong>索引</strong> ，但在索引一个文档之前，需要确定将文档存 储在哪里。</li>
+<li>一个 ElasticSearch 集群可以 包含多个<strong>索引</strong> ，相应的每个索引可以包含多个<strong>类型</strong>。这些不同的类型存储着多个<strong>文档</strong> ，每个文档又有 多个 <strong>属性</strong> 。</li>
+<li>类似关系:</li>
+<li>索引-数据库</li>
+<li>类型-表</li>
+<li>文档-表中的记录 – 属性-列</li>
+</ul>
+<figure data-type="image" tabindex="2"><img src="http://image.itwolfed.com/springboot-9/2.png" alt="img" loading="lazy"></figure>
+<p>elasticsearch使用可以参早官方文档，在这里不在讲解。</p>
+<h2 id="四-整合-elasticsearch">四、整合 elasticsearch</h2>
+<p>创建项目 springboot-elasticsearch，引入web支持 SpringBoot 提供了两种方式操作elasticsearch，Jest 和 SpringData。</p>
+<h3 id="jest-操作-elasticsearch">Jest 操作 elasticsearch</h3>
+<p>Jest是ElasticSearch的Java HTTP Rest客户端。</p>
+<p>ElasticSearch已经有一个Java API，ElasticSearch也在内部使用它，但是Jest填补了空白，它是ElasticSearch Http Rest接口缺少的客户端。</p>
+<h4 id="1-pomxml">1. pom.xml</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+	&lt;groupId&gt;com.gf&lt;/groupId&gt;
+	&lt;artifactId&gt;springboot-elasticsearch&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
+
+	&lt;name&gt;springboot-elasticsearch&lt;/name&gt;
+	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+	&lt;parent&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+		&lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+	&lt;/parent&gt;
+
+	&lt;properties&gt;
+		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+		&lt;java.version&gt;1.8&lt;/java.version&gt;
+	&lt;/properties&gt;
+
+	&lt;dependencies&gt;
+		&lt;dependency&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-data-elasticsearch&lt;/artifactId&gt;
+	&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;io.searchbox&lt;/groupId&gt;
+			&lt;artifactId&gt;jest&lt;/artifactId&gt;
+			&lt;version&gt;5.3.3&lt;/version&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+			&lt;scope&gt;test&lt;/scope&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+
+	&lt;build&gt;
+		&lt;plugins&gt;
+			&lt;plugin&gt;
+				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+			&lt;/plugin&gt;
+		&lt;/plugins&gt;
+	&lt;/build&gt;
+
+
+&lt;/project&gt;
+</code></pre>
+<p>####2. application.properties</p>
+<pre><code>spring.elasticsearch.jest.uris=http://127.0.0.1:9200
+</code></pre>
+<h4 id="3-article">3. Article</h4>
+<pre><code class="language-java">package com.gf.entity;
+
+
+import io.searchbox.annotations.JestId;
+
+public class Article {
+
+    @JestId
+    private Integer id;
+    private String author;
+    private String title;
+    private String content;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder( &quot;{\&quot;Article\&quot;:{&quot; );
+        sb.append( &quot;\&quot;id\&quot;:&quot; )
+                .append( id );
+        sb.append( &quot;,\&quot;author\&quot;:\&quot;&quot; )
+                .append( author ).append( '\&quot;' );
+        sb.append( &quot;,\&quot;title\&quot;:\&quot;&quot; )
+                .append( title ).append( '\&quot;' );
+        sb.append( &quot;,\&quot;content\&quot;:\&quot;&quot; )
+                .append( content ).append( '\&quot;' );
+        sb.append( &quot;}}&quot; );
+        return sb.toString();
+    }
+
+
+}
+</code></pre>
+<h4 id="4-springboot测试类">4. springboot测试类</h4>
+<pre><code class="language-java">package com.gf;
+
+import com.gf.entity.Article;
+import io.searchbox.client.JestClient;
+import io.searchbox.core.Index;
+import io.searchbox.core.Search;
+import io.searchbox.core.SearchResult;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.io.IOException;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringbootElasticsearchApplicationTests {
+
+	@Autowired
+	JestClient jestClient;
+
+	@Test
+	public void createIndex() {
+		//1. 给ES中索引(保存)一个文档
+		Article article = new Article();
+		article.setId( 1 );
+		article.setTitle( &quot;好消息&quot; );
+		article.setAuthor( &quot;张三&quot; );
+		article.setContent( &quot;Hello World&quot; );
+
+		//2. 构建一个索引
+		Index index = new Index.Builder( article ).index( &quot;gf&quot; ).type( &quot;news&quot; ).build();
+		try {
+			//3. 执行
+			jestClient.execute( index );
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	public void search() {
+		//查询表达式
+		String query = &quot;{\n&quot; +
+				&quot;    \&quot;query\&quot; : {\n&quot; +
+				&quot;        \&quot;match\&quot; : {\n&quot; +
+				&quot;            \&quot;content\&quot; : \&quot;hello\&quot;\n&quot; +
+				&quot;        }\n&quot; +
+				&quot;    }\n&quot; +
+				&quot;}&quot;;
+
+		//构建搜索功能
+		Search search = new Search.Builder( query ).addIndex( &quot;gf&quot; ).addType( &quot;news&quot; ).build();
+
+		try {
+			//执行
+			SearchResult result = jestClient.execute( search );
+			System.out.println(result.getJsonString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+}
+</code></pre>
+<p>Jest的更多api ，可以参照github的文档：https://github.com/searchbox-io/Jest</p>
+<h3 id="springdata-操作-elasticsearch">SpringData 操作 elasticsearch</h3>
+<h4 id="1-applicationproperties">1. application.properties</h4>
+<pre><code>spring.data.elasticsearch.cluster-name=elasticsearch
+spring.data.elasticsearch.cluster-nodes=127.0.0.1:9300
+</code></pre>
+<h4 id="2-book">2. Book</h4>
+<pre><code class="language-java">package com.gf.entity;
+
+@Document( indexName = &quot;gf&quot; , type = &quot;book&quot;)
+public class Book {
+    private Integer id;
+    private String bookName;
+    private String author;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(String bookName) {
+        this.bookName = bookName;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder( &quot;{\&quot;Book\&quot;:{&quot; );
+        sb.append( &quot;\&quot;id\&quot;:&quot; )
+                .append( id );
+        sb.append( &quot;,\&quot;bookName\&quot;:\&quot;&quot; )
+                .append( bookName ).append( '\&quot;' );
+        sb.append( &quot;,\&quot;author\&quot;:\&quot;&quot; )
+                .append( author ).append( '\&quot;' );
+        sb.append( &quot;}}&quot; );
+        return sb.toString();
+    }
+    
+}
+</code></pre>
+<h4 id="3-bookrepository">3. BookRepository</h4>
+<pre><code class="language-java">package com.gf.repository;
+
+
+import com.gf.entity.Book;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+
+import java.util.List;
+
+public interface BookRepository extends ElasticsearchRepository&lt;Book, Integer&gt;{
+
+    List&lt;Book&gt; findByBookNameLike(String bookName);
+
+}
+</code></pre>
+<h4 id="4-springboot-测试类">4. springboot 测试类</h4>
+<pre><code class="language-java">package com.gf;
+
+import com.gf.entity.Article;
+import com.gf.entity.Book;
+import com.gf.repository.BookRepository;
+import io.searchbox.client.JestClient;
+import io.searchbox.core.Index;
+import io.searchbox.core.Search;
+import io.searchbox.core.SearchResult;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.io.IOException;
+import java.util.List;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringbootElasticsearchApplicationTests {
+
+	@Autowired
+	BookRepository bookRepository;
+	
+	@Test
+	public void createIndex2(){
+		Book book = new Book();
+		book.setId(1);
+		book.setBookName(&quot;西游记&quot;);
+		book.setAuthor( &quot;吴承恩&quot; );
+		bookRepository.index( book );
+	}
+
+	@Test
+	public void useFind() {
+		List&lt;Book&gt; list = bookRepository.findByBookNameLike( &quot;游&quot; );
+		for (Book book : list) {
+			System.out.println(book);
+		}
+
+	}
+
+}
+</code></pre>
+<p>我们启动测试 ，发现报错 。 <img src="http://image.itwolfed.com/springboot-9/3.png" alt="img" loading="lazy"> 这个报错的原因是springData的版本与我elasticsearch的版本有冲突，下午是springData官方文档给出的适配表。 <img src="http://image.itwolfed.com/springboot-9/4.png" alt="img" loading="lazy"> 我们使用的springdata elasticsearch的 版本是3.1.3 ，对应的版本应该是6.2.2版本，而我们是的 elasticsearch 是 5.6.9，所以目前我们需要更换elasticsearch的版本为6.X</p>
+<pre><code>docker pull elasticsearch:6.5.1
+docker run -e ES_JAVA_OPTS=&quot;-Xms256m -Xmx256m&quot; -d -p 9200:9200 -p 9300:9300 --name es02 镜像ID
+</code></pre>
+<p>访问127.0.0.1:9200 <img src="http://image.itwolfed.com/springboot-9/5.png" alt="img" loading="lazy"></p>
+<p>集群名为docker-cluster，所以我们要修改application.properties的配置了</p>
+<pre><code>spring.data.elasticsearch.cluster-name=docker-cluster
+spring.data.elasticsearch.cluster-nodes=127.0.0.1:9300
+</code></pre>
+<p>我们再次进行测试，测试可以通过了 。我们访问http://127.0.0.1:9200/gf/book/1，可以得到我们存入的索引信息。 <img src="http://image.itwolfed.com/springboot-9/6.png" alt="img" loading="lazy"></p>
+<p>源码下载：https://github.com/gf-huanchupk/SpringBootLearning</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/gra6AGClN/">
+              <span class="post-title">
+                 SpringBoot 整合 Rabbitmq&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

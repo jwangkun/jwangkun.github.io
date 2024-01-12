@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Spring Boot 整合 apollo | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Spring Boot 整合 apollo | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Spring Boot 整合 apollo"/>
+    <meta property="og:url" content="https://jwangkun.github.io/q3uH3ZKcZ/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/n3c4SKEY9/" class="tag">apollo</a>
+            
+            <a href="https://jwangkun.github.io/ZPK0tltDQ/" class="tag">Spring Boot Admin</a>
+            
+        </span>
+            <h1>Spring Boot 整合 apollo</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，7 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="简介">简介</h2>
+<p>Apollo（阿波罗）是携程框架部门研发的分布式配置中心，能够集中化管理应用不同环境、不同集群的配置，配置修改后能够实时推送到应用端，并且具备规范的权限、流程治理等特性，适用于微服务配置管理场景。</p>
+<h2 id="apollo和spring-cloud-config对比">Apollo和Spring Cloud Config对比</h2>
+<p><img src="http://image.itwolfed.com/springboot-13/1.png" alt="img" loading="lazy"> 通过对比，可以看出，生成环境中 Apollo 相比 Spring Cloud Config 更具有优势一些。</p>
+<h2 id="安装-apollo-配置中心">安装 Apollo 配置中心</h2>
+<h3 id="搭建教程">搭建教程</h3>
+<p>参照 https://github.com/ctripcorp/apollo/wiki/Quick-Start 搭建 Apollo 配置中心，文档写的很清楚，这里就赘述了。</p>
+<h3 id="查看样例配置">查看样例配置</h3>
+<p>搭建完成并启动后，访问 http://localhost:8070 ，界面如下。</p>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-13/2.png" alt="img" loading="lazy"></figure>
+<p>输入用户名 apollo，密码 admin 后登录后，点击SampleApp进入配置界面。</p>
+<figure data-type="image" tabindex="2"><img src="http://image.itwolfed.com/springboot-13/3.png" alt="img" loading="lazy"></figure>
+<h2 id="与-spring-boot-整合使用">与 Spring Boot 整合使用</h2>
+<p>创建一个springboot项目，主要代码如下。</p>
+<h3 id="pomxml">pom.xml</h3>
+<p>添加 Apollo 客户端的依赖，为了编码方便引入commons-lang3。</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.ctrip.framework.apollo&lt;/groupId&gt;
+    &lt;artifactId&gt;apollo-client&lt;/artifactId&gt;
+    &lt;version&gt;1.3.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- 为了编码方便，并非apollo 必须的依赖 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
+    &lt;artifactId&gt;commons-lang3&lt;/artifactId&gt;
+    &lt;version&gt;3.8.1&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>###application.yml</p>
+<pre><code class="language-js">server:
+  port: 8761
+
+app:
+  id: springboot-apollo
+apollo:
+  meta: http://127.0.0.1:8080
+  bootstrap:
+    enabled: true
+    eagerLoad:
+      enabled: true
+
+logging:
+  level:
+    com:
+      gf:
+        controller: debug
+</code></pre>
+<p>配置说明：</p>
+<ul>
+<li><strong>app.id</strong>：AppId是应用的身份信息，是配置中心获取配置的一个重要信息。</li>
+<li><strong>apollo.bootstrap.enabled</strong>：在应用启动阶段，向Spring容器注入被托管的application.properties文件的配置信息。</li>
+<li><strong>apollo.bootstrap.eagerLoad.enabled</strong>：将Apollo配置加载提到初始化日志系统之前。</li>
+<li><strong>logging.level.com.gf.controller</strong>：调整 controller 包的 log 级别，为了后面演示在配置中心动态配置日志级别。</li>
+</ul>
+<h3 id="hellocontroller">HelloController</h3>
+<pre><code class="language-java">@RestController
+public class HelloController {
+
+    private static Logger logger = LoggerFactory.getLogger( HelloController.class );
+
+    @Value( &quot;${server.port}&quot; )
+    String port;
+
+    @GetMapping(&quot;hi&quot;)
+    public String hi(String name) {
+
+        logger.debug( &quot;debug log...&quot; );
+        logger.info( &quot;info log...&quot; );
+        logger.warn( &quot;warn log...&quot; );
+
+        return &quot;hi &quot; + name + &quot; ,i am from port:&quot; + port;
+    }
+
+}
+</code></pre>
+<h3 id="启动类">启动类</h3>
+<pre><code class="language-java">@SpringBootApplication
+@EnableApolloConfig
+public class SpringbootApolloApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run( SpringbootApolloApplication.class, args );
+    }
+
+
+}
+</code></pre>
+<p>启动项目。现在需要去配置中心做些关于这个springboot客户端的一些配置。</p>
+<h3 id="配置中心的配置">配置中心的配置</h3>
+<h4 id="创建项目">创建项目</h4>
+<p>第一步：访问http://localhost:8070 登录后，选择创建项目。</p>
+<figure data-type="image" tabindex="3"><img src="http://image.itwolfed.com/springboot-13/4.png" alt="img" loading="lazy"></figure>
+<p>第二步：填写配置信息。</p>
+<figure data-type="image" tabindex="4"><img src="http://image.itwolfed.com/springboot-13/5.png" alt="img" loading="lazy"></figure>
+<p>配置说明：</p>
+<ul>
+<li><strong>部门</strong>：选择应用所在的部门。（想自定义部门，参照官方文档，这里就选择样例）</li>
+<li><strong>应用AppId</strong>：用来标识应用身份的唯一id，格式为string，需要和客户端。application.properties中配置的app.id对应。</li>
+<li><strong>应用名称</strong>：应用名，仅用于界面展示。</li>
+<li><strong>应用负责人</strong>：选择的人默认会成为该项目的管理员，具备项目权限管理、集群创建、Namespace创建等权限。</li>
+</ul>
+<p>提交配置后会出现如下项目配置的管理页面。</p>
+<h4 id="添加配置项">添加配置项</h4>
+<figure data-type="image" tabindex="5"><img src="http://image.itwolfed.com/springboot-13/6.png" alt="img" loading="lazy"></figure>
+<p>第一步：点击 “新增配置”，配置需要管理的 application.properties 中的属性。</p>
+<figure data-type="image" tabindex="6"><img src="http://image.itwolfed.com/springboot-13/7.png" alt="img" loading="lazy"></figure>
+<p>点击提交，之后按照同样的方法，新增需要动态管理的 application.properties 中的属性。</p>
+<p>提交后，跳转到配置的管理界面：</p>
+<figure data-type="image" tabindex="7"><img src="http://image.itwolfed.com/springboot-13/8.png" alt="img" loading="lazy"></figure>
+<h4 id="发布配置">发布配置</h4>
+<p>配置只有在发布后才会真的被应用使用到，所以在编辑完配置后，需要发布配置。点击“发布按钮”。</p>
+<p>填写发布相关信息，点击发布 。</p>
+<figure data-type="image" tabindex="8"><img src="http://image.itwolfed.com/springboot-13/9.png" alt="img" loading="lazy"></figure>
+<h3 id="测试">测试</h3>
+<p>在配置中心，修改 server.port 的值为 8762 并发布。</p>
+<figure data-type="image" tabindex="9"><img src="http://image.itwolfed.com/springboot-13/10.png" alt="img" loading="lazy"></figure>
+<p>Postman 访问之前写个测试接口 http://127.0.0.1:8761/hi?name=zhangsan ，返回如下。</p>
+<figure data-type="image" tabindex="10"><img src="http://image.itwolfed.com/springboot-13/11.png" alt="img" loading="lazy"></figure>
+<p>说明 客户端 获取到了 配置中心修改后的 server.port 的值 。</p>
+<p>注意：</p>
+<ul>
+<li>服务的端口依然还是 8761，这是因为 apollo 修改配置，不会像Spring Cloud Config 那样去重启应用。</li>
+<li>重启应用后，客户端会加载使用 配置中心中配置的属性的值，例如我们重启我们的应用，服务端口会变成8762。</li>
+</ul>
+<figure data-type="image" tabindex="11"><img src="http://image.itwolfed.com/springboot-13/12.png" alt="img" loading="lazy"></figure>
+<h3 id="监听配置的变化">监听配置的变化</h3>
+<h4 id="需求">需求</h4>
+<p>日志模块是每个项目中必须的，用来记录程序运行中的相关信息。一般在开发环境下使用DEBUG级别的日志输出，为了方便查看问题，而在线上一般都使用INFO或者ERROR级别的日志，主要记录业务操作或者错误的日志。那么问题来了，当线上环境出现问题希望输出DEBUG日志信息辅助排查的时候怎么办呢？修改配置文件，重新打包然后上传重启线上环境，以前确实是这么做的。</p>
+<p>虽然上面我们已经把日志的配置部署到Apollo配置中心，但在配置中心修改日志等级，依然需要重启应用才生效，下面我们就通过监听配置的变化，来达到热更新的效果。</p>
+<pre><code class="language-java">@Configuration
+public class LoggerConfig {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggerConfig.class);
+    private static final String LOGGER_TAG = &quot;logging.level.&quot;;
+
+    @Autowired
+    private LoggingSystem loggingSystem;
+
+    @ApolloConfig
+    private Config config;
+
+    @ApolloConfigChangeListener
+    private void configChangeListter(ConfigChangeEvent changeEvent) {
+        refreshLoggingLevels();
+    }
+
+    @PostConstruct
+    private void refreshLoggingLevels() {
+        Set&lt;String&gt; keyNames = config.getPropertyNames();
+        for (String key : keyNames) {
+            if (StringUtils.containsIgnoreCase(key, LOGGER_TAG)) {
+                String strLevel = config.getProperty(key, &quot;info&quot;);
+                LogLevel level = LogLevel.valueOf(strLevel.toUpperCase());
+                loggingSystem.setLogLevel(key.replace(LOGGER_TAG, &quot;&quot;), level);
+                logger.info(&quot;{}:{}&quot;, key, strLevel);
+            }
+        }
+    }
+
+
+}
+</code></pre>
+<p>关键点讲解：</p>
+<ul>
+<li><strong>@ApolloConfig注解</strong>：将Apollo服务端的中的配置注入这个类中。</li>
+<li><strong>@ApolloConfigChangeListener注解</strong>：监听配置中心配置的更新事件，若该事件发生，则调用refreshLoggingLevels方法，处理该事件。</li>
+<li><strong>ConfigChangeEvent参数</strong>：可以获取被修改配置项的key集合，以及被修改配置项的新值、旧值和修改类型等信息。</li>
+</ul>
+<p>application.yml 中配置的日志级别是 debug ，访问http://127.0.0.1:8761/hi?name=zhangsan ，控制台打印如下。</p>
+<pre><code class="language-shell">2019-03-05 18:29:22.673 DEBUG 4264 --- [nio-8762-exec-1] com.gf.controller.HelloController        : debug log...
+2019-03-05 18:29:22.673  INFO 4264 --- [nio-8762-exec-1] com.gf.controller.HelloController        : info log...
+2019-03-05 18:29:22.673  WARN 4264 --- [nio-8762-exec-1] com.gf.controller.HelloController        : warn log...
+</code></pre>
+<p>现在在配置中心修改日志级别为 warn。</p>
+<figure data-type="image" tabindex="12"><img src="http://image.itwolfed.com/springboot-13/13.png" alt="img" loading="lazy"></figure>
+<p>再次访问http://127.0.0.1:8761/hi?name=zhangsan ，控制台打印如下。</p>
+<pre><code class="language-shell">2019-03-05 19:07:19.469  WARN 4264 --- [nio-8762-exec-3] com.gf.controller.HelloController        : warn log...
+</code></pre>
+<p>说明日志级别的配置，已经支持热更新了。关于apollo 的更多应用 ，可以参照github的文档。</p>
+<p>源码下载 : https://github.com/gf-huanchupk/SpringBootLearning/tree/master/springboot-apollo</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/FQJiWX7zK/">
+              <span class="post-title">
+                Spring Boot Admin 2.0 详解&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

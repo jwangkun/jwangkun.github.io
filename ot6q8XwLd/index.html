@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Centos7.4  Keepalived安装配 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Centos7.4  Keepalived安装配 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Centos7.4  Keepalived安装配"/>
+    <meta property="og:url" content="https://jwangkun.github.io/ot6q8XwLd/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/D38-UU1Yr/" class="tag">Keepalived</a>
+            
+        </span>
+            <h1>Centos7.4  Keepalived安装配</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-06，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>keepalive：最主要的目的是能够自己调用ipvsadm命令来生成规则，并且能够自动实现将用户需求的访问地址转移到其他节点上来实现的。</p>
+<p>keepalive：在一个节点上提供VIP向外提供服务，将用户的请求转发到后端的realservel上去。</p>
+<p>一个dearicter有两个资源进行工作：</p>
+<p>1、向外的VIP；</p>
+<p>2、在内核中生效的ipvs规则</p>
+<p>keepalive自身启动一个服务，它能够工作在两个节点上（也可以是多个节点），其中当前持有资源的节点称为活动节点Master，另一个称为备用节点backup，；对于Master和backup来讲，Master这个节点会不停的向backup这个节点通告心跳，但他的通告是基于VRRP这种机制来实现的，Master这个节点会一直处于存活状态的，备用节点backup一旦接收不到主节点的心跳传递过来的VRRP信息之后，他就会把资源抢过来在本地使用并在本地生效规则；<br>
+这个规则的生效是：本地有个服务，它只需要把本地的keepalive的那个生效服务中的某个模块把他生效起来就可以了，所以keepalive自身是模块化设计的，它有着诸多模块；有些模块是监控生效ipvs的，去监控配置文件中跟ipvs相关的一些应用；他的主要目的是为ipvs提供高可用性，keepalive除了能实现资源转移之外，还能自身调用ipvs命令来生成规则；而且还能够实现后端realserver的健康状态检测。</p>
+<p>keepalive的核心：<br>
+1、vrrp的实现；<br>
+vrrp：是虚拟冗余路由协议；能把两个网关虚拟成一个网关来使用。<br>
+2、跟vrrp相关的一些配置：vrrp server<br>
+3、vrrp_script 调用vrrp脚本的实现</p>
+<p>对keepalive他的架构是一个主进程称为Mster进程，在一个主进程下回生产两个子进程，一个是用来实现vrrp（keepalive的核心是vrrp），第二个是checkers（检测服务检测可用性）是提供ipvs后端realserver的健康状态检测的;<br>
+VRRP每个虚拟路由中的每个节点是有优先级的，优先级是从,0—255，0和255有特殊用法一般不用，一般来讲数字越大，优先级越高;谁是Master谁是Backup是由选举产生的，谁的优先级越高，谁是Master；<br>
+keepalive是轻量级，适用于节点少的场景；支持多个节点，但是对于同一组服务来讲，仍然跟此前的法则一样，只能有一个节点是活动的，因为VIP只能在一个节点上运行，所他是一主多从的模式；可以有一个主Master多个backup；但是backup越大浪费越大，资源占用越大</p>
+<p>不能让其他节点随意加到集群中来：要通过认证来解决:<br>
+VRRP认证有两种认证：一种是明文认证，双方都配置好域共享密钥这种明文字符串；第二种：可以实现md5或sha1散列这种认证；<br>
+yum install ansible<br>
+如果时间不同步执行：# netdate 172.16.0.1 从主机上同步时间</p>
+<h1 id="安装">安装</h1>
+<p>Centos7.4</p>
+<pre><code>yum install keepalived
+</code></pre>
+<p>Master服务器配置</p>
+<pre><code>vim /etc/keepalived/keepalived.conf
+</code></pre>
+<pre><code>global_defs {
+## keepalived 自带的邮件提醒需要开启 sendmail 服务。 建议用独立的监控或第三方 SMTP
+   router_id LVS_DEVEL
+}
+## keepalived 会定时执行脚本并对脚本执行的结果进行分析，动态调整 vrrp_instance 的优先级。如果脚本执行结果为 0，并且 weight 配置的值大于 0，则优先级相应的增加。如果脚本执行结果非 0，并且 weight配置的值小于 0，则优先级相应的减少。其他情况，维持原本配置的优先级，即配置文件
+中 priority 对应的值。
+vrrp_script chk_nginx {
+script &quot;/etc/keepalived/chk_nginx.sh&quot; ## 检测 nginx 状态的脚本路径
+interval 2 ## 检测时间间隔
+weight -20 ## 如果条件成立，权重-20
+}
+## 定义虚拟路由， VI_1 为虚拟路由的标示符，自己定义名称
+vrrp_instance VI_1 {
+   state MASTER ## 主节点为 MASTER， 对应的备份节点为 BACKUP
+   interface ens192 ## 绑定虚拟 IP 的网络接口，与本机 IP 地址所在的网络接口相同， 我的是 eth0
+   virtual_router_id 33 ## 虚拟路由的 ID 号， 两个节点设置必须一样， 可选 IP 最后一段使用, 相同的 VRID 为一个组，他将决定多播的 MAC 地址
+   priority 100 ## 节点优先级， 值范围 0-254， MASTER 要比 BACKUP 高
+   nopreempt ## 优先级高的设置 nopreempt 解决异常恢复后再次抢占的问题
+   advert_int 1 ## 组播信息发送间隔，两个节点设置必须一样， 默认 1s
+## 设置验证信息，两个节点必须一致
+authentication {
+   auth_type PASS
+   auth_pass 1111 ## 真实生产，按需求对应该过来
+}
+## 将 track_script 块加入 instance 配置块
+track_script {
+   chk_nginx ## 执行 Nginx 监控的服务
+} #
+# 虚拟 IP 池, 两个节点设置必须一样
+virtual_ipaddress {
+   10.213.103.30 ## 虚拟 ip，可以定义多个
+}
+}
+virtual_server 10.213.103.30 80 {
+    delay_loop 6
+    lb_algo rr
+    lb_kind NAT
+    persistence_timeout 50
+    protocol TCP
+
+    real_server 10.213.103.30 80 {
+        weight 1
+        TCP_CHECK{
+            connect_timeout 3
+            nb_get_retry 3
+            delay_before_retry 3
+            connect_port 80
+        }
+    }
+}
+
+</code></pre>
+<p>Backup服务器配置</p>
+<pre><code>vim /etc/keepalived/keepalived.conf
+</code></pre>
+<pre><code>global_defs {
+  router_id LVS_DEVEL
+}
+vrrp_script chk_nginx {
+  script &quot;/etc/keepalived/chk_nginx.sh&quot;
+  interval 2
+  weight -20
+}
+vrrp_instance VI_1 {
+  state BACKUP
+  interface ens192
+  virtual_router_id 33
+  priority 90
+  advert_int 1
+  authentication {
+  auth_type PASS
+  auth_pass 1111
+}
+track_script {
+  chk_nginx
+}
+virtual_ipaddress {
+  10.213.103.30
+}
+}
+virtual_server 10.213.103.30 80 {
+    delay_loop 6
+    lb_algo rr
+    lb_kind NAT
+    persistence_timeout 50
+    protocol TCP
+
+    real_server 10.213.103.130 80 {
+        weight 1
+        TCP_CHECK{
+            connect_timeout 3
+            nb_get_retry 3
+            delay_before_retry 3
+            connect_port 80
+        }
+    }
+    real_server 10.213.103.131 80 {
+        weight 1
+        TCP_CHECK{
+            connect_timeout 3
+            nb_get_retry 3
+            delay_before_retry 3
+            connect_port 80
+        }
+    }
+}
+
+</code></pre>
+<p>配置检测脚本</p>
+<pre><code>vim /etc/keepalived/chk_nginx.sh
+</code></pre>
+<pre><code>=`ps -C nginx --no-header |wc -l`
+if [ $A -eq 0 ];then
+systemctl start nginx
+sleep 2
+if [ `ps -C nginx --no-header |wc -l` -eq 0 ];then
+systemctl stop keepalived.service
+fi
+fi
+</code></pre>
+<p>配置完成后启动服务：</p>
+<pre><code>systemctl start keepalived     #启动
+systemctl stop keepalived      #停止
+systemctl restart keepalived   #重启
+systemctl status keepalived    #查看状态
+</code></pre>
+<h2 id="测试切换">测试切换</h2>
+<p>Master 服务器上执行：</p>
+<blockquote>
+<p>killall nginx</p>
+</blockquote>
+<pre><code>May 19 15:37:23 wsjy-proxy01 Keepalived_vrrp[2163]: VRRP sockpool: [ifindex(2), proto(112), unicast(0), fd(10,11)]
+May 19 15:37:24 wsjy-proxy01 Keepalived_vrrp[2163]: VRRP_Instance(kube-master) Transition to MASTER STATE
+May 19 15:38:13 wsjy-proxy01 Keepalived_vrrp[2163]: /usr/bin/killall -0 nginx exited with status 1
+May 19 15:38:13 wsjy-proxy01 Keepalived_vrrp[2163]: VRRP_Script(check-haproxy) failed
+May 19 15:38:13 wsjy-proxy01 Keepalived_vrrp[2163]: VRRP_Instance(kube-master) Changing effective priority from 120 to 90
+May 19 15:38:14 wsjy-proxy01 Keepalived_vrrp[2163]: VRRP_Instance(kube-master) Received advert with higher priority 110, ours 90
+May 19 15:38:14 wsjy-proxy01 Keepalived_vrrp[2163]: VRRP_Instance(kube-master) Entering BACKUP STATE
+May 19 15:38:14 wsjy-proxy01 Keepalived_vrrp[2163]: VRRP_Instance(kube-master) removing protocol VIPs.
+</code></pre>
+<p>查看到MASTER切换为 BACKUP状态。</p>
+<h2 id="keepalived日志配置">Keepalived日志配置</h2>
+<p>1、/usr/local/keepalived/etc/sysconfig/keepalived及/etc/sysconfig/keepalived最后的KEEPALIVED_OPTIONS改为&quot;-D -d -S 0&quot;</p>
+<p>2、修改/etc/rsyslog.conf</p>
+<p>*.info;mail.none;authpriv.none;cron.none   /var/log/messages</p>
+<p>改为</p>
+<p>*.info;mail.none;authpriv.none;cron.none;local0.none  /var/log/messages</p>
+<p>末尾添加local0.* /var/log/keepalived.log</p>
+<p>3、重启</p>
+<pre><code>systemctl restart rsyslog
+</code></pre>
+<p>4、 重启</p>
+<pre><code>systemctl restart keepalived
+</code></pre>
+<p>5、 keepalived日志路径/var/log/keepalived.log</p>
+<p>6、执行ip addr检查vip在那台机器上</p>
+<h1 id="vip切换通知配置">VIP切换通知配置</h1>
+<p>配置Linux邮件服务</p>
+<pre><code>yum remove sendmail
+yum remove postfix
+</code></pre>
+<p>然后修改/etc/mail.rc，在文件末尾增加以下内容，指定外部的smtp服务器地址、帐号密码等</p>
+<pre><code>set from=发件邮箱
+set smtp=smtp.qq.comset smtp-auth-user=用户
+set smtp-auth-password=密码
+set smtp-auth=login
+</code></pre>
+<p>测试</p>
+<pre><code>echo Hello World | mail -s &quot;test&quot; 管理员邮箱，多个之间以英文逗号分隔
+</code></pre>
+<p>在/etc/keepalived下新建notify.sh脚本并授予执行权限，内容如下</p>
+<pre><code>#!/bin/bash
+# Author: MageEdu &lt;linuxedu@foxmail.com&gt;
+# description: An example of notify script
+#
+vip=10.213.103.118
+contact='管理员邮箱，多个以逗号分隔'
+
+notify() {
+    mailsubject=&quot;`hostname` to be $1: $vip floating&quot;
+    mailbody=&quot;`date '+%F %H:%M:%S'`: vrrp transition, `hostname` changed to be $1&quot;
+    echo $mailbody | mail -s &quot;$mailsubject&quot; $contact
+}
+ 
+case &quot;$1&quot; in
+    master)
+        notify master
+        exit 0
+    ;;
+    backup)
+        notify backup
+        exit 0
+    ;;
+    fault)
+        notify fault
+        exit 0
+    ;;
+    *)
+        echo 'Usage: `basename $0` {master|backup|fault}'
+        exit 1
+    ;;
+esac
+</code></pre>
+<p>/usr/local/keepalived/etc/keepalived/keepalived.conf及/etc/keepalived/keepalived.conf中vrrp_instance VI_1中添加</p>
+<pre><code>notify_master &quot;/etc/keepalived/notify.sh master&quot;
+
+notify_backup &quot;/etc/keepalived/notify.sh backup&quot;
+</code></pre>
+<p>开放防火墙访问</p>
+<pre><code>firewall-cmd --zone=public --add-rich-rule 'rule family=&quot;ipv4&quot; source address=&quot;10.213.120.59&quot; accept' --permanent
+
+firewall-cmd --zone=public --add-rich-rule 'rule family=&quot;ipv4&quot; source address=&quot;10.213.120.58&quot; accept' --permanent
+
+ firewall-cmd --reload
+</code></pre>
+<p>其他注意内容</p>
+<p>A、如果在正式环境中，建议将添加回环地址作为开机启动项，并且keepalived 也配置成开机启动</p>
+<p>B、如果使用了防火墙，务必允许keepalived使用的vrrp组播通过防火墙，否则虚IP会同时出现在主备两台机器上。</p>
+<p>命令如下（网卡换成你的网卡即可）：</p>
+<pre><code>firewall-cmd --direct --permanent --add-rule ipv4 filter INPUT 0 --in-interface [网卡] --destination 224.0.0.18 --protocol vrrp -j ACCEPT
+
+firewall-cmd --reload
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/F7N5X4j8J/">
+              <span class="post-title">
+                使用 kainstall 工具一键部署 kubernetes 高可用集群&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

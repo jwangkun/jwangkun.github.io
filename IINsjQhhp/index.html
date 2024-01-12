@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Git入门教程分享 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Git入门教程分享 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Git入门教程分享"/>
+    <meta property="og:url" content="https://jwangkun.github.io/IINsjQhhp/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/H0YOCYFRJ/" class="tag">Git</a>
+            
+        </span>
+            <h1>Git入门教程分享</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-16，12 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h1 id="简介">简介</h1>
+<p>Git是一款免费、开源的<strong>分布式</strong>版本控制系统，GIT之父也是linux之父Linus。linux开源后参与贡献者众多，导致审查及合并、分发代码工作量过大，所以又花了一周时间开发了git。</p>
+<h3 id="基本概念解析">基本概念解析</h3>
+<p><strong>工作空间</strong>： 指的是你在当前设备存放代码文件的工作目录<br>
+<strong>本地仓库</strong>： 指的是你在当前设备用于存放不同版本代码的本地存储区，一般在工作目录的 .git 目录下<br>
+<strong>远程仓库</strong>： 指的是用于存放不同版本代码的远程网络存储区，一般由代码托管平台提供。主流平台有（github|gitlab|私有化gitlab|私有化gitea|阿里云|腾讯云）等<br>
+<strong>分支</strong>： 指的是从一个开发历史线分离出的另一个开发历史线<br>
+<strong>快照（commit）</strong>：指某一时段代码变更的记录，快照组成代码开发历史记录<br>
+<strong>版本号</strong>：使用SHA-1来生成一个40位的十六进制唯一字符串来标识一个代码快照。（注：GIT版本号是无序的，没有一个全局的版本号）</p>
+<hr>
+<h3 id="qa">QA</h3>
+<p><strong>分支能做什么？</strong><br>
+分支能够很好的把我们的操作与开发主线进行隔离，为了不让我们的修改影响到主线程序，只有通过审核后的代码才能够合并到主线中去，所以通过使用分支是最理想的方法。</p>
+<blockquote>
+<p>举个例子：我们在一个迭代周期（一般是两周）内计划升级用户管理和商品管理的功能，开发和测试过程中产生了近百个代码提交记录，在最后时刻准备上线，因为某些原因放弃商品管理升级，只保留用户管理，这时候就需要把商品管理的代码剔除，如果一开始就通过合理的规划分支，我们只需合并用户管理分支即可，反之没有合理的分支管理则是一场噩梦。</p>
+</blockquote>
+<p><strong>程序员为什么要学习GIT？</strong></p>
+<ol>
+<li><strong>Git是分布式</strong>（可离线工作、可多个远程仓库协作、嵌套项目），SVN是集中式（必须联网，单点仓库）</li>
+<li>Git分支廉价、速度快、灵活，SVN分支昂贵、慢、重</li>
+<li>共有或私有代码托管平台成熟易用，生态系统丰富、发展势头强劲；代码审核直观方便高效</li>
+<li>掌握GIT可以并行开发，协同开发、轻松应对各种规模的项目和复杂需求</li>
+<li>更容易融入开源社区、参与或发起开源项目</li>
+<li><strong>丰富的命令行可以精确控制代码及更容易对接各种开发工具</strong></li>
+</ol>
+<p><strong>GIT有什么缺点？</strong><br>
+GIT不能对二进制文件做增量提交，导致文件副本过多而撑大仓库体积，解决方法是使用LFS<br>
+GIT项目管理是独立的且扁平化的，权限只能分项目管理而不是目录，所不能像SVN一样每一个目录都可以当作一个项目来管理<br>
+Git学习成本高（主要是功能强大）</p>
+<h3 id="主流分支管理方法">主流分支管理方法</h3>
+<p>业内有很多的分支管理方法，包括著名的GitFlow、TBD以及从他们衍生出来的版本。<br>
+<strong>GitFlow</strong>设计非常全面，考虑到了实际开发过程中的各种问题，都能稳定应对，是非常适合大型项目的代码管理。他的主要理念包括2个主干分支——Master和Develop，1个发布分支——Release，若干个开发分支——Feature，以及HotFix分支。整体实施流程略微复杂，对持续集成不太友好。<br>
+<strong>TBD</strong>（Trunk Based Development）早在svn时代就已经流行，是种比较简单的分支管理模型，他只有一个主干分支，每个人写完代码自测通过后就往主干上面Push，要发布的时候就拉个Release分支，对持续集成友好，但如果临上线前发现有问题，剔除代码比较困难。</p>
+<h1 id="git分支原理">GIT分支原理</h1>
+<p>GIT分支和SVN的分支区别，SVN的分支就是一个目录，是一份代码拷贝，新分支没有过去的历史记录。而GIT分支是一个指向commit对象的指针，差异通过元数据记录在版本库中。GIT中有一个特别的指针名为HEAD，它是一个指向你正在工作中的本地分支的指针，切换分支，本质上就是移动HEAD指针。Git鼓励频繁使用分支。</p>
+<figure data-type="image" tabindex="1"><img src="https://jwangkun.github.io/post-images/1605493144035.jpg" alt="" loading="lazy"></figure>
+<h2 id="图解git结构">图解GIT结构</h2>
+<figure data-type="image" tabindex="2"><img src="https://jwangkun.github.io/post-images/1605493152466.png" alt="" loading="lazy"></figure>
+<p>画图工具： https://www.processon.com/i/54c5c898e4b0c7bde4f2156c</p>
+<blockquote>
+<p>注：git fetch是将远程仓库的更新拉取到本地仓库，不影响工作区。而git pull则是将远程仓库的代码拉到本地仓库并合并到工作区。</p>
+</blockquote>
+<hr>
+<h2 id="git安装">GIT安装</h2>
+<p>从官网下载(网速很慢)： https://git-scm.com/<br>
+国内可通过腾讯软件库下载 https://pc.qq.com/search.html#!keyword=git<br>
+安装方法：双击安装包一直点下一步即可，这里略过。</p>
+<h3 id="辅助工具推荐">辅助工具推荐</h3>
+<p>Meld是一个功能强大的文件比对工具，支持作为git的插件使用，可用于检查差异和合并代码。</p>
+<h2 id="httpmeldmergeorg">http://meldmerge.org/</h2>
+<p>meld 安装配置</p>
+<blockquote>
+<p>从官网下载安装，然后打开 git base 执行以下命令配置你的比较工具</p>
+</blockquote>
+<pre><code>git config --global merge.tool meldgit config --global mergetool.meld.path &quot;/c/Program Files (x86)/Meld/Meld.exe&quot; # 这里软件路径改成你自己的安装路径
+</code></pre>
+<blockquote>
+<p>当代码冲突时，执行 git mergetool 启动三路合并</p>
+</blockquote>
+<figure data-type="image" tabindex="3"><img src="https://jwangkun.github.io/post-images/1605493174061.png" alt="" loading="lazy"></figure>
+<p>VSCODE 是微软开发的一款代码编辑工具，里面自带的GIT管理功能非常好用，特别是冲突解决直观高效<br>
+TortoiseGit 是一个GIT的GUI工具，操作及界面和TortoiseSVN非常相似（我自己见过没用过）。</p>
+<hr>
+<h3 id="新建本地代码库">新建本地代码库</h3>
+<pre><code># 方法一：为当前目录初始化一个Git代码库git init# 方法二：新建一个目录，将其初始化为Git代码库git init [project-name]# 方法三：克隆一个项目git clone [url]cd xxx # 进入目录 # 克隆一份裸版本库再以镜像方式推送服务器git clone --bare [url] &amp;&amp; cd xxxgit push –mirror [url]# 查看当前状态git status
+</code></pre>
+<blockquote>
+<p>注：HTTP 方式需要输入用户名密码，如果输错可通过命令删除 git config —system —unset credential.helper</p>
+</blockquote>
+<hr>
+<h3 id="配置">配置</h3>
+<pre><code># 显示当前的Git配置git config --list# 编辑Git配置文件git config -e --global# 设置提交代码时的用户名和邮箱git config --global user.name &quot;[name]&quot;git config --global user.email &quot;[email address]&quot;
+</code></pre>
+<hr>
+<h3 id="查看信息">查看信息</h3>
+<pre><code>gitk # git bash 才有git loggit status# 查看当前详细分支信息（可看到当前分支与对应的远程追踪分支）:git branch -vv# 查看当前远程仓库信息git remote -vvgit remote -a
+</code></pre>
+<hr>
+<h3 id="增加删除文件">增加/删除文件</h3>
+<pre><code># 添加当前目录的所有文件到暂存区git add .# 删除工作区文件，并且将这次删除放入暂存区git rm [file1] [file2] ...
+</code></pre>
+<hr>
+<h3 id="代码提交">代码提交</h3>
+<pre><code># 提交暂存区到仓库区git commit -m [message]# 提交工作区自上次commit之后的变化，直接到仓库区git commit -a# 提交时显示所有diff信息git commit -v# 使用一次新的commit，替代上一次提交# 如果代码没有任何新变化，则用来改写上一次commit的提交信息git commit --amend -m [message]# 重做上一次commit，并包括指定文件的新变化git commit --amend [file1] [file2] ...
+</code></pre>
+<hr>
+<h3 id="分支">分支</h3>
+<pre><code># 列出所有本地分支git branch# 列出所有远程分支git branch -r# 列出所有本地分支和远程分支git branch -a# 新建一个分支，但依然停留在当前分支git branch [branch-name]# **** 新建一个分支，并切换到该分支 ****git checkout -b [branch]# 新建一个分支，指向指定commitgit branch [branch] [commit]# 新建一个分支，与指定的远程分支建立追踪关系git branch --track [branch] [remote-branch]
+</code></pre>
+<hr>
+<pre><code># 切换到指定分支，并更新工作区git checkout [branch-name]# 切换到上一个分支git checkout -# 建立追踪关系，在现有分支与指定的远程分支之间git branch --set-upstream [branch] [remote-branch]# 合并指定分支到当前分支git merge [branch] --no-ff# 把某个分支合并到当前工作区，（对完全不同历史的分支进行强制合并）git merge &lt;对应的分支&gt; --allow-unrelated-histories# 选择一个commit，合并进当前分支git cherry-pick [commit]# 删除分支git branch -d [branch-name]# 删除本地的远程分支记录git branch -dr [remote/branch]# 删除远程分支git push origin --delete [branch-name]
+</code></pre>
+<hr>
+<h3 id="远程同步">远程同步</h3>
+<pre><code># 下载远程仓库的所有变动git fetch [remote]# 显示所有远程仓库git remote -v# 显示某个远程仓库的信息git remote show [remote]# 增加一个新的远程仓库，并命名git remote add [shortname] [url]# 取回远程仓库的变化，并与本地分支合并git pull [remote] [branch]# 上传本地指定分支到远程仓库git push [remote] [branch]# 强行推送当前分支到远程仓库，即使有冲突git push [remote] --force# 推送所有分支到远程仓库git push [remote] --all
+</code></pre>
+<hr>
+<h3 id="撤销">撤销</h3>
+<pre><code># 恢复暂存区的指定文件到工作区git checkout [file]# 恢复某个commit的指定文件到暂存区和工作区git checkout [commit] [file]# 恢复暂存区的所有文件到工作区git checkout .# 清理未纳入版本管理的文件和目录git clean -df# 重置暂存区的指定文件，与上一次commit保持一致，但工作区不变git reset [file]# 重置暂存区与工作区，与上一次commit保持一致git reset --hard# 重置当前分支的指针为指定commit，同时重置暂存区，但工作区不变git reset [commit]# 重置当前分支的HEAD为指定commit，同时重置暂存区和工作区，与指定commit一致git reset --hard [commit]# 重置当前HEAD为指定commit，但保持暂存区和工作区不变git reset --keep [commit]# 新建一个commit，用来撤销指定commit# 后者的所有变化都将被前者抵消，并且应用到当前分支git revert [commit]# 暂时将未提交的变化移除，稍后再移入git stashgit stash pop
+</code></pre>
+<h3 id="子模块-submodule">子模块 submodule</h3>
+<pre><code># 添加子模块git submodule add [url] [path]# 子模块批量操作git submodule foreach [git status]
+</code></pre>
+<hr>
+<p><a href="http://www.ruanyifeng.com/blog/2015/12/git-cheat-sheet.html">常用命令</a><br>
+<img src="http://hn.uiyun.com:7500/Public/Uploads/2020-06-28/5ef834f5249d6.jpg" alt="img" loading="lazy"></p>
+<hr>
+<h3 id="添加忽略文件或目录">添加忽略文件或目录</h3>
+<blockquote>
+<p>git忽略文件需要提交一个隐藏文件“.gitignore”，在此文件中定义忽略文件的规则；可以通过git bash命令行新建这个文件</p>
+</blockquote>
+<pre><code>touch .gitignore
+</code></pre>
+<blockquote>
+<h4 id="配置语法">配置语法：</h4>
+<p>以斜杠“/”开头表示目录；<br>
+以星号“*”通配多个字符；<br>
+以问号“?”通配单个字符<br>
+以方括号“[]”包含单个字符的匹配列表；<br>
+以叹号“!”表示不忽略(跟足宗)匹配到的文件或目录；<br>
+git 对于 .ignore 配置文件是按行从上到下进行规则匹配的，意味着如果前面的规则匹配的范围更大，则后面的规则将不会生效；</p>
+</blockquote>
+<hr>
+<h3 id="相关知识">相关知识</h3>
+<h4 id="markdown">markdown</h4>
+<p>Markdown是Aaron Swartz 跟John Gruber共同设计的排版语言，Markdown 的目标是实现「易读易写」。</p>
+<h4 id="readme">readme</h4>
+<p>用于描述项目的文件，采用Markdown语法编写，文件名普遍使用 “README.md”，md其实就是Markdown缩写。</p>
+<hr>
+<h4 id="github">github</h4>
+<p>Github是运用Git思想来工作的一个商业网站，拥有超过2400万的开发者在上面开源自己的项目，这2400万用户几乎涵盖了这个世界上所有最优秀的开发者。在Github上面获得fork或star，都意味着其它工程师对这个项目的认可。</p>
+<h4 id="gitlab">gitlab</h4>
+<p>GitLab 是一个用于仓库管理系统的开源项目，使用Git作为代码管理工具，并在此基础上搭建起来的web服务，可以用gitlab来搭建一个类似github那样的网站。</p>
+<h3 id="躺坑记录">躺坑记录</h3>
+<p>git有可以创建4096长度的文件名，然而在windows最多是260，因为git用了旧版本的windows api，为此踩了个坑。</p>
+<blockquote>
+<p>解决： git config —global core.longpaths true</p>
+</blockquote>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/KCdUy6FHC/">
+              <span class="post-title">
+                Linux 系统时间同步方法小结&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

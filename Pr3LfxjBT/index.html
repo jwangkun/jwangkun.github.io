@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot整合redis做为缓存 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot整合redis做为缓存 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot整合redis做为缓存"/>
+    <meta property="og:url" content="https://jwangkun.github.io/Pr3LfxjBT/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/R2P-hE8zq/" class="tag">Redis</a>
+            
+        </span>
+            <h1>SpringBoot整合redis做为缓存</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-10，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="redis简介">redis简介</h2>
+<p>redis作为一种非关系型数据库，读写非常快，应用十分广泛，它采用key-value的形式存储数据，value常用的五大数据类型有string(字符串)，list(链表)，set（集合），zset(有序集合)和hash(哈希表)。</p>
+<p>redis的特性决定了它的功能，它可以用来做以下这些事情！</p>
+<ol>
+<li>排行榜，利用zset可以方便的实现排序功能</li>
+<li>计数器，利用redis中原子性的自增操作，可以统计到阅读量，点赞量等功能</li>
+<li>简单消息队列，list存储结构，满足先进先出的原则，可以使用lpush/rpop或rpush/lpop实现简单消息队列</li>
+<li>session共享，分布式系统中，可以利用redis实现session共享。spring官方提供的分布式解决方案Spring Session就是利用redis 实现的。</li>
+</ol>
+<p>Spring Boot对redis也实现自动化装配，使用非常方便。</p>
+<h2 id="spring-boot整合redis">Spring Boot整合redis</h2>
+<h3 id="1-引入redis依赖">1. 引入redis依赖</h3>
+<pre><code>&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-data-redis&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+           &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
+        &lt;artifactId&gt;commons-pool2&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<h3 id="2-配置redis相关信息">2. 配置redis相关信息</h3>
+<pre><code>spring:
+  redis:
+    # redis库
+    database: 0
+    # redis 服务器地址
+    host: localhost
+    # redis 端口号
+    port: 6379
+    # redis 密码
+    password:
+    # 连接超时时间（毫秒）
+    timeout: 1000
+    lettuce:
+      pool:
+        # 连接池最大链接数（负数表示没有限制）
+        max-active: 8
+        # 连接池最大阻塞等待时间（负数表示没有限制）
+        max-wait: -1
+        # 连接池最大空闲连接数
+        max-idle: 8
+        # 连接池最小空闲连接数
+        min-idle: 0
+</code></pre>
+<h3 id="3-操作redis">3. 操作redis</h3>
+<p>SpringBoot提供了两个bean来操作redis，分别是<code>RedisTemplate</code> 和 <code>StringRedisTemplate</code>，这两者的主要区别如下。</p>
+<p><code>RedisTemplate</code>使用的是<code>JdkSerializationRedisSerializer</code> 存入数据会将数据先序列化成字节数组然后在存入Redis数据库。</p>
+<p><code>StringRedisTemplate</code>使用的是StringRedisSerializer。</p>
+<p>下面一起来看看效果：</p>
+<pre><code>@RestController
+public class RedisDemo {
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @GetMapping(&quot;redisTmeplateData&quot;)
+    public void redisTemplateData(){
+
+        redisTemplate.opsForValue().set(&quot;name&quot;,&quot;Java旅途&quot;);
+    }
+
+    @GetMapping(&quot;stringRedisTemplateData&quot;)
+    public void stringRedisTemplateData(){
+
+        stringRedisTemplate.opsForValue().set(&quot;desc&quot;,&quot;坚持分享java技术栈&quot;);
+    }
+}
+</code></pre>
+<p><strong>第一个方法存入的数据如下图</strong>：</p>
+<figure data-type="image" tabindex="1"><img src="https://segmentfault.com/img/remote/1460000037430719" alt="img" loading="lazy"></figure>
+<p><strong>第二个方法存入的数据如下图</strong>：</p>
+<figure data-type="image" tabindex="2"><img src="https://segmentfault.com/img/remote/1460000037430718" alt="img" loading="lazy"></figure>
+<p>由于RedisTemplate是序列化成字节数组存储的，因此在redis客户端的可读性并不好。</p>
+<h2 id="自动缓存">自动缓存</h2>
+<p><code>@Cacheable</code>可以标记在一个方法上，也可以标记在一个类上。当标记在一个方法上时表示该方法是支持缓存的，当标记在一个类上时则表示该类所有的方法都是支持缓存的。</p>
+<p>如果添加了<code>@Cacheable</code>注解，那么方法被调用后，值会被存入redis，下次再调用的时候会直接从redis中取值返回。</p>
+<pre><code>@GetMapping(&quot;getStudent&quot;)
+@Cacheable(value = &quot;student:key&quot;)
+public Student getStudent(){
+    log.info(&quot;我不是缓存，我是new的对象！&quot;);
+    Student student = new Student(&quot;Java旅途&quot;,26);
+    return student;
+}
+</code></pre>
+<p><strong>记得要开启缓存，在启动类加上<code>@EnableCaching</code>注解</strong></p>
+<p>访问上面的方法，如果不打印日志，则是从缓存中获取的值。</p>
+<h2 id="封装redisutils">封装redisUtils</h2>
+<p>RedisTemplate提供了很多方法来操作redis，但是找起来比较费事，为了更好的操作redis，一般会封装redisUtils来满足业务开发。这里简单封装几个做个示例，如果开发中有需求可以自己封装。</p>
+<pre><code>public class RedisUtils {
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    /**
+     * 普通存入
+     * @param key
+     * @param value
+     * @return
+     */
+    public boolean set(String key,Object value){
+        try {
+            redisTemplate.opsForValue().set(key,value);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 普通获取key
+     * @param key
+     * @return
+     */
+    public Object get(String key){
+        return key == null ? null : redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 存入key，设置过期时长
+     * @param key
+     * @param value
+     * @param time
+     * @return
+     */
+    public boolean set(String key,Object value,long time){
+        try {
+            if(time &gt; 0){
+                redisTemplate.opsForValue().set(key,value,time, TimeUnit.SECONDS);
+            }else{
+                redisTemplate.opsForValue().set(key,value);
+            }
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 判断key是否存在
+     * @param key
+     * @return
+     */
+    public boolean exists(String key){
+        try {
+            return redisTemplate.hasKey(key);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 删除key
+     * @param key
+     */
+    public void del(String key){
+        try {
+            if(key != null &amp;&amp; key.length() &gt; 0){
+                redisTemplate.delete(key);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/6-kkp-W9S/">
+              <span class="post-title">
+                SpringBoot数据库配置信息加密&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Centos 挂在iSCSI磁盘 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Centos 挂在iSCSI磁盘 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Centos 挂在iSCSI磁盘"/>
+    <meta property="og:url" content="https://jwangkun.github.io/bOVNtCNyF/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/uWado-RdU/" class="tag">iSCSI</a>
+            
+            <a href="https://jwangkun.github.io/ffAuwwMqh/" class="tag">存储</a>
+            
+        </span>
+            <h1>Centos 挂在iSCSI磁盘</h1>
+            <span class="meta">
+            	Posted on
+              2022-10-28，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>1、安装工具</p>
+<pre><code>[root@localhost /]# yum -y install iscsi-initiator-utils
+</code></pre>
+<p>2、给 initiator 命名(默认不修改)</p>
+<pre><code>[root@localhost /]# vim /etc/iscsi/initiatorname.iscsi
+</code></pre>
+<p>3、启动服务</p>
+<pre><code>[root@localhost /]# systemctl start iscsi
+[root@localhost /]# systemctl enable iscsi
+
+Created symlink from /etc/systemd/system/remote-fs.target.wants/iscsi.service to /usr/lib/systemd/system/iscsi.service.
+[root@localhost /]# systemctl status iscsi
+● iscsi.service - Login and scanning of iSCSI devices
+   Loaded: loaded (/usr/lib/systemd/system/iscsi.service; enabled; vendor preset: disabled)
+   Active: inactive (dead)
+Condition: start condition failed at 四 2022-04-28 21:01:36 CST; 26s ago
+     Docs: man:iscsiadm(8)
+           man:iscsid(8)
+
+4月 27 16:17:48 localhost.localdomain systemd[1]: Unit iscsi.service cannot ...
+4月 27 16:17:48 localhost.localdomain systemd[1]: Unit iscsi.service cannot ...
+4月 27 16:20:16 localhost.localdomain systemd[1]: Unit iscsi.service cannot ...
+Hint: Some lines were ellipsized, use -l to show in full.
+</code></pre>
+<p>4、发现存储</p>
+<pre><code>iscsiadm -m discovery -t st -p 10.213.132.24
+
+	```
+	iscsiadm -m discovery -t st -p 10.213.132.24
+	
+	iscsiadm: cannot make connection to 10.213.132.24: Connection refused
+	```
+</code></pre>
+<p>5、登陆存储 / 连接 target</p>
+<pre><code>iscsiadm -m discovery -t st -p 10.213.132.24  -l
+
+10.213.132.30:3260,2461 iqn.2007-11.com.nimblestorage:nimblegroup-g4f9e7cc0916de8eb
+10.213.132.31:3260,2461 iqn.2007-11.com.nimblestorage:nimblegroup-g4f9e7cc0916de8eb
+Logging in to [iface: default, target: iqn.2007-11.com.nimblestorage:nimblegroup-g4f9e7cc0916de8eb, portal: 10.213.132.30,3260] (multiple)
+Logging in to [iface: default, target: iqn.2007-11.com.nimblestorage:nimblegroup-g4f9e7cc0916de8eb, portal: 10.213.132.31,3260] (multiple)
+Login to [iface: default, target: iqn.2007-11.com.nimblestorage:nimblegroup-g4f9e7cc0916de8eb, portal: 10.213.132.30,3260] successful.
+Login to [iface: default, target: iqn.2007-11.com.nimblestorage:nimblegroup-g4f9e7cc0916de8eb, portal: 10.213.132.31,3260] successful.
+</code></pre>
+<p>6、验证 iscsi 连接，查看是否得到外界磁盘</p>
+<pre><code> lsscsi
+
+0:0:66:0]   enclosu HUAWEI   Expander 12Gx16  131   -        
+[0:2:0:0]    disk    AVAGO    HW-SAS3508       5.06  /dev/sda 
+[0:2:1:0]    disk    AVAGO    HW-SAS3508       5.06  /dev/sdb 
+[0:2:2:0]    disk    AVAGO    HW-SAS3508       5.06  /dev/sdc 
+[0:2:3:0]    disk    AVAGO    HW-SAS3508       5.06  /dev/sdd 
+
+[15:0:0:0]   disk    Nimble   Server           1.0   /dev/sde 
+[16:0:0:0]   disk    Nimble   Server           1.0   /dev/sdf
+</code></pre>
+<p>然后就可以像操作本地磁盘一样来操作 iscsi 磁盘 了。由于iscsi使用了多链路，所以我们<strong>multipath做链路聚合</strong></p>
+<p><strong>安装multipath软件</strong></p>
+<pre><code class="language-jsx">yum install -y device-mapper-multipath
+rpm -qa | grep multipath
+
+device-mapper-multipath-0.4.9-123.el7.x86_64
+device-mapper-multipath-libs-0.4.9-123.el7.x86_64
+</code></pre>
+<p><strong>生成multipath配置</strong>执行命令<code>mpathconf --enable</code></p>
+<p>在/etc目录下生成配置文件multipath.conf</p>
+<pre><code class="language-jsx">mpathconf --enable
+</code></pre>
+<pre><code class="language-jsx">systemctl restart multipathd
+</code></pre>
+<p>修改mulipath 配置文件（系统盘排除）<br>
+vim  /etc/multipath.conf</p>
+<pre><code class="language-jsx">defaults {
+    user_friendly_names yes
+}
+
+设置黑名单列表，示例环境sda、sdb磁盘为系统RAID盘，故而排除
+
+blacklist {
+
+devnode &quot;^sd[a-b]&quot;
+
+}
+
+multipaths {
+
+multipath {
+
+path_grouping_policy    multibus
+
+#path_checker           readsector0
+
+prio                    &quot;random&quot;
+
+path_selector           &quot;round-robin 0&quot;
+
+}
+
+}
+
+devices {
+
+device {
+
+vendor        &quot;vcluster&quot;
+
+product       &quot;12.2.12&quot;
+
+path_checker  readsector0
+
+path_selector &quot;round-robin 0&quot;
+
+failback      immediate
+
+no_path_retry fail
+
+}
+</code></pre>
+<p><strong>修改multipath配置</strong>修改配置文件/etc/mulipath.conf信息如下，之后执行命令重启服务</p>
+<pre><code class="language-jsx">systemctl restart multipathd
+</code></pre>
+<p><strong>刷新所有多路径配置：</strong></p>
+<pre><code class="language-jsx">multipath -F
+</code></pre>
+<p><strong>查看multipath状态</strong></p>
+<pre><code class="language-jsx"> *multipath -ll*
+</code></pre>
+<p>此时本地可以看到新增的虚拟磁盘 <code>/dev/mapper/mpatha</code> ，该虚拟磁盘通过两条iscsi路径提供，当前配置为主备模式（同一时刻只有一条路径处于活动状态，可写入数据）</p>
+<p><strong>多路径格式化，对磁盘操作提示要分区</strong></p>
+<pre><code class="language-jsx">fdisk -l
+
+Disk /dev/mapper/mpatha: 10995.1 GB, 10995116277760 bytes, 21474836480 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+</code></pre>
+<p><strong>格式化磁盘</strong></p>
+<pre><code class="language-jsx">mkfs -t ext4 /dev/mapper/mpatha
+</code></pre>
+<p><strong>挂载磁盘</strong></p>
+<pre><code class="language-jsx">mkdir  /data
+mount  /dev/mapper/mpatha   /data
+df -h
+</code></pre>
+<p><strong>写入开机启动项，并挂载</strong></p>
+<pre><code class="language-jsx">echo '/dev/mapper/mpatha  /data ext4       defaults        0 0' &gt;&gt; /etc/fstab
+
+mount -a
+
+df -h
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/i-pthMtMd/">
+              <span class="post-title">
+                IO测试工具之fio详解&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

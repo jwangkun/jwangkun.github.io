@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Kubernetes 部署 Wordpress+MySQL | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Kubernetes 部署 Wordpress+MySQL | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Kubernetes 部署 Wordpress+MySQL"/>
+    <meta property="og:url" content="https://jwangkun.github.io/NOhi3BQeN/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/_JVrn2ZGG/" class="tag">MySQL</a>
+            
+        </span>
+            <h1>Kubernetes 部署 Wordpress+MySQL</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <!-- more -->
+<p>这部分我们结合之前的 k8s 知识点给大家展示如何使用 kubernetes 部署 wordpress+MySQL, 并利用 NFS 去保存我们容器的源代码以及 DB 数据.</p>
+<!-- more -->
+<p>安装环境</p>
+<p>System: CentOS 7.4</p>
+<p>Kubernetes: Kubernetes1.9</p>
+<p>Docker: 17.03.2-ce</p>
+<p>kube-master 10.110.16.10</p>
+<p>kube-node-1 10.110.16.11</p>
+<p>一. NFS 配置:</p>
+<ol>
+<li>NFS 依赖包安装</li>
+</ol>
+<p>在 Master 与 Node 分别安装 NFS 组件</p>
+<pre><code class="language-shellhe"> yum install nfs-utils -y
+</code></pre>
+<p>Tip: 这里需保证 nfs-utils 安装到所有 master 和 node 中, 否则容器挂载 NFS 时会报错.</p>
+<ol start="2">
+<li>为 Master 下 mysql data 和 wordpress 源码配置 NFS 共享目录</li>
+</ol>
+<pre><code># systemctl enable nfs-server &amp;&amp; systemctl start nfs-server
+
+# mkdir -p /kube/mysql-db
+
+# mkdir -p /kube/wordpress
+
+# chown nfsnobody:nfsnobody /kube/mysql-db
+
+# chown nfsnobody:nfsnobody /kube/wordpress
+
+# chmod 755 /kube/mysql-db
+
+# chmod 755 /kube/wordpress
+
+# echo -e &quot;/kube/mysql-db    kube-(rw,sync,no_subtree_check,no_root_squash)&quot; &gt; /etc/exports
+
+# echo -e &quot;/kube/wordpress    kube-(rw,sync,no_subtree_check,no_root_squash)&quot; &gt;&gt; /etc/exports
+</code></pre>
+<p>Tip: 这里 kube-* 限制只有 kube 相关的 server 才能连接 Master 下 NFS 共享目录, no_root_squash 参数保证 wordpress-mysql pod 在初始化 mysql 配置的时候向在其下挂载的 / var/lib/mysql 目录有写入权限</p>
+<ol start="3">
+<li>应用配置</li>
+</ol>
+<pre><code># exportfs -a
+</code></pre>
+<p>二. Persistent volume 配置</p>
+<ol>
+<li>
+<p>为 mysql data 与 wordpress 源码存储创建 Persistent volume</p>
+<p><strong>kubectl create -f mysql-pv.yaml</strong></p>
+</li>
+</ol>
+<pre><code class="language-bsh">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+  labels:
+    app: mysql
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  nfs:
+    path: /kube/mysql-db
+    server: kube-master
+</code></pre>
+<p>​		kubectl create -f wordpress-pv.yaml</p>
+<pre><code class="language-bsh">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wp-pv
+  labels:
+    app: wordpress
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  nfs:
+    path: /kube/wordpress
+    server: kube-master
+</code></pre>
+<ol start="2">
+<li>
+<p>创建存放 mysql data 的 PVC</p>
+<p>kubectl create -f mysql-pvc.yaml</p>
+</li>
+</ol>
+<pre><code class="language-bsh">kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mysql-pv-claim
+  labels:
+    app: mysql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+</code></pre>
+<ol start="3">
+<li>
+<p>创建存放 wordpress 源码的 PVC</p>
+<p>kubectl create -f wordpress-pvc.yaml</p>
+</li>
+</ol>
+<pre><code class="language-bsh">kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: wp-pv-claim
+  labels:
+    app: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+</code></pre>
+<p>查看绑定</p>
+<p># <strong>kubectl get pvc</strong></p>
+<pre><code>NAME             STATUS    VOLUME     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+
+mysql-pv-claim   Bound     mysql-pv   5Gi        RWO                           3m
+
+wp-pv-claim      Bound     wp-pv      5Gi        RWO                           6s
+</code></pre>
+<p>三. Secret 配置</p>
+<ol>
+<li>创建 mysql root password</li>
+</ol>
+<p># <strong>kubectl create secret generic mysql-pass --from-literal='password=countonme'</strong></p>
+<p>四. Deployment 配置</p>
+<ol>
+<li>部署 mysql deployment with PVC</li>
+</ol>
+<p># <strong>kubectl create -f mysql-deployment.yaml</strong></p>
+<pre><code class="language-bsh">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+</code></pre>
+<ol start="2">
+<li>部署 wordpress deployment with PVC</li>
+</ol>
+<p># <strong>kubectl create -f wordpress-deployment.yaml</strong></p>
+<pre><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+      containers:
+      - image: wordpress:4.8-apache
+        name: wordpress
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: wordpress-mysql
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 80
+          name: wordpress
+        volumeMounts:
+        - name: wordpress-persistent-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: wordpress-persistent-storage
+        persistentVolumeClaim:
+          claimName: wp-pv-claim
+</code></pre>
+<p>3.Service 配置</p>
+<p>Tip: 这里我们开启了 node IP 的 80 端口的外部访问权限, 可以方便我们直接利用主机去访问虚拟机任意 Node 地址从而登录我们的 Wordpress 网站.</p>
+<p># <strong>kubectl create -f wp-svc.yaml</strong></p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: wordpress
+    tier: mysql
+  clusterIP: None
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 80
+      nodePort: 80
+  selector:
+    app: wordpress
+    tier: frontend
+  type: NodePort
+</code></pre>
+<p>Tip: 这里 service 定义的 name: wordpress-mysql 保证我们 wordpress-deployment.yaml 定义的如下环境变量可以作为有效的域名成功去访问我们的 mysql 容器, 保证网站服务器与数据库服务器的通讯.</p>
+<pre><code>env:
+  - name: WORDPRESS_DB_HOST
+	value: wordpress-mysql
+</code></pre>
+<p>五. 验证结果</p>
+<ol>
+<li>访问 wordpress 主页</li>
+</ol>
+<p>这里我们可以直接在浏览器访问任意 node 的 IP 地址从而进入 wordpress 主页</p>
+<figure data-type="image" tabindex="1"><img src="http://www.showerlee.com/wp-content/uploads/2018/02/wordpress01.png" alt="wordpress01" loading="lazy"></figure>
+<ol start="2">
+<li>
+<p>查看 NFS 主机对在容器里的 mysql data 与 wordpress root dir 的目录挂载.</p>
+<pre><code>#mount |grep kube-master
+</code></pre>
+</li>
+<li>
+<p>后记:</p>
+</li>
+</ol>
+<p>果我们使用 helm 包管理去部署 wordpress, 将大大简化我们的工作量.</p>
+<h2 id="helm-deployment"><strong>Helm deployment:</strong></h2>
+<h3 id="1-搜索-chart">1. 搜索 chart</h3>
+<p>搜索 wordpress 的 charts</p>
+<pre><code class="language-javascript"># helm search wordpress
+
+NAME            	CHART VERSION	APP VERSION	DESCRIPTION                                             
+stable/wordpress	5.0.3        	5.0.2      	Web publishing platform for building blogs and websites.
+</code></pre>
+<h3 id="2-查看-chart-的存储信息">2. 查看 chart 的存储信息</h3>
+<p>创建 wordpress 的时候需要申请 PersistentVolumeClaim，由于我们的环境不支持动态申请所以需要手动创建</p>
+<pre><code class="language-javascript"># helm inspect value stable/wordpress
+
+……
+  ## MariaDB admin password
+  ## ref: https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#setting-the-root-password-on-first-run
+  ##
+  # rootUser:
+  #   password:
+
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  master:
+    persistence:
+      enabled: true
+      ## mariadb data Persistent Volume Storage Class
+      ## If defined, storageClassName: &lt;storageClass&gt;
+      ## If set to &quot;-&quot;, storageClassName: &quot;&quot;, which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS &amp; OpenStack)
+      ##
+      # storageClass: &quot;-&quot;
+      accessMode: ReadWriteOnce
+      size: 8Gi
+      
+……
+
+persistence:
+  enabled: true
+  ## wordpress data Persistent Volume Storage Class
+  ## If defined, storageClassName: &lt;storageClass&gt;
+  ## If set to &quot;-&quot;, storageClassName: &quot;&quot;, which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS &amp; OpenStack)
+  ##
+  # storageClass: &quot;-&quot;
+  ##
+  ## If you want to reuse an existing claim, you can pass the name of the PVC using
+  ## the existingClaim variable
+  # existingClaim: your-claim
+  accessMode: ReadWriteOnce
+  size: 10Gi
+</code></pre>
+<p>可以看到 wordpress 的 chart 需要两个 pv，分别用于 <a href="https://cloud.tencent.com/product/tdsql?from=10680">mariadb</a>(8G) 和 wordpress(10G) 的数据存储。</p>
+<h3 id="3-手动创建-chart-所需的-pv">3. 手动创建 chart 所需的 pv</h3>
+<p>创建 create-pv.yml 文件，输入以下内容</p>
+<pre><code class="language-javascript"># vim create-pv.yml
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mariadb-pv
+spec:
+  capacity:
+    storage: 8Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  #storageClassName: nfs
+  nfs:
+    path: /nfsdata/mariadb-pv
+    server: 172.20.6.116
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wordpress-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  #storageClassName: nfs
+  nfs:
+    path: /nfsdata/wordpress-pv
+    server: 172.20.6.116
+</code></pre>
+<p>创建 pv</p>
+<pre><code class="language-javascript"># kubectl apply -f create-pv.yml 
+
+persistentvolume/mariadb-pv created
+persistentvolume/wordpress-pv created
+</code></pre>
+<h3 id="4-安装-chart">4. 安装 chart</h3>
+<pre><code class="language-javascript"># helm install --name wordpress stable/wordpress
+
+NAME:   wordpress                                  ---------①---------
+LAST DEPLOYED: Fri Jan  4 10:32:57 2019
+NAMESPACE: default
+STATUS: DEPLOYED
+
+RESOURCES:                                         ---------②---------
+==&gt; v1beta1/Deployment
+NAME                 DESIRED  CURRENT  UP-TO-DATE  AVAILABLE  AGE
+wordpress-wordpress  1        1        1           0          0s
+
+==&gt; v1beta1/StatefulSet
+NAME               DESIRED  CURRENT  AGE
+wordpress-mariadb  1        1        0s
+
+==&gt; v1/Pod(related)
+NAME                                  READY  STATUS   RESTARTS  AGE
+wordpress-wordpress-56794ff7b9-rf98x  0/1    Pending  0         0s
+wordpress-mariadb-0                   0/1    Pending  0         0s
+
+==&gt; v1/Secret
+NAME                 TYPE    DATA  AGE
+wordpress-mariadb    Opaque  2     0s
+wordpress-wordpress  Opaque  1     0s
+
+==&gt; v1/ConfigMap
+NAME                     DATA  AGE
+wordpress-mariadb        1     0s
+wordpress-mariadb-tests  1     0s
+
+==&gt; v1/PersistentVolumeClaim
+NAME                 STATUS   VOLUME  CAPACITY  ACCESS MODES  STORAGECLASS  AGE
+wordpress-wordpress  Pending  0s
+
+RESOURCES:
+==&gt; v1/Service
+NAME                 TYPE          CLUSTER-IP      EXTERNAL-IP  PORT(S)                     AGE
+wordpress-mariadb    ClusterIP     10.100.218.132  &lt;none&gt;       3306/TCP                    0s
+wordpress-wordpress  LoadBalancer  10.100.36.64    &lt;pending&gt;    80:31051/TCP,443:30169/TCP  0s
+
+
+NOTES:                                             ---------③---------
+1. Get the WordPress URL:
+
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        Watch the status with: 'kubectl get svc --namespace default -w wordpress-wordpress'
+  export SERVICE_IP=$(kubectl get svc --namespace default wordpress-wordpress --template &quot;{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}&quot;)
+  echo &quot;WordPress URL: http://$SERVICE_IP/&quot;
+  echo &quot;WordPress Admin URL: http://$SERVICE_IP/admin&quot;
+
+2. Login with the following credentials to see your blog
+
+  echo Username: user
+  echo Password: $(kubectl get secret --namespace default wordpress-wordpress -o jsonpath=&quot;{.data.wordpress-password}&quot; | base64 --decode)
+</code></pre>
+<p>输出分为 3 部分（上文输出结果中的①②③）：</p>
+<ul>
+<li>① 本次部署 chart 的描述信息。包括 release 的名字（没有指定，则默认生成）。release 部署的 namespace，默认是 default。release的状态 DEPLOYED 表示已经将 chart 部署到集群。</li>
+<li>② release 包含的资源： Service、 Deployment、 Secret 等</li>
+<li>③ release 的使用方法</li>
+</ul>
+<h2 id="5-访问-wordpress">5. 访问 wordpress</h2>
+<p>使用 <a href="http://nodeip+service_port/">http://nodeip+service_port</a> 访问wordpress</p>
+<p>其他信息，包括后台地址，管理员账号等信息可以参考release 的 NOTES 部分。</p>
+<h1 id="写在最后">写在最后</h1>
+<p>Helm 的使用有点类似 ubuntu 的 apt 或者 RHEL 的 yum，极大的简化了部署一个应用的流程。对于使用者而言，使用 Helm 后不用需要了解 Kubernetes 的 yaml 语法并编写应用部署文件，也无需考虑应用的各种依赖，可以直接通过 Helm 下载并在 kubernetes 上安装需要的应用。 除此以外，Helm 还提供了 kubernetes 上的软件部署，删除，升级，回滚应用的强大功能。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/XkCaqepMl/">
+              <span class="post-title">
+                在K8S上部署eureka-server&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

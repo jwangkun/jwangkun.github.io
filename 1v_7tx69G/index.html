@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>基于Nexus搭建私服 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="基于Nexus搭建私服 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="基于Nexus搭建私服"/>
+    <meta property="og:url" content="https://jwangkun.github.io/1v_7tx69G/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/s0nAd5fDR/" class="tag">Nexus</a>
+            
+            <a href="https://jwangkun.github.io/HKDpNgMQ_p/" class="tag">Maven</a>
+            
+            <a href="https://jwangkun.github.io/G5U-0Oj0H3/" class="tag">私服</a>
+            
+        </span>
+            <h1>基于Nexus搭建私服</h1>
+            <span class="meta">
+            	Posted on
+              2018-11-15，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h3 id="环境安装">环境安装</h3>
+<ol>
+<li>
+<p>安装jdk</p>
+</li>
+<li>
+<p>安装maven</p>
+</li>
+<li>
+<p>安装nexus</p>
+<p>nexus工具是此次maven私服的构建工具</p>
+<p>下载nexus</p>
+<p>官网地址：https://www.sonatype.com/download-oss-sonatype</p>
+<p>上传到服务器</p>
+<p>可以使用FTP工具上传或者使用scp命令上传</p>
+<p>解压安装包到指定位置，修改配置</p>
+<p>将启动内存和最大内存都设置为1G（此处配置根据服务器配置而定）</p>
+<pre><code>-Xms1024m
+-Xmx1024m
+-XX:MaxDirectMemorySize=2073m
+-XX:+UnlockDiagnosticVMOptions
+-XX:+LogVMOutput
+-XX:LogFile=../sonatype-work/nexus3/log/jvm.log
+-XX:-OmitStackTraceInFastThrow
+-Djava.net.preferIPv4Stack=true
+</code></pre>
+<p>启动nexus</p>
+<p>进入bin目录 启动nexus 出现如下效果即启动成功</p>
+<pre><code>./nexus start
+WARNING: ************************************************************
+WARNING: Detected execution as &quot;root&quot; user.  This is NOT recommended!
+WARNING: ************************************************************
+Starting nexus
+</code></pre>
+<p>启动成功后即可访问： <code>http://ip:8081/</code></p>
+<p>说明</p>
+<p>​	Nexus默认的端口是8081,可以在sonatype-work/nexus3/etc/nexus.properties中修改</p>
+<p>​	右上角那个登录会有一个默认的admin账号，初始密码保存在/usr/software/nexus/sonatype-work/nexus3/admin.password文件中，登录进去会让你重置密码。</p>
+<p>​	出现访问拒绝的情况，有可能是防火墙端口未开放 参考文章：https://blog.csdn.net/beekimlin/article/details/104551278/</p>
+</li>
+</ol>
+<h3 id="默认仓库">默认仓库</h3>
+<p>安装好了Nexus后，会内置几个maven的默认仓库。可自定义仓库。</p>
+<h5 id="maven-central">maven-central</h5>
+<p>proxy类型。maven中央库，默认从<code>https://repo1.maven.org/maven2/</code>拉取jar。</p>
+<p>将私服的中央仓库的地址改为aliyun的中央仓库地址http://maven.aliyun.com/nexus/content/groups/public</p>
+<h5 id="maven-releases">maven-releases</h5>
+<p>hosted类型。releases发行版版本仓库。</p>
+<h5 id="maven-snapshots">maven-snapshots</h5>
+<p>hosted类型。snapshots快照版版本仓库。</p>
+<h5 id="maven-public">maven-public</h5>
+<p>group类型。默认把上面3个仓库组合在一起。</p>
+<blockquote>
+<p>注意：Nexus安装好以后需要更新远程仓库项目构建的索引文件。进入仓库就可以看到相关的按钮。</p>
+</blockquote>
+<h3 id="项目配置">项目配置</h3>
+<p>Maven配置文件更改，修改&lt;Maven安装目录&gt;/conf/settings.xml文件</p>
+<pre><code>&lt;server&gt;
+  &lt;id&gt;nexus-releases&lt;/id&gt;
+  &lt;username&gt;admin&lt;/username&gt;
+  &lt;password&gt;admin123&lt;/password&gt;
+&lt;/server&gt;
+&lt;server&gt;
+  &lt;id&gt;nexus-snapshots&lt;/id&gt;
+  &lt;username&gt;admin&lt;/username&gt;
+  &lt;password&gt;admin123&lt;/password&gt;
+&lt;/server&gt;
+</code></pre>
+<p>用户名和密码是搭建私服时创建的用户的密码，或者也可以使用管理员的用户名和密码</p>
+<p>配置私服镜像</p>
+<pre><code>&lt;mirror&gt;
+  &lt;id&gt;maven-public&lt;/id&gt;
+  &lt;mirrorOf&gt;*&lt;/mirrorOf&gt;
+  &lt;url&gt;http://ip:8081/repository/maven-public/&lt;/url&gt;
+&lt;/mirror&gt;
+</code></pre>
+<h3 id="maven项目发布jar到nexus私服">Maven项目发布jar到Nexus私服</h3>
+<p>pom.xml配置</p>
+<pre><code>&lt;profiles&gt;
+    &lt;profile&gt;
+        &lt;id&gt;nexus&lt;/id&gt;
+        &lt;repositories&gt;
+            &lt;repository&gt;
+                &lt;!--覆盖掉中央仓库--&gt;
+                &lt;id&gt;central&lt;/id&gt;
+                &lt;name&gt;nexus central&lt;/name&gt;
+                &lt;url&gt;http://xxx/repository/maven-public/&lt;/url&gt;
+                &lt;layout&gt;default&lt;/layout&gt;
+                &lt;releases&gt;
+                    &lt;enabled&gt;true&lt;/enabled&gt;
+                &lt;/releases&gt;
+                &lt;snapshots&gt;
+                    &lt;!--快照版本，不从中央仓库拿--&gt;
+                    &lt;enabled&gt;false&lt;/enabled&gt;
+                &lt;/snapshots&gt;
+            &lt;/repository&gt;
+            &lt;!--另外的仓库，会按照顺序进行查找--&gt;
+            &lt;repository&gt;
+                &lt;id&gt;releases&lt;/id&gt;
+                &lt;url&gt;http://xxx/repository/maven-releases/&lt;/url&gt;
+            &lt;/repository&gt;
+            &lt;repository&gt;
+                &lt;id&gt;snapshots&lt;/id&gt;
+                &lt;url&gt;http://xxx/repository/maven-snapshots/&lt;/url&gt;
+            &lt;/repository&gt;
+        &lt;/repositories&gt;
+        &lt;!--配置插件下载的仓库--&gt;
+        &lt;pluginRepositories&gt;
+            &lt;pluginRepository&gt;
+                &lt;id&gt;central&lt;/id&gt;
+                &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public&lt;/url&gt;
+                &lt;releases&gt;
+                    &lt;enabled&gt;true&lt;/enabled&gt;
+                &lt;/releases&gt;
+                &lt;snapshots&gt;
+                    &lt;enabled&gt;false&lt;/enabled&gt;
+                &lt;/snapshots&gt;
+            &lt;/pluginRepository&gt;
+            &lt;pluginRepository&gt;
+                &lt;id&gt;snapshots&lt;/id&gt;
+                &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public&lt;/url&gt;
+                &lt;releases&gt;
+                    &lt;enabled&gt;false&lt;/enabled&gt;
+                &lt;/releases&gt;
+                &lt;snapshots&gt;
+                    &lt;enabled&gt;true&lt;/enabled&gt;
+                &lt;/snapshots&gt;
+            &lt;/pluginRepository&gt;
+        &lt;/pluginRepositories&gt;
+    &lt;/profile&gt;
+&lt;/profiles&gt;
+&lt;activeProfiles&gt;
+    &lt;activeProfile&gt;nexus&lt;/activeProfile&gt;
+&lt;/activeProfiles&gt;
+</code></pre>
+<p>使用<code>mvn deploy</code>命令即可发布jar到Nexus 私服</p>
+
+          
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> Git 工作流程 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" Git 工作流程 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" Git 工作流程"/>
+    <meta property="og:url" content="https://jwangkun.github.io/xzpF4Te2G/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/H0YOCYFRJ/" class="tag">Git</a>
+            
+        </span>
+            <h1> Git 工作流程</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-21，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>Git 作为一个源码管理系统，不可避免涉及到多人协作。</p>
+<p>协作必须有一个规范的工作流程，让大家有效地合作，使得项目井井有条地发展下去。&quot;工作流程&quot;在英语里，叫做&quot;workflow&quot;或者&quot;flow&quot;，原意是水流，比喻项目像水流那样，顺畅、自然地向前流动，不会发生冲击、对撞、甚至漩涡。</p>
+<figure data-type="image" tabindex="1"><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015122301.png" alt="img" loading="lazy"></figure>
+<p>本文介绍三种广泛使用的工作流程：</p>
+<blockquote>
+<ul>
+<li>Git flow</li>
+<li>Github flow</li>
+<li>Gitlab flow</li>
+</ul>
+</blockquote>
+<p>如果你对Git还不是很熟悉，可以先阅读下面的文章。</p>
+<blockquote>
+<ul>
+<li><a href="http://www.ruanyifeng.com/blog/2015/08/git-use-process.html">《Git 使用规范流程》</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2015/12/git-cheat-sheet.html">《常用 Git 命令清单》</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2014/06/git_remote.html">《Git 远程操作详解》</a></li>
+</ul>
+</blockquote>
+<h2 id="一-功能驱动">一、功能驱动</h2>
+<p>本文的三种工作流程，有一个共同点：都采用<a href="https://en.wikipedia.org/wiki/Feature-driven_development">&quot;功能驱动式开发&quot;</a>（Feature-driven development，简称FDD）。</p>
+<p>它指的是，需求是开发的起点，先有需求再有功能分支（feature branch）或者补丁分支（hotfix branch）。完成开发后，该分支就合并到主分支，然后被删除。</p>
+<h2 id="二-git-flow">二、Git flow</h2>
+<p>最早诞生、并得到广泛采用的一种工作流程，就是<a href="http://nvie.com/posts/a-successful-git-branching-model/">Git flow</a> 。</p>
+<h3 id="21-特点">2.1 特点</h3>
+<p>它最主要的特点有两个。</p>
+<figure data-type="image" tabindex="2"><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015122302.png" alt="img" loading="lazy"></figure>
+<p>首先，项目存在两个长期分支。</p>
+<blockquote>
+<ul>
+<li>主分支<code>master</code></li>
+<li>开发分支<code>develop</code></li>
+</ul>
+</blockquote>
+<p>前者用于存放对外发布的版本，任何时候在这个分支拿到的，都是稳定的分布版；后者用于日常开发，存放最新的开发版。</p>
+<p>其次，项目存在三种短期分支。</p>
+<blockquote>
+<ul>
+<li>功能分支（feature branch）</li>
+<li>补丁分支（hotfix branch）</li>
+<li>预发分支（release branch）</li>
+</ul>
+</blockquote>
+<p>一旦完成开发，它们就会被合并进<code>develop</code>或<code>master</code>，然后被删除。</p>
+<p>Git flow 的详细介绍，请阅读我翻译的中文版<a href="http://www.ruanyifeng.com/blog/2012/07/git.html">《Git 分支管理策略》</a>。</p>
+<h3 id="22-评价">2.2 评价</h3>
+<p>Git flow的优点是清晰可控，缺点是相对复杂，需要同时维护两个长期分支。大多数工具都将<code>master</code>当作默认分支，可是开发是在<code>develop</code>分支进行的，这导致经常要切换分支，非常烦人。</p>
+<p>更大问题在于，这个模式是基于&quot;版本发布&quot;的，目标是一段时间以后产出一个新版本。但是，很多网站项目是&quot;持续发布&quot;，代码一有变动，就部署一次。这时，<code>master</code>分支和<code>develop</code>分支的差别不大，没必要维护两个长期分支。</p>
+<h2 id="三-github-flow">三、Github flow</h2>
+<p><a href="http://scottchacon.com/2011/08/31/github-flow.html">Github flow</a> 是Git flow的简化版，专门配合&quot;持续发布&quot;。它是 Github.com 使用的工作流程。</p>
+<h3 id="31-流程">3.1 流程</h3>
+<p>它只有一个长期分支，就是<code>master</code>，因此用起来非常简单。</p>
+<p>官方推荐的<a href="https://guides.github.com/introduction/flow/index.html">流程</a>如下。</p>
+<figure data-type="image" tabindex="3"><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015122305.png" alt="img" loading="lazy"></figure>
+<blockquote>
+<p>第一步：根据需求，从<code>master</code>拉出新分支，不区分功能分支或补丁分支。</p>
+<p>第二步：新分支开发完成后，或者需要讨论的时候，就向<code>master</code>发起一个<a href="https://help.github.com/articles/using-pull-requests/">pull request</a>（简称PR）。</p>
+<p>第三步：Pull Request既是一个通知，让别人注意到你的请求，又是一种对话机制，大家一起评审和讨论你的代码。对话过程中，你还可以不断提交代码。</p>
+<p>第四步：你的Pull Request被接受，合并进<code>master</code>，重新部署后，原来你拉出来的那个分支就被删除。（先部署再合并也可。）</p>
+</blockquote>
+<h3 id="32-评价">3.2 评价</h3>
+<p>Github flow 的最大优点就是简单，对于&quot;持续发布&quot;的产品，可以说是最合适的流程。</p>
+<p>问题在于它的假设：<code>master</code>分支的更新与产品的发布是一致的。也就是说，<code>master</code>分支的最新代码，默认就是当前的线上代码。</p>
+<p>可是，有些时候并非如此，代码合并进入<code>master</code>分支，并不代表它就能立刻发布。比如，苹果商店的APP提交审核以后，等一段时间才能上架。这时，如果还有新的代码提交，<code>master</code>分支就会与刚发布的版本不一致。另一个例子是，有些公司有发布窗口，只有指定时间才能发布，这也会导致线上版本落后于<code>master</code>分支。</p>
+<p>上面这种情况，只有<code>master</code>一个主分支就不够用了。通常，你不得不在<code>master</code>分支以外，另外新建一个<code>production</code>分支跟踪线上版本。</p>
+<h2 id="四-gitlab-flow">四、Gitlab flow</h2>
+<p><a href="http://doc.gitlab.com/ee/workflow/gitlab_flow.html">Gitlab flow</a> 是 Git flow 与 Github flow 的综合。它吸取了两者的优点，既有适应不同开发环境的弹性，又有单一主分支的简单和便利。它是 Gitlab.com 推荐的做法。</p>
+<h3 id="41-上游优先">4.1 上游优先</h3>
+<p>Gitlab flow 的最大原则叫做&quot;上游优先&quot;（upsteam first），即只存在一个主分支<code>master</code>，它是所有其他分支的&quot;上游&quot;。只有上游分支采纳的代码变化，才能应用到其他分支。</p>
+<p><a href="https://www.chromium.org/chromium-os/chromiumos-design-docs/upstream-first">Chromium项目</a>就是一个例子，它明确规定，上游分支依次为：</p>
+<blockquote>
+<ol>
+<li>Linus Torvalds的分支</li>
+<li>子系统（比如netdev）的分支</li>
+<li>设备厂商（比如三星）的分支</li>
+</ol>
+</blockquote>
+<h3 id="42-持续发布">4.2 持续发布</h3>
+<p>Gitlab flow 分成两种情况，适应不同的开发流程。</p>
+<figure data-type="image" tabindex="4"><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015122306.png" alt="img" loading="lazy"></figure>
+<p>对于&quot;持续发布&quot;的项目，它建议在<code>master</code>分支以外，再建立不同的环境分支。比如，&quot;开发环境&quot;的分支是<code>master</code>，&quot;预发环境&quot;的分支是<code>pre-production</code>，&quot;生产环境&quot;的分支是<code>production</code>。</p>
+<p>开发分支是预发分支的&quot;上游&quot;，预发分支又是生产分支的&quot;上游&quot;。代码的变化，必须由&quot;上游&quot;向&quot;下游&quot;发展。比如，生产环境出现了bug，这时就要新建一个功能分支，先把它合并到<code>master</code>，确认没有问题，再<code>cherry-pick</code>到<code>pre-production</code>，这一步也没有问题，才进入<code>production</code>。</p>
+<p>只有紧急情况，才允许跳过上游，直接合并到下游分支。</p>
+<h3 id="43-版本发布">4.3 版本发布</h3>
+<figure data-type="image" tabindex="5"><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015122307.png" alt="img" loading="lazy"></figure>
+<p>对于&quot;版本发布&quot;的项目，建议的做法是每一个稳定版本，都要从<code>master</code>分支拉出一个分支，比如<code>2-3-stable</code>、<code>2-4-stable</code>等等。</p>
+<p>以后，只有修补bug，才允许将代码合并到这些分支，并且此时要更新小版本号。</p>
+<h2 id="五-一些小技巧">五、一些小技巧</h2>
+<h3 id="51-pull-request">5.1 Pull Request</h3>
+<figure data-type="image" tabindex="6"><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015122310.png" alt="img" loading="lazy"></figure>
+<p>功能分支合并进<code>master</code>分支，必须通过Pull Request（Gitlab里面叫做 Merge Request）。</p>
+<figure data-type="image" tabindex="7"><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015122308.png" alt="img" loading="lazy"></figure>
+<p>前面说过，Pull Request本质是一种对话机制，你可以在提交的时候，<code>@</code>相关<a href="https://github.com/blog/1004-mention-autocompletion">人员</a>或<a href="https://github.com/blog/1121-introducing-team-mentions">团队</a>，引起他们的注意。</p>
+<h3 id="52-protected-branch">5.2 Protected branch</h3>
+<p><code>master</code>分支应该受到保护，不是每个人都可以修改这个分支，以及拥有审批 Pull Request 的权力。</p>
+<p><a href="https://help.github.com/articles/about-protected-branches/">Github</a> 和 <a href="http://doc.gitlab.com/ce/permissions/permissions.html">Gitlab</a> 都提供&quot;保护分支&quot;（Protected branch）这个功能。</p>
+<h3 id="53-issue">5.3 Issue</h3>
+<p>Issue 用于 Bug追踪和需求管理。建议先新建 Issue，再新建对应的功能分支。功能分支总是为了解决一个或多个 Issue。</p>
+<p>功能分支的名称，可以与issue的名字保持一致，并且以issue的编号起首，比如&quot;15-require-a-password-to-change-it&quot;。</p>
+<figure data-type="image" tabindex="8"><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015122311.png" alt="img" loading="lazy"></figure>
+<p>开发完成后，在提交说明里面，可以写上&quot;fixes #14&quot;或者&quot;closes #67&quot;。Github规定，只要commit message里面有下面这些<a href="https://help.github.com/articles/closing-issues-via-commit-messages/">动词</a> + 编号，就会关闭对应的issue。</p>
+<blockquote>
+<ul>
+<li>close</li>
+<li>closes</li>
+<li>closed</li>
+<li>fix</li>
+<li>fixes</li>
+<li>fixed</li>
+<li>resolve</li>
+<li>resolves</li>
+<li>resolved</li>
+</ul>
+</blockquote>
+<p>这种方式还可以一次关闭多个issue，或者关闭其他代码库的issue，格式是<code>username/repository#issue_number</code>。</p>
+<p>Pull Request被接受以后，issue关闭，原始分支就应该删除。如果以后该issue重新打开，新分支可以复用原来的名字。</p>
+<h3 id="54-merge节点">5.4 Merge节点</h3>
+<p>Git有两种合并：一种是&quot;直进式合并&quot;（fast forward），不生成单独的合并节点；另一种是&quot;非直进式合并&quot;（none fast-forword），会生成单独节点。</p>
+<p>前者不利于保持commit信息的清晰，也不利于以后的回滚，建议总是采用后者（即使用<code>--no-ff</code>参数）。只要发生合并，就要有一个单独的合并节点。</p>
+<h3 id="55-squash-多个commit">5.5 Squash 多个commit</h3>
+<p>为了便于他人阅读你的提交，也便于<code>cherry-pick</code>或撤销代码变化，在发起Pull Request之前，应该把多个commit合并成一个。（前提是，该分支只有你一个人开发，且没有跟<code>master</code>合并过。）</p>
+<figure data-type="image" tabindex="9"><img src="http://www.ruanyifeng.com/blogimg/asset/2015/bg2015122309.png" alt="img" loading="lazy"></figure>
+<p>这可以采用<code>rebase</code>命令附带的<code>squash</code>操作，具体方法请参考我写的<a href="http://www.ruanyifeng.com/blog/2015/08/git-use-process.html">《Git 使用规范流程》</a>。</p>
+<p>（完）</p>
+<h3 id="文档信息">文档信息</h3>
+<ul>
+<li>版权声明：自由转载-非商用-非衍生-保持署名（<a href="http://creativecommons.org/licenses/by-nc-nd/3.0/deed.zh">创意共享3.0许可证</a>）</li>
+<li>发表日期： 2015年12月24日</li>
+</ul>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/3Me5sxE_I/">
+              <span class="post-title">
+                Git flow 规范&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

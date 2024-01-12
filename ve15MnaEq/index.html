@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Spring Boot Security 整合 JWT 实现 无状态的分布式API接口 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Spring Boot Security 整合 JWT 实现 无状态的分布式API接口 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Spring Boot Security 整合 JWT 实现 无状态的分布式API接口"/>
+    <meta property="og:url" content="https://jwangkun.github.io/ve15MnaEq/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/tdBXFmuve/" class="tag">JWT</a>
+            
+            <a href="https://jwangkun.github.io/XUlOQDeIVT/" class="tag">API接口</a>
+            
+            <a href="https://jwangkun.github.io/IfTf9fmmN/" class="tag">Spring Boot Security</a>
+            
+        </span>
+            <h1>Spring Boot Security 整合 JWT 实现 无状态的分布式API接口</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="简介">简介</h2>
+<p>JSON Web Token（缩写 JWT）是目前最流行的跨域认证解决方案。<a href="http://www.ruanyifeng.com/blog/2018/07/json_web_token-tutorial.html">JSON Web Token 入门教程 - 阮一峰</a>，这篇文章可以帮你了解JWT的概念。本文重点讲解Spring Boot 结合 jwt ，来实现前后端分离中，接口的安全调用。</p>
+<h2 id="快速上手">快速上手</h2>
+<p>之前的文章已经对 Spring Security 进行了讲解，这一节对涉及到 Spring Security 的配置不详细讲解。若不了解 Spring Security 先移步到 <a href="https://mp.weixin.qq.com/s/vxw4EeJ-LWxQtD0xlyB0nA">Spring Boot Security 详解</a>。</p>
+<h3 id="建表">建表</h3>
+<pre><code class="language-sql">DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `role`;
+DROP TABLE IF EXISTS `user_role`;
+DROP TABLE IF EXISTS `role_permission`;
+DROP TABLE IF EXISTS `permission`;
+
+CREATE TABLE `user` (
+`id` bigint(11) NOT NULL AUTO_INCREMENT,
+`username` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+PRIMARY KEY (`id`) 
+);
+CREATE TABLE `role` (
+`id` bigint(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+PRIMARY KEY (`id`) 
+);
+CREATE TABLE `user_role` (
+`user_id` bigint(11) NOT NULL,
+`role_id` bigint(11) NOT NULL
+);
+CREATE TABLE `role_permission` (
+`role_id` bigint(11) NOT NULL,
+`permission_id` bigint(11) NOT NULL
+);
+CREATE TABLE `permission` (
+`id` bigint(11) NOT NULL AUTO_INCREMENT,
+`url` varchar(255) NOT NULL,
+`name` varchar(255) NOT NULL,
+`description` varchar(255) NULL,
+`pid` bigint(11) NOT NULL,
+PRIMARY KEY (`id`) 
+);
+
+INSERT INTO user (id, username, password) VALUES (1,'user','e10adc3949ba59abbe56e057f20f883e'); 
+INSERT INTO user (id, username , password) VALUES (2,'admin','e10adc3949ba59abbe56e057f20f883e'); 
+INSERT INTO role (id, name) VALUES (1,'USER');
+INSERT INTO role (id, name) VALUES (2,'ADMIN');
+INSERT INTO permission (id, url, name, pid) VALUES (1,'/user/hi','',0);
+INSERT INTO permission (id, url, name, pid) VALUES (2,'/admin/hi','',0);
+INSERT INTO user_role (user_id, role_id) VALUES (1, 1);
+INSERT INTO user_role (user_id, role_id) VALUES (2, 1);
+INSERT INTO user_role (user_id, role_id) VALUES (2, 2);
+INSERT INTO role_permission (role_id, permission_id) VALUES (1, 1);
+INSERT INTO role_permission (role_id, permission_id) VALUES (2, 1);
+INSERT INTO role_permission (role_id, permission_id) VALUES (2, 2);
+</code></pre>
+<h3 id="项目结构">项目结构</h3>
+<pre><code>resources
+|___application.yml
+java
+|___com
+| |____gf
+| | |____SpringbootJwtApplication.java
+| | |____config
+| | | |____.DS_Store
+| | | |____SecurityConfig.java
+| | | |____MyFilterSecurityInterceptor.java
+| | | |____MyInvocationSecurityMetadataSourceService.java
+| | | |____MyAccessDecisionManager.java
+| | |____entity
+| | | |____User.java
+| | | |____RolePermisson.java
+| | | |____Role.java
+| | |____mapper
+| | | |____PermissionMapper.java
+| | | |____UserMapper.java
+| | | |____RoleMapper.java
+| | |____utils
+| | | |____JwtTokenUtil.java
+| | |____controller
+| | | |____AuthController.java
+| | |____filter
+| | | |____JwtTokenFilter.java
+| | |____service
+| | | |____impl
+| | | | |____AuthServiceImpl.java
+| | | | |____UserDetailsServiceImpl.java
+| | | |____AuthService.java
+</code></pre>
+<h3 id="关键代码">关键代码</h3>
+<h4 id="pomxml">pom.xml</h4>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.jsonwebtoken&lt;/groupId&gt;
+    &lt;artifactId&gt;jjwt&lt;/artifactId&gt;
+    &lt;version&gt;0.9.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;mysql&lt;/groupId&gt;
+    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+    &lt;version&gt;2.0.0&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="applicationyml">application.yml</h3>
+<pre><code>spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/spring-security-jwt?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false
+    username: root
+    password: root
+</code></pre>
+<h3 id="securityconfig">SecurityConfig</h3>
+<pre><code class="language-java">@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+
+        //校验用户
+        auth.userDetailsService( userDetailsService ).passwordEncoder( new PasswordEncoder() {
+            //对密码进行加密
+            @Override
+            public String encode(CharSequence charSequence) {
+                System.out.println(charSequence.toString());
+                return DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
+            }
+            //对密码进行判断匹配
+            @Override
+            public boolean matches(CharSequence charSequence, String s) {
+                String encode = DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
+                boolean res = s.equals( encode );
+                return res;
+            }
+        } );
+
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+        http.csrf().disable()
+                //因为使用JWT，所以不需要HttpSession
+                .sessionManagement().sessionCreationPolicy( SessionCreationPolicy.STATELESS).and()
+                .authorizeRequests()
+                //OPTIONS请求全部放行
+                .antMatchers( HttpMethod.OPTIONS, &quot;/**&quot;).permitAll()
+                //登录接口放行
+                .antMatchers(&quot;/auth/login&quot;).permitAll()
+                //其他接口全部接受验证
+                .anyRequest().authenticated();
+
+        //使用自定义的 Token过滤器 验证请求的Token是否合法
+        http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+        http.headers().cacheControl();
+    }
+
+    @Bean
+    public JwtTokenFilter authenticationTokenFilterBean() throws Exception {
+        return new JwtTokenFilter();
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+
+
+}
+</code></pre>
+<h3 id="jwttokenutil">JwtTokenUtil</h3>
+<pre><code class="language-java">/**
+ * JWT 工具类
+ */
+@Component
+public class JwtTokenUtil implements Serializable {
+
+    private static final String CLAIM_KEY_USERNAME = &quot;sub&quot;;
+
+    /**
+     * 5天(毫秒)
+     */
+    private static final long EXPIRATION_TIME = 432000000;
+    /**
+     * JWT密码
+     */
+    private static final String SECRET = &quot;secret&quot;;
+
+
+    /**
+     * 签发JWT
+     */
+    public String generateToken(UserDetails userDetails) {
+        Map&lt;String, Object&gt; claims = new HashMap&lt;&gt;(16);
+        claims.put( CLAIM_KEY_USERNAME, userDetails.getUsername() );
+
+        return Jwts.builder()
+                .setClaims( claims )
+                .setExpiration( new Date( Instant.now().toEpochMilli() + EXPIRATION_TIME  ) )
+                .signWith( SignatureAlgorithm.HS512, SECRET )
+                .compact();
+    }
+
+    /**
+     * 验证JWT
+     */
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        User user = (User) userDetails;
+        String username = getUsernameFromToken( token );
+
+        return (username.equals( user.getUsername() ) &amp;&amp; !isTokenExpired( token ));
+    }
+
+    /**
+     * 获取token是否过期
+     */
+    public Boolean isTokenExpired(String token) {
+        Date expiration = getExpirationDateFromToken( token );
+        return expiration.before( new Date() );
+    }
+
+    /**
+     * 根据token获取username
+     */
+    public String getUsernameFromToken(String token) {
+        String username = getClaimsFromToken( token ).getSubject();
+        return username;
+    }
+
+    /**
+     * 获取token的过期时间
+     */
+    public Date getExpirationDateFromToken(String token) {
+        Date expiration = getClaimsFromToken( token ).getExpiration();
+        return expiration;
+    }
+
+    /**
+     * 解析JWT
+     */
+    private Claims getClaimsFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey( SECRET )
+                .parseClaimsJws( token )
+                .getBody();
+        return claims;
+    }
+
+
+
+}
+</code></pre>
+<h3 id="jwttokenfilter">JwtTokenFilter</h3>
+<pre><code class="language-java">@Component
+public class JwtTokenFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    /**
+     * 存放Token的Header Key
+     */
+    public static final String HEADER_STRING = &quot;Authorization&quot;;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+        String token = request.getHeader( HEADER_STRING );
+        if (null != token) {
+            String username = jwtTokenUtil.getUsernameFromToken(token);
+            if (username != null &amp;&amp; SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+                if (jwtTokenUtil.validateToken(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(
+                            request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }
+        }
+        chain.doFilter(request, response);
+    }
+    
+}
+</code></pre>
+<h3 id="authserviceimpl">AuthServiceImpl</h3>
+<pre><code class="language-java">@Service
+public class AuthServiceImpl implements AuthService {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+
+    @Override
+    public String login(String username, String password) {
+        UsernamePasswordAuthenticationToken upToken = new UsernamePasswordAuthenticationToken( username, password );
+        Authentication authentication = authenticationManager.authenticate(upToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserDetails userDetails = userDetailsService.loadUserByUsername( username );
+        String token = jwtTokenUtil.generateToken(userDetails);
+        return token;
+    }
+
+
+
+}
+</code></pre>
+<p>关键代码就是这些，其他类代码参照后面提供的源码地址。</p>
+<h3 id="验证">验证</h3>
+<p>登录，获取token</p>
+<pre><code class="language-shell">curl -X POST -d &quot;username=admin&amp;password=123456&quot; http://127.0.0.1:8080/auth/login
+</code></pre>
+<p>返回</p>
+<pre><code class="language-shell">eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU1NDQ1MzUwMX0.sglVeqnDGUL9pH1oP3Lh9XrdzJIS42VKBApd2nPJt7e1TKhCEY7AUfIXnzG9vc885_jTq4-h8R6YCtRRJzl8fQ
+</code></pre>
+<p>不带token访问资源</p>
+<pre><code class="language-shell">curl -X POST -d &quot;name=zhangsan&quot; http://127.0.0.1:8080/admin/hi
+</code></pre>
+<p>返回，拒绝访问</p>
+<pre><code class="language-json">{
+    &quot;timestamp&quot;: &quot;2019-03-31T08:50:55.894+0000&quot;,
+    &quot;status&quot;: 403,
+    &quot;error&quot;: &quot;Forbidden&quot;,
+    &quot;message&quot;: &quot;Access Denied&quot;,
+    &quot;path&quot;: &quot;/auth/login&quot;
+}
+</code></pre>
+<p>携带token访问资源</p>
+<pre><code class="language-shell">curl -X POST -H &quot;Authorization: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTU1NDQ1MzUwMX0.sglVeqnDGUL9pH1oP3Lh9XrdzJIS42VKBApd2nPJt7e1TKhCEY7AUfIXnzG9vc885_jTq4-h8R6YCtRRJzl8fQ&quot; -d &quot;name=zhangsan&quot; http://127.0.0.1:8080/admin/hi
+</code></pre>
+<p>返回正确</p>
+<pre><code>hi zhangsan , you have 'admin' role
+</code></pre>
+<h3 id="源码">源码</h3>
+<p>https://github.com/gf-huanchupk/SpringBootLearning/tree/master/springboot-jwt</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/DT4HJUZxH/">
+              <span class="post-title">
+                Spring Boot Security 整合 OAuth2 设计安全API接口服务&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

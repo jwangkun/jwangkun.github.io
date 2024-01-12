@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> DRBD+HEARTBEAT  搭建NFS 服务高可用方案 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" DRBD+HEARTBEAT  搭建NFS 服务高可用方案 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" DRBD+HEARTBEAT  搭建NFS 服务高可用方案"/>
+    <meta property="og:url" content="https://jwangkun.github.io/LAiVBbLo2/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/jY1_HHrkR/" class="tag">NFS</a>
+            
+        </span>
+            <h1> DRBD+HEARTBEAT  搭建NFS 服务高可用方案</h1>
+            <span class="meta">
+            	Posted on
+              2021-12-07，10 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="1-简述">1. 简述</h2>
+<p>本篇文章主要是使用 DRBD+HEARTBEAT 来保证 NFS 的高可用。使用 DRBD 来保证主从服务器的文件一致， 使用 HEARTBEAT 来做热切换。</p>
+<h2 id="2-硬件和网络需求">2. 硬件和网络需求</h2>
+<p>需要两台服务器， 并且分别单独挂载硬盘或者硬盘分区。 同时有一个 VIP 能够对外统一提供 NFS 服务</p>
+<h2 id="3-安装-drbd">3. 安装 DRBD</h2>
+<h3 id="31-安装-drbd">3.1 安装 DRBD</h3>
+<p>两台服务器都进行添加的磁盘分区格式化， 如果是有已存在的分区可以忽略</p>
+<pre><code>parted /dev/sdb mklabel gpt
+parted /dev/sdb mkpart primary 0 1024
+parted /dev/sdb mkpart primary 1025 2146
+parted /dev/sdb p
+mkfs.ext4 /dev/sdb1
+</code></pre>
+<p>安装 和初始化 drbd</p>
+<pre><code>rpm -Uvh http://www.elrepo.org/elrepo-release-6-8.el6.elrepo.noarch.rpm
+yum install -y drbd84-utils kmod-drbd84
+modprobe drbd
+</code></pre>
+<h3 id="32-编辑配置文件">3.2 编辑配置文件</h3>
+<p>创建文件 <code>/etc/drbd.d/r0.res</code><br>
+172.16.1.31 和 172.16.1.32 分别为两台服务器 IP</p>
+<pre><code>resource r0 {
+  net {
+    protocol C;
+    cram-hmac-alg &quot;sha1&quot;;
+    shared-secret &quot;c4f9375f9834b4e7f0a528cc65c055702bf5f24a&quot;;
+}
+  device      /dev/drbd0;
+  disk        /dev/sdb1;
+  meta-disk   /dev/sdb2[0];
+  on nfs {
+    address     172.16.1.31:7788;
+  }
+  on nfs-s {
+    address     172.16.1.32:7788;
+  }
+}
+</code></pre>
+<h3 id="33-初始化设备">3.3 初始化设备</h3>
+<pre><code>drbdadm create-md r0
+drbdadm up r0
+cat /proc/drbd
+</code></pre>
+<p>NFS 主服务器提升</p>
+<pre><code>drbdadm -- --overwrite-data-of-peer primary r0
+</code></pre>
+<p>将主 NFS 服务器的 drbd0 格式化供使用</p>
+<pre><code>mkfs.ext4 /dev/drbd0
+</code></pre>
+<p>测试一下</p>
+<pre><code>mkdir /data
+mount /dev/drbd0 /data
+</code></pre>
+<h2 id="4-nfs-服务安装">4 NFS 服务安装</h2>
+<h3 id="41-安装服务">4.1 安装服务</h3>
+<pre><code>yum install -y rpcbind nfs-utils
+</code></pre>
+<h3 id="42-配置">4.2 配置</h3>
+<p>修改配置文件</p>
+<pre><code>echo &quot;/data 10.0.0.0/24(rw,sync,anonuid=502,anongid=502,all_squash)&quot; &gt;/etc/exports
+</code></pre>
+<p>创建用户个用户组 ， 赋予权限，这里的 502 是 创建的 nginx 用户的 UID</p>
+<pre><code>useradd -s /sbin/nologin -u 502 -M nginx
+chown -R nginx.nginx /data
+</code></pre>
+<p>启动 NFS 服务</p>
+<pre><code>/etc/init.d/rpcbind start
+/etc/init.d/nfs start
+</code></pre>
+<h2 id="5-安装-heartbeat">5. 安装 heartbeat</h2>
+<h3 id="51-安装">5.1 安装</h3>
+<pre><code>wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo
+yum repolist
+yum install -y heartbeat
+</code></pre>
+<h3 id="52-修改配置">5.2 修改配置</h3>
+<h4 id="521-修改总体配置-etchadhacf-如下">5.2.1 修改总体配置 <code>/etc/ha.d/ha.cf</code> 如下</h4>
+<pre><code>## 日志文件
+logfile /var/log/ha-log
+logfacility      local0
+keepalive 2
+deadtime 30
+warntime 10
+initdead 60
+# 对方的IP
+mcast eth0 225.0.0.31 694 1 0
+auto_failback on
+node nfs
+node nfs-s
+</code></pre>
+<h4 id="522-修改双机验证文件-etchadauthkeys">5.2.2 修改双机验证文件 <code>/etc/ha.d/authkeys</code></h4>
+<pre><code>auth 1
+1 sha1 c4f9375f9834b4e7f0a528cc65c055702bf5f24a
+</code></pre>
+<p>修改一下权限<br>
+<code>chmod 600 /etc/ha.d/authkeys</code></p>
+<h4 id="523-修改集群资源文件配置-etchadharesources">5.2.3 修改集群资源文件配置 <code>/etc/ha.d/haresources</code></h4>
+<pre><code>nfs 10.0.0.30 drbddisk::r0 Filesystem::/dev/drbd0::/data::ext4 nfs
+</code></pre>
+<p>注意这里配置的 IP 是　VIP, 两台服务器都一致</p>
+<h3 id="53-启动">5.3 启动</h3>
+<pre><code>/etc/init.d/heartbeat start
+</code></pre>
+<p><strong>客户端挂载它</strong><br>
+客户端需要安装nfs库，不然会提示下面这样的报错：</p>
+<pre><code>[root@nfsclient ~]# mount -t nfs 192.168.1.7:/nfs /database/
+mount: wrong fs type, bad option, bad superblock on 192.168.1.7:/nfs,
+       missing codepage or helper program, or other error
+       (for several filesystems (e.g. nfs, cifs) you might
+       need a /sbin/mount.&lt;type&gt; helper program)
+       In some cases useful info is found in syslog - try
+       dmesg | tail  or so
+</code></pre>
+<p>出现上面的报错后，安装nfs-utils</p>
+<pre><code>[root@nfsclient ~]# yum -y install nfs-utils
+</code></pre>
+<p>安装完之后挂载nfs，使用vip</p>
+<pre><code>[root@nfsclient ~]# showmount -e 192.168.1.100
+clnt_create: RPC: Program not registered    #出现这个错误的话，去nfs服务器上确认是否NFS服务正常启动，重启下即可
+[root@nfsclient ~]# showmount -e 192.168.1.100
+Export list for 192.168.1.100:
+/nfs 192.168.1.0/255.255.255.0
+
+[root@localhost ~]# mount -t nfs 192.168.1.100:/nfs /database/
+[root@localhost ~]# df -hT
+Filesystem         Type   Size  Used Avail Use% Mounted on
+/dev/sda2          ext4    28G  2.9G   24G  11% /
+tmpfs              tmpfs  491M     0  491M   0% /dev/shm
+/dev/sda1          ext4   283M   28M  240M  11% /boot
+192.168.1.100:/nfs nfs    9.8G   23M  9.2G   1% /database
+  # 挂载成功。
+</code></pre>
+<h2 id="6-模拟nfs-server故障">6、模拟Nfs-server故障</h2>
+<p>我们把NFSmaster关机，此时客户端不管是df ,还是进入到/database下面，都是卡死的。解决办法是在/etc/mtab里面删除最后一行：</p>
+<pre><code>[root@nfsclient ~]# cat /etc/mtab
+/dev/sda2 / ext4 rw 0 0
+proc /proc proc rw 0 0
+sysfs /sys sysfs rw 0 0
+devpts /dev/pts devpts rw,gid=5,mode=620 0 0
+tmpfs /dev/shm tmpfs rw 0 0
+/dev/sda1 /boot ext4 rw 0 0
+none /proc/sys/fs/binfmt_misc binfmt_misc rw 0 0
+vmware-vmblock /var/run/vmblock-fuse fuse.vmware-vmblock rw,nosuid,nodev,default_permissions,allow_other 0 0
+nfsd /proc/fs/nfsd nfsd rw 0 0
+sunrpc /var/lib/nfs/rpc_pipefs rpc_pipefs rw 0 0
+192.168.1.100:/nfs /database nfs rw,addr=192.168.1.100 0 0       #删除这一行即可。
+</code></pre>
+<p>由此可见，这个heartbeat虽然会让VIP进行漂移，但是呢nfs客户端依然是不可用的。所以我们需要采用另外一种方法来来export共享目录。</p>
+<p><strong>删除export里面的内容，使用命令exporfs申明要共享的目录</strong></p>
+<p>我们删除/etc/exports里面的内容，然后通过exportfs来申明要共享的目录。</p>
+<pre><code>[root@nfsmaster ~]# &gt; /etc/exports
+[root@nfsmaster ~]# exportfs -o rw,sync,all_squash,mp,fsid=2 192.168.1.0/24:/nfs/   
+</code></pre>
+<p>上面这种exportfs的方法同样可以申明共享目录，nfsclient也同样正常使用。</p>
+<h2 id="7-高可用方案">7、高可用方案</h2>
+<p>经过dbrd+heartbeat+NFS的搭建，以及exportfs的简单使用，下面我们就开始做高可用了。<br>
+说道高可用，不得不说exportfs这个命令，如果我们使用exportfs这个命令来申明需要共享目录的话，那么我们就不需要到/etc/exports里面再次添加这个要申明的目录了。<br>
+对于NFS高可用，我们需要使用exportfs来关闭共享的目录和打开共享的目录，这样做的好处就需要修改/etc/exports文件了，大大提高了方便性。对此，我们通过exportfs命令写了一个脚本，由heartbeat来接管这个脚本，当nfsmaster服务器宕机时，nfsbackup的heartbeat开始就执行脚本，脚本通过exportfs来共享目录，此时VIP也已经飘过去了，所以nfsclient受影响很小。达到了高可用的目的。更多关于exportfs的资料，可以参考man exportfs。下面就看看这个脚本的内容：</p>
+<pre><code>[root@nfsbackup ~]# cat /etc/ha.d/resource.d/rsdata1.sh     #必须放在/etc/ha.d/resource.d下面
+#!/bin/bash
+
+FSID=&quot;1&quot;
+EXPORT_DIR=&quot;/nfs&quot;         
+EXPORT_OPTIONS=&quot;-o rw,sync,all_squash,mp,fsid=2&quot;
+EXPORT_CLIENT=&quot;192.168.1.0/24&quot;
+
+exportfs_usage() {
+cat &lt;&lt;EOF
+	USEAGE: $0 {start|stop}
+EOF
+}
+
+exportfs_start()
+{
+	fn=&quot;/nfs&quot;
+	service rpcbind stop &amp;&gt;/dev/null
+	service rpcbind start  &amp;&gt;/dev/null
+	service nfs restart  &amp;&gt;/dev/null
+        echo &quot;=======nfs restart========&quot;
+	exportfs ${EXPORT_OPTIONS} ${EXPORT_CLIENT}:${EXPORT_DIR} 2&gt;1&amp;    #通过exportfs来申明共享目录
+	rc=$?
+	if [ $rc -ne 0 ];then
+		echo &quot;export resource ${EXPORT_DIR} error&quot;
+		exit $rc
+	else
+	        echo &quot;export resource ok&quot;
+		exit 0
+	fi
+}
+
+exportfs_stop()
+{
+	fn=&quot;/nfs&quot;
+	service rpcbind stop &amp;&gt;/dev/null
+        service rpcbind start  &amp;&gt;/dev/null
+	service nfs restart  &amp;&gt;/dev/null
+        echo &quot;=======nfs restart========&quot;
+	exportfs -u  ${EXPORT_CLIENT}:${EXPORT_DIT} 2&gt;1&amp;   通过exportfs来取消共享目录
+	rc=$?
+	if [ $rc -ne 0 ];then
+		echo &quot;export resource ${EXPORT_DIR} error&quot;
+		exit $rc
+	else
+	        echo &quot;umount resource ok&quot;
+		exit 0
+	fi
+}
+
+if [ $# -lt 1 ];then
+	exportfs_usage
+	exit 1
+fi
+case $1 in
+	start)
+	exportfs_start
+	;;
+	stop)
+	exportfs_stop
+	;;
+	*)
+	exit 1
+	;;
+esac
+</code></pre>
+<p>这个脚本必须赋予可执行权限，且必须是LSB规范。同时在/etc/ha.d/haresources添加上这个脚本</p>
+<pre><code>[root@nfsmaster ~]# cat /etc/ha.d/haresources
+nfsbackup  IPaddr::192.168.1.100/24/eth0 drbddisk::r0 Filesystem::/dev/drbd0::/nfs::ext4  rsdata1.sh   #尾部添加rsdata1.sh这个脚本名
+</code></pre>
+<p>上面的操作主备都需要操作。脚本主备都要有。</p>
+<p><strong>测试高可用性</strong></p>
+<p>此时VIP在nfsmaster上面，我们在nfsclient端首先挂载NFS共享目录后创建一些文件：</p>
+<pre><code>[root@nfsclient /]# mount -t nfs 192.168.1.100:/nfs /database    #
+[root@nfsclient /]# cd /database/
+[root@nfsclient database]# touch {1..10}
+[root@nfsclient database]# ls
+1  10  2  3  4  5  6  7  8  9  lost+found  readme
+</code></pre>
+<p>关闭nfsmaster的电源，模拟宕机。此时等待VIP漂移到nfsbackup上面。待漂移到位后，我们继续在nfsclient上操作：</p>
+<pre><code>[root@nfsclient database]# ls    # 可以查看目录下的文件
+1  10  2  3  4  5  6  7  8  9  lost+found  readme
+[root@nfsclient database]# rm -f {1..5}     # 也可以删除文件。
+[root@nfsclient database]# ls
+10  6  7  8  9  lost+found  readme
+</code></pre>
+<h6 id="到此nfs高可用就做完了">到此NFS高可用就做完了。</h6>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/VSlKpIv5O/">
+              <span class="post-title">
+                NFS文件系统相关参数介绍&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> SpringBoot 配置文件详解 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" SpringBoot 配置文件详解 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" SpringBoot 配置文件详解"/>
+    <meta property="og:url" content="https://jwangkun.github.io/duZ4RFDl-/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/NOdBskH2b/" class="tag">配置文件</a>
+            
+        </span>
+            <h1> SpringBoot 配置文件详解</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>SpringBoot使用一个全局的配置文件，配置文件名的</p>
+<ul>
+<li>application.properties</li>
+<li>application.yml</li>
+</ul>
+<p>配置文件的作用 : SpringBoot底层都给我们配置好了，但有时候我们需要修改一些默认配置。</p>
+<h2 id="一-ymal">一、YMAL</h2>
+<h3 id="1-ymal与xml对比">1. YMAL与XML对比</h3>
+<p>YMAL :</p>
+<pre><code>server
+  port: 8081
+</code></pre>
+<p>XML :</p>
+<pre><code class="language-xml">&lt;server&gt;
+	&lt;port&gt;8081&lt;/port&gt;
+&lt;/server&gt;
+</code></pre>
+<p>###2. 基本语法 k:空格v : 表示一对键值对（空格必须有)<br>
+以<strong>空格</strong>的缩进来控制层级关系；空格多少无所谓，只要左对齐的一列数据，都是同一个层级的。</p>
+<pre><code class="language-yml">server:
+	port: 8081
+	path: /hello
+</code></pre>
+<h3 id="3-配置文件值注入">3. 配置文件值注入</h3>
+<h4 id="applicationyml">application.yml</h4>
+<pre><code class="language-yml">server:
+  port: 8081
+
+person:
+  lastName: zhangsan # 也可写成(松散语法) last-name:zhansang
+  age: 18
+  boss: false
+  birth: 2017/12/12
+  map: {k1: v1, k2 : 12}
+  list:
+    - lisi
+    - zhaoliu
+  dog:
+    name: 史努比
+    age: 2
+cat:
+  name: Tom
+  age: 5
+</code></pre>
+<h4 id="实体类-person">实体类 Person</h4>
+<pre><code class="language-java">package com.gf.entity;
+
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 将配置文件中的配置，映射到这个组件中
+ * @ConfigurationProperties: 告诉SpringBoot将本类所有属性和配置文件中相关的配置进行绑定
+ *      prefix = &quot;person&quot; : 配置文件中那个下面的所有属性进行一一映射
+ * 只有这个这个组件是容器中的组件，才能使用容器提供的@ConfigurationProperties的功能
+ */
+@Component
+@ConfigurationProperties(prefix = &quot;person&quot;)
+public class Person {
+    private String lastName;
+    private Integer age;
+    private Boolean boss;
+    private Date birth;
+
+    private Map&lt;String , Object&gt; map;
+    private List&lt;Object&gt; list;
+    private Dog dog;
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public Boolean getBoss() {
+        return boss;
+    }
+
+    public void setBoss(Boolean boss) {
+        this.boss = boss;
+    }
+
+    public Date getBirth() {
+        return birth;
+    }
+
+    public void setBirth(Date birth) {
+        this.birth = birth;
+    }
+
+    public Map&lt;String, Object&gt; getMap() {
+        return map;
+    }
+
+    public void setMap(Map&lt;String, Object&gt; map) {
+        this.map = map;
+    }
+
+    public List&lt;Object&gt; getList() {
+        return list;
+    }
+
+    public void setList(List&lt;Object&gt; list) {
+        this.list = list;
+    }
+
+    public Dog getDog() {
+        return dog;
+    }
+
+    public void setDog(Dog dog) {
+        this.dog = dog;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder( &quot;{\&quot;Person\&quot;:{&quot; );
+        sb.append( &quot;\&quot;lastName\&quot;:\&quot;&quot; )
+                .append( lastName ).append( '\&quot;' );
+        sb.append( &quot;,\&quot;age\&quot;:&quot; )
+                .append( age );
+        sb.append( &quot;,\&quot;boss\&quot;:&quot; )
+                .append( boss );
+        sb.append( &quot;,\&quot;birth\&quot;:\&quot;&quot; )
+                .append( birth ).append( '\&quot;' );
+        sb.append( &quot;,\&quot;map\&quot;:&quot; )
+                .append( map );
+        sb.append( &quot;,\&quot;list\&quot;:&quot; )
+                .append( list );
+        sb.append( &quot;,\&quot;dog\&quot;:&quot; )
+                .append( dog );
+        sb.append( &quot;}}&quot; );
+        return sb.toString();
+    }
+}
+</code></pre>
+<h4 id="实体类-dog">实体类 Dog</h4>
+<pre><code class="language-java">package com.gf.entity;
+
+
+public class Dog {
+
+    private String name;
+    private Integer age;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder( &quot;{\&quot;Dog\&quot;:{&quot; );
+        sb.append( &quot;\&quot;name\&quot;:\&quot;&quot; )
+                .append( name ).append( '\&quot;' );
+        sb.append( &quot;,\&quot;age\&quot;:&quot; )
+                .append( age );
+        sb.append( &quot;}}&quot; );
+        return sb.toString();
+    }
+}
+</code></pre>
+<h4 id="实体类-cat">实体类 Cat</h4>
+<pre><code class="language-java">package com.gf.entity;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class Cat {
+    @Value( &quot;${cat.name}&quot; )
+    private String name;
+    @Value( &quot;${cat.age}&quot; )
+    private Integer age;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder( &quot;{\&quot;Cat\&quot;:{&quot; );
+        sb.append( &quot;\&quot;name\&quot;:\&quot;&quot; )
+                .append( name ).append( '\&quot;' );
+        sb.append( &quot;,\&quot;age\&quot;:&quot; )
+                .append( age );
+        sb.append( &quot;}}&quot; );
+        return sb.toString();
+    }
+}
+</code></pre>
+<h4 id="pomxml">pom.xml</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+	&lt;groupId&gt;com.gf&lt;/groupId&gt;
+	&lt;artifactId&gt;springboot-config&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
+
+	&lt;name&gt;springboot-config&lt;/name&gt;
+	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+	&lt;parent&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+		&lt;version&gt;1.5.9.RELEASE&lt;/version&gt;
+		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+	&lt;/parent&gt;
+
+	&lt;properties&gt;
+		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+		&lt;java.version&gt;1.8&lt;/java.version&gt;
+	&lt;/properties&gt;
+
+	&lt;dependencies&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+			&lt;scope&gt;test&lt;/scope&gt;
+		&lt;/dependency&gt;
+		&lt;!-- 导入配置文件处理器，配置文件进行绑定就会有提示 --&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;
+			&lt;optional&gt;true&lt;/optional&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+
+	&lt;build&gt;
+		&lt;plugins&gt;
+			&lt;plugin&gt;
+				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+			&lt;/plugin&gt;
+		&lt;/plugins&gt;
+	&lt;/build&gt;
+
+
+&lt;/project&gt;
+</code></pre>
+<h4 id="springboot-测试类">SpringBoot 测试类</h4>
+<pre><code class="language-java">package com.gf;
+
+import com.gf.entity.Cat;
+import com.gf.entity.Person;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+/**
+ * SpringBoot单元测试
+ * 可以在测试期间很方便的类似编码一样进行自动注入等容器的功能
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringbootConfigApplicationTests {
+
+	@Autowired
+	Person person;
+
+	@Autowired
+	Cat cat;
+
+	@Test
+	public void contextLoads() {
+		System.out.println(person);
+		System.out.println(cat);
+	}
+
+}
+</code></pre>
+<p>运行 SpringbootConfigApplicationTests 的到结果</p>
+<pre><code class="language-json">{
+	&quot;Person&quot;: {
+		&quot;lastName&quot;: &quot;zhangsan&quot;,
+		&quot;age&quot;: 18,
+		&quot;boss&quot;: false,
+		&quot;birth&quot;: &quot;Tue Dec 12 00:00:00 CST 2017&quot;,
+		&quot;map&quot;: {
+			k1 = v1,
+			k2 = 12
+		},
+		&quot;list&quot;: [lisi, zhaoliu],
+		&quot;dog&quot;: {
+			&quot;Dog&quot;: {
+				&quot;name&quot;: &quot;史努比&quot;,
+				&quot;age&quot;: 2
+			}
+		}
+	}
+} 
+{
+	&quot;Cat&quot;: {
+		&quot;name&quot;: &quot;Tom&quot;,
+		&quot;age&quot;: 5
+	}
+}
+</code></pre>
+<h4 id="value获取值和configurationproperties获取值比较">@Value获取值和@ConfigurationProperties获取值比较</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>@ConfigurationProperties</th>
+<th>@Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>功能</td>
+<td>批量注入文件中的属性</td>
+<td>一个一个指定</td>
+</tr>
+<tr>
+<td>松散绑定（松散语法）</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>SpEL</td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>JSR303数据校验</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>复杂类型封装</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>如果说，我们只是在某个业务逻辑中需要获取一下配置文件中的某项值，使用**@Value**;</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>如果说，我们专门编写了一个javaBean来和配置文件进行映射，我们就直接使用**@ConfigurationProperties**;</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Mcc2pXo1i/">
+              <span class="post-title">
+                构建一个SpringBoot工程&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

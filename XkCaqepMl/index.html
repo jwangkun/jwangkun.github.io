@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>在K8S上部署eureka-server | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="在K8S上部署eureka-server | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="在K8S上部署eureka-server"/>
+    <meta property="og:url" content="https://jwangkun.github.io/XkCaqepMl/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+        </span>
+            <h1>在K8S上部署eureka-server</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-12，5 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="理解eureka-server">理解eureka-server</h2>
+<p>本章节参考 eureka-server 的 <a href="https://gitee.com/owenwangwen/open-capacity-platform/tree/2.0.1/register-center/eureka-server">代码仓库</a>，并着重从容器化部署的角度来理解 Spring Cloud eureka-server 以及 OCP 中 eureka-server 的配置文件。</p>
+<p><code>open-capacity-platform/register-center/eureka-server/src/main/resources</code> 目录中包含了 eureka-server 的配置文件，如下所示：</p>
+<pre><code class="language-sh">├── application-slave0.yml
+├── application-slave1.yml
+├── application-slave2.yml
+├── application-slave3.yml
+├── application.yml
+└── bootstrap.yml
+</code></pre>
+<p>其中， <code>application-slave0.yml</code>，<code>application-slave1.yml</code>，<code>application-slave2.yml</code>，<code>application-slave3.yml</code> 为 spring boot 的 4 个 profile 配置，他们之间最重要的差异在于以下两个字段：</p>
+<ul>
+<li>server.port</li>
+<li>eureka.client.defaultZone</li>
+</ul>
+<p>而 <code>application.yml</code> 文件中则指定了 <code>application-slave0.yml</code> 为默认 profile。通过 <code>eureka.client.service-url.defaultZone</code> 字段不难看出：</p>
+<ul>
+<li>配置文件 slave0 为一组，在运行 eureka-server 单节点时使用（该文件中还有一些特定于测试环境的配置项）</li>
+<li>配置文件 slave1/slave2/slave3 为一组，在运行 eureka-server 高可用时使用，为了避免端口冲突，为每一个实例单独定义了 <code>server.port</code> 字段，通过 <code>--spring.profiles.active </code>启动参数为 eureka-server 的实例指定激活的配置文件</li>
+</ul>
+<h2 id="确定部署方案">确定部署方案</h2>
+<p>在 Kubernetes 中部署多个 eureka-server 的实例组成集群时，主要有如下考虑因素：</p>
+<ul>
+<li>每个 eureka-server 需要被赋予一个唯一的 id，通过字段 <code>eureka.instance.instance-id</code> 指定。OCP 中，该字段的配置为 <code>${spring.application.name}:${spring.cloud.client.ip-address}:${spring.application.instance_id:${server.port}}</code>
+<ul>
+<li>Kubernetes 为每一个 Pod 分配一个 IP 地址，此要求可以满足</li>
+</ul>
+</li>
+<li>eureka-server 的每一个实例需要知道集群中其他实例的地址和端口号，通过字段 <code>eureka.client.serviceUrl.defaultZone</code> 指定
+<ul>
+<li>请参考 <a href="/learning/k8s-intermediate/workload/wl-statefulset/#statefulset-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF">StatefulSet的使用场景</a> 以理解为何选择 StatefulSet 部署 eureka</li>
+<li>请参考 <a href="/learning/k8s-intermediate/workload/wl-statefulset/basics.html#%E7%A8%B3%E5%AE%9A%E7%9A%84%E7%BD%91%E7%BB%9C-id">StatefulSet稳定的网络ID</a> 以理解 StatefulSet 如何为其中的 Pod 分配 DNS name</li>
+</ul>
+</li>
+<li>eureka-server 的多个实例之间，不能存在端口冲突
+<ul>
+<li>请参考 <a href="/learning/k8s-intermediate/service/connecting.html#kubernetes-%E7%9A%84%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B">Kubernetes的网络模型</a> 以理解 Kubernetes 中如何避免端口冲突</li>
+</ul>
+</li>
+</ul>
+<p>我们在 Kubernetes 上部署 eureka-server 时：</p>
+<ul>
+<li>使用 StatefulSet 部署 eureka-server，副本数量为 3</li>
+<li>使用 OCP eureka-server 的 application-slave0.yml 这个 profile</li>
+<li>使用环境变量覆盖 <code>eureka.client.service-url.defaultZone</code> 取值，将其设置为：<pre><code>http://cloud-eureka-0.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-1.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-2.cloud-eureka.ocp.svc.cluster.local:1111/eureka
+</code></pre>
+::: tip<br>
+通过 cloud-eureka-0.cloud-eureka 也可以访问到对应的 POD，但是此处必须使用完整域名，否则 eureka-server 将不被认为是 available<br>
+:::</li>
+<li>使用环境变量覆盖 <code>eureka.instance.prefer-ip-address</code> 取值，将其设置为：<code>false</code></li>
+<li>为 eureka-server 创建 Ingress，并分配域名 <code>cloud-eureka.ocp.demo.kuboard.cn</code>
+<ul>
+<li>关于 Ingress，请参考 <a href="/learning/k8s-intermediate/service/ingress.html">Ingress通过互联网访问您的应用</a></li>
+<li>该域名由 <code>工作负载名</code>.<code>名称空间</code>.<code>集群名字</code>.<code>一级域名</code> 组成，这种命名规则下，只需要将 <code>*.demo.kuboard.cn</code> 的域名解析指向集群 Ingress Controller 的地址就可以，在测试环境中配置新的模块时非常方便。</li>
+</ul>
+</li>
+</ul>
+<h2 id="部署eureka-server">部署eureka-server</h2>
+<p>本教程将 eureka-server 及其他 OCP 组件部署到 <code>ocp</code> 名称空间，并假设您已经创建好了该名称空间，参考 <a href="/guide/cluster/namespace.html">创建名称空间</a></p>
+<ul>
+<li>
+<p>在 Kuboard 界面中进入 <code>ocp</code> 名称空间，并点击页头的按钮 <code>创建工作负载</code>，如下图所示：</p>
+<p>填写表单：</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>填写内容</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><div style="min-width:70px;">服务类型</div></td>
+<td>StatefulSet</td>
+<td></td>
+</tr>
+<tr>
+<td>服务分层</td>
+<td>中间件</td>
+<td></td>
+</tr>
+<tr>
+<td>服务名称</td>
+<td>eureka</td>
+<td></td>
+</tr>
+<tr>
+<td>服务描述</td>
+<td>服务注册中心</td>
+<td></td>
+</tr>
+<tr>
+<td>副本数量</td>
+<td>3</td>
+<td></td>
+</tr>
+<tr>
+<td>容器名称</td>
+<td>eureka-server</td>
+<td></td>
+</tr>
+<tr>
+<td>镜像</td>
+<td>ocpsample/eureka-server:latest</td>
+<td>也可以使用自己构建的镜像</td>
+</tr>
+<tr>
+<td>抓取策略</td>
+<td>Always</td>
+<td></td>
+</tr>
+<tr>
+<td>环境变量</td>
+<td><div style="max-width: 600px;"><span style="color: blue;">eureka.client.service-url.defaultZone=</span>http://cloud-eureka-0.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-1.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-2.cloud-eureka.ocp.svc.cluster.local:1111/eureka</div> <div style="max-width: 600px;"><span style="color: blue;">eureka.instance.prefer-ip-address=</span>false</div></td>
+<td>填入 kuboard 时<br/>环境变量名后面不带 <code>=</code></td>
+</tr>
+<tr>
+<td>Service</td>
+<td>NodePort：<br />协议 <code>TCP</code> 服务端口 <code>1111</code>节点端口 <code>31111</code> 容器端口 <code>1111</code></td>
+<td>可从节点端口访问</td>
+</tr>
+<tr>
+<td>Ingress</td>
+<td>域名：cloud-eureka.ocp.demo.kuboard.cn<br />路由配置： 映射URL <code>/</code> 服务端口 <code>1111</code></td>
+<td>可通过域名访问</td>
+</tr>
+</tbody>
+</table>
+<figure data-type="image" tabindex="1"><img src="./eureka-server.assets/image-20190927104441574.png" alt="Kubernetes教程：在K8S中部署SpringCloud" loading="lazy"></figure>
+</li>
+<li>
+<p>点击 <strong>保存</strong> 按钮</p>
+</li>
+<li>
+<p>点击 <strong>应用</strong> 按钮</p>
+</li>
+<li>
+<p>点击 <strong>完成</strong> 按钮</p>
+<ul>
+<li>等待 eureka-server 完成部署</li>
+<li>根据您服务器到 hub.docker.com 的网速不同，等候的时间约 1-5 分钟</li>
+</ul>
+</li>
+</ul>
+<h2 id="查看部署结果">查看部署结果</h2>
+<SharingBlock>
+<p>按照上面的部署方式，有如下两种方式可以从浏览器访问 eureka-server 的界面：</p>
+<ul>
+<li>使用域名： <a href="http://cloud-eureka.ocp.demo.kuboard.cn/">http://cloud-eureka.ocp.demo.kuboard.cn/</a></li>
+<li>使用节点端口：http://${任意节点的IP地址}:31111</li>
+</ul>
+<p>eureka-server 界面如下图所示：</p>
+<figure data-type="image" tabindex="2"><img src="./eureka-server.assets/image-20190927140934092.png" alt="Kubernetes教程：在K8S部署SpringCloud服务注册中心Eureka-Server" loading="lazy"></figure>
+</SharingBlock>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/tPLFLp3lw/">
+              <span class="post-title">
+                Kubernetes 中 PV 和 PVC 的状态变化&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

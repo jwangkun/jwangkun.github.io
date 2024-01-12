@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Spring Boot Admin 2.0 详解 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Spring Boot Admin 2.0 详解 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Spring Boot Admin 2.0 详解"/>
+    <meta property="og:url" content="https://jwangkun.github.io/FQJiWX7zK/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/ZPK0tltDQ/" class="tag">Spring Boot Admin</a>
+            
+        </span>
+            <h1>Spring Boot Admin 2.0 详解</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，24 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="一-什么是spring-boot-admin">一、什么是Spring Boot Admin ？</h2>
+<p>Spring Boot Admin是一个开源社区项目，用于管理和监控SpringBoot应用程序。 应用程序作为Spring Boot Admin Client向为Spring Boot Admin Server注册（通过HTTP）或使用SpringCloud注册中心（例如Eureka，Consul）发现。 UI是的Vue.js应用程序，展示Spring Boot Admin Client的Actuator端点上的一些监控。服务端采用Spring WebFlux + Netty的方式。Spring Boot Admin为注册的应用程序提供以下功能：</p>
+<ul>
+<li>显示健康状况</li>
+<li>显示详细信息，例如</li>
+<li>JVM和内存指标</li>
+<li>micrometer.io指标</li>
+<li>数据源指标</li>
+<li>缓存指标</li>
+<li>显示构建信息编号</li>
+<li>关注并下载日志文件</li>
+<li>查看jvm system-和environment-properties</li>
+<li>查看Spring Boot配置属性</li>
+<li>支持Spring Cloud的postable / env-和/ refresh-endpoint</li>
+<li>轻松的日志级管理</li>
+<li>与JMX-beans交互</li>
+<li>查看线程转储</li>
+<li>查看http-traces</li>
+<li>查看auditevents</li>
+<li>查看http-endpoints</li>
+<li>查看计划任务</li>
+<li>查看和删除活动会话（使用spring-session）</li>
+<li>查看Flyway / Liquibase数据库迁移</li>
+<li>下载heapdump</li>
+<li>状态变更通知（通过电子邮件，Slack，Hipchat，......）</li>
+<li>状态更改的事件日志（非持久性）</li>
+</ul>
+<h2 id="二-入门">二、入门</h2>
+<h3 id="1-创建-spring-boot-admin-server">1. 创建 Spring Boot Admin Server</h3>
+<h4 id="pomxml">pom.xml</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;parent&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+        &lt;version&gt;2.1.0.RELEASE&lt;/version&gt;
+        &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+    &lt;/parent&gt;
+    &lt;groupId&gt;com.gf&lt;/groupId&gt;
+    &lt;artifactId&gt;admin-server&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+    &lt;name&gt;admin-server&lt;/name&gt;
+    &lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+    &lt;properties&gt;
+        &lt;java.version&gt;1.8&lt;/java.version&gt;
+        &lt;spring-boot-admin.version&gt;2.1.0&lt;/spring-boot-admin.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-admin-starter-server&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;dependencyManagement&gt;
+        &lt;dependencies&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-admin-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;${spring-boot-admin.version}&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+    &lt;/dependencyManagement&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+
+&lt;/project&gt;
+</code></pre>
+<h4 id="applicationyml">application.yml</h4>
+<pre><code class="language-xml">spring:
+  application:
+    name: admin-server
+server:
+  port: 8769
+</code></pre>
+<h4 id="启动类-adminserverapplication">启动类 AdminServerApplication</h4>
+<p>启动类加上@EnableAdminServer注解，开启AdminServer的功能：</p>
+<pre><code class="language-java">@SpringBootApplication
+@EnableAdminServer
+public class AdminServerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run( AdminServerApplication.class, args );
+    }
+
+}
+</code></pre>
+<h3 id="2-创建-spring-boot-admin-client">2. 创建 Spring Boot Admin Client</h3>
+<h4 id="pomxml-2">pom.xml</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;parent&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+        &lt;version&gt;2.1.0.RELEASE&lt;/version&gt;
+        &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+    &lt;/parent&gt;
+    &lt;groupId&gt;com.gf&lt;/groupId&gt;
+    &lt;artifactId&gt;admin-client&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+    &lt;name&gt;admin-client&lt;/name&gt;
+    &lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+    &lt;properties&gt;
+        &lt;java.version&gt;1.8&lt;/java.version&gt;
+        &lt;spring-boot-admin.version&gt;2.1.0&lt;/spring-boot-admin.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-admin-starter-client&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;dependencyManagement&gt;
+        &lt;dependencies&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-admin-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;${spring-boot-admin.version}&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+    &lt;/dependencyManagement&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+
+&lt;/project&gt;
+</code></pre>
+<h4 id="applicationyml-2">application.yml</h4>
+<ul>
+<li>spring.boot.admin.client.url：要注册的Spring Boot Admin Server的URL。</li>
+<li>management.endpoints.web.exposure.include：与Spring Boot 2一样，默认情况下，大多数actuator的端口都不会通过http公开，* 代表公开所有这些端点。对于生产环境，应该仔细选择要公开的端点。</li>
+</ul>
+<pre><code class="language-xml">spring:
+  application:
+    name: admin-client
+  boot:
+    admin:
+      client:
+        url: http://localhost:8769
+server:
+  port: 8768
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS
+</code></pre>
+<h4 id="启动类-adminclientapplication">启动类 AdminClientApplication</h4>
+<pre><code class="language-java">@SpringBootApplication
+public class AdminClientApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run( AdminClientApplication.class, args );
+    }
+
+}
+</code></pre>
+<p>启动两个工程，在浏览器上输入localhost:8769 ，浏览器显示的界面如下：</p>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-12/1.png" alt="img" loading="lazy"></figure>
+<p>查看wallboard：</p>
+<figure data-type="image" tabindex="2"><img src="http://image.itwolfed.com/springboot-12/2.png" alt="img" loading="lazy"></figure>
+<p>点击wallboard，可以查看admin-client具体的信息，比如内存状态信息：</p>
+<figure data-type="image" tabindex="3"><img src="http://image.itwolfed.com/springboot-12/3.png" alt="img" loading="lazy"></figure>
+<p>查看spring bean的情况：</p>
+<figure data-type="image" tabindex="4"><img src="http://image.itwolfed.com/springboot-12/4.png" alt="img" loading="lazy"></figure>
+<p>查看应用程序运行状况，信息和详细：</p>
+<figure data-type="image" tabindex="5"><img src="http://image.itwolfed.com/springboot-12/5.png" alt="img" loading="lazy"></figure>
+<p>还有很多监控信息，多点一点就知道。</p>
+<h2 id="三-集成-eureka">三、集成 Eureka</h2>
+<h3 id="1-创建-sc-eureka-server">1. 创建 sc-eureka-server</h3>
+<p>这是一个 eureka-server 注册中心。</p>
+<h4 id="pomxml-3">pom.xml</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;parent&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+        &lt;version&gt;2.1.0.RELEASE&lt;/version&gt;
+        &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+    &lt;/parent&gt;
+    &lt;groupId&gt;com.gf&lt;/groupId&gt;
+    &lt;artifactId&gt;sc-admin-server&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+    &lt;name&gt;sc-admin-server&lt;/name&gt;
+    &lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+    &lt;properties&gt;
+        &lt;java.version&gt;1.8&lt;/java.version&gt;
+        &lt;spring-boot-admin.version&gt;2.1.0&lt;/spring-boot-admin.version&gt;
+        &lt;spring-cloud.version&gt;Finchley.RELEASE&lt;/spring-cloud.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-admin-starter-server&lt;/artifactId&gt;
+            &lt;version&gt;2.1.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-mail&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+            &lt;artifactId&gt;jolokia-core&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;dependencyManagement&gt;
+        &lt;dependencies&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;${spring-cloud.version}&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-admin-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;${spring-boot-admin.version}&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+    &lt;/dependencyManagement&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+
+&lt;/project&gt;
+</code></pre>
+<h4 id="applicationyml-3">application.yml</h4>
+<pre><code class="language-yml">spring:
+  application:
+    name: sc-eureka-server
+server:
+  port: 8761
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: false
+    fetch-registry: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: &quot;*&quot;
+  endpoint:
+    health:
+      show-details: ALWAYS
+</code></pre>
+<h4 id="启动类-sceurekaserverapplication">启动类 ScEurekaServerApplication</h4>
+<pre><code class="language-java">@SpringBootApplication
+@EnableEurekaServer
+public class ScEurekaServerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run( ScEurekaServerApplication.class, args );
+    }
+
+}
+</code></pre>
+<h3 id="2-创建-sc-admin-server">2. 创建 sc-admin-server</h3>
+<p>这是一个 Spring Boot Admin Server端。</p>
+<h4 id="pomxml-4">pom.xml</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;parent&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+        &lt;version&gt;2.1.0.RELEASE&lt;/version&gt;
+        &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+    &lt;/parent&gt;
+    &lt;groupId&gt;com.gf&lt;/groupId&gt;
+    &lt;artifactId&gt;sc-admin-server&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+    &lt;name&gt;sc-admin-server&lt;/name&gt;
+    &lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+    &lt;properties&gt;
+        &lt;java.version&gt;1.8&lt;/java.version&gt;
+        &lt;spring-boot-admin.version&gt;2.1.0&lt;/spring-boot-admin.version&gt;
+        &lt;spring-cloud.version&gt;Finchley.RELEASE&lt;/spring-cloud.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-admin-starter-server&lt;/artifactId&gt;
+            &lt;version&gt;2.1.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-mail&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.jolokia&lt;/groupId&gt;
+            &lt;artifactId&gt;jolokia-core&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;dependencyManagement&gt;
+        &lt;dependencies&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;${spring-cloud.version}&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-admin-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;${spring-boot-admin.version}&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+    &lt;/dependencyManagement&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+
+&lt;/project&gt;
+</code></pre>
+<h4 id="applicationyml-4">application.yml</h4>
+<pre><code class="language-yml">spring:
+  application:
+    name: admin-server
+server:
+  port: 8769
+eureka:
+  client:
+    registryFetchIntervalSeconds: 5
+    service-url:
+      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761}/eureka/
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+    health-check-url-path: /actuator/health
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: &quot;*&quot;
+  endpoint:
+    health:
+      show-details: ALWAYS
+</code></pre>
+<h4 id="启动类-scadminserverapplication">启动类 ScAdminServerApplication</h4>
+<pre><code class="language-java">@SpringBootApplication
+@EnableAdminServer
+@EnableDiscoveryClient
+public class ScAdminServerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run( ScAdminServerApplication.class, args );
+    }
+
+}
+</code></pre>
+<h3 id="3-创建-sc-admin-client">3. 创建 sc-admin-client</h3>
+<p>这是一个 Spring Boot Admin client 端。</p>
+<h4 id="pomxml-5">pom.xml</h4>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+    &lt;parent&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+        &lt;version&gt;2.1.0.RELEASE&lt;/version&gt;
+        &lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+    &lt;/parent&gt;
+    &lt;groupId&gt;com.gf&lt;/groupId&gt;
+    &lt;artifactId&gt;sc-admin-client&lt;/artifactId&gt;
+    &lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+    &lt;name&gt;sc-admin-client&lt;/name&gt;
+    &lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+    &lt;properties&gt;
+        &lt;java.version&gt;1.8&lt;/java.version&gt;
+        &lt;spring-boot-admin.version&gt;2.1.0&lt;/spring-boot-admin.version&gt;
+        &lt;spring-cloud.version&gt;Finchley.SR2&lt;/spring-cloud.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-webflux&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-admin-starter-client&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+            &lt;scope&gt;test&lt;/scope&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+
+    &lt;dependencyManagement&gt;
+        &lt;dependencies&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;${spring-cloud.version}&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;de.codecentric&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-admin-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;${spring-boot-admin.version}&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+    &lt;/dependencyManagement&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+
+&lt;/project&gt;
+</code></pre>
+<h4 id="applicationyml-5">application.yml</h4>
+<pre><code class="language-xml">spring:
+  application:
+    name: sc-admin-client
+eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+    health-check-url-path: /actuator/health
+
+  client:
+    registryFetchIntervalSeconds: 5
+    service-url:
+      defaultZone: ${EUREKA_SERVICE_URL:http://localhost:8761}/eureka/
+management:
+  endpoints:
+    web:
+      exposure:
+        include: &quot;*&quot;
+  endpoint:
+    health:
+      show-details: ALWAYS
+server:
+  port: 8762
+</code></pre>
+<h4 id="启动类-scadminclientapplication">启动类 ScAdminClientApplication</h4>
+<pre><code class="language-java">@SpringBootApplication
+@EnableDiscoveryClient
+public class ScAdminClientApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run( ScAdminClientApplication.class, args );
+    }
+
+}
+</code></pre>
+<p>启动三个工程，访问localhost:8769，出现如下界面：</p>
+<figure data-type="image" tabindex="6"><img src="http://image.itwolfed.com/springboot-12/6.png" alt="img" loading="lazy"></figure>
+<p><strong>admin 会自己拉取 Eureka 上注册的 app 信息，主动去注册。这也是唯一区别之前入门中手动注册的地方，就是 client 端不需要 admin-client 的依赖，也不需要配置 admin 地址了，一切全部由 admin-server 自己实现。这样的设计对环境变化很友好，不用改了admin-server后去改所有app 的配置了。</strong></p>
+<h2 id="四-集成-spring-security">四、集成 Spring Security</h2>
+<p>Web应用程序中的身份验证和授权有多种方法，因此Spring Boot Admin不提供默认方法。默认情况下，spring-boot-admin-server-ui提供登录页面和注销按钮。我们结合 Spring Security 实现需要用户名和密码登录的安全认证。</p>
+<p>sc-admin-server工程的pom文件需要增加以下的依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>在 sc-admin-server工的配置文件 application.yml 中配置 spring security 的用户名和密码，这时需要在服务注册时带上 metadata-map 的信息，如下：</p>
+<pre><code class="language-xml">spring:
+  security:
+    user:
+      name: &quot;admin&quot;
+      password: &quot;admin&quot;
+      
+eureka:
+  instance:
+    metadata-map:
+      user.name: ${spring.security.user.name}
+      user.password: ${spring.security.user.password}
+</code></pre>
+<p><strong>@EnableWebSecurity</strong>注解以及<strong>WebSecurityConfigurerAdapter</strong>一起配合提供基于web的security。继承了WebSecurityConfigurerAdapter之后，再加上几行代码，我们就能实现要求用户在进入应用的任何URL之前都进行验证的功能，写一个配置类SecuritySecureConfig继承WebSecurityConfigurerAdapter，配置如下：</p>
+<pre><code class="language-java">@Configuration
+public class SecuritySecureConfig extends WebSecurityConfigurerAdapter {
+
+    private final String adminContextPath;
+
+    public SecuritySecureConfig(AdminServerProperties adminServerProperties) {
+        this.adminContextPath = adminServerProperties.getContextPath();
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        // @formatter:off
+        SavedRequestAwareAuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+        successHandler.setTargetUrlParameter(&quot;redirectTo&quot;);
+        successHandler.setDefaultTargetUrl(adminContextPath + &quot;/&quot;);
+
+        http.authorizeRequests()
+                //授予对所有静态资产和登录页面的公共访问权限。
+                .antMatchers(adminContextPath + &quot;/assets/**&quot;).permitAll()
+                .antMatchers(adminContextPath + &quot;/login&quot;).permitAll()
+                //必须对每个其他请求进行身份验证
+                .anyRequest().authenticated()
+                .and()
+                //配置登录和注销
+                .formLogin().loginPage(adminContextPath + &quot;/login&quot;).successHandler(successHandler).and()
+                .logout().logoutUrl(adminContextPath + &quot;/logout&quot;).and()
+                //启用HTTP-Basic支持。这是Spring Boot Admin Client注册所必需的
+                .httpBasic().and();
+        // @formatter:on
+    }
+}
+</code></pre>
+<p>重新访问 http://localhost:8769/ 会出现登录界面，密码是 配置文件中配置好的，账号 admin 密码 admin，界面如下：</p>
+<figure data-type="image" tabindex="7"><img src="http://image.itwolfed.com/springboot-12/7.png" alt="img" loading="lazy"></figure>
+<h2 id="五-通知">五、通知</h2>
+<h3 id="1-邮件通知">1. 邮件通知</h3>
+<p>在 Spring Boot Admin 中 当注册的应用程序状态更改为DOWN、UNKNOWN、OFFLINE 都可以指定触发通知，下面讲解配置邮件通知。</p>
+<p>在sc-admin-server工程pom文件，加上mail的依赖，如下：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-mail&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>在配置文件application.yml文件中，配置收发邮件的配置：</p>
+<pre><code class="language-xml">spring:
+  mail:
+    host: smtp.163.com
+    username: xxxx@163.com
+    password: xxxx
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  boot:
+    admin:
+      notify:
+        mail:
+          from: xxxx@163.com
+          to: xxxx@qq.com
+</code></pre>
+<p>配置后，重启sc-admin-server工程，之后若出现注册的客户端的状态从 UP 变为 OFFLINE 或其他状态，服务端就会自动将电子邮件发送到上面配置的收件地址。</p>
+<p><strong>注意 : 配置了邮件通知后，会出现 反复通知 service offline / up。这个问题的原因在于 查询应用程序的状态和信息超时，下面给出两种解决方案：</strong></p>
+<pre><code class="language-xml">#方法一：增加超时时间（单位:ms）
+
+spring.boot.admin.monitor.read-timeout=20000
+
+#方法二：关闭闭未使用或不重要的检查点
+
+management.health.db.enabled=false
+management.health.mail.enabled=false
+management.health.redis.enabled=false
+management.health.mongo.enabled=false
+</code></pre>
+<h3 id="2-自定义通知">2. 自定义通知</h3>
+<p>可以通过添加实现Notifier接口的Spring Beans来添加您自己的通知程序，最好通过扩展 AbstractEventNotifier或AbstractStatusChangeNotifier。在sc-admin-server工程中编写一个自定义的通知器：</p>
+<pre><code class="language-java">@Component
+public class CustomNotifier  extends AbstractStatusChangeNotifier {
+    private static final Logger LOGGER = LoggerFactory.getLogger( LoggingNotifier.class);
+
+    public CustomNotifier(InstanceRepository repository) {
+        super(repository);
+    }
+
+    @Override
+    protected Mono&lt;Void&gt; doNotify(InstanceEvent event, Instance instance) {
+        return Mono.fromRunnable(() -&gt; {
+            if (event instanceof InstanceStatusChangedEvent) {
+                LOGGER.info(&quot;Instance {} ({}) is {}&quot;, instance.getRegistration().getName(), event.getInstance(),
+                        ((InstanceStatusChangedEvent) event).getStatusInfo().getStatus());
+
+                String status = ((InstanceStatusChangedEvent) event).getStatusInfo().getStatus();
+
+                switch (status) {
+                    // 健康检查没通过
+                    case &quot;DOWN&quot;:
+                        System.out.println(&quot;发送 健康检查没通过 的通知！&quot;);
+                        break;
+                    // 服务离线
+                    case &quot;OFFLINE&quot;:
+                        System.out.println(&quot;发送 服务离线 的通知！&quot;);
+                        break;
+                    //服务上线
+                    case &quot;UP&quot;:
+                        System.out.println(&quot;发送 服务上线 的通知！&quot;);
+                        break;
+                    // 服务未知异常
+                    case &quot;UNKNOWN&quot;:
+                        System.out.println(&quot;发送 服务未知异常 的通知！&quot;);
+                        break;
+                    default:
+                        break;
+                }
+
+            } else {
+                LOGGER.info(&quot;Instance {} ({}) {}&quot;, instance.getRegistration().getName(), event.getInstance(),
+                        event.getType());
+            }
+        });
+    }
+}
+</code></pre>
+<p>源码下载：https://github.com/gf-huanchupk/SpringBootLearning/tree/master/springboot-admin</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/2eZeFun_S/">
+              <span class="post-title">
+                SpringBoot 整合 ELK&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

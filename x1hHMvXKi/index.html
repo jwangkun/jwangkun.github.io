@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>使用KubeKey安装Kubernetes1.18.6 以及KubeSphere 3.0 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="使用KubeKey安装Kubernetes1.18.6 以及KubeSphere 3.0 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="使用KubeKey安装Kubernetes1.18.6 以及KubeSphere 3.0"/>
+    <meta property="og:url" content="https://jwangkun.github.io/x1hHMvXKi/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/qgzu_PZIG/" class="tag">KubeKey</a>
+            
+            <a href="https://jwangkun.github.io/xGgIrb1zw/" class="tag">KubeSphere</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>使用KubeKey安装Kubernetes1.18.6 以及KubeSphere 3.0</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，26 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="安装条件">安装条件</h2>
+<h3 id="yum源调整">YUM源调整</h3>
+<pre><code>sed -e 's!^#baseurl=!baseurl=!g' \
+       -e  's!^mirrorlist=!#mirrorlist=!g' \
+       -e 's!mirror.centos.org!mirrors.ustc.edu.cn!g' \
+       -i  /etc/yum.repos.d/CentOS-Base.repo
+
+yum install -y epel-release
+sed -e 's!^mirrorlist=!#mirrorlist=!g' \
+	-e 's!^#baseurl=!baseurl=!g' \
+	-e 's!^metalink!#metalink!g' \
+	-e 's!//download\.fedoraproject\.org/pub!//mirrors.ustc.edu.cn!g' \
+	-e 's!http://mirrors\.ustc!https://mirrors.ustc!g' \
+	-i /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel-testing.repo
+</code></pre>
+<h3 id="关闭防火墙">关闭防火墙</h3>
+<pre><code>systemctl stop firewalld &amp;&amp; systemctl disable firewalld
+</code></pre>
+<h3 id="关掉网络服务">关掉网络服务</h3>
+<pre><code>systemctl stop NetworkManager &amp;&amp; systemctl disable NetworkManager
+</code></pre>
+<h3 id="关闭selinux">关闭selinux</h3>
+<pre><code>setenforce 0
+sed -i &quot;s#=enforcing#=disabled#g&quot; /etc/selinux/config
+</code></pre>
+<h3 id="关闭swap">关闭swap</h3>
+<pre><code>swapoff -a &amp;&amp; sysctl -w vm.swappiness=0
+sed -ri '/^[^#]*swap/s@^@#@' /etc/fstab
+</code></pre>
+<h3 id="同步时间">同步时间</h3>
+<pre><code>yum install -y ntpdate ntp
+ntpdate 0.cn.pool.ntp.org
+hwclock --systohc
+cat &lt;&lt; EOF &gt;&gt; /etc/ntp.conf
+driftfile /var/lib/ntp/drift
+server 0.cn.pool.ntp.org
+server 1.cn.pool.ntp.org
+server 2.cn.pool.ntp.org
+server 3.cn.pool.ntp.org
+EOF
+
+systemctl enable --now ntpd
+ntpq -p
+</code></pre>
+<h3 id="系统参数调整">系统参数调整</h3>
+<pre><code>cat &lt;&lt;EOF &gt; /etc/sysctl.d/k8s.conf
+# https://github.com/moby/moby/issues/31208 
+# ipvsadm -l --timout
+# 修复ipvs模式下长连接timeout问题 小于900即可
+net.ipv4.tcp_keepalive_time = 600
+net.ipv4.tcp_keepalive_intvl = 30
+net.ipv4.tcp_keepalive_probes = 10
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+net.ipv4.neigh.default.gc_stale_time = 120
+net.ipv4.conf.all.rp_filter = 0
+net.ipv4.conf.default.rp_filter = 0
+net.ipv4.conf.default.arp_announce = 2
+net.ipv4.conf.lo.arp_announce = 2
+net.ipv4.conf.all.arp_announce = 2
+net.ipv4.ip_forward = 1
+net.ipv4.tcp_max_tw_buckets = 5000
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_max_syn_backlog = 1024
+net.ipv4.tcp_synack_retries = 2
+# 要求iptables不对bridge的数据进行处理
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.bridge.bridge-nf-call-arptables = 1
+net.netfilter.nf_conntrack_max = 2310720
+fs.inotify.max_user_watches=89100
+fs.may_detach_mounts = 1
+fs.file-max = 52706963
+fs.nr_open = 52706963
+vm.swappiness = 0
+vm.overcommit_memory=1
+vm.panic_on_oom=0
+EOF
+
+sysctl --system
+</code></pre>
+<p>如果遇到</p>
+<pre><code>sysctl: cannot stat /proc/sys/net/bridge/bridge-nf-call-ip6tables: No such file or directory
+</code></pre>
+<p>是因为没有加载ipv6模块，可以使用 <code>modprobe br_netfilter</code></p>
+<h3 id="设置节点主机名解析">设置节点主机名解析</h3>
+<pre><code>cat &lt;&lt; EOF &gt;&gt; /etc/hosts
+10.213.120.72 node1
+10.213.120.71 node2
+10.213.120.70 node3
+10.213.120.69 node4
+EOF
+</code></pre>
+<h3 id="启用ipvs">启用ipvs</h3>
+<pre><code>yum install ipvsadm ipset sysstat conntrack libseccomp -y
+</code></pre>
+<p>开机自启动加载ipvs内核</p>
+<pre><code>:&gt; /etc/modules-load.d/ipvs.conf
+module=(
+ip_vs
+ip_vs_rr
+ip_vs_wrr
+ip_vs_sh
+nf_conntrack
+br_netfilter
+)
+for kernel_module in ${module[@]};do
+    /sbin/modinfo -F filename $kernel_module |&amp; grep -qv ERROR &amp;&amp; echo $kernel_module &gt;&gt; /etc/modules-load.d/ipvs.conf || :
+done
+systemctl enable --now systemd-modules-load.service
+</code></pre>
+<h3 id="安装docker-ce">安装docker-ce</h3>
+<pre><code>curl -o /etc/yum.repos.d/docker-ce.repo https://mirrors.ustc.edu.cn/docker-ce/linux/centos/docker-ce.repo
+sed -i 's#download.docker.com#mirrors.ustc.edu.cn/docker-ce#g' /etc/yum.repos.d/docker-ce.repo
+yum -y install docker-ce bash-completion
+cp /usr/share/bash-completion/completions/docker /etc/bash_completion.d/
+mkdir  /etc/docker
+cat &gt;&gt; /etc/docker/daemon.json &lt;&lt;EOF
+{
+    &quot;log-driver&quot;: &quot;json-file&quot;,
+    &quot;log-opts&quot;: {
+        &quot;max-size&quot;: &quot;100m&quot;,
+        &quot;max-file&quot;: &quot;3&quot;
+    },
+    &quot;live-restore&quot;: true,
+    &quot;max-concurrent-downloads&quot;: 10,
+    &quot;max-concurrent-uploads&quot;: 10,
+    &quot;storage-driver&quot;: &quot;overlay2&quot;,
+    &quot;storage-opts&quot;: [
+        &quot;overlay2.override_kernel_check=true&quot;
+    ],
+    &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;],
+    &quot;registry-mirrors&quot;: [
+        &quot;https://docker.mirrors.ustc.edu.cn/&quot;
+    ]
+}
+EOF
+
+systemctl enable --now docker
+</code></pre>
+<p>可以用官网提供的<code>docker</code>环境检查脚本来检查系统内核和模块是否适合运行<code>docker</code></p>
+<pre><code>curl https://raw.githubusercontent.com/docker/docker/master/contrib/check-config.sh &gt; check-config.sh
+bash ./check-config.sh
+</code></pre>
+<h3 id="升级内核">升级内核</h3>
+<blockquote>
+<p>可选, Centos 7 符合docker要求的最低内核版本，建议升级到最新，否则运行一段时间会导致服务器假死的情况</p>
+</blockquote>
+<pre><code>rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+yum --disablerepo=&quot;*&quot; --enablerepo=&quot;elrepo-kernel&quot; list available  --showduplicates | grep -Po '^kernel-ml.x86_64\s+\K\S+(?=.el7)'
+yum --disablerepo=&quot;*&quot; --enablerepo=elrepo-kernel install -y kernel-ml{,-devel}
+grub2-set-default  0 &amp;&amp; grub2-mkconfig -o /etc/grub2.cfg
+grubby --default-kernel
+grubby --args=&quot;user_namespace.enable=1&quot; --update-kernel=&quot;$(grubby --default-kernel)&quot;
+</code></pre>
+<h2 id="免密登录其他节点">免密登录其他节点</h2>
+<p>在<code>ks8-m1</code>操作</p>
+<pre><code>yum install sshpass -y
+ssh-keygen -t rsa -P '' -f /root/.ssh/id_rsa
+for NODE in k8s-m1 k8s-m2 k8s-m3 k8s-n1 k8s-n2; do
+  echo &quot;--- $NODE ---&quot;
+  sshpass -p 123456 ssh-copy-id -o &quot;StrictHostKeyChecking no&quot; -i /root/.ssh/id_rsa.pub ${NODE}
+  ssh ${NODE} &quot;hostnamectl set-hostname ${NODE}&quot;
+done
+
+</code></pre>
+<p>其中<code>123456</code> 是服务器的密码</p>
+<p>如果不打算关闭防火墙，则需要按照&quot;端口要求&quot;文档打开<a href="https://kubesphere.io/docs/installing-on-linux/introduction/port-firewall/">相关端口</a>。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Service</th>
+<th style="text-align:left">Protocol</th>
+<th style="text-align:left">Action</th>
+<th style="text-align:left">Start Port</th>
+<th style="text-align:left">End Port</th>
+<th style="text-align:left">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">ssh</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">22</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">etcd</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">2379</td>
+<td style="text-align:left">2380</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">apiserver</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">6443</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">calico</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">9099</td>
+<td style="text-align:left">9100</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">bgp</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">179</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">nodeport</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">30000</td>
+<td style="text-align:left">32767</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">master</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">10250</td>
+<td style="text-align:left">10258</td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">dns</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">53</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">dns</td>
+<td style="text-align:left">UDP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">53</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+</tr>
+<tr>
+<td style="text-align:left">local-registry</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">5000</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">For offline environment</td>
+</tr>
+<tr>
+<td style="text-align:left">local-apt</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">5080</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">For offline environment</td>
+</tr>
+<tr>
+<td style="text-align:left">rpcbind</td>
+<td style="text-align:left">TCP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left">111</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">Required if NFS is used</td>
+</tr>
+<tr>
+<td style="text-align:left">ipip</td>
+<td style="text-align:left">IPENCAP / IPIP</td>
+<td style="text-align:left">allow</td>
+<td style="text-align:left"></td>
+<td style="text-align:left"></td>
+<td style="text-align:left">Calico needs to allow the ipip protocol</td>
+</tr>
+</tbody>
+</table>
+<h2 id="第-1-步准备-linux-计算机">第 1 步：准备 Linux 计算机</h2>
+<p>请参阅以下硬件和操作系统的要求。</p>
+<h3 id="硬件推荐">硬件推荐</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">System</th>
+<th style="text-align:left">Minimum Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Ubuntu</strong> <em>16.04, 18.04</em></td>
+<td style="text-align:left">CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Debian</strong> <em>Buster, Stretch</em></td>
+<td style="text-align:left">CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>CentOS</strong> <em>7</em>.x</td>
+<td style="text-align:left">CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Red Hat Enterprise Linux 7</strong></td>
+<td style="text-align:left">CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>SUSE Linux Enterprise Server 15/openSUSE Leap 15.2</strong></td>
+<td style="text-align:left">CPU: 2 Cores, Memory: 4 G, Disk Space: 40 G</td>
+</tr>
+</tbody>
+</table>
+<p>注意</p>
+<p>上述系统要求和以下说明用于默认最小安装，且未启用任何可选组件。如果计算机至少有 8 个内核和 16G 内存，建议您启用所有组件。</p>
+<h3 id="依赖项要求">依赖项要求</h3>
+<p>库贝基可以一起安装库贝内特和库贝球。需要安装的依赖项可能根据要安装的 Kubernetes 版本而有所不同。您可以参考下面的列表，以查看是否需要提前在节点上安装相关依赖项。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">ependency</th>
+<th style="text-align:left">Kubernetes Version ≥ 1.18</th>
+<th style="text-align:left">Kubernetes Version &lt; 1.18</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>socat</code></td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left">Optional but recommended</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>conntrack</code></td>
+<td style="text-align:left">Required</td>
+<td style="text-align:left">Optional but recommended</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ebtables</code></td>
+<td style="text-align:left">Optional but recommended</td>
+<td style="text-align:left">Optional but recommended</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ipset</code></td>
+<td style="text-align:left">Optional but recommended</td>
+<td style="text-align:left">Optional but recommended</td>
+</tr>
+</tbody>
+</table>
+<p>KubeKey 以 Go 语言开发，代表全新的安装工具，以替代以前使用的基于易用的安装程序。KubeKey 为用户提供了灵活的安装选择，因为他们可以单独安装 KubeSphere 和 Kubernetes，或同时安装它们，这非常方便和高效。</p>
+<pre><code>yum install -y socat
+yum install -y conntrack-tools
+</code></pre>
+<p>注意：如果不安装该工具在安装时会报错</p>
+<h3 id="网络和-dns-要求">网络和 DNS 要求</h3>
+<ul>
+<li>确保 中的 DNS 地址可用。否则，可能会导致群集中的 DNS 问题。<code>/etc/resolv.conf</code></li>
+<li>如果您的网络配置使用防火墙或安全组，则必须确保基础结构组件可以通过特定端口相互通信。建议您关闭防火墙或按照指南&quot;网络访问<a href="https://github.com/kubesphere/kubekey/blob/master/docs/network-access.md">&quot;操作</a>。</li>
+</ul>
+<p>提示</p>
+<ul>
+<li>建议您的操作系统干净（未安装任何其他软件）。否则，可能会发生冲突。</li>
+</ul>
+<h2 id="第-2-步下载-kubekey">第 2 步：下载 KubeKey</h2>
+<p>使用以下命令下载 KubeKey：</p>
+<pre><code>wget -c https://kubesphere.io/download/kubekey-v1.0.0-linux-amd64.tar.gz -O - | tar -xz
+</code></pre>
+<p>制作可执行：<code>kk</code></p>
+<pre><code>chmod +x kk
+</code></pre>
+<h2 id="第-3-步开始安装">第 3 步：开始安装</h2>
+<p>在此快速入门教程中，您只需要执行一个命令进行安装，其模板如下所示：</p>
+<pre><code>./kk create cluster [--with-kubernetes version] [--with-kubesphere version]
+</code></pre>
+<p>使用已安装的 KubeSphere 创建 Kubernetes 群集。下面是一个供您参考的示例：</p>
+<pre><code>./kk create cluster --with-kubernetes v1.18.6 --with-kubesphere v3.0.0
+</code></pre>
+<p>通过配置文件安装</p>
+<pre><code>./kk create cluster -f config-sample.yaml
+apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Cluster
+metadata:
+  name: example
+spec:
+  hosts:
+  - {name: node1, address: 172.16.0.2, internalAddress: 172.16.0.2, port: 8022, user: ubuntu, password: Qcloud@123} # Assume that the default port for SSH is 22, otherwise add the port number after the IP address as above
+  - {name: node2, address: 172.16.0.3, internalAddress: 172.16.0.3, password: Qcloud@123}  # the default root user
+  - {name: node3, address: 172.16.0.4, internalAddress: 172.16.0.4, privateKeyPath: &quot;~/.ssh/id_rsa&quot;} # password-less login with SSH keys
+  roleGroups:
+    etcd:
+     - node1
+    master:
+     - node1
+     - node[2:10] # the nodes from node2, node3,..., to node10
+    worker:
+     - node1
+     - node[10:100]
+  controlPlaneEndpoint:
+    domain: lb.kubesphere.local
+    address: &quot;&quot;
+    port: &quot;6443&quot;
+  kubernetes:
+    version: v1.17.9
+    imageRepo: kubesphere
+    clusterName: cluster.local
+    masqueradeAll: false  # masqueradeAll tells kube-proxy to SNAT everything if using the pure iptables proxy mode. [Default: false]
+    maxPods: 110  # maxPods is the number of pods that can run on this Kubelet. [Default: 110]
+    nodeCidrMaskSize: 24  # internal network node size allocation. This is the size allocated to each node on your network. [Default: 24]
+    proxyMode: ipvs  # mode specifies which proxy mode to use. [Default: ipvs]
+  network:
+    plugin: calico
+    calico:
+      ipipMode: Always  # IPIP Mode to use for the IPv4 POOL created at start up. If set to a value other than Never, vxlanMode should be set to &quot;Never&quot;. [Always | CrossSubnet | Never] [Default: Always]
+      vxlanMode: Never  # VXLAN Mode to use for the IPv4 POOL created at start up. If set to a value other than Never, ipipMode should be set to &quot;Never&quot;. [Always | CrossSubnet | Never] [Default: Never]
+      vethMTU: 1440  # The maximum transmission unit (MTU) setting determines the largest packet size that can be transmitted through your network. [Default: 1440]
+    kubePodsCIDR: 10.233.64.0/18
+    kubeServiceCIDR: 10.233.0.0/18
+  registry:
+    registryMirrors: []
+    insecureRegistries: []
+    privateRegistry: &quot;&quot;
+  addons: []
+
+---
+apiVersion: installer.kubesphere.io/v1alpha1
+kind: ClusterConfiguration
+metadata:
+  name: ks-installer
+  namespace: kubesphere-system
+  labels:
+    version: v3.0.0
+spec:
+  local_registry: &quot;&quot;
+  persistence:
+    storageClass: &quot;&quot;
+  authentication:
+    jwtSecret: &quot;&quot;
+  etcd:
+    monitoring: true        # Whether to install etcd monitoring dashboard
+    endpointIps: 192.168.0.7,192.168.0.8,192.168.0.9  # etcd cluster endpointIps
+    port: 2379              # etcd port
+    tlsEnable: true
+  common:
+    mysqlVolumeSize: 20Gi # MySQL PVC size
+    minioVolumeSize: 20Gi # Minio PVC size
+    etcdVolumeSize: 20Gi  # etcd PVC size
+    openldapVolumeSize: 2Gi   # openldap PVC size
+    redisVolumSize: 2Gi # Redis PVC size
+    es:  # Storage backend for logging, tracing, events and auditing.
+      elasticsearchMasterReplicas: 1   # total number of master nodes, it's not allowed to use even number
+      elasticsearchDataReplicas: 1     # total number of data nodes
+      elasticsearchMasterVolumeSize: 4Gi   # Volume size of Elasticsearch master nodes
+      elasticsearchDataVolumeSize: 20Gi    # Volume size of Elasticsearch data nodes
+      logMaxAge: 7                     # Log retention time in built-in Elasticsearch, it is 7 days by default.
+      elkPrefix: logstash              # The string making up index names. The index name will be formatted as ks-&lt;elk_prefix&gt;-log
+      # externalElasticsearchUrl:
+      # externalElasticsearchPort:
+  console:
+    enableMultiLogin: false  # enable/disable multiple sing on, it allows an account can be used by different users at the same time.
+    port: 30880
+  alerting:                # Whether to install KubeSphere alerting system. It enables Users to customize alerting policies to send messages to receivers in time with different time intervals and alerting levels to choose from.
+    enabled: false
+  auditing:                # Whether to install KubeSphere audit log system. It provides a security-relevant chronological set of records，recording the sequence of activities happened in platform, initiated by different tenants.
+    enabled: false         
+  devops:                  # Whether to install KubeSphere DevOps System. It provides out-of-box CI/CD system based on Jenkins, and automated workflow tools including Source-to-Image &amp; Binary-to-Image
+    enabled: false
+    jenkinsMemoryLim: 2Gi      # Jenkins memory limit
+    jenkinsMemoryReq: 1500Mi   # Jenkins memory request
+    jenkinsVolumeSize: 8Gi     # Jenkins volume size
+    jenkinsJavaOpts_Xms: 512m  # The following three fields are JVM parameters
+    jenkinsJavaOpts_Xmx: 512m
+    jenkinsJavaOpts_MaxRAM: 2g
+  events:                  # Whether to install KubeSphere events system. It provides a graphical web console for Kubernetes Events exporting, filtering and alerting in multi-tenant Kubernetes clusters.
+    enabled: false
+  logging:                 # Whether to install KubeSphere logging system. Flexible logging functions are provided for log query, collection and management in a unified console. Additional log collectors can be added, such as Elasticsearch, Kafka and Fluentd.
+    enabled: false
+    logsidecarReplicas: 2
+  metrics_server:                    # Whether to install metrics-server. IT enables HPA (Horizontal Pod Autoscaler).
+    enabled: true
+  monitoring:                        #
+    prometheusReplicas: 1            # Prometheus replicas are responsible for monitoring different segments of data source and provide high availability as well.
+    prometheusMemoryRequest: 400Mi   # Prometheus request memory
+    prometheusVolumeSize: 20Gi       # Prometheus PVC size
+    alertmanagerReplicas: 1          # AlertManager Replicas
+  multicluster:
+    clusterRole: none  # host | member | none  # You can install a solo cluster, or specify it as the role of host or member cluster
+  networkpolicy:       # Network policies allow network isolation within the same cluster, which means firewalls can be set up between certain instances (Pods).
+    enabled: false     
+  notification:        # Email Notification support for the legacy alerting system, should be enabled/disabled together with the above alerting option
+    enabled: false
+  openpitrix:          # Whether to install KubeSphere Application Store. It provides an application store for Helm-based applications, and offer application lifecycle management
+    enabled: false
+  servicemesh:         # Whether to install KubeSphere Service Mesh (Istio-based). It provides fine-grained traffic management, observability and tracing, and offer visualization for traffic topology
+    enabled: false
+</code></pre>
+<p>贴一下我的安装</p>
+<pre><code>apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Cluster
+metadata:
+  name: k8sinstall
+spec:
+  hosts:
+  - {name: node1, address: 10.213.120.72, internalAddress: 10.213.120.72, password: uio##465 }
+  - {name: node2, address: 10.213.120.71, internalAddress: 10.213.120.71, password: uio##465 } # Assume that the default port for SSH is 22, otherwise add the port number after the IP address as above
+  - {name: node3, address: 10.213.120.70, internalAddress: 10.213.120.70, password: uio##465 }  # the default root user
+  - {name: node4, address: 10.213.120.69, internalAddress: 10.213.120.69, password: uio##465 } # password-less login with SSH keys
+  roleGroups:
+    etcd:
+     - node1
+     - node2
+     - node3
+    master:
+     - node1
+     - node[2:3] # the nodes from node2, node3,..., to node10
+    worker:
+     - node1
+     - node2
+     - node3
+     - node4
+  controlPlaneEndpoint:
+    domain: lb.kubesphere.local
+    address: &quot;&quot;
+    port: &quot;6443&quot;
+  kubernetes:
+    version: v1.18.6
+    imageRepo: kubesphere
+    clusterName: cluster.local
+    masqueradeAll: false  # masqueradeAll tells kube-proxy to SNAT everything if using the pure iptables proxy mode. [Default: false]
+    maxPods: 110  # maxPods is the number of pods that can run on this Kubelet. [Default: 110]
+    nodeCidrMaskSize: 24  # internal network node size allocation. This is the size allocated to each node on your network. [Default: 24]
+    proxyMode: ipvs  # mode specifies which proxy mode to use. [Default: ipvs]
+  network:
+    plugin: calico
+    calico:
+      ipipMode: Always  # IPIP Mode to use for the IPv4 POOL created at start up. If set to a value other than Never, vxlanMode should be set to &quot;Never&quot;. [Always | CrossSubnet | Never] [Default: Always]
+      vxlanMode: Never  # VXLAN Mode to use for the IPv4 POOL created at start up. If set to a value other than Never, ipipMode should be set to &quot;Never&quot;. [Always | CrossSubnet | Never] [Default: Never]
+      vethMTU: 1440  # The maximum transmission unit (MTU) setting determines the largest packet size that can be transmitted through your network. [Default: 1440]
+    kubePodsCIDR: 10.233.64.0/18
+    kubeServiceCIDR: 10.233.0.0/18
+  registry:
+    registryMirrors: []
+    insecureRegistries: []
+    privateRegistry: &quot;&quot;
+  addons: []
+
+</code></pre>
+<p>注意</p>
+<ul>
+<li>支持的库伯内特版本： <em>v1.15.12</em>， <em>v1.16.13</em>， <em>v1.17.9</em> （默认）， <em>v1.18.6</em>.</li>
+<li>对于一个一对一的安装，一般来说，您不需要更改任何配置。</li>
+<li>默认情况下<a href="https://openebs.io/">，KubeKey 将安装 OpenEBS</a>来为开发和测试环境预配 LocalPV，这对于新用户来说非常方便。有关其他存储类，请参阅<a href="https://kubesphere.io/docs/installing-on-linux/introduction/storage-configuration/">持久存储配置</a>。</li>
+</ul>
+<p>执行该命令后，将看到如下所示的表，用于环境检查。</p>
+<figure data-type="image" tabindex="1"><img src="https://ap3.qingstor.com/kubesphere-website/docs/environment-check.png" alt="environment-check" loading="lazy"></figure>
+<p>确保已安装上述标记的组件并输入以继续。y</p>
+<h2 id="第-4-步验证安装">第 4 步：验证安装</h2>
+<pre><code>./kk create cluster -f config-sample.yaml
+</code></pre>
+<p>当您看到输出如下时，这意味着安装完成。</p>
+<figure data-type="image" tabindex="2"><img src="https://ap3.qingstor.com/kubesphere-website/docs/Installation-complete.png" alt="installation-complete" loading="lazy"></figure>
+<p>输入以下命令以检查结果。</p>
+<pre><code>kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l app=ks-install -o jsonpath='{.items[0].metadata.name}') -f
+</code></pre>
+<p>输出显示 Web 控制台的 IP 地址和端口号，默认情况下，该地址和端口号通过 Web 控制台公开。现在，您可以使用默认帐户和密码 （） 访问控制台。<code>NodePort 30880``EIP:30880``admin/P@88word</code></p>
+<pre><code>#####################################################
+###              Welcome to KubeSphere!           ###
+#####################################################
+
+Console: http://192.168.0.2:30880
+Account: admin
+Password: P@88w0rd
+
+NOTES：
+  1. After logging into the console, please check the
+     monitoring status of service components in
+     the &quot;Cluster Management&quot;. If any service is not
+     ready, please wait patiently until all components
+     are ready.
+  2. Please modify the default password after login.
+
+#####################################################
+https://kubesphere.io             20xx-xx-xx xx:xx:xx
+#####################################################
+</code></pre>
+<p>注意</p>
+<p>您可能需要在环境中绑定 EIP 并配置端口转发，以便外部用户访问控制台。此外，请确保端口 30880 在安全组中打开。</p>
+<p>登录到控制台后，可以在组件 中检查不同组件<strong>的状态</strong>。如果要使用相关服务，可能需要等待某些组件启动并运行。还可以使用 来检查 KubeSphere 工作负载的运行状态。<code>kubectl get pod --all-namespaces</code></p>
+<figure data-type="image" tabindex="3"><img src="https://kubesphere.io/images/docs/quickstart/kubesphere-components.png" alt="components" loading="lazy"></figure>
+<h2 id="添加节点">添加节点</h2>
+<p>在使用 KubeSphere 一段时间后，可能需要使用越来越多的工作负载来扩展群集。在这种情况下，KubeSphere 提供向群集添加新节点的脚本。</p>
+<p>使用 KubeKey 创建配置文件</p>
+<pre><code>./kk create config --with-kubesphere --with-kubernetes V1.18.6
+</code></pre>
+<p>以下部分演示如何添加两个节点（即 和 ）使用用户作为示例。假定第一台计算机的主机名为（将以下主机名替换为您的主机名）。<code>node5``node6``root``master7</code></p>
+<pre><code>apiVersion: kubekey.kubesphere.io/v1alpha1
+kind: Cluster
+metadata:
+  name: k8sinstall
+spec:
+  hosts:
+  - {name: node1, address: 10.213.120.72, internalAddress: 10.213.120.72, password: uio##465 }
+  - {name: node2, address: 10.213.120.71, internalAddress: 10.213.120.71, password: uio##465 } # Assume that the default port for SSH is 22, otherwise add the port number after the IP address as above
+  - {name: node3, address: 10.213.120.70, internalAddress: 10.213.120.70, password: uio##465 }  # the default root user
+  - {name: node4, address: 10.213.120.69, internalAddress: 10.213.120.69, password: uio##465 } # password-less login with SSH keys
+  - {name: node5, address: 10.213.120.77, internalAddress: 10.213.120.77, password: uio##465 }
+  - {name: node6, address: 10.213.120.78, internalAddress: 10.213.120.78, password: uio##465 } # Assume that the default port for SSH is 22, otherwise add the port number after the IP address as above
+  - {name: node7, address: 10.213.120.79, internalAddress: 10.213.120.79, password: uio##465 }  # the default root user
+  roleGroups:
+    etcd:
+     - node1
+     - node2
+     - node3
+    master:
+     - node1
+     - node[2:3] # the nodes from node2, node3,..., to node10
+    worker:
+     - node1
+     - node2
+     - node3
+     - node4
+     - node5
+     - node6
+     - node7
+  controlPlaneEndpoint:
+    domain: lb.kubesphere.local
+    address: &quot;&quot;
+    port: &quot;6443&quot;
+  kubernetes:
+    version: v1.18.6
+    imageRepo: kubesphere
+    clusterName: cluster.local
+    masqueradeAll: false  # masqueradeAll tells kube-proxy to SNAT everything if using the pure iptables proxy mode. [Default: false]
+    maxPods: 110  # maxPods is the number of pods that can run on this Kubelet. [Default: 110]
+    nodeCidrMaskSize: 24  # internal network node size allocation. This is the size allocated to each node on your network. [Default: 24]
+    proxyMode: ipvs  # mode specifies which proxy mode to use. [Default: ipvs]
+  network:
+    plugin: calico
+    calico:
+      ipipMode: Always  # IPIP Mode to use for the IPv4 POOL created at start up. If set to a value other than Never, vxlanMode should be set to &quot;Never&quot;. [Always | CrossSubnet | Never] [Default: Always]
+      vxlanMode: Never  # VXLAN Mode to use for the IPv4 POOL created at start up. If set to a value other than Never, ipipMode should be set to &quot;Never&quot;. [Always | CrossSubnet | Never] [Default: Never]
+      vethMTU: 1440  # The maximum transmission unit (MTU) setting determines the largest packet size that can be transmitted through your network. [Default: 1440]
+    kubePodsCIDR: 10.233.64.0/18
+    kubeServiceCIDR: 10.233.0.0/18
+  registry:
+    registryMirrors: []
+    insecureRegistries: []
+    privateRegistry: &quot;&quot;
+  addons: []
+
+</code></pre>
+<p>执行以下命令以应用更改：</p>
+<pre><code>./kk add nodes -f config-sample.yaml
+</code></pre>
+<p>最后，在成功返回后，您将能够在 KubeSphere 控制台中看到新节点及其信息。从**左侧菜单****中选择&quot;**节点&quot;下的群集节点，或使用命令查看更改。<code>kubectl get node</code></p>
+<pre><code>kubectl get node
+NAME          STATUS   ROLES           AGE   VERSION
+master1       Ready    master,worker   20d   v1.17.9
+node1         Ready    worker          31h   v1.17.9
+node2         Ready    worker          31h   v1.17.9
+</code></pre>
+<h2 id="删除节点">删除节点</h2>
+<p>您可以通过以下命令删除节点：</p>
+<pre><code>./kk delete node &lt;nodeName&gt; -f config-sample.yaml
+</code></pre>
+<h2 id="删除集群">删除集群</h2>
+<pre><code>./kk delete cluster
+</code></pre>
+<p>如果从高级模式开始（使用配置文件删除）：</p>
+<pre><code>./kk delete cluster [-f config-sample.yaml]
+</code></pre>
+<h2 id="启用可插拔组件可选">启用可插拔组件（可选）</h2>
+<p>默认情况下，上述指南仅用于最小安装。</p>
+<h2 id="开启应用商店">开启应用商店</h2>
+<p>通过编辑配置文件开启</p>
+<pre><code>vi cluster-configuration.yaml
+</code></pre>
+<p>修改配置文件openpitrix改为true</p>
+<pre><code>openpitrix:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+</code></pre>
+<p>应用修改</p>
+<pre><code>kubectl apply -f cluster-configuration.yaml
+</code></pre>
+<p>或者通过kubectl开启应用商店</p>
+<pre><code> kubectl -n kubesphere-system edit cc ks-installer
+</code></pre>
+<p>打开安装的配置文件后开启应用商店</p>
+<pre><code>openpitrix:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+</code></pre>
+<h2 id="开启devops">开启DevOps</h2>
+<p>通过编辑配置文件开启</p>
+<pre><code>vi cluster-configuration.yaml
+</code></pre>
+<p>修改配置文件openpitrix改为true</p>
+<pre><code>devops:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+</code></pre>
+<p>应用修改</p>
+<pre><code>kubectl apply -f cluster-configuration.yaml
+</code></pre>
+<p>或者通过kubectl开启</p>
+<pre><code> kubectl -n kubesphere-system edit cc ks-installer
+</code></pre>
+<p>打开安装的配置文件后开启店</p>
+<pre><code>devops:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+</code></pre>
+<p>查看是否安装日志</p>
+<pre><code>kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l app=ks-install -o jsonpath='{.items[0].metadata.name}') -f
+</code></pre>
+<h2 id="开启日志-记录">开启日志 记录</h2>
+<p>通过编辑配置文件开启</p>
+<pre><code>vi cluster-configuration.yaml
+</code></pre>
+<p>修改配置文件openpitrix改为true</p>
+<pre><code>logging:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+</code></pre>
+<p>应用修改</p>
+<pre><code>kubectl apply -f cluster-configuration.yaml
+</code></pre>
+<p>或者通过kubectl开启，这种方式开完保存即可，自动应用</p>
+<pre><code> kubectl -n kubesphere-system edit cc ks-installer
+</code></pre>
+<p>打开安装的配置文件后开启</p>
+<pre><code>logging:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+</code></pre>
+<p>默认情况下，如果启用日志记录，ks 安装程序将在内部安装弹性搜索。对于生产环境，如果您要启用日志记录，特别是 和 ，强烈建议您在群集配置**.yaml**中设置以下值。</p>
+<pre><code>es:  # Storage backend for logging, tracing, events and auditing.
+  elasticsearchMasterReplicas: 1   # total number of master nodes, it's not allowed to use even number
+  elasticsearchDataReplicas: 1     # total number of data nodes
+  elasticsearchMasterVolumeSize: 4Gi   # Volume size of Elasticsearch master nodes
+  elasticsearchDataVolumeSize: 20Gi    # Volume size of Elasticsearch data nodes
+  logMaxAge: 7                     # Log retention time in built-in Elasticsearch, it is 7 days by default.
+  elkPrefix: logstash              # The string making up index names. The index name will be formatted as ks-&lt;elk_prefix&gt;-log
+  externalElasticsearchUrl: # The URL of external Elasticsearch
+  externalElasticsearchPort: # The port of external Elasticsearch
+</code></pre>
+<h2 id="开启service-mesh">开启Service Mesh</h2>
+<p>通过编辑配置文件开启</p>
+<pre><code>vi cluster-configuration.yaml
+</code></pre>
+<p>或者通过kubectl开启，这种方式开完保存即可，自动应用</p>
+<pre><code> kubectl -n kubesphere-system edit cc ks-installer
+</code></pre>
+<p>修改配置文件openpitrix改为true</p>
+<pre><code>servicemesh:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+</code></pre>
+<p>应用修改</p>
+<pre><code>kubectl apply -f cluster-configuration.yaml
+</code></pre>
+<h2 id="开启监控告警和提醒">开启监控告警和提醒</h2>
+<p>通过编辑配置文件开启</p>
+<pre><code>vi cluster-configuration.yaml
+</code></pre>
+<p>或者通过kubectl开启，这种方式开完保存即可，自动应用</p>
+<pre><code> kubectl -n kubesphere-system edit cc ks-installer
+</code></pre>
+<p>修改配置文件openpitrix改为true</p>
+<pre><code>alerting:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+notification:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+</code></pre>
+<p>应用修改</p>
+<pre><code>kubectl apply -f cluster-configuration.yaml
+</code></pre>
+<h2 id="开启网络策略">开启网络策略</h2>
+<p>通过编辑配置文件开启</p>
+<pre><code>vi cluster-configuration.yaml
+</code></pre>
+<p>或者通过kubectl开启，这种方式开完保存即可，自动应用</p>
+<pre><code> kubectl -n kubesphere-system edit cc ks-installer
+</code></pre>
+<p>修改配置文件openpitrix改为true</p>
+<pre><code>networkpolicy:
+    enabled: true # Change &quot;false&quot; to &quot;true&quot;
+</code></pre>
+<p>应用修改</p>
+<pre><code>kubectl apply -f cluster-configuration.yaml
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/uEZxv8lam/">
+              <span class="post-title">
+                Gitlab CI 集成 Kubernetes&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

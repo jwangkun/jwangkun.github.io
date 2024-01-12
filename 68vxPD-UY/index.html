@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot 整合 spring cache | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot 整合 spring cache | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot 整合 spring cache"/>
+    <meta property="og:url" content="https://jwangkun.github.io/68vxPD-UY/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/VzWNfNKLn/" class="tag">spring cache</a>
+            
+        </span>
+            <h1>SpringBoot 整合 spring cache</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="一-jsr107">一、JSR107</h2>
+<p>JSR107是Java的一套缓存规范，<strong>Java Caching</strong>定义了5个核心接口，分别是<strong>CachingProvider</strong>, <strong>CacheManager</strong>, <strong>Cache</strong>, <strong>Entry</strong> 和 <strong>Expiry</strong>。</p>
+<ul>
+<li><strong>CachingProvider</strong>：定义了创建、配置、获取、管理和控制多个CacheManager。一个应用可 以在运行期访问多个CachingProvider。</li>
+<li><strong>CacheManager</strong>：定义了创建、配置、获取、管理和控制多个唯一命名的Cache，这些Cache 存在于CacheManager的上下文中。一个CacheManager仅被一个CachingProvider所拥有。</li>
+<li><strong>Cache</strong>：是一个类似Map的数据结构并临时存储以Key为索引的值。一个Cache仅被一个 CacheManager所拥有。</li>
+<li><strong>Entry</strong>：是一个存储在Cache中的key-value对。</li>
+<li><strong>Expiry</strong>：每一个存储在Cache中的条目有一个定义的有效期。一旦超过这个时间，条目为过期 的状态。一旦过期，条目将不可访问、更新和删除。缓存有效期可以通过ExpiryPolicy设置。</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="http://image.itwolfed.com/springboot-7/1.png" alt="img" loading="lazy"></figure>
+<h2 id="二-spring-缓存抽象">二、Spring 缓存抽象</h2>
+<p>Spring从3.1开始定义了<strong>org.springframework.cache.Cache</strong> 和<strong>org.springframework.cache.CacheManager</strong> 接口来统一不同的缓存技术; 并支持使用JCache(JSR-107)注解简化我们开发;</p>
+<ul>
+<li>默认使用 <strong>ConcurrenMapCacheManager</strong></li>
+<li><strong>Cache</strong>接口为缓存的组件规范定义，包含缓存的各种操作集合;</li>
+<li><strong>Cache</strong>接口下Spring提供了各种<strong>xxxCache</strong>的实现;如<strong>RedisCache</strong>，<strong>EhCacheCache</strong> , <strong>ConcurrentMapCache</strong>等;</li>
+<li>每次调用需要缓存功能的方法时，Spring会检查检查指定参数的指定的目标方法是否 已经被调用过;如果有就直接从缓存中获取方法调用后的结果，如果没有就调用方法 并缓存结果后返回给用户。下次调用直接从缓存中获取。</li>
+<li>使用Spring缓存抽象时我们需要关注以下两点;
+<ul>
+<li>1、确定方法需要被缓存以及他们的缓存策略</li>
+<li>2、从缓存中读取之前缓存存储的数据</li>
+</ul>
+</li>
+</ul>
+<figure data-type="image" tabindex="2"><img src="http://image.itwolfed.com/springboot-7/2.png" alt="img" loading="lazy"></figure>
+<h2 id="三-几个重要概念缓存注解">三、几个重要概念&amp;缓存注解</h2>
+<figure data-type="image" tabindex="3"><img src="http://image.itwolfed.com/springboot-7/3.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="4"><img src="http://image.itwolfed.com/springboot-7/4.png" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="http://image.itwolfed.com/springboot-7/5.png" alt="img" loading="lazy"></figure>
+<h2 id="四-整合redis实现缓存">四、整合redis实现缓存</h2>
+<p>创建项目springboot-cache，引入<strong>spring-boot-starter-cache</strong>、<strong>spring-boot-starter-data-redis</strong> 的依赖。</p>
+<h3 id="1-pomxml">1. pom.xml</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+		 xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+	&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+	&lt;groupId&gt;com.gf&lt;/groupId&gt;
+	&lt;artifactId&gt;springboot-cache&lt;/artifactId&gt;
+	&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+	&lt;packaging&gt;jar&lt;/packaging&gt;
+
+	&lt;name&gt;springboot-cache&lt;/name&gt;
+	&lt;description&gt;Demo project for Spring Boot&lt;/description&gt;
+
+	&lt;parent&gt;
+		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+		&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+		&lt;version&gt;2.0.5.RELEASE&lt;/version&gt;
+		&lt;relativePath/&gt; &lt;!-- lookup parent from repository --&gt;
+	&lt;/parent&gt;
+
+	&lt;properties&gt;
+		&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+		&lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+		&lt;java.version&gt;1.8&lt;/java.version&gt;
+	&lt;/properties&gt;
+
+	&lt;dependencies&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-cache&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-data-redis&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+			&lt;artifactId&gt;fastjson&lt;/artifactId&gt;
+			&lt;version&gt;1.2.51&lt;/version&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;mysql&lt;/groupId&gt;
+			&lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+			&lt;scope&gt;runtime&lt;/scope&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.projectlombok&lt;/groupId&gt;
+			&lt;artifactId&gt;lombok&lt;/artifactId&gt;
+			&lt;version&gt;1.18.2&lt;/version&gt;
+			&lt;scope&gt;provided&lt;/scope&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;com.baomidou&lt;/groupId&gt;
+			&lt;artifactId&gt;mybatis-plus-boot-starter&lt;/artifactId&gt;
+			&lt;version&gt;3.0.1&lt;/version&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.apache.velocity&lt;/groupId&gt;
+			&lt;artifactId&gt;velocity&lt;/artifactId&gt;
+			&lt;version&gt;1.7&lt;/version&gt;
+		&lt;/dependency&gt;
+
+		&lt;dependency&gt;
+			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+			&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+			&lt;scope&gt;test&lt;/scope&gt;
+		&lt;/dependency&gt;
+	&lt;/dependencies&gt;
+
+	&lt;build&gt;
+		&lt;plugins&gt;
+			&lt;plugin&gt;
+				&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+				&lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+			&lt;/plugin&gt;
+		&lt;/plugins&gt;
+	&lt;/build&gt;
+
+
+&lt;/project&gt;
+</code></pre>
+<h3 id="2-redisconfig">2. RedisConfig</h3>
+<p>我们用redis自定义CacheManager，同时自定义序列化方式。</p>
+<p>**注意：**lombok 的getter setter 和 编辑器生成的 getter setter，有时会存在差异。字段 dID ，编辑器生成的是 getdId() ，而lombok 编译成的是getDId()，这中情况会可能会导致序列化成json时多出一个字段 json串出现 did 和 dId ，出现这种情况时，对与该实体可以弃用lombok，手动生成来解决。</p>
+<pre><code class="language-java">@Configuration
+public class RedisConfig {
+
+    @Bean
+    public RedisTemplate&lt;Object, Object&gt; redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate&lt;Object, Object&gt; template = new RedisTemplate&lt;&gt;();
+        template.setConnectionFactory(redisConnectionFactory);
+
+        GenericFastJsonRedisSerializer serializer = new GenericFastJsonRedisSerializer();
+
+        ParserConfig.getGlobalInstance().addAccept(&quot;com.gf.&quot;);
+
+        //key序列化方式
+        template.setKeySerializer(new StringRedisSerializer());
+        //value序列化
+        template.setValueSerializer(serializer);
+        //value hashmap序列化
+        template.setHashValueSerializer(serializer);
+        template.afterPropertiesSet();
+
+        return template;
+    }
+
+    @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
+
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig();
+
+        GenericFastJsonRedisSerializer serializer = new GenericFastJsonRedisSerializer();
+
+        ParserConfig.getGlobalInstance().addAccept(&quot;com.gf.&quot;);
+
+        config = config.serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
+                .disableCachingNullValues();
+
+        RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.builder(redisConnectionFactory).cacheDefaults(config);
+
+
+        return builder.build();
+    }
+
+
+}
+</code></pre>
+<h3 id="3-employeeserviceimpl">3. EmployeeServiceImpl</h3>
+<pre><code class="language-java">@Service
+public class EmployeeServiceImpl extends ServiceImpl&lt;EmployeeMapper, Employee&gt; implements EmployeeService {
+
+    @Cacheable(value = &quot;emp&quot; , key = &quot;#root.args[0]&quot; , condition = &quot;#id &gt; 0&quot; , unless = &quot;#result eq null&quot;)
+    @Override
+    public Employee getById(Serializable id) {
+        System.out.println(&quot;getById&quot;);
+        return super.getById( id );
+    }
+
+    @Override
+    @CachePut(value = &quot;emp&quot;, key = &quot;#root.args[0].id&quot;, unless = &quot;#result eq null &quot;)
+    public Employee updateEmployeeById(Employee entity) {
+        boolean res = super.updateById( entity );
+        if (res){
+            return entity;
+        }
+        return null;
+    }
+
+    @CacheEvict(value = &quot;emp&quot;, key = &quot;#root.args[0]&quot;, condition = &quot;#result eq true&quot;)
+    @Override
+    public boolean removeById(Serializable id) {
+        return super.removeById( id );
+    }
+    
+}
+</code></pre>
+<h3 id="4-启动类-springbootcacheapplication">4. 启动类 SpringbootCacheApplication</h3>
+<p>使用**@EnableCaching**开启缓存</p>
+<pre><code class="language-java">@EnableCaching
+@SpringBootApplication
+public class SpringbootCacheApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run( SpringbootCacheApplication.class, args);
+	}
+}
+</code></pre>
+<p>之后我们通过postman测试。</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/7YnmQAl3N/">
+              <span class="post-title">
+                SpringBoot 整合 mybatis-plus&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

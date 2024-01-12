@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>SpringBoot Security 详解 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="SpringBoot Security 详解 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="SpringBoot Security 详解"/>
+    <meta property="og:url" content="https://jwangkun.github.io/KxZIg9sIn/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/7We0UJeOg/" class="tag">SpringBoot</a>
+            
+            <a href="https://jwangkun.github.io/IfTf9fmmN/" class="tag">Spring Boot Security</a>
+            
+        </span>
+            <h1>SpringBoot Security 详解</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-09，15 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="简介">简介</h2>
+<p>Spring Security，这是一种基于 Spring AOP 和 Servlet 过滤器的安全框架。它提供全面的安全性解决方案，同时在 Web 请求级和方法调用级处理身份确认和授权。</p>
+<h2 id="工作流程">工作流程</h2>
+<p>从网上找了一张Spring Security 的工作流程图，如下。 <img src="http://image.itwolfed.com/springboot-14/1.png" alt="img" loading="lazy"> 图中标记的MyXXX，就是我们项目中需要配置的。</p>
+<h2 id="快速上手">快速上手</h2>
+<h3 id="建表">建表</h3>
+<p>表结构 <img src="http://image.itwolfed.com/springboot-14/2.png" alt="img" loading="lazy"> 建表语句</p>
+<pre><code class="language-sql">DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `role`;
+DROP TABLE IF EXISTS `user_role`;
+DROP TABLE IF EXISTS `role_permission`;
+DROP TABLE IF EXISTS `permission`;
+
+CREATE TABLE `user` (
+`id` bigint(11) NOT NULL AUTO_INCREMENT,
+`username` varchar(255) NOT NULL,
+`password` varchar(255) NOT NULL,
+PRIMARY KEY (`id`) 
+);
+CREATE TABLE `role` (
+`id` bigint(11) NOT NULL AUTO_INCREMENT,
+`name` varchar(255) NOT NULL,
+PRIMARY KEY (`id`) 
+);
+CREATE TABLE `user_role` (
+`user_id` bigint(11) NOT NULL,
+`role_id` bigint(11) NOT NULL
+);
+CREATE TABLE `role_permission` (
+`role_id` bigint(11) NOT NULL,
+`permission_id` bigint(11) NOT NULL
+);
+CREATE TABLE `permission` (
+`id` bigint(11) NOT NULL AUTO_INCREMENT,
+`url` varchar(255) NOT NULL,
+`name` varchar(255) NOT NULL,
+`description` varchar(255) NULL,
+`pid` bigint(11) NOT NULL,
+PRIMARY KEY (`id`) 
+);
+
+INSERT INTO user (id, username, password) VALUES (1,'user','e10adc3949ba59abbe56e057f20f883e'); 
+INSERT INTO user (id, username , password) VALUES (2,'admin','e10adc3949ba59abbe56e057f20f883e'); 
+INSERT INTO role (id, name) VALUES (1,'USER');
+INSERT INTO role (id, name) VALUES (2,'ADMIN');
+INSERT INTO permission (id, url, name, pid) VALUES (1,'/user/common','common',0);
+INSERT INTO permission (id, url, name, pid) VALUES (2,'/user/admin','admin',0);
+INSERT INTO user_role (user_id, role_id) VALUES (1, 1);
+INSERT INTO user_role (user_id, role_id) VALUES (2, 1);
+INSERT INTO user_role (user_id, role_id) VALUES (2, 2);
+INSERT INTO role_permission (role_id, permission_id) VALUES (1, 1);
+INSERT INTO role_permission (role_id, permission_id) VALUES (2, 1);
+INSERT INTO role_permission (role_id, permission_id) VALUES (2, 2);
+</code></pre>
+<h3 id="pomxml">pom.xml</h3>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.thymeleaf.extras&lt;/groupId&gt;
+    &lt;artifactId&gt;thymeleaf-extras-security4&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="applicationyml">application.yml</h3>
+<pre><code class="language-yml">spring:
+  thymeleaf:
+    mode: HTML5
+    encoding: UTF-8
+    cache: false
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/spring-security?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false
+    username: root
+    password: root
+</code></pre>
+<h3 id="user">User</h3>
+<pre><code class="language-java">public class User implements UserDetails , Serializable {
+
+    private Long id;
+    private String username;
+    private String password;
+
+    private List&lt;Role&gt; authorities;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public List&lt;Role&gt; getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(List&lt;Role&gt; authorities) {
+        this.authorities = authorities;
+    }
+
+    /**
+     * 用户账号是否过期
+     */
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    /**
+     * 用户账号是否被锁定
+     */
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    /**
+     * 用户密码是否过期
+     */
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    /**
+     * 用户是否可用
+     */
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+    
+}
+</code></pre>
+<p>上面的 User 类实现了 UserDetails 接口，该接口是实现Spring Security 认证信息的核心接口。其中 getUsername 方法为 UserDetails 接口 的方法，这个方法返回 username，也可以是其他的用户信息，例如手机号、邮箱等。getAuthorities() 方法返回的是该用户设置的权限信息，在本实例中，从数据库取出用户的所有角色信息，权限信息也可以是用户的其他信息，不一定是角色信息。另外需要读取密码，最后几个方法一般情况下都返回 true，也可以根据自己的需求进行业务判断。</p>
+<h3 id="role">Role</h3>
+<pre><code class="language-java">public class Role implements GrantedAuthority {
+
+    private Long id;
+    private String name;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getAuthority() {
+        return name;
+    }
+
+}
+</code></pre>
+<p>Role 类实现了 GrantedAuthority 接口，并重写 getAuthority() 方法。权限点可以为任何字符串，不一定非要用角色名。</p>
+<p>所有的Authentication实现类都保存了一个GrantedAuthority列表，其表示用户所具有的权限。GrantedAuthority是通过AuthenticationManager设置到Authentication对象中的，然后AccessDecisionManager将从Authentication中获取用户所具有的GrantedAuthority来鉴定用户是否具有访问对应资源的权限。</p>
+<h3 id="myuserdetailsservice">MyUserDetailsService</h3>
+<pre><code class="language-java">@Service
+public class MyUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private RoleMapper roleMapper;
+
+    @Override
+    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
+        //查数据库
+        User user = userMapper.loadUserByUsername( userName );
+        if (null != user) {
+            List&lt;Role&gt; roles = roleMapper.getRolesByUserId( user.getId() );
+            user.setAuthorities( roles );
+        }
+
+        return user;
+    }
+    
+
+}
+</code></pre>
+<p>Service 层需要实现 UserDetailsService 接口，该接口是根据用户名获取该用户的所有信息， 包括用户信息和权限点。</p>
+<h3 id="myinvocationsecuritymetadatasourceservice">MyInvocationSecurityMetadataSourceService</h3>
+<pre><code class="language-java">@Component
+public class MyInvocationSecurityMetadataSourceService implements FilterInvocationSecurityMetadataSource {
+
+    @Autowired
+    private PermissionMapper permissionMapper;
+
+    /**
+     * 每一个资源所需要的角色 Collection&lt;ConfigAttribute&gt;决策器会用到
+     */
+    private static HashMap&lt;String, Collection&lt;ConfigAttribute&gt;&gt; map =null;
+
+
+    /**
+     * 返回请求的资源需要的角色
+     */
+    @Override
+    public Collection&lt;ConfigAttribute&gt; getAttributes(Object o) throws IllegalArgumentException {
+        if (null == map) {
+            loadResourceDefine();
+        }
+        //object 中包含用户请求的request 信息
+        HttpServletRequest request = ((FilterInvocation) o).getHttpRequest();
+        for (Iterator&lt;String&gt; it = map.keySet().iterator() ; it.hasNext();) {
+            String url = it.next();
+            if (new AntPathRequestMatcher( url ).matches( request )) {
+                return map.get( url );
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public Collection&lt;ConfigAttribute&gt; getAllConfigAttributes() {
+        return null;
+    }
+
+    @Override
+    public boolean supports(Class&lt;?&gt; aClass) {
+        return true;
+    }
+
+    /**
+     * 初始化 所有资源 对应的角色
+     */
+    public void loadResourceDefine() {
+        map = new HashMap&lt;&gt;(16);
+        //权限资源 和 角色对应的表  也就是 角色权限 中间表
+        List&lt;RolePermisson&gt; rolePermissons = permissionMapper.getRolePermissions();
+
+        //某个资源 可以被哪些角色访问
+        for (RolePermisson rolePermisson : rolePermissons) {
+
+            String url = rolePermisson.getUrl();
+            String roleName = rolePermisson.getRoleName();
+            ConfigAttribute role = new SecurityConfig(roleName);
+
+            if(map.containsKey(url)){
+                map.get(url).add(role);
+            }else{
+                List&lt;ConfigAttribute&gt; list =  new ArrayList&lt;&gt;();
+                list.add( role );
+                map.put( url , list );
+            }
+        }
+    }
+
+
+}
+</code></pre>
+<p>MyInvocationSecurityMetadataSourceService 类实现了 FilterInvocationSecurityMetadataSource，FilterInvocationSecurityMetadataSource 的作用是用来储存请求与权限的对应关系。</p>
+<p>FilterInvocationSecurityMetadataSource接口有3个方法：</p>
+<ul>
+<li>boolean supports(Class&lt;?&gt; clazz)：指示该类是否能够为指定的方法调用或Web请求提供ConfigAttributes。</li>
+<li>Collection getAllConfigAttributes()：Spring容器启动时自动调用, 一般把所有请求与权限的对应关系也要在这个方法里初始化, 保存在一个属性变量里。</li>
+<li>Collection getAttributes(Object object)：当接收到一个http请求时, filterSecurityInterceptor会调用的方法. 参数object是一个包含url信息的HttpServletRequest实例. 这个方法要返回请求该url所需要的所有权限集合。</li>
+</ul>
+<h3 id="myaccessdecisionmanager">MyAccessDecisionManager</h3>
+<pre><code class="language-java">/**
+ * 决策器
+ */
+@Component
+public class MyAccessDecisionManager implements AccessDecisionManager {
+
+    private final static Logger logger = LoggerFactory.getLogger(MyAccessDecisionManager.class);
+
+    /**
+     * 通过传递的参数来决定用户是否有访问对应受保护对象的权限
+     *
+     * @param authentication 包含了当前的用户信息，包括拥有的权限。这里的权限来源就是前面登录时UserDetailsService中设置的authorities。
+     * @param object  就是FilterInvocation对象，可以得到request等web资源
+     * @param configAttributes configAttributes是本次访问需要的权限
+     */
+    @Override
+    public void decide(Authentication authentication, Object object, Collection&lt;ConfigAttribute&gt; configAttributes) throws AccessDeniedException, InsufficientAuthenticationException {
+        if (null == configAttributes || 0 &gt;= configAttributes.size()) {
+            return;
+        } else {
+            String needRole;
+            for(Iterator&lt;ConfigAttribute&gt; iter = configAttributes.iterator(); iter.hasNext(); ) {
+                needRole = iter.next().getAttribute();
+
+                for(GrantedAuthority ga : authentication.getAuthorities()) {
+                    if(needRole.trim().equals(ga.getAuthority().trim())) {
+                        return;
+                    }
+                }
+            }
+            throw new AccessDeniedException(&quot;当前访问没有权限&quot;);
+        }
+
+    }
+
+    /**
+     * 表示此AccessDecisionManager是否能够处理传递的ConfigAttribute呈现的授权请求
+     */
+    @Override
+    public boolean supports(ConfigAttribute configAttribute) {
+        return true;
+    }
+
+    /**
+     * 表示当前AccessDecisionManager实现是否能够为指定的安全对象（方法调用或Web请求）提供访问控制决策
+     */
+    @Override
+    public boolean supports(Class&lt;?&gt; aClass) {
+        return true;
+    }
+
+}
+</code></pre>
+<p>MyAccessDecisionManager 类实现了AccessDecisionManager接口，AccessDecisionManager是由AbstractSecurityInterceptor调用的，它负责鉴定用户是否有访问对应资源（方法或URL）的权限。</p>
+<h3 id="myfiltersecurityinterceptor">MyFilterSecurityInterceptor</h3>
+<pre><code class="language-java">@Component
+public class MyFilterSecurityInterceptor extends AbstractSecurityInterceptor implements Filter {
+
+
+    @Autowired
+    private FilterInvocationSecurityMetadataSource securityMetadataSource;
+
+    @Autowired
+    public void setMyAccessDecisionManager(MyAccessDecisionManager myAccessDecisionManager) {
+        super.setAccessDecisionManager(myAccessDecisionManager);
+    }
+
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+
+        FilterInvocation fi = new FilterInvocation(servletRequest, servletResponse, filterChain);
+        invoke(fi);
+    }
+
+    public void invoke(FilterInvocation fi) throws IOException, ServletException {
+
+        InterceptorStatusToken token = super.beforeInvocation(fi);
+        try {
+            //执行下一个拦截器
+            fi.getChain().doFilter(fi.getRequest(), fi.getResponse());
+        } finally {
+            super.afterInvocation(token, null);
+        }
+    }
+
+    @Override
+    public Class&lt;?&gt; getSecureObjectClass() {
+        return FilterInvocation.class;
+    }
+
+    @Override
+    public SecurityMetadataSource obtainSecurityMetadataSource() {
+
+        return this.securityMetadataSource;
+    }
+    
+    
+}
+</code></pre>
+<p>每种受支持的安全对象类型（方法调用或Web请求）都有自己的拦截器类，它是AbstractSecurityInterceptor的子类，AbstractSecurityInterceptor 是一个实现了对受保护对象的访问进行拦截的抽象类。</p>
+<p>AbstractSecurityInterceptor的机制可以分为几个步骤：</p>
+<ul>
+<li>
+<ol>
+<li>查找与当前请求关联的“配置属性（简单的理解就是权限）”</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>将 安全对象（方法调用或Web请求）、当前身份验证、配置属性 提交给决策器（AccessDecisionManager）</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>（可选）更改调用所根据的身份验证</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>允许继续进行安全对象调用(假设授予了访问权)</li>
+</ol>
+</li>
+<li>
+<ol>
+<li>在调用返回之后，如果配置了AfterInvocationManager。如果调用引发异常，则不会调用AfterInvocationManager。</li>
+</ol>
+</li>
+</ul>
+<p>AbstractSecurityInterceptor中的方法说明：</p>
+<ul>
+<li>beforeInvocation()方法实现了对访问受保护对象的权限校验，内部用到了AccessDecisionManager和AuthenticationManager；</li>
+<li>finallyInvocation()方法用于实现受保护对象请求完毕后的一些清理工作，主要是如果在beforeInvocation()中改变了SecurityContext，则在finallyInvocation()中需要将其恢复为原来的SecurityContext，该方法的调用应当包含在子类请求受保护资源时的finally语句块中。</li>
+<li>afterInvocation()方法实现了对返回结果的处理，在注入了AfterInvocationManager的情况下默认会调用其decide()方法。</li>
+</ul>
+<p>了解了AbstractSecurityInterceptor，就应该明白了，我们自定义MyFilterSecurityInterceptor就是想使用我们之前自定义的 AccessDecisionManager 和 securityMetadataSource。</p>
+<h3 id="securityconfig">SecurityConfig</h3>
+<p>@EnableWebSecurity注解以及WebSecurityConfigurerAdapter一起配合提供基于web的security。自定义类 继承了WebSecurityConfigurerAdapter来重写了一些方法来指定一些特定的Web安全设置。</p>
+<pre><code class="language-java">@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    private MyUserDetailsService userService;
+
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+
+        //校验用户
+        auth.userDetailsService( userService ).passwordEncoder( new PasswordEncoder() {
+            //对密码进行加密
+            @Override
+            public String encode(CharSequence charSequence) {
+                System.out.println(charSequence.toString());
+                return DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
+            }
+            //对密码进行判断匹配
+            @Override
+            public boolean matches(CharSequence charSequence, String s) {
+                String encode = DigestUtils.md5DigestAsHex(charSequence.toString().getBytes());
+                boolean res = s.equals( encode );
+                return res;
+            }
+        } );
+
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+                .antMatchers(&quot;/&quot;,&quot;index&quot;,&quot;/login&quot;,&quot;/login-error&quot;,&quot;/401&quot;,&quot;/css/**&quot;,&quot;/js/**&quot;).permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .formLogin().loginPage( &quot;/login&quot; ).failureUrl( &quot;/login-error&quot; )
+                .and()
+                .exceptionHandling().accessDeniedPage( &quot;/401&quot; );
+        http.logout().logoutSuccessUrl( &quot;/&quot; );
+    }
+
+
+}
+</code></pre>
+<h3 id="maincontroller">MainController</h3>
+<pre><code class="language-java">@Controller
+public class MainController {
+
+    @RequestMapping(&quot;/&quot;)
+    public String root() {
+        return &quot;redirect:/index&quot;;
+    }
+
+    @RequestMapping(&quot;/index&quot;)
+    public String index() {
+        return &quot;index&quot;;
+    }
+
+    @RequestMapping(&quot;/login&quot;)
+    public String login() {
+        return &quot;login&quot;;
+    }
+
+    @RequestMapping(&quot;/login-error&quot;)
+    public String loginError(Model model) {
+        model.addAttribute( &quot;loginError&quot;  , true);
+        return &quot;login&quot;;
+    }
+
+    @GetMapping(&quot;/401&quot;)
+    public String accessDenied() {
+        return &quot;401&quot;;
+    }
+
+    @GetMapping(&quot;/user/common&quot;)
+    public String common() {
+        return &quot;user/common&quot;;
+    }
+
+    @GetMapping(&quot;/user/admin&quot;)
+    public String admin() {
+        return &quot;user/admin&quot;;
+    }
+
+
+}
+</code></pre>
+<h3 id="页面">页面</h3>
+<p>login.html</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot; xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;登录&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Login page&lt;/h1&gt;
+    &lt;p th:if=&quot;${loginError}&quot; class=&quot;error&quot;&gt;用户名或密码错误&lt;/p&gt;
+    &lt;form th:action=&quot;@{/login}&quot; method=&quot;post&quot;&gt;
+        &lt;label for=&quot;username&quot;&gt;用户名&lt;/label&gt;:
+        &lt;input type=&quot;text&quot; id=&quot;username&quot; name=&quot;username&quot; autofocus=&quot;autofocus&quot; /&gt;
+        &lt;br/&gt;
+        &lt;label for=&quot;password&quot;&gt;密　码&lt;/label&gt;:
+        &lt;input type=&quot;password&quot; id=&quot;password&quot; name=&quot;password&quot; /&gt;
+        &lt;br/&gt;
+        &lt;input type=&quot;submit&quot; value=&quot;登录&quot; /&gt;
+    &lt;/form&gt;
+    &lt;p&gt;&lt;a href=&quot;/index&quot; th:href=&quot;@{/index}&quot;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>index.html</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot; xmlns:th=&quot;http://www.thymeleaf.org&quot;&gt;
+&lt;head&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;首页&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h2&gt;page list&lt;/h2&gt;
+    &lt;a href=&quot;/user/common&quot;&gt;common page&lt;/a&gt;
+    &lt;br/&gt;
+    &lt;a href=&quot;/user/admin&quot;&gt;admin page&lt;/a&gt;
+    &lt;br/&gt;
+    &lt;form th:action=&quot;@{/logout}&quot; method=&quot;post&quot;&gt;
+        &lt;input type=&quot;submit&quot; class=&quot;btn btn-primary&quot; value=&quot;注销&quot;/&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>admin.html</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;admin page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    success admin page！！！
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>common.html</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;common page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    success common page！！！
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>401.html</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;401 page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div&gt;
+        &lt;div&gt;
+            &lt;h2&gt;权限不够&lt;/h2&gt;
+            &lt;p&gt;拒绝访问！&lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>最后运行项目，可以分别用 user、admin 账号 去测试认证和授权是否正确。</p>
+<h3 id="参考">参考</h3>
+<p>《深入理解Spring Cloud与微服务构建》</p>
+<p>https://www.ktanx.com/blog/p/4929</p>
+<h3 id="源码">源码</h3>
+<p>https://github.com/gf-huanchupk/SpringBootLearning/tree/master/springboot-security</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/q3uH3ZKcZ/">
+              <span class="post-title">
+                Spring Boot 整合 apollo&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>Angular-内存溢出的问题 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="Angular-内存溢出的问题 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="Angular-内存溢出的问题"/>
+    <meta property="og:url" content="https://jwangkun.github.io/z1DaTQKse/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/OvZjkTZfc/" class="tag">Angular</a>
+            
+        </span>
+            <h1>Angular-内存溢出的问题</h1>
+            <span class="meta">
+            	Posted on
+              2020-11-27，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p>本项目用的是angular6搭建，用动态组件的形式来显示页面，之前遇到过因为内存溢出而导致无法aot的问题，</p>
+<p>Angular4以上的该方法都适用</p>
+<p>解决方法：手动改写内存上限</p>
+<p>修改目录: my-project/node_modules/.bin 找到 ng.cmd :</p>
+<pre><code>@IF EXIST &quot;%~dp0\node.exe&quot; (
+  &quot;%~dp0\node.exe&quot; --max_old_space_size=8192 &quot;%~dp0\..\@angular\cli\bin\ng&quot; %*
+) ELSE (
+  @SETLOCAL
+  @SET PATHEXT=%PATHEXT:;.JS;=;%
+  node --max_old_space_size=8192  &quot;%~dp0\..\@angular\cli\bin\ng&quot; %*
+)
+</code></pre>
+<p>修改目录: my-project/node_modules/.bin 找到 ngc.cmd :</p>
+<pre><code>@IF EXIST &quot;%~dp0\node.exe&quot; (
+ &quot;%~dp0\node.exe&quot; --max_old_space_size=8192 &quot;%~dp0\..\._@angular_compiler-cli@4.0.1@@angular\compiler-cli\src\main.js&quot; %*
+) ELSE (
+ @SETLOCAL
+ @SET PATHEXT=%PATHEXT:;.JS;=;%
+ node --max_old_space_size=8192 &quot;%~dp0\..\._@angular_compiler-cli@4.0.1@@angular\compiler-cli\src\main.js&quot; %*
+)
+</code></pre>
+<p>至于到底是什么原因导致的内存溢出，还不清楚，只是有如下猜测：</p>
+<p>1）文件过多；</p>
+<p>2）订阅数据没有销毁占用内存，（看了下订阅的数据很少，应该不是的）；</p>
+<p>3）因为所有的组件都在一个根目录下（上面说了，用的动态组件没用路由），导致需要编译的组件过多？</p>
+<p>暂时还不清楚只能先用设置内存上限的方法来解决，有大神的话望不吝指教；</p>
+<p>还有一个问题就是用动态组件的方式，组件都在根目录下，会导致首次加载的时间过长。有奇思妙想请告诉我，哈哈</p>
+<p>同时package的时候也需要修改打包时候的内存</p>
+<p>package.json</p>
+<pre><code>{
+  &quot;name&quot;: &quot;pms&quot;,
+  &quot;version&quot;: &quot;0.0.0&quot;,
+  &quot;scripts&quot;: {
+    &quot;ng&quot;: &quot;ng&quot;,
+    &quot;start&quot;: &quot;ng serve --host 0.0.0.0  &quot;,
+    &quot;start-un-live&quot;: &quot;ng serve --host 0.0.0.0 --port 4201 --live-reload false&quot;,
+    &quot;build&quot;: &quot;ng build&quot;,
+    &quot;test&quot;: &quot;ng test&quot;,
+    &quot;lint&quot;: &quot;ng lint&quot;,
+    &quot;e2e&quot;: &quot;ng e2e&quot;,
+    &quot;build-prod&quot;: &quot;node --max_old_space_size=8192 ./node_modules/@angular/cli/bin/ng build --prod --build--optimizer --base-href /pms/&quot;
+  },
+  &quot;private&quot;: true,
+  &quot;dependencies&quot;: {
+    &quot;@angular/animations&quot;: &quot;^6.1.0&quot;,
+    &quot;@angular/common&quot;: &quot;^6.1.0&quot;,
+    &quot;@angular/compiler&quot;: &quot;^6.1.0&quot;,
+    &quot;@angular/core&quot;: &quot;^6.1.0&quot;,
+    &quot;@angular/forms&quot;: &quot;^6.1.0&quot;,
+    &quot;@angular/http&quot;: &quot;^6.1.0&quot;,
+    &quot;@angular/platform-browser&quot;: &quot;^6.1.0&quot;,
+    &quot;@angular/platform-browser-dynamic&quot;: &quot;^6.1.0&quot;,
+    &quot;@angular/router&quot;: &quot;^6.1.0&quot;,
+    &quot;@fortawesome/angular-fontawesome&quot;: &quot;^0.3.0&quot;,
+    &quot;@fortawesome/fontawesome-svg-core&quot;: &quot;^1.2.8&quot;,
+    &quot;@fortawesome/free-brands-svg-icons&quot;: &quot;^5.5.0&quot;,
+    &quot;@fortawesome/free-regular-svg-icons&quot;: &quot;^5.5.0&quot;,
+    &quot;@fortawesome/free-solid-svg-icons&quot;: &quot;^5.5.0&quot;,
+    &quot;@grapecity/spread-sheets&quot;: &quot;^13.0.5&quot;,
+    &quot;@grapecity/spread-sheets-angular&quot;: &quot;^13.0.5&quot;,
+    &quot;@grapecity/spread-sheets-resources-zh&quot;: &quot;^13.0.5&quot;,
+    &quot;@ng-bootstrap/ng-bootstrap&quot;: &quot;^3.3.1&quot;,
+    &quot;@ng-select/ng-select&quot;: &quot;^2.12.1&quot;,
+    &quot;@types/mathjs&quot;: &quot;^5.0.1&quot;,
+    &quot;@types/pako&quot;: &quot;^1.0.1&quot;,
+    &quot;angular-progress-http&quot;: &quot;^1.0.0&quot;,
+    &quot;angular-safeguard&quot;: &quot;^2.0.1&quot;,
+    &quot;angular-sortablejs&quot;: &quot;^2.7.0&quot;,
+    &quot;angular2-fontawesome&quot;: &quot;^5.2.1&quot;,
+    &quot;babel-polyfill&quot;: &quot;^6.26.0&quot;,
+    &quot;bootstrap&quot;: &quot;^4.1.3&quot;,
+    &quot;classlist.js&quot;: &quot;^1.1.20150312&quot;,
+    &quot;core-js&quot;: &quot;^2.5.4&quot;,
+    &quot;echarts&quot;: &quot;^4.2.0-rc.2&quot;,
+    &quot;echarts-gl&quot;: &quot;^1.1.1&quot;,
+    &quot;essence-ng2-print&quot;: &quot;^1.1.0&quot;,
+    &quot;file-saver&quot;: &quot;^2.0.2&quot;,
+    &quot;font-awesome&quot;: &quot;^4.7.0&quot;,
+    &quot;install&quot;: &quot;^0.12.2&quot;,
+    &quot;mathjs&quot;: &quot;^5.10.0&quot;,
+    &quot;ng-sidebar&quot;: &quot;^8.0.0&quot;,
+    &quot;ng2-completer&quot;: &quot;^2.0.8&quot;,
+    &quot;ng2-pdf-viewer&quot;: &quot;^5.2.4&quot;,
+    &quot;ng2-smart-table&quot;: &quot;^1.3.5&quot;,
+    &quot;ng2-tree&quot;: &quot;^2.0.0-rc.11&quot;,
+    &quot;ngx-clipboard&quot;: &quot;^12.1.2&quot;,
+    &quot;ngx-color-picker&quot;: &quot;^7.1.0&quot;,
+    &quot;ngx-echarts&quot;: &quot;^4.0.1&quot;,
+    &quot;ngx-print&quot;: &quot;^1.2.0-beta.2&quot;,
+    &quot;ngx-quill&quot;: &quot;^7.0.2&quot;,
+    &quot;ngx-toastr&quot;: &quot;^10.0.4&quot;,
+    &quot;pako&quot;: &quot;^1.0.10&quot;,
+    &quot;primeicons&quot;: &quot;^1.0.0&quot;,
+    &quot;primeng&quot;: &quot;^6.1.7&quot;,
+    &quot;print-js&quot;: &quot;^1.0.61&quot;,
+    &quot;quill&quot;: &quot;^1.3.6&quot;,
+    &quot;rxjs&quot;: &quot;~6.2.0&quot;,
+    &quot;rxjs-compat&quot;: &quot;^6.2.2&quot;,
+    &quot;sortablejs&quot;: &quot;^1.8.4&quot;,
+    &quot;web-animations-js&quot;: &quot;^2.3.1&quot;,
+    &quot;xlsx&quot;: &quot;^0.15.2&quot;,
+    &quot;zone.js&quot;: &quot;~0.8.26&quot;
+  },
+  &quot;devDependencies&quot;: {
+    &quot;@angular-devkit/build-angular&quot;: &quot;^0.8.9&quot;,
+    &quot;@angular/cli&quot;: &quot;^6.2.7&quot;,
+    &quot;@angular/compiler-cli&quot;: &quot;^6.1.0&quot;,
+    &quot;@angular/language-service&quot;: &quot;^6.1.0&quot;,
+    &quot;@angularclass/hmr&quot;: &quot;^2.1.3&quot;,
+    &quot;@types/echarts&quot;: &quot;^4.1.3&quot;,
+    &quot;@types/file-saver&quot;: &quot;^2.0.1&quot;,
+    &quot;@types/jasmine&quot;: &quot;~2.8.8&quot;,
+    &quot;@types/jasminewd2&quot;: &quot;~2.0.3&quot;,
+    &quot;@types/node&quot;: &quot;~8.9.4&quot;,
+    &quot;codelyzer&quot;: &quot;~4.3.0&quot;,
+    &quot;jasmine-core&quot;: &quot;~2.99.1&quot;,
+    &quot;jasmine-spec-reporter&quot;: &quot;~4.2.1&quot;,
+    &quot;karma&quot;: &quot;~3.0.0&quot;,
+    &quot;karma-chrome-launcher&quot;: &quot;~2.2.0&quot;,
+    &quot;karma-coverage-istanbul-reporter&quot;: &quot;~2.0.1&quot;,
+    &quot;karma-jasmine&quot;: &quot;~1.1.2&quot;,
+    &quot;karma-jasmine-html-reporter&quot;: &quot;^0.2.2&quot;,
+    &quot;protractor&quot;: &quot;~5.4.0&quot;,
+    &quot;ts-md5&quot;: &quot;^1.2.4&quot;,
+    &quot;ts-node&quot;: &quot;~7.0.0&quot;,
+    &quot;tslint&quot;: &quot;~5.11.0&quot;,
+    &quot;typescript&quot;: &quot;~2.9.2&quot;
+  }
+}
+</code></pre>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/0wLaW8TGC/">
+              <span class="post-title">
+                Docker 安装运行 Jenkines &rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

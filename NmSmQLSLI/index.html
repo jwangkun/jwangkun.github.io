@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title> k8s安装ELK与EFK | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title=" k8s安装ELK与EFK | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content=" k8s安装ELK与EFK"/>
+    <meta property="og:url" content="https://jwangkun.github.io/NmSmQLSLI/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/dqz1srWTf/" class="tag">ELK</a>
+            
+            <a href="https://jwangkun.github.io/qi6RwSsX4m/" class="tag">EFK</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1> k8s安装ELK与EFK</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，6 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="一-elasticsearch安装">一、Elasticsearch安装</h2>
+<p><strong>helm安装的也行，而且helm安装的stable/elasticsearch可用性更高，但是使用资源更多。</strong></p>
+<h3 id="1-安装elasticsearch线上环境千万记得把emptydir改了一定要使用存储">1、安装<strong>elasticsearch（线上环境千万记得把emptyDir改了，一定要使用存储。）</strong></h3>
+<pre><code>#下载资源文件
+wget https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/fluentd-elasticsearch/es-statefulset.yaml
+wget https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/fluentd-elasticsearch/es-service.yaml
+
+#替换镜像和修改配置
+docker.elastic.co/elasticsearch/elasticsearch-oss:6.7.0
+#其它配置根据自己情况修改，我这里修改了name的值，其它的测试就不添加或修改了
+复制代码
+</code></pre>
+<h3 id="2-查看">2、查看</h3>
+<pre><code>[root@k8s-m elk]# kubectl get svc -n kube-system
+NAME            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                  AGE
+elasticsearch   ClusterIP   10.102.165.164   none        9200/TCP                 108s
+
+[root@k8s-m elk]# curl  10.102.165.164:9200/_cluster/health?pretty
+{
+  &quot;cluster_name&quot; : &quot;docker-cluster&quot;,
+  &quot;status&quot; : &quot;green&quot;,
+  &quot;timed_out&quot; : false,
+  &quot;number_of_nodes&quot; : 1,
+  &quot;number_of_data_nodes&quot; : 1,
+  &quot;active_primary_shards&quot; : 0,
+  &quot;active_shards&quot; : 0,
+  &quot;relocating_shards&quot; : 0,
+  &quot;initializing_shards&quot; : 0,
+  &quot;unassigned_shards&quot; : 0,
+  &quot;delayed_unassigned_shards&quot; : 0,
+  &quot;number_of_pending_tasks&quot; : 0,
+  &quot;number_of_in_flight_fetch&quot; : 0,
+  &quot;task_max_waiting_in_queue_millis&quot; : 0,
+  &quot;active_shards_percent_as_number&quot; : 100.0
+}
+复制代码
+</code></pre>
+<h2 id="二-logstash安装">二、Logstash安装</h2>
+<h3 id="1-下载与修改helm资源清单修改镜像和配置">1、下载与修改helm资源清单（修改镜像和配置）</h3>
+<pre><code>#下载logtsash资源清单
+helm fetch stable/logstash
+
+#修改的配置（我这里就拿messages和audit日志做演示，我去掉了pvc的存储，这里就不记录了）
+#镜像6.7.0
+
+#elasticsearch配置
+elasticsearch:
+  host: elasticsearch.kube-system.svc.cluster.local
+  port: 9200
+
+#输入输出等配置
+inputs:
+  main: |-
+    input {
+      beats {
+        port = 5044
+      }
+    }
+
+filters:
+  main: |-
+    filter {
+      if &quot;audit_log&quot; in [tags] {
+        mutate {
+          rename = { &quot;[host][name]&quot; = &quot;host&quot; }
+        }
+      }
+
+      if &quot;messages_log&quot; in [tags] {
+        mutate {
+          rename = { &quot;[host][name]&quot; = &quot;host&quot; }
+        }
+      }
+    }
+outputs:
+  main: |-
+    output {
+      if &quot;audit_log&quot; in [tags] {
+        elasticsearch {
+          hosts = [&quot;${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}&quot;]
+          index = &quot;audit-%{+YYYY.MM.dd}&quot;
+        }
+      }
+      if &quot;messages_log&quot; in [tags] {
+        elasticsearch {
+          hosts = [&quot;${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}&quot;]
+          index = &quot;messages-%{+YYYY.MM.dd}&quot;
+        }
+      }
+    }
+复制代码
+</code></pre>
+<h3 id="2-安装与查看">2、安装与查看</h3>
+<pre><code>helm  install stable/logstash     --name logstash -f values.yaml    --namespace  kube-system
+
+#查看
+[root@k8s-m logstash]# kubectl get sts -n kube-system
+NAME            READY   AGE
+elasticsearch   2/2     33m
+logstash        1/1     19m
+
+</code></pre>
+<h2 id="三-filebeat安装">三、Filebeat安装</h2>
+<h3 id="1-下载与修改helm资源清单修改镜像和配置-2">1、下载与修改helm资源清单（修改镜像和配置）</h3>
+<pre><code>#下载清单
+helm fetch stable/filebeat
+
+#修改镜像等配置（演示messages和audit日志）
+config:
+  filebeat.config:
+    modules:
+      path: ${path.config}/modules.d/*.yml
+      # Reload module configs as they change:
+      reload.enabled: false
+
+  processors:
+    - add_cloud_metadata:
+
+  filebeat.inputs:
+    - type: log
+      enabled: true
+      paths:
+        - /var/log/messages
+      close_eof: true
+      tags: messages_log
+      clean_*: true
+    - type: log
+      paths:
+        - /var/log/audit/audit.log
+      close_eof: true
+      tags: audit_log
+      clean_*: true
+    - type: docker
+      containers.ids:
+      - &quot;*&quot;
+      processors:
+        - add_kubernetes_metadata:
+            in_cluster: true
+        - drop_event:
+            when:
+              equals:
+                kubernetes.container.name: &quot;filebeat&quot;
+
+  output.file:
+    enabled: false
+  output.logstash:
+    hosts: [&quot;logstash.kube-system.svc.cluster.local:5044&quot;]
+  http.enabled: true
+  http.port: 5066
+
+</code></pre>
+<h3 id="2-安装与查看-2">2、安装与查看</h3>
+<pre><code>#安装
+helm install stable/filebeat  --name  filebeat   -f  values.yaml  --namespace kube-system
+
+#查看
+[root@k8s-m filebeat]# kubectl get ds -n kube-system
+NAME          DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                 AGE
+calico-node   3         3         3       3            3           beta.kubernetes.io/os=linux   45m
+filebeat      2         2         2       2            2           none                        21m
+复制代码
+</code></pre>
+<h2 id="四-kibana安装">四、Kibana安装</h2>
+<h3 id="1-下载与修改helm资源清单修改镜像和配置-3">1、下载与修改helm资源清单（修改镜像和配置）</h3>
+<pre><code>#下载清单
+helm  fetch stable/kibana
+
+#修改的配置（我把443改成了80端口访问）
+files:
+  kibana.yml:
+    server.name: kibana
+    server.host: &quot;0&quot;
+    elasticsearch.hosts: http://elasticsearch.kube-system.svc.cluster.local:9200
+service:
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 5601
+复制代码
+</code></pre>
+<h3 id="2-安装与查看-3">2、安装与查看</h3>
+<pre><code>#安装
+helm install  stable/kibana   --name kibana -f values.yaml  --namespace kube-system
+
+#让kibana能外网访问
+kubectl  patch svc  kibana -n kube-system -p '{&quot;spec&quot;:{&quot;type&quot;:&quot;NodePort&quot;}}'
+复制代码
+</code></pre>
+<h3 id="3-浏览器查看">3、浏览器查看</h3>
+<figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd3855112aba5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd385532adc98?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd38552dba922?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h2 id="五-fluentd安装filebeat和fluentd选一个安装k8s日志收集方案推荐">五、Fluentd安装（filebeat和fluentd选一个安装）(k8s日志收集方案推荐</h2>
+<p>Fluentd) 安装fluentd就没必要安装logtsah和filebeat了，上面的架构可以说是ELFK，特点是logstash对日志较强的格式处理，格式化输出，还有特点就是之前用过或学过，不用再学习了，可以直接拿来就用。并且logstash保存到Elasticsearch之间还可以添加个消息队列。 EFK (Elasticsearch + Fluentd + Kibana) 是kubernetes官方推荐的日志收集方案。</p>
+<p>Fluentd官方安装的就已经收集了许多日志了。可以根据自己的需求添加修改。 推荐一篇博客：<a href="https://blog.laisky.com/p/fluentd/#">blog.laisky.com/p/fluentd/#</a></p>
+<h3 id="1-安装fluentd记得修改elasticsearch的配置">1、安装Fluentd（记得修改elasticsearch的配置）</h3>
+<pre><code>wget https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/fluentd-elasticsearch/fluentd-es-configmap.yaml
+wget https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/fluentd-elasticsearch/fluentd-es-ds.yaml
+复制代码
+</code></pre>
+<h3 id="2-查看-2">2、查看</h3>
+<pre><code>[root@k8s-m fluentd]# kubectl get ds -n kube-system fluentd-es-v2.7.0 
+NAME                DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+fluentd-es-v2.7.0   2         2         2       2            2           none          101m
+复制代码
+</code></pre>
+<h3 id="3-kibana查看">3、kibana查看</h3>
+<figure data-type="image" tabindex="4"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd38553ae92b5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="5"><img src="https://user-gold-cdn.xitu.io/2019/8/26/16ccd38554e506a5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="4-总结">4、总结</h3>
+<p>EFK的安装完全可以使用官方的yaml文件安装，并且官方安装的方式使用的EFK版本都比较新。</p>
+<p>原文链接：https://juejin.im/post/6844903924797964301</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/WhrC1yTsk/">
+              <span class="post-title">
+                Jenkines Pipline CI/CD 发布至k8s &rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

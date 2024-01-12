@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>K8S部署Nacos微服务 | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="K8S部署Nacos微服务 | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="K8S部署Nacos微服务"/>
+    <meta property="og:url" content="https://jwangkun.github.io/8l7nJoUol/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/NFaOMIyTM/" class="tag">Nacos</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>K8S部署Nacos微服务</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，3 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <h2 id="本地搭建nacos环境">本地搭建Nacos环境</h2>
+<h3 id="下载代码资源">下载代码资源</h3>
+<pre><code>https://gitee.com/pingfanrenbiji/nacos.git
+
+</code></pre>
+<h3 id="编译nacos">编译Nacos</h3>
+<pre><code>mvn -Prelease-nacos clean install -U -Dmaven.test.skip=true 
+
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://user-gold-cdn.xitu.io/2020/5/23/1724187231849c1a?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="启动nacos">启动Nacos</h3>
+<pre><code>./distribution/target/nacos-server-1.3.0-BETA/nacos/bin/startup.sh -m standalone
+
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://user-gold-cdn.xitu.io/2020/5/23/1724187248939ece?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="下载user-order代码资源">下载user、order代码资源</h3>
+<pre><code>https://gitee.com/pingfanrenbiji/nacos-example.git
+
+</code></pre>
+<h3 id="启动user服务">启动user服务</h3>
+<figure data-type="image" tabindex="3"><img src="https://user-gold-cdn.xitu.io/2020/5/23/1724187244810a4e?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="启动order服务">启动order服务</h3>
+<figure data-type="image" tabindex="4"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418726c4f7500?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="查看注册情况">查看注册情况</h3>
+<pre><code>http://127.0.0.1:8848/nacos
+nacos/nacos
+</code></pre>
+<figure data-type="image" tabindex="5"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418726c5086e8?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="验证下-user是否能够访问order">验证下 user是否能够访问order</h3>
+<pre><code>  访问 localhost:8100/k8s
+  查看日志
+
+</code></pre>
+<figure data-type="image" tabindex="6"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418728e250886?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h2 id="将order和user服务-docker化">将order和user服务 docker化</h2>
+<h3 id="将order和user分别生成jar包">将order和user分别生成jar包</h3>
+<figure data-type="image" tabindex="7"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241872d8bb83e9?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="存放到同一个文件夹-目录结构如下">存放到同一个文件夹 目录结构如下</h3>
+<figure data-type="image" tabindex="8"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241872fd0a6970?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="9"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418732d050caa?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="分别创建dockerfile文件">分别创建Dockerfile文件</h3>
+<figure data-type="image" tabindex="10"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418734473da80?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="11"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241873447ee1e4?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="生成镜像">生成镜像</h3>
+<pre><code>sudo docker build -t user-image:v1.0 .
+sudo docker build -t order-image:v1.0 .
+
+</code></pre>
+<figure data-type="image" tabindex="12"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241873b7c5e543?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="13"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418744a59914d?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="将镜像推送到阿里云docker库">将镜像推送到阿里云docker库</h3>
+<ul>
+<li>网址</li>
+</ul>
+<pre><code>https://cr.console.aliyun.com/cn-hangzhou/new
+
+</code></pre>
+<ul>
+<li>打 tag</li>
+</ul>
+<pre><code>sudo docker tag user-image:v1.0 registry.cn-shanghai.aliyuncs.com/mengfanxiao/user-image:v1.0
+sudo docker tag order-image:v1.0 registry.cn-shanghai.aliyuncs.com/mengfanxiao/order-image:v1.0
+</code></pre>
+<ul>
+<li>推送</li>
+</ul>
+<pre><code>sudo docker push registry.cn-shanghai.aliyuncs.com/mengfanxiao/user-image
+sudo docker push registry.cn-shanghai.aliyuncs.com/mengfanxiao/order-image
+</code></pre>
+<figure data-type="image" tabindex="14"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418748ad8f249?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<h3 id="k8s部署2个docker">k8s部署2个docker</h3>
+<ul>
+<li>创建user.yaml</li>
+</ul>
+<figure data-type="image" tabindex="15"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418748df56dd3?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<ul>
+<li>创建order.yaml</li>
+</ul>
+<figure data-type="image" tabindex="16"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241874bab35cf6?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<ul>
+<li>部署</li>
+</ul>
+<pre><code>kubectl apply -f user.yaml
+kubectl apply -f order.yaml 
+
+</code></pre>
+<ul>
+<li>查看部署pods情况</li>
+</ul>
+<pre><code>kubectl get pods
+
+</code></pre>
+<figure data-type="image" tabindex="17"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241874bcc93bb4?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<pre><code>kubectl get pods -o wide
+
+</code></pre>
+<figure data-type="image" tabindex="18"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241874cd76d2a0?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<pre><code>进入集群环境 查看pod之间是否可以访问
+kubectl run busybox --rm=true --image=busybox --restart=Never -it
+</code></pre>
+<figure data-type="image" tabindex="19"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241874ed649ea3?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<ul>
+<li>查看service</li>
+</ul>
+<pre><code>kubectl get svc
+
+</code></pre>
+<figure data-type="image" tabindex="20"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241874f6492537?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<ul>
+<li>查看 ingress</li>
+</ul>
+<pre><code>kubectl get ingress
+
+</code></pre>
+<figure data-type="image" tabindex="21"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418750e6427df?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<ul>
+<li>查看user 和 order服务 是否成功注册到 nacos</li>
+</ul>
+<figure data-type="image" tabindex="22"><img src="https://user-gold-cdn.xitu.io/2020/5/23/17241875192b51e8?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<p><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418751f096ef5?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="ip为Pod的IP" loading="lazy">ip为Pod的IP</p>
+<figure data-type="image" tabindex="23"><img src="https://user-gold-cdn.xitu.io/2020/5/23/1724187537c6f6cb?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<pre><code>至此 user 和 server 2个springboot项目 以pod的方式跑起来了 也注册到了 宿主机上的nacos服务上 
+
+</code></pre>
+<h2 id="问题协查方式">问题协查方式</h2>
+<ul>
+<li>查看pod docker imags版本号是否正确</li>
+</ul>
+<pre><code>kubectl describe pods|grep user
+
+</code></pre>
+<figure data-type="image" tabindex="24"><img src="https://user-gold-cdn.xitu.io/2020/5/23/172418754cd37ec2?imageView2/0/w/1280/h/960/format/webp/ignore-error/1" alt="img" loading="lazy"></figure>
+<ul>
+<li>查看pod docker 启动日志</li>
+</ul>
+<pre><code>kubectl logs -f order-65d5b4d858-rgnfs
+
+</code></pre>
+<ul>
+<li>查看 k8s 服务启动文件 比如 order.yaml 文件 其中的端口号映射是否正确</li>
+</ul>
+<h2 id="未完待续">未完待续</h2>
+<ul>
+<li>通过 service NodeType方式访问 order</li>
+<li>通过ingress nginx方式访问user</li>
+<li>测试 user是否可以访问到 order</li>
+</ul>
+<h2 id="资源文件">资源文件</h2>
+<pre><code>https://gitee.com/pingfanrenbiji/nacos-example.git
+相关配置文件也在其中
+</code></pre>
+<h2 id="参考文章">参考文章</h2>
+<pre><code>https://www.cnblogs.com/wuzhenzhao/p/12076827.html
+https://zhuanlan.zhihu.com/p/68700978
+
+</code></pre>
+<p>原文链接：https://juejin.im/post/6844904166691700750</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Bf0bV70AO/">
+              <span class="post-title">
+                在K8S上搭建Redis集群&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

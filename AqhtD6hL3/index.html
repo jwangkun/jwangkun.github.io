@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>sealos+rook 部署 kubeSphere+TiDB | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="sealos+rook 部署 kubeSphere+TiDB | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="sealos+rook 部署 kubeSphere+TiDB"/>
+    <meta property="og:url" content="https://jwangkun.github.io/AqhtD6hL3/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/iD4THcSIn/" class="tag">sealos</a>
+            
+            <a href="https://jwangkun.github.io/6I7ItFEtlr/" class="tag">rook</a>
+            
+            <a href="https://jwangkun.github.io/BBcX72CRAT/" class="tag">TiDB</a>
+            
+            <a href="https://jwangkun.github.io/xGgIrb1zw/" class="tag">KubeSphere</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>sealos+rook 部署 kubeSphere+TiDB</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-20，35 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p><strong>前言</strong></p>
+<p>最近 CNCF 宣布 rook 毕业，kubeSphere 正好也发布了 3.0.0 版本，由于 rancher 开源的 longhorn 还处于孵化阶段，不太适合生产环境使用，这次使用 rook 作为 kubeSphere 底层存储快速搭建一个生产可用的容器平台。</p>
+<h2 id="sealos-简介">sealos 简介</h2>
+<p><strong>Sealos</strong>[1]官方描述：只能用丝滑一词形容的 Kubernetes 高可用安装工具，一条命令，离线安装，包含所有依赖，内核负载不依赖 haproxy keepalived，纯 Golang 开发，99 年证书，支持 v1.16 ~ v1.19。<img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmdicZCYc6ia2r3BrN5XLFpwLKLwtWnbG5aXCH4l94lW8iaeoq738JWaOfg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></p>
+<h2 id="rook-简介">rook 简介</h2>
+<p><strong>rook</strong>[2]是 Kubernetes 的开源云原生存储解决方案，能够为 kubernetes 提供生产就绪的文件、块和对象存储。</p>
+<p>值得一提的是 ceph 官方最新的部署工具 cephadm 默认也使用容器来部署 ceph 集群了。</p>
+<figure data-type="image" tabindex="1"><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8Zm7RqAC1We9YK1r97BLUb9Lric3iaFyVv6Dic0CVuuuPBuSAWFIDszcBxrA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<h2 id="kubesphere-简介">kubeSphere 简介</h2>
+<p><strong>KubeSphere</strong>[3]是在 Kubernetes 之上构建的以应用为中心的多租户容器平台，完全开源免费，支持多云与多集群管理，提供全栈的 IT 自动化运维的能力，简化企业的 DevOps 工作流。KubeSphere 提供了运维友好的向导式操作界面，帮助企业快速构建一个强大和功能丰富的容器云平台。</p>
+<figure data-type="image" tabindex="2"><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmBjWQPiaq0nGFjmFsqfYibupWdyJl7L9aqKRicWtdZNT2ZzEEh9HD7C24w/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<h2 id="部署环境准备">部署环境准备</h2>
+<p>准备以下节点资源：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">节点名称</th>
+<th style="text-align:left">节点 IP</th>
+<th style="text-align:left">CPU</th>
+<th style="text-align:left">内存</th>
+<th style="text-align:left">系统盘</th>
+<th style="text-align:left">数据盘</th>
+<th style="text-align:left">存储盘</th>
+<th style="text-align:left">操作系统</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">k8s-master1</td>
+<td style="text-align:left">192.168.1.102</td>
+<td style="text-align:left">2 核</td>
+<td style="text-align:left">8G</td>
+<td style="text-align:left">vda: 60G</td>
+<td style="text-align:left">vdb: 200G</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">CentOS7.8 minimal</td>
+</tr>
+<tr>
+<td style="text-align:left">k8s-master2</td>
+<td style="text-align:left">192.168.1.103</td>
+<td style="text-align:left">2 核</td>
+<td style="text-align:left">8G</td>
+<td style="text-align:left">vda: 60G</td>
+<td style="text-align:left">vdb: 200G</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">CentOS7.8 minimal</td>
+</tr>
+<tr>
+<td style="text-align:left">k8s-master3</td>
+<td style="text-align:left">192.168.1.104</td>
+<td style="text-align:left">2 核</td>
+<td style="text-align:left">8G</td>
+<td style="text-align:left">vda: 60G</td>
+<td style="text-align:left">vdb: 200G</td>
+<td style="text-align:left">-</td>
+<td style="text-align:left">CentOS7.8 minimal</td>
+</tr>
+<tr>
+<td style="text-align:left">k8s-node1</td>
+<td style="text-align:left">192.168.1.105</td>
+<td style="text-align:left">4 核</td>
+<td style="text-align:left">16G</td>
+<td style="text-align:left">vda: 60G</td>
+<td style="text-align:left">vdb: 200G</td>
+<td style="text-align:left">vdc：200G</td>
+<td style="text-align:left">CentOS7.8 minimal</td>
+</tr>
+<tr>
+<td style="text-align:left">k8s-node2</td>
+<td style="text-align:left">192.168.1.106</td>
+<td style="text-align:left">4 核</td>
+<td style="text-align:left">16G</td>
+<td style="text-align:left">vda: 60G</td>
+<td style="text-align:left">vdb: 200G</td>
+<td style="text-align:left">vdc：200G</td>
+<td style="text-align:left">CentOS7.8 minimal</td>
+</tr>
+<tr>
+<td style="text-align:left">k8s-node3</td>
+<td style="text-align:left">192.168.1.107</td>
+<td style="text-align:left">4 核</td>
+<td style="text-align:left">16G</td>
+<td style="text-align:left">vda: 60G</td>
+<td style="text-align:left">vdb: 200G</td>
+<td style="text-align:left">vdc：200G</td>
+<td style="text-align:left">CentOS7.8 minimal</td>
+</tr>
+</tbody>
+</table>
+<p>部署示意图</p>
+<figure data-type="image" tabindex="3"><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmJG4HLfpak2BxrZLUG7zNIsmCnnU4RTY1iauib0iaibriajdxlaGS6QeUDyw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<p>说明：</p>
+<ul>
+<li>vdb 盘：/var/lib/docker 作为镜像及容器数据存储目录建议单独挂盘，创建为逻辑卷方便扩容。另外/var/lib/kubelet 存储了 pod 临时卷，如果临时卷用量较大也建议使用单独存储（可选）。</li>
+<li>vdc 盘：使用 rook 作为 kubesphere 容器平台底层存储，3 数据副本的 ceph 集群每个节点至少需要 1 个 OSD，每个 OSD 位于 3 个不同的节点上，与 longhorn 不同，rook 只能使用干净的裸盘或分区，所以在每个 node 上添加一块 vdc 盘。</li>
+</ul>
+<p>所有节点 vdb 整盘创建为逻辑卷，挂载到/var/lib/docker 目录下，用于存储 docker 数据（可选）：</p>
+<pre><code>yum install -y lvm2
+pvcreate /dev/vdb
+vgcreate data /dev/vdb
+lvcreate -l 100%VG -n docker data
+mkfs.xfs /dev/data/docker
+mkdir /var/lib/docker
+echo &quot;/dev/mapper/data-docker  /var/lib/docker  xfs  defaults  0 0&quot; &gt;&gt; /etc/fstab
+mount -a
+</code></pre>
+<p>后续扩展容量只需将磁盘加入 data 卷组即可。</p>
+<p>验证挂载正常</p>
+<pre><code>[root@k8s-master1 ~]# df -h | grep docker
+/dev/mapper/data-docker  200G   33M  200G   1% /var/lib/docker
+</code></pre>
+<p>vdc 盘保留为裸盘用于 rook 组建 ceph 集群的 osd 盘，请勿做任何分区格式化操作，磁盘最终状态如下:</p>
+<pre><code>[root@k8s-master1 ~]# lsblk -f
+NAME          FSTYPE      LABEL UUID                                   MOUNTPOINT
+vda
+└─vda1        ext4              ca08d7b9-ded5-4935-882f-5b12d6efb14f   /
+vdb           LVM2_member       cPhOii-QPw5-85Vs-UFSH-aJV1-rq0D-4883rX
+└─data-docker xfs               c32b7a2c-b1f6-4e5f-b422-39dc68c0d9aa   /var/lib/docker
+vdc
+</code></pre>
+<h2 id="部署-k8s-集群">部署 k8s 集群</h2>
+<p>使用 sealos 工具部署 k8s 集群，所有节点必须配置独立主机名，并确认节点时间同步：</p>
+<pre><code>hostnamectl set-hostname xx
+yum install -y chrony
+systemctl enable --now chronyd
+timedatectl set-timezone Asia/Shanghai
+</code></pre>
+<p>验证所有节点时间是否同步</p>
+<pre><code>timedatectl
+</code></pre>
+<p>在第一个 master 节点操作，下载部署工具及离线包（kubesphere v3.0.0 请使用 kubernetes v1.18.x 版本，务必确认 kubesphere 支持的 kubernetes 版本范围）</p>
+<pre><code># 下载sealos
+wget -c https://sealyun.oss-cn-beijing.aliyuncs.com/latest/sealos &amp;&amp; \
+    chmod +x sealos &amp;&amp; mv sealos /usr/bin
+
+# 下载kubernetes v1.18.8离线包
+wget -c https://sealyun.oss-cn-beijing.aliyuncs.com/cd3d5791b292325d38bbfaffd9855312-1.18.8/kube1.18.8.tar.gz
+</code></pre>
+<p>执行以下命令部署 k8s 集群，passwd 为所有节点 root 密码</p>
+<pre><code>sealos init --passwd 123456 \
+  --master 192.168.1.102 \
+  --master 192.168.1.103 \
+  --master 192.168.1.104 \
+  --node 192.168.1.105 \
+  --node 192.168.1.106 \
+  --node 192.168.1.107 \
+  --pkg-url kube1.18.8.tar.gz \
+  --version v1.18.8
+</code></pre>
+<p>确认 k8s 集群已经就绪：</p>
+<pre><code>[root@k8s-master1 ~]# kubectl get nodes -o wide
+NAME          STATUS   ROLES    AGE     VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE                KERNEL-VERSION                CONTAINER-RUNTIME
+k8s-master1   Ready    master   5m57s   v1.18.8   192.168.1.102   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1127.18.2.el7.x86_64   docker://19.3.0
+k8s-master2   Ready    master   5m28s   v1.18.8   192.168.1.103   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1127.18.2.el7.x86_64   docker://19.3.0
+k8s-master3   Ready    master   5m27s   v1.18.8   192.168.1.104   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1127.18.2.el7.x86_64   docker://19.3.0
+k8s-node1     Ready    &lt;none&gt;   4m34s   v1.18.8   192.168.1.105   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1127.18.2.el7.x86_64   docker://19.3.0
+k8s-node2     Ready    &lt;none&gt;   4m34s   v1.18.8   192.168.1.106   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1127.18.2.el7.x86_64   docker://19.3.0
+k8s-node3     Ready    &lt;none&gt;   4m34s   v1.18.8   192.168.1.107   &lt;none&gt;        CentOS Linux 7 (Core)   3.10.0-1127.18.2.el7.x86_64   docker://19.3.0
+
+[root@k8s-master1 ~]# kubectl get pods -A
+NAMESPACE     NAME                                       READY   STATUS    RESTARTS   AGE
+kube-system   calico-kube-controllers-84445dd79f-ntnf2   1/1     Running   0          5m50s
+kube-system   calico-node-6dnfd                          1/1     Running   0          5m39s
+kube-system   calico-node-8gxwv                          1/1     Running   0          4m45s
+kube-system   calico-node-b28xq                          1/1     Running   0          4m45s
+kube-system   calico-node-k2978                          1/1     Running   0          4m45s
+kube-system   calico-node-rldns                          1/1     Running   0          5m50s
+kube-system   calico-node-zm5dl                          1/1     Running   0          4m57s
+kube-system   coredns-66bff467f8-jk8h5                   1/1     Running   0          5m50s
+kube-system   coredns-66bff467f8-n8hsn                   1/1     Running   0          5m50s
+kube-system   etcd-k8s-master1                           1/1     Running   0          5m59s
+kube-system   etcd-k8s-master2                           1/1     Running   0          5m33s
+kube-system   etcd-k8s-master3                           1/1     Running   0          5m26s
+kube-system   kube-apiserver-k8s-master1                 1/1     Running   0          5m59s
+kube-system   kube-apiserver-k8s-master2                 1/1     Running   0          5m34s
+kube-system   kube-apiserver-k8s-master3                 1/1     Running   0          4m12s
+kube-system   kube-controller-manager-k8s-master1        1/1     Running   1          5m59s
+kube-system   kube-controller-manager-k8s-master2        1/1     Running   0          5m38s
+kube-system   kube-controller-manager-k8s-master3        1/1     Running   0          4m18s
+kube-system   kube-proxy-2lr22                           1/1     Running   0          4m45s
+kube-system   kube-proxy-4m78t                           1/1     Running   0          4m57s
+kube-system   kube-proxy-jzrc9                           1/1     Running   0          5m50s
+kube-system   kube-proxy-kpwnn                           1/1     Running   0          4m45s
+kube-system   kube-proxy-lw5bq                           1/1     Running   0          4m45s
+kube-system   kube-proxy-rl2g5                           1/1     Running   0          5m39s
+kube-system   kube-scheduler-k8s-master1                 1/1     Running   1          5m59s
+kube-system   kube-scheduler-k8s-master2                 1/1     Running   0          5m33s
+kube-system   kube-scheduler-k8s-master3                 1/1     Running   0          4m7s
+kube-system   kube-sealyun-lvscare-k8s-node1             1/1     Running   0          4m43s
+kube-system   kube-sealyun-lvscare-k8s-node2             1/1     Running   0          4m44s
+kube-system   kube-sealyun-lvscare-k8s-node3             1/1     Running   0          3m24s
+</code></pre>
+<h2 id="部署-rook-存储">部署 rook 存储</h2>
+<p>下载 rook 的 release 版本</p>
+<pre><code>wget https://github.com/rook/rook/archive/v1.4.4.tar.gz
+tar -zxvf v1.4.4.tar.gz
+cd  rook-1.4.4/cluster/examples/kubernetes/ceph
+</code></pre>
+<p>由于 kubesphere 部分 pod 会调度到 master 节点并且需要绑定 pv，所以需要开启 rook 的 csi-rbdplugin pod 对 master 节点的容忍，使 csi 插件也能够调度到 master 节点，否则那部分 pod 挂载 volume 会失败。（也可以去除 master 节点污点，但不推荐 master 运行过多其他 pod）</p>
+<p>查看 master 节点 taints：</p>
+<pre><code>[root@k8s-master1 ceph]# kubectl describe nodes k8s-master1 | grep Taints
+Taints:             node-role.kubernetes.io/master:NoSchedule
+</code></pre>
+<p>取消 operator.yaml 以下部分注释，并将 key 后面的 controlplane 改为 master</p>
+<pre><code>[root@k8s-master1 ceph]# vim operator.yaml
+  CSI_PLUGIN_TOLERATIONS: |
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+      operator: Exists
+    - effect: NoExecute
+      key: node-role.kubernetes.io/etcd
+      operator: Exists
+</code></pre>
+<p>执行以下 yaml 部署 rook</p>
+<pre><code>kubectl create -f common.yaml
+kubectl create -f operator.yaml
+kubectl create -f cluster.yaml
+</code></pre>
+<p>确认所有 pod 运行正常</p>
+<pre><code>[root@k8s-master1 ceph]# kubectl -n rook-ceph get pods
+NAME                                                  READY   STATUS      RESTARTS   AGE
+csi-cephfsplugin-9qcvs                                3/3     Running     0          22m
+csi-cephfsplugin-c8mb4                                3/3     Running     0          20m
+csi-cephfsplugin-fcrzv                                3/3     Running     0          22m
+csi-cephfsplugin-pmjqn                                3/3     Running     0          20m
+csi-cephfsplugin-provisioner-598854d87f-l26qc         6/6     Running     0          21m
+csi-cephfsplugin-provisioner-598854d87f-zm2jt         6/6     Running     0          21m
+csi-cephfsplugin-srz2x                                3/3     Running     0          22m
+csi-cephfsplugin-swh5g                                3/3     Running     0          20m
+csi-rbdplugin-2cgr9                                   3/3     Running     0          20m
+csi-rbdplugin-4jxpc                                   3/3     Running     0          22m
+csi-rbdplugin-bd68x                                   3/3     Running     0          22m
+csi-rbdplugin-fbs6n                                   3/3     Running     0          20m
+csi-rbdplugin-jvz47                                   3/3     Running     0          22m
+csi-rbdplugin-k98qz                                   3/3     Running     0          21m
+csi-rbdplugin-provisioner-dbc67ffdc-hvfln             6/6     Running     0          21m
+csi-rbdplugin-provisioner-dbc67ffdc-sh5db             6/6     Running     0          21m
+rook-ceph-crashcollector-k8s-node1-6d79784c6d-fsvxm   1/1     Running     0          3h2m
+rook-ceph-crashcollector-k8s-node2-576785565c-9dbdr   1/1     Running     0          3h3m
+rook-ceph-crashcollector-k8s-node3-c8fc68746-8dp7f    1/1     Running     0          3h3m
+rook-ceph-mgr-a-845ff64bf5-ldhf2                      1/1     Running     0          3h2m
+rook-ceph-mon-a-64fd6c646f-prt9x                      1/1     Running     0          3h4m
+rook-ceph-mon-b-55fd7dc845-ndhtw                      1/1     Running     0          3h3m
+rook-ceph-mon-c-6c4469c6b4-s7s4m                      1/1     Running     0          3h3m
+rook-ceph-operator-667756ddb6-s82sj                   1/1     Running     0          3h8m
+rook-ceph-osd-0-7c57558cf-rf7ql                       1/1     Running     0          3h2m
+rook-ceph-osd-1-58cb86f47f-75rgr                      1/1     Running     0          3h2m
+rook-ceph-osd-2-76b9d45484-qw6l2                      1/1     Running     0          3h2m
+rook-ceph-osd-prepare-k8s-node1-z4k9r                 0/1     Completed   0          126m
+rook-ceph-osd-prepare-k8s-node2-rjtkp                 0/1     Completed   0          126m
+rook-ceph-osd-prepare-k8s-node3-2sbkb                 0/1     Completed   0          126m
+rook-ceph-tools-7cc7fd5755-784tv                      1/1     Running     0          113m
+rook-discover-77m2c                                   1/1     Running     0          3h8m
+rook-discover-97svb                                   1/1     Running     0          3h8m
+rook-discover-cr48w                                   1/1     Running     0          3h8m
+</code></pre>
+<p>ceph 会自动发现节点上的空磁盘并将其创建为 ceph OSD，可以看到 node 节点上的 vdc 被创建为 lvm 类型的磁盘：</p>
+<pre><code>[root@k8s-node1 ~]# lsblk
+NAME                                                                                                 MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+vda                                                                                                  253:0    0   60G  0 disk
+└─vda1                                                                                               253:1    0   60G  0 part /
+vdb                                                                                                  253:16   0  200G  0 disk
+└─data-docker                                                                                        252:0    0  200G  0 lvm  /var/lib/docker
+vdc                                                                                                  253:32   0  200G  0 disk
+└─ceph--96e1e8fb--8677--4276--832b--5a9b6ba6061e-osd--data--dc184518--da34--42fb--9100--c56c3d880f19 252:1    0  200G  0 lvm
+</code></pre>
+<p>运行 ceph 命令行工具</p>
+<pre><code>[root@k8s-master1 ceph]# kubectl create -f toolbox.yaml
+
+#进入toolbox pod
+kubectl -n rook-ceph exec -it $(kubectl -n rook-ceph get pod -l &quot;app=rook-ceph-tools&quot; -o jsonpath='{.items[0].metadata.name}') -- bash
+</code></pre>
+<p>确认 ceph 集群状态为 HEALTH_OK，所有 OSD 盘 up</p>
+<pre><code>[root@rook-ceph-tools-7cc7fd5755-784tv /]# ceph status
+  cluster:
+    id:     a5552710-4d29-4717-90ae-f3ded597225e
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum a,b,c (age 69m)
+    mgr: a(active, since 13m)
+    osd: 3 osds: 3 up (since 69m), 3 in (since 69m)
+
+  data:
+    pools:   1 pools, 1 pgs
+    objects: 0 objects, 0 B
+    usage:   3.0 GiB used, 597 GiB / 600 GiB avail
+    pgs:     1 active+clean
+
+[root@rook-ceph-tools-7cc7fd5755-784tv /]# ceph osd status
+ID  HOST        USED  AVAIL  WR OPS  WR DATA  RD OPS  RD DATA  STATE
+ 0  k8s-node3  1027M   198G      0        0       0        0   exists,up
+ 1  k8s-node2  1027M   198G      0        0       0        0   exists,up
+ 2  k8s-node1  1027M   198G      0        0       0        0   exists,up
+</code></pre>
+<p>创建块存储类型的存储池和 storageclass</p>
+<pre><code>[root@k8s-master1 ceph]# kubectl create -f csi/rbd/storageclass.yaml
+</code></pre>
+<p>设置为默认 storageclass</p>
+<pre><code>kubectl patch storageclass rook-ceph-block -p '{&quot;metadata&quot;: {&quot;annotations&quot;:{&quot;storageclass.kubernetes.io/is-default-class&quot;:&quot;true&quot;}}}'
+</code></pre>
+<p>确认 rook-ceph-block 为默认 storageclass (default)</p>
+<pre><code>[root@k8s-master1 ceph]# kubectl get sc
+NAME                        PROVISIONER                  RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+rook-ceph-block (default)   rook-ceph.rbd.csi.ceph.com   Delete          Immediate           true                   58s
+</code></pre>
+<p><strong>登录 ceph dashboard</strong></p>
+<p>默认已经创建了 dashboard service，但是类型为 clusterIP，重新创建一个 NodePort 类型的 service</p>
+<pre><code>[root@k8s-master1 ceph]# kubectl apply -f dashboard-external-https.yaml
+
+[root@k8s-master1 ceph]# kubectl -n rook-ceph get service | grep dashboard
+rook-ceph-mgr-dashboard                  ClusterIP   10.110.146.141   &lt;none&gt;        8443/TCP            72m
+rook-ceph-mgr-dashboard-external-https   NodePort    10.107.93.204    &lt;none&gt;        8443:31318/TCP      36s
+</code></pre>
+<p>获取 dashboard admin 用户的密码</p>
+<pre><code>kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o jsonpath=&quot;{['data']['password']}&quot; | base64 --decode &amp;&amp; echo
+</code></pre>
+<p>登录后查看 ceph 集群整体状态</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmKcQOcWLgJdcLagUAPuYxpax7SfOQGj3YVv0nbylla0tE6Ribnia2B3zw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">点击 Pools，可以看到创建的 replicapool 存储池，点击 Usage 查看下大小，由于是 3 副本，实际可用存储大概 200G，后续所有调用 rook-ceph-block 这个 storageclass 创建的 pv，数据都会存储在这个存储池内</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmZxyRDqeJicffzaeCyoVrp9Iw0XDNxEOEKU8IP63ysyeoS6icuKNsvdsA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">默认的 storageclass 就绪后可以继续部署 kubesphere 容器平台。</p>
+<h2 id="部署-kubesphere">部署 kubeSphere</h2>
+<p>参考：<strong>https://kubesphere.com.cn/en/docs/installing-on-kubernetes/</strong>[4]</p>
+<p>部署 kubesphere 3.0 版本，下载 yaml 文件</p>
+<pre><code>wget https://raw.githubusercontent.com/kubesphere/ks-installer/v3.0.0/deploy/kubesphere-installer.yaml
+wget https://raw.githubusercontent.com/kubesphere/ks-installer/v3.0.0/deploy/cluster-configuration.yaml
+</code></pre>
+<p>修改 cluster-configuration.yaml，找到相应字段开启需要安装的组件，以下仅为参考：</p>
+<pre><code>  devops:
+    enabled: true
+    ......
+  logging:
+    enabled: true
+    ......
+  metrics_server:
+    enabled: true
+    ......
+  openpitrix:
+    enabled: true
+    ......
+</code></pre>
+<p>上面开启了 devopos、日志、metrics server 以及应用商店。</p>
+<p>执行以下 yaml 部署 kubeSphere</p>
+<pre><code>kubectl apply -f kubesphere-installer.yaml
+kubectl apply -f cluster-configuration.yaml
+</code></pre>
+<p>查看部署日志，确认无报错</p>
+<pre><code>kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l app=ks-install -o jsonpath='{.items[0].metadata.name}') -f
+</code></pre>
+<p>部署完成后确认所有 pod 运行正常</p>
+<pre><code>[root@k8s-master1 ceph]# kubectl get pods -A | grep kubesphere
+kubesphere-controls-system     default-http-backend-857d7b6856-87hfd                 1/1     Running     0          100m
+kubesphere-controls-system     kubectl-admin-58f985d8f6-9s6lr                        1/1     Running     0          17m
+kubesphere-devops-system       ks-jenkins-54455f5db8-cxw6r                           1/1     Running     0          97m
+kubesphere-devops-system       s2ioperator-0                                         1/1     Running     1          98m
+kubesphere-devops-system       uc-jenkins-update-center-cd9464fff-6g7w6              1/1     Running     0          99m
+kubesphere-logging-system      elasticsearch-logging-data-0                          1/1     Running     0          101m
+kubesphere-logging-system      elasticsearch-logging-data-1                          1/1     Running     0          99m
+kubesphere-logging-system      elasticsearch-logging-data-2                          1/1     Running     0          98m
+kubesphere-logging-system      elasticsearch-logging-discovery-0                     1/1     Running     0          101m
+kubesphere-logging-system      elasticsearch-logging-discovery-1                     1/1     Running     0          99m
+kubesphere-logging-system      elasticsearch-logging-discovery-2                     1/1     Running     0          98m
+kubesphere-logging-system      fluent-bit-725c4                                      1/1     Running     0          100m
+kubesphere-logging-system      fluent-bit-9rc6d                                      1/1     Running     0          100m
+kubesphere-logging-system      fluent-bit-g5n57                                      1/1     Running     0          100m
+kubesphere-logging-system      fluent-bit-n85tz                                      1/1     Running     0          100m
+kubesphere-logging-system      fluent-bit-nfpgl                                      1/1     Running     0          100m
+kubesphere-logging-system      fluent-bit-pc527                                      1/1     Running     0          100m
+kubesphere-logging-system      fluentbit-operator-855d4b977d-ffr2g                   1/1     Running     0          101m
+kubesphere-logging-system      logsidecar-injector-deploy-74c66bfd85-t67gz           2/2     Running     0          99m
+kubesphere-logging-system      logsidecar-injector-deploy-74c66bfd85-vsvrh           2/2     Running     0          99m
+kubesphere-monitoring-system   alertmanager-main-0                                   2/2     Running     0          98m
+kubesphere-monitoring-system   alertmanager-main-1                                   2/2     Running     0          98m
+kubesphere-monitoring-system   alertmanager-main-2                                   2/2     Running     0          98m
+kubesphere-monitoring-system   kube-state-metrics-95c974544-xqkv5                    3/3     Running     0          98m
+kubesphere-monitoring-system   node-exporter-95462                                   2/2     Running     0          98m
+kubesphere-monitoring-system   node-exporter-9cxnq                                   2/2     Running     0          98m
+kubesphere-monitoring-system   node-exporter-cbp58                                   2/2     Running     0          98m
+kubesphere-monitoring-system   node-exporter-cx8fz                                   2/2     Running     0          98m
+kubesphere-monitoring-system   node-exporter-tszl7                                   2/2     Running     0          98m
+kubesphere-monitoring-system   node-exporter-tt9f2                                   2/2     Running     0          98m
+kubesphere-monitoring-system   notification-manager-deployment-7c8df68d94-9mtvx      1/1     Running     0          97m
+kubesphere-monitoring-system   notification-manager-deployment-7c8df68d94-rvr6m      1/1     Running     0          97m
+kubesphere-monitoring-system   notification-manager-operator-6958786cd6-6qbqz        2/2     Running     0          97m
+kubesphere-monitoring-system   prometheus-k8s-0                                      3/3     Running     1          98m
+kubesphere-monitoring-system   prometheus-k8s-1                                      3/3     Running     1          98m
+kubesphere-monitoring-system   prometheus-operator-84d58bf775-kpdfq                  2/2     Running     0          98m
+kubesphere-system              etcd-65796969c7-5fxjf                                 1/1     Running     0          101m
+kubesphere-system              ks-apiserver-59d74f777d-776rg                         1/1     Running     11         50m
+kubesphere-system              ks-apiserver-59d74f777d-djz68                         1/1     Running     0          18m
+kubesphere-system              ks-apiserver-59d74f777d-gfn7v                         1/1     Running     20         97m
+kubesphere-system              ks-console-786b9846d4-9djs9                           1/1     Running     0          100m
+kubesphere-system              ks-console-786b9846d4-g42kc                           1/1     Running     0          100m
+kubesphere-system              ks-console-786b9846d4-rhltz                           1/1     Running     0          100m
+kubesphere-system              ks-controller-manager-57c45bf58b-4rsml                1/1     Running     20         96m
+kubesphere-system              ks-controller-manager-57c45bf58b-jlfjf                1/1     Running     20         96m
+kubesphere-system              ks-controller-manager-57c45bf58b-vwvq5                1/1     Running     20         97m
+kubesphere-system              ks-installer-7cb866bd-vj9q8                           1/1     Running     0          105m
+kubesphere-system              minio-7bfdb5968b-bqw2x                                1/1     Running     0          102m
+kubesphere-system              mysql-7f64d9f584-pbqph                                1/1     Running     0          101m
+kubesphere-system              openldap-0                                            1/1     Running     0          102m
+kubesphere-system              openldap-1                                            1/1     Running     0          21m
+kubesphere-system              redis-ha-haproxy-5c6559d588-9bjrd                     1/1     Running     13         102m
+kubesphere-system              redis-ha-haproxy-5c6559d588-9zpz9                     1/1     Running     15         102m
+kubesphere-system              redis-ha-haproxy-5c6559d588-bzrxs                     1/1     Running     19         102m
+kubesphere-system              redis-ha-server-0                                     2/2     Running     0          23m
+kubesphere-system              redis-ha-server-1                                     2/2     Running     0          22m
+kubesphere-system              redis-ha-server-2                                     2/2     Running     0          22m
+</code></pre>
+<p>注意，kubesphere 部分组件使用 helm 部署，安装 helm</p>
+<pre><code>version=v3.3.1
+curl -LO https://repo.huaweicloud.com/helm/${version}/helm-${version}-linux-amd64.tar.gz
+tar -zxvf helm-${version}-linux-amd64.tar.gz
+mv linux-amd64/helm /usr/local/bin/helm &amp;&amp; rm -rf linux-amd64
+</code></pre>
+<p>查看使用 helm 部署的应用</p>
+<pre><code>[root@k8s-master1 ~]# helm ls -A | grep kubesphere
+elasticsearch-logging           kubesphere-logging-system       1               2020-10-09 13:08:51.160758783 +0800 CST deployed        elasticsearch-1.22.1            6.7.0-0217
+elasticsearch-logging-curator   kubesphere-logging-system       1               2020-10-09 13:08:53.108855322 +0800 CST deployed        elasticsearch-curator-1.3.3     5.5.4-0217
+ks-jenkins                      kubesphere-devops-system        1               2020-10-09 13:12:44.612683667 +0800 CST deployed        jenkins-0.19.0                  2.121.3-0217
+ks-minio                        kubesphere-system               1               2020-10-09 13:07:53.607800017 +0800 CST deployed        minio-2.5.16                    RELEASE.2019-08-07T01-59-21Z
+ks-openldap                     kubesphere-system               1               2020-10-09 13:07:41.468154298 +0800 CST deployed        openldap-ha-0.1.0               1.0
+ks-redis                        kubesphere-system               1               2020-10-09 13:07:34.128473211 +0800 CST deployed        redis-ha-3.9.0                  5.0.5
+logsidecar-injector             kubesphere-logging-system       1               2020-10-09 13:10:48.478814658 +0800 CST deployed        logsidecar-injector-0.1.0       0.1.0
+notification-manager            kubesphere-monitoring-system    1               2020-10-09 13:12:19.698782146 +0800 CST deployed        notification-manager-0.1.0      0.1.0
+uc                              kubesphere-devops-system        1               2020-10-09 13:10:34.954444043 +0800 CST deployed        jenkins-update-center-0.8.0     3.0.0
+</code></pre>
+<p>查看绑定的 pv</p>
+<pre><code>[root@k8s-master1 ~]# kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                                              STORAGECLASS      REASON   AGE
+pvc-02d60e15-a76e-4e8e-98b4-bd2741faf2bb   4Gi        RWO            Delete           Bound    kubesphere-logging-system/data-elasticsearch-logging-discovery-0   rook-ceph-block            108m
+pvc-1d34723f-8908-4dc9-b560-ecd8bd35aa57   2Gi        RWO            Delete           Bound    kubesphere-system/openldap-pvc-openldap-1                          rook-ceph-block            28m
+pvc-2a355379-1358-42ae-9eaa-fcba53295134   20Gi       RWO            Delete           Bound    kubesphere-logging-system/data-elasticsearch-logging-data-2        rook-ceph-block            105m
+pvc-38bb0d32-11eb-468b-839f-ddb796bec6a1   4Gi        RWO            Delete           Bound    kubesphere-logging-system/data-elasticsearch-logging-discovery-1   rook-ceph-block            105m
+pvc-41291f83-031a-42a4-9842-4781fcc4383e   8Gi        RWO            Delete           Bound    kubesphere-devops-system/ks-jenkins                                rook-ceph-block            104m
+pvc-4bddf760-462e-424f-aa24-666ce50168ca   20Gi       RWO            Delete           Bound    kubesphere-monitoring-system/prometheus-k8s-db-prometheus-k8s-1    rook-ceph-block            104m
+pvc-4f741a76-08e7-428f-9489-d9655b82994e   20Gi       RWO            Delete           Bound    kubesphere-logging-system/data-elasticsearch-logging-data-1        rook-ceph-block            106m
+pvc-66f15326-e9de-4b2e-9682-d585f359bada   20Gi       RWO            Delete           Bound    kubesphere-monitoring-system/prometheus-k8s-db-prometheus-k8s-0    rook-ceph-block            104m
+pvc-7adcda06-7875-41b0-8ddb-c7aa6c448ae5   20Gi       RWO            Delete           Bound    kubesphere-system/mysql-pvc                                        rook-ceph-block            108m
+pvc-7f7ac4f3-ed29-42d7-b35f-fc15f1b3f2f8   2Gi        RWO            Delete           Bound    kubesphere-system/data-redis-ha-server-1                           rook-ceph-block            29m
+pvc-9a15a19f-59f0-4ddf-9356-8c1a09aad33a   2Gi        RWO            Delete           Bound    kubesphere-system/openldap-pvc-openldap-0                          rook-ceph-block            109m
+pvc-9d7ca083-62e8-4177-a7ed-dacc912bf091   2Gi        RWO            Delete           Bound    kubesphere-system/data-redis-ha-server-0                           rook-ceph-block            109m
+pvc-a71517e7-0bd8-48ca-b6a0-5710dde18c64   20Gi       RWO            Delete           Bound    kubesphere-system/minio                                            rook-ceph-block            109m
+pvc-db18d04e-6595-4fd1-836a-f42628a25d0b   20Gi       RWO            Delete           Bound    kubesphere-logging-system/data-elasticsearch-logging-data-0        rook-ceph-block            108m
+pvc-e781c644-8304-4461-acd8-a136889e1174   20Gi       RWO            Delete           Bound    kubesphere-system/etcd-pvc                                         rook-ceph-block            108m
+pvc-f288b4df-7458-4f91-8608-3af078986d33   4Gi        RWO            Delete           Bound    kubesphere-logging-system/data-elasticsearch-logging-discovery-2   rook-ceph-block            105m
+pvc-fe493c61-63e7-4a20-96f8-a2c550b019f4   2Gi        RWO            Delete           Bound    kubesphere-system/data-redis-ha-server-2                           rook-ceph-block            29m
+</code></pre>
+<p>实际上 pv 是 ceph 使用 rbd 客户端挂载到节点的块设备</p>
+<pre><code>[root@k8s-node1 ~]# lsblk | grep rbd
+rbd0                                                                                                 251:0    0   20G  0 disk /var/lib/kubelet/pods/810061ea-fac0-4a38-9586-ee14c8fda984/volumes/kubernetes.io~csi/pvc-e781c644-8304-4461-acd8-a136889e1174/mount
+rbd1                                                                                                 251:16   0   20G  0 disk /var/lib/kubelet/pods/7ab52612-0893-4834-839b-dbd3ee9d7589/volumes/kubernetes.io~csi/pvc-7adcda06-7875-41b0-8ddb-c7aa6c448ae5/mount
+rbd2                                                                                                 251:32   0    4G  0 disk /var/lib/kubelet/pods/83bf95f7-6e7a-4699-aa4e-ea6564ebaad4/volumes/kubernetes.io~csi/pvc-02d60e15-a76e-4e8e-98b4-bd2741faf2bb/mount
+rbd3                                                                                                 251:48   0   20G  0 disk /var/lib/kubelet/pods/e313f3ba-fd19-4f6f-a561-78e4e62614b9/volumes/kubernetes.io~csi/pvc-4f741a76-08e7-428f-9489-d9655b82994e/mount
+rbd4                                                                                                 251:64   0    8G  0 disk /var/lib/kubelet/pods/5265b538-90da-412d-be5e-3326af7c3196/volumes/kubernetes.io~csi/pvc-41291f83-031a-42a4-9842-4781fcc4383e/mount
+</code></pre>
+<p>查看 pv 和块设备对应关系</p>
+<pre><code>[root@k8s-master1 ~]#  kubectl get volumeattachment
+NAME                                                                   ATTACHER                     PV                                         NODE          ATTACHED   AGE
+csi-053f2bfa28ac8ab9c17f7f4981dce4a0b4aadc8c933e8fdff32da16d623501f4   rook-ceph.rbd.csi.ceph.com   pvc-f288b4df-7458-4f91-8608-3af078986d33   k8s-node2     true       109m
+csi-3709f608c4edf4c4c92721add6e69b6223b5390ed81f1b8ccf7a5da1705cd94b   rook-ceph.rbd.csi.ceph.com   pvc-38bb0d32-11eb-468b-839f-ddb796bec6a1   k8s-node3     true       110m
+csi-4b8bdac0b581c0291707130d6bb1dcb5ebc66a56d3e067dfbb4f56edb6c7abf9   rook-ceph.rbd.csi.ceph.com   pvc-4f741a76-08e7-428f-9489-d9655b82994e   k8s-node1     true       111m
+csi-8a39d696f23a13b00b4dea835f732c5bd9a05e8e851dc47cb6b8bf9a9343a0f2   rook-ceph.rbd.csi.ceph.com   pvc-9d7ca083-62e8-4177-a7ed-dacc912bf091   k8s-master2   true       114m
+csi-8a99e4304666fa74d6216590ff1b6373879c7c6744c97e90950c165fa778653c   rook-ceph.rbd.csi.ceph.com   pvc-e781c644-8304-4461-acd8-a136889e1174   k8s-node1     true       113m
+csi-cda98cea8f1ad1f5949005d5f5f10e5929c82d05f348ae31300adb8aec775b6d   rook-ceph.rbd.csi.ceph.com   pvc-7f7ac4f3-ed29-42d7-b35f-fc15f1b3f2f8   k8s-master3   true       34m
+csi-d01b8cac9a340fd5e96170e2cc196574bf509db04b00430b24f4d50042e0b9e6   rook-ceph.rbd.csi.ceph.com   pvc-02d60e15-a76e-4e8e-98b4-bd2741faf2bb   k8s-node1     true       113m
+csi-d340f3ccdc4681db8ba5336e5ba846f5d0f31369612f685eba304aaa28745971   rook-ceph.rbd.csi.ceph.com   pvc-41291f83-031a-42a4-9842-4781fcc4383e   k8s-node1     true       109m
+csi-d4db3283dd2b1c7373534b01330f8ed32ebd0548c348875d590b43d505a75237   rook-ceph.rbd.csi.ceph.com   pvc-4bddf760-462e-424f-aa24-666ce50168ca   k8s-node3     true       109m
+csi-dfac397b86769d712799d700e1919a083418c2e706ca000da1da60b715bdbf5a   rook-ceph.rbd.csi.ceph.com   pvc-2a355379-1358-42ae-9eaa-fcba53295134   k8s-node2     true       110m
+csi-e7c56dab61b9b42c16e9fca1269e6e700de4d8f0fa38922c0f482c96ad3d757a   rook-ceph.rbd.csi.ceph.com   pvc-9a15a19f-59f0-4ddf-9356-8c1a09aad33a   k8s-master3   true       114m
+csi-e914c5d320012d41f5f459fa9fd3ca9afc8d73e5d5d126b5be93f0cecff57ebd   rook-ceph.rbd.csi.ceph.com   pvc-1d34723f-8908-4dc9-b560-ecd8bd35aa57   k8s-master2   true       33m
+csi-ef8c703a1616bd46231d264fa5413dd562f9472c7430a2a834cbc0a04c1a673f   rook-ceph.rbd.csi.ceph.com   pvc-7adcda06-7875-41b0-8ddb-c7aa6c448ae5   k8s-node1     true       113m
+csi-f71974ab0cdcc67cd3ff230d4a0e900755dc2582d58b6b657263c6fc4fc7274d   rook-ceph.rbd.csi.ceph.com   pvc-a71517e7-0bd8-48ca-b6a0-5710dde18c64   k8s-node3     true       114m
+csi-fb4499d62b6b9767a4396432983f7c684e2a32dcb042a10e859a7c229be9af0b   rook-ceph.rbd.csi.ceph.com   pvc-66f15326-e9de-4b2e-9682-d585f359bada   k8s-node2     true       109m
+csi-fe7c56b8f0ed55169ec71654b0952d2839f04b0855c4d0f9c56ec1e9f7c37fe1   rook-ceph.rbd.csi.ceph.com   pvc-fe493c61-63e7-4a20-96f8-a2c550b019f4   k8s-master1   true       34m
+csi-ff5de0f94fc2ca7b5c4f43b81f9eb97c6f9f5ad091d6d78fd9d422d4f3f030cc   rook-ceph.rbd.csi.ceph.com   pvc-db18d04e-6595-4fd1-836a-f42628a25d0b   k8s-node3     true       113m
+</code></pre>
+<p>上面的 pv 对应 ceph 中的 image 概念</p>
+<pre><code>#进入toolbox pod
+kubectl -n rook-ceph exec -it $(kubectl -n rook-ceph get pod -l &quot;app=rook-ceph-tools&quot; -o jsonpath='{.items[0].metadata.name}') -- bash
+
+#列出replicapool存储池中所有的image
+[root@rook-ceph-tools-7cc7fd5755-784tv /]# rbd ls replicapool
+csi-vol-109ef2dd-09ee-11eb-b2f2-ea801b5d83dd
+csi-vol-57b3fd9d-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-5bdc9036-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-630ff002-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-80284a01-09f8-11eb-9cca-0afc38dd23d7
+csi-vol-81db6730-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-82a332e4-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-857bc4bd-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-857bf228-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-91eced11-09f8-11eb-9cca-0afc38dd23d7
+csi-vol-a4f2686e-09f8-11eb-9cca-0afc38dd23d7
+csi-vol-c4a815f1-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-d9906c83-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-e2b254e2-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-f404ab61-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-fde4f65d-09ed-11eb-b2f2-ea801b5d83dd
+csi-vol-fdeef353-09ed-11eb-b2f2-ea801b5d83dd
+</code></pre>
+<p>或者登陆 ceph dashoboard 查看，点击 images 查看</p>
+<figure data-type="image" tabindex="4"><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmKJU3tJTsuV94SxZPhxhlV3Udp9EwMicy3FOBMwtckAOpkdcZejGSvog/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<h2 id="访问-kubesphere-ui">访问 kubeSphere UI</h2>
+<p>获取 web console 监听端口，默认为 30880</p>
+<pre><code>kubectl get svc/ks-console -n kubesphere-system
+</code></pre>
+<p>默认登录账号为</p>
+<pre><code>admin/P@88w0rd
+</code></pre>
+<p>登录 kubesphere UI,查看集群概况：</p>
+<figure data-type="image" tabindex="5"><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmXDGOL9anFdOQVbzVhZKqNbR5QfIa0rzJaxYnLd1uhHqAvpWicBur2wg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<p>集群节点信息<img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmY1asydoWAr9xnppKUrKia23dt5SvKcfxpvIfDJMcqKEey6BiaCBPEPicA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">服务组件信息<img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmT2JAaiawnEx2beJvMQzVmRZUYfqReWtUMQUVH5Ycx2IKWGqfRm9qbaA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">集群状态监控</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmvwNakfQvicNeSZSKic676lzpBle5x25boMmFXtwc5ZrGDe4odUGkn5icA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">应用资源监控</p>
+<figure data-type="image" tabindex="6"><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8Zm99lcmbnCXNRDruGGTw16a9PmCDW0WgIIhBJgF9C4vJZPvJjwgJAAZw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<p>日志查询（右下角图标）</p>
+<figure data-type="image" tabindex="7"><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmdzDWgRnJ1iczRJpbQg2XC3bnypnXKCux49n1Iy7Oq93otIe8TaicTR8w/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<p>应用商店（helm 应用）<img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmwexryHahAGEBn7I66HEk8icsjw1fH1ZrqFXcv8zuI19MNlX8q7iaHqEw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></p>
+<h2 id="kubesphere-部署普通应用">kubesphere 部署普通应用</h2>
+<p>以部署 deployment 类型应用为例</p>
+<ol>
+<li>点击左上角平台管理，选择访问控制，创建一个普通用户，角色为 platform-regular</li>
+<li>创建一个企业空间，点击进入企业空间，选择企业空间设置，企业成员，邀请成员</li>
+<li>将之前创建的普通用户加入企业空间，角色选择 self-provisioner</li>
+<li>以普通用户身份登陆到 kubesphere，创建项目</li>
+<li>选择应用负载，服务，创建无状态服务，填写名称、镜像及服务端口信息</li>
+</ol>
+<p>以部署 nginx 为例</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmOzOaSJGTyUQS2lhA2ib8h2QupMdFm9HdFrwJnMlFUhApElwsV1HJAicw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">开启外网访问选择 nodeport，点击创建。</p>
+<p>然后查看工作负载，选择右侧编辑配置文件可以看到 yaml 中定义的 deployment 类型应用：<img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8Zm0AL7iagtfLp7euUKc9icKWILUsddRgPYcQOTwCoJWMLwREw7melFw2qA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">工作负载支持部署的应用类型为:</p>
+<ul>
+<li>部署-对应 k8s 中的 deployment</li>
+<li>有状态副本集-对应 k8s 中的 statefulset</li>
+<li>守护进程集-对应 k8s 中的 daemonset</li>
+<li>下面的任务选项-对应 k8s 中的 job 和 cronjob</li>
+</ul>
+<h2 id="kubesphere-部署-helm-应用">kubesphere 部署 helm 应用</h2>
+<p>以部署 tidb 数据库为例。</p>
+<p><strong>TiDB</strong>[5] 是一款定位于在线事务处理/在线分析处理（ HTAP: Hybrid Transactional/Analytical Processing）的融合型数据库产品，实现了一键水平伸缩，强一致性的多副本数据安全，分布式事务，实时 OLAP 等重要特性。同时兼容 MySQL 协议和生态，迁移便捷，运维成本极低。<img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmDMicZgdNgjoW8x5T6oAZH6tK06Nus3UaCvKsicXFA1M7S2ojHr4Yticew/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">参考：<strong>https://github.com/pingcap/docs-tidb-operator/blob/master/zh/get-started.md</strong>[6]</p>
+<p>下载 tidb operator helm chart</p>
+<pre><code>helm repo add pingcap https://charts.pingcap.org/
+helm search repo pingcap --version=v1.1.5
+helm pull pingcap/tidb-cluster
+helm pull pingcap/tidb-operator
+</code></pre>
+<p>将下载的 chart 包保存到本地：</p>
+<pre><code>[root@k8s-master1 ~]# ls | grep tidb
+tidb-cluster-v1.1.5.tgz
+tidb-operator-v1.1.5.tgz
+</code></pre>
+<p>以普通用户身份登录 kubesphere，点击工作台，应用管理，应用模板，上传模板，上传完成后如下图：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8Zm3S32pAmcYLSLkOnDxoTU0OV40GALpoDPOqJ7FYODib4fh5aERibG9FRQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">首先使用命令安装 TiDB Operator CRDs</p>
+<pre><code>kubectl apply -f https://raw.githubusercontent.com/pingcap/tidb-operator/v1.1.5/manifests/crd.yaml
+</code></pre>
+<p>然后选择项目管理，进入项目，点击应用，部署新应用，来自应用模板，选择 tidb-operator 直接部署即可，无需修改配置文件。完成后同样方式部署 tidb-cluster，注意这次需要将 values.yaml 配置文件下载到本地，将 storageClassName 值 local-storage 替换为 rook-ceph-block，替换完成后在覆盖粘贴到配置文件中，然后执行部署：<img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmK41XtmIB72d51Rul1b3Hj8dZWV6mS2twzHTVHITM1wyqrHMHqvWg7g/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">部署完成后，选择应用可以查看部署情况：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8Zm9fFib31aoI3GuAKI8icRFD0QQsWC5v0mjLO7aFZC710KzHqlv5AmME2Q/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">点击 tidb-ci 查看应用详情，可以看到有 2 个工作负载，这 2 个为 deployment 类型资源</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8Zmp8OicBKbYZ3cOsPYGicUfqXUzAs9wUtJfZeKXaaE2z1Q0N6UGjtPNgfA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">点击工作负载，有状态副本集，可以看到 tidb 部分组件是 statefulset 类型</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmVA3ABmePt8NQjaO5Q79wztvv6onM1XrMiclZ0oIGRicR0MpWe2L1JDuQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">点击容器组（pod），过滤 tidb，按名称排序，看下 tidb operator 都部署了哪些组件：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmsDDcLPBUia5LfJ2sDDfNLOciaF5Qia2vzdSetGSH38kARNtEawaxbv1iaw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">可以看到部署了 2 个 tidb ，3 个 tikv 以及 3 个 pd，都调度在不同的节点上，保证了高可用。</p>
+<p>点击存储管理，存储卷，其中 tikv 和 pd 这 2 个组件挂载了 pv 持久卷。<img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmPvYzwIDdw65KZRYYcPfhYT2nBtnPWto6nfSkRnEYNrTgJ4LDm01ZzA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></p>
+<p>点击服务，可以看到 tidb 4000 端口默认 service 类型为 nodePort:</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmX2xRniblmMIlNa9depibAthPcGxHuVN2XT8q4HJBuzyODwtaLEUWcjUA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">测试使用 mysql 客户端连接数据库</p>
+<pre><code>[root@k8s-master1 ~]# docker run -it --rm mysql bash
+
+[root@0d7cf9d2173e:/# mysql -h 192.168.1.102 -P 31503 -u root
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 201
+Server version: 5.7.25-TiDB-v4.0.6 TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible
+
+Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql&gt; show databases;
++--------------------+
+| Database           |
++--------------------+
+| INFORMATION_SCHEMA |
+| METRICS_SCHEMA     |
+| PERFORMANCE_SCHEMA |
+| mysql              |
+| test               |
++--------------------+
+5 rows in set (0.01 sec)
+
+mysql&gt;
+</code></pre>
+<p>tidb operator 自带了 prometheus 和 grafana，用于数据库集群的性能监控，服务选项中可以看到 grafana 的 serivce 3000 端口绑定到了 30804 nodeport，访问 grafana，随便查看一个指标：<img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8Zm5vpgxpZIwLD1k8RB175n8L3vgibbtB8SgxS6RrovVyrEU2RVjCdbQLA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></p>
+<p>注意：TiDB 是重量级数据库，对磁盘 IO 和网络性能要求较高，建议运行在单独的 node 节点，rook 支持添加 SSD 盘单独创建存储池和 storageclass 提供给 tidb 使用。</p>
+<p>不仅 tidb，在整个集群规模较大时，像 kubesphere 及 rook 都可以调度到独立节点运行，防止相互之间争抢资源、影响业务应用，或者出现性能瓶颈。这里由于节点有限，所有组件都堆到了同样的 3 个 node 节点上。</p>
+<p><strong>tidb 上架应用商店</strong></p>
+<p>tidb 部署测试没问题后，可以上架到应用商店。</p>
+<p>以普通用户登录 kubesphere，选择应用模板，点击 tidb 应用，展开后点击提交审核：</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmuxqdGbjibNa3fTHKROcwXMIcYpKwcQmNibEQUeViaDERjeJtMV9xSrueg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">切换到管理员用户，点击左上角平台管理，应用商店管理，应用审核，选择右侧审核通过</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8Zmasj0aZURLP8PqmPdGLduPd1EPt96siaDwibXkbLRIXarZvdfHaviaVHsw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">再次回到普通用户，选择应用模板，进入 tidb 应用，展开发现此时应用可以发布到商店</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmMLuylWcArtwO65q0GFmib8GWfQmVJFmUicTaDW3PRiahFyv336uToqXdg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">发布后点击左上角应用商店，在应用商店中即可看到上架的 tidb 应用：</p>
+<figure data-type="image" tabindex="8"><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmYIRFULJbYUqXv0uw4CZTiaiam8kxA7gez3nDdT3umJicNhRqd48My2Cjw/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<h2 id="kubesphere-运行流水线">kubesphere 运行流水线</h2>
+<p>依然使用普通用户，点击工作台，devops 工程，创建 devops 工程，点击 devops 工程进入，创建流水线填写名称其他全部默认，点击创建，编辑 jenkinsfile，粘贴以下内容并运行</p>
+<pre><code>pipeline {
+  agent any
+  stages {
+    stage('获取源码') {
+      steps {
+        sh 'echo &quot;获取源码&quot;'
+      }
+    }
+    stage('单元测试') {
+      steps {
+        sh 'echo &quot;单元测试&quot;'
+      }
+    }
+    stage('代码扫描') {
+      steps {
+        sh 'echo &quot;源代码扫描&quot;'
+      }
+    }
+    stage('源码编译') {
+      steps {
+        sh 'echo &quot;源码编译&quot;'
+      }
+    }
+    stage('镜像构建') {
+      steps {
+        sh 'echo &quot;docker镜像构建&quot;'
+      }
+    }
+    stage('镜像推送') {
+      steps {
+        sh 'echo &quot;推送镜像到harbor仓库&quot;'
+      }
+    }
+    stage('应用部署') {
+      steps {
+        sh 'echo &quot;部署应用到kubernetes集群&quot;'
+      }
+    }
+  }
+}
+</code></pre>
+<p>查看运行成功的流水线</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmSH7xT3MKYWBVndNxsV25IXYDp69ImqP6d1a3ghFsV4b3cqx4ccSMmQ/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy">查看流水线运行日志</p>
+<figure data-type="image" tabindex="9"><img src="https://mmbiz.qpic.cn/mmbiz_png/qFG6mghhA4anyV73ECSQ5sf1ub9bA8ZmoLtlgvn668PEKGZpLH6ic4pAIGap9TCia5yylKhYf54ic2LxNQXibtliaYA/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt="img" loading="lazy"></figure>
+<h2 id="清理-kubesphere-集群">清理 kubesphere 集群</h2>
+<p>参考：<strong>https://kubesphere.com.cn/en/docs/installing-on-kubernetes/uninstalling/uninstalling-kubesphere-from-k8s/</strong>[7]</p>
+<pre><code>wget https://raw.githubusercontent.com/kubesphere/ks-installer/master/scripts/kubesphere-delete.sh
+sh kubesphere-delete.sh
+</code></pre>
+<h3 id="参考资料">参考资料</h3>
+<p>[1]Sealos: <em>https://sealyun.com</em>[2]rook: <em>https://rook.io/</em>[3]KubeSphere: <em>https://kubesphere.io</em>[4]https://kubesphere.com.cn/en/docs/installing-on-kubernetes/: <em>https://kubesphere.com.cn/en/docs/installing-on-kubernetes/</em>[5]TiDB: <em>https://pingcap.com/</em>[6]https://github.com/pingcap/docs-tidb-operator/blob/master/zh/get-started.md: <em>https://github.com/pingcap/docs-tidb-operator/blob/master/zh/get-started.md</em>[7]https://kubesphere.com.cn/en/docs/installing-on-kubernetes/uninstalling/uninstalling-kubesphere-from-k8s/: <em>https://kubesphere.com.cn/en/docs/installing-on-kubernetes/uninstalling/uninstalling-kubesphere-from-k8s/</em></p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/Wev3hXnKO/">
+              <span class="post-title">
+                基于Docker Desktop桌面客户端搭建 Kubernetes&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+

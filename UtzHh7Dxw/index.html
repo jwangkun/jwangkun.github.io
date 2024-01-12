@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta name="referrer" content="never">
+  <meta name="keywords" content="">
+  <meta name="description" content="">
+  <meta name="author" content="kveln">
+  <title>在现有 Kubernetes 集群上安装 KubeSphere | John Wong&#39;s Blog</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="https://jwangkun.github.io/media/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!--  <link href="https://jwangkun.github.io/media/css/all.min.css" rel="stylesheet" type="text/css"> -->
+  <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+  <link rel="alternate" type="application/rss+xml" title="在现有 Kubernetes 集群上安装 KubeSphere | John Wong&#39;s Blog » Feed" href="https://jwangkun.github.io/atom.xml">
+  <link rel="stylesheet"href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+  <link href="https://jwangkun.github.io/styles/main.css" rel="stylesheet">
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/highlight.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/jquery.min.js"></script> -->
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+    <meta property="og:description" content="在现有 Kubernetes 集群上安装 KubeSphere"/>
+    <meta property="og:url" content="https://jwangkun.github.io/UtzHh7Dxw/"/>
+    <meta property="og:locale" content="zh-CN"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="John Wong&#39;s Blog"/>
+  </head>
+  <body>
+  	<!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <div class="container">
+      <a class="navbar-brand" href="https://jwangkun.github.io">John Wong&#39;s Blog</a>
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        Menu
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/">首页</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/archives">归档</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/tags">标签</a>
+              
+          </li>
+          
+          <li class="nav-item">
+              
+              <a class="nav-link" href="/about">关于</a>
+              
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- Page Header -->
+  <header class="masthead" style="background-image: url('https://jwangkun.github.io/media/images/home-bg.jpg')">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <div class="post-heading">
+          	<span class="tags">
+          	 
+            <a href="https://jwangkun.github.io/xGgIrb1zw/" class="tag">KubeSphere</a>
+            
+            <a href="https://jwangkun.github.io/efVGHoi38/" class="tag">Kubernetes</a>
+            
+        </span>
+            <h1>在现有 Kubernetes 集群上安装 KubeSphere</h1>
+            <span class="meta">
+            	Posted on
+              2020-10-15，8 min read
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Post Content -->
+  <article>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <p><a href="https://kubesphere.io/">KubeSphere</a>是在 Kubernetes 之上构建的企业级分布式多租户容器管理平台，提供简单易用的操作界面以及向导式操作方式，在降低用户使用容器调度平台学习成本的同时，极大减轻开发、测试、运维的日常工作的复杂度，旨在解决 Kubernetes 本身存在的存储、网络、安全和易用性等痛点。除此之外，平台已经整合并优化了多个适用于容器场景的功能模块，以完整的解决方案帮助企业轻松应对敏捷开发与自动化运维、微服务治理、多租户管理、工作负载和集群管理、服务与网络管理、应用编排与管理、镜像仓库管理和存储管理等业务场景。</p>
+<!-- more -->
+<p>KubeSphere 一开始就推出了开源的<a href="https://github.com/kubesphere/kubesphere">社区版本</a>，只是之前提供的安装方式比较单一，在已有的 Kubernetes 集群上要想安装相对较麻烦，本文将为你演示如何在已有的 Kubernetes 集群上安装 KubeSphere。</p>
+<h2 id="环境准备">环境准备</h2>
+<p>本文安装 KubeSphere 使用到的相关环境及工具如下：</p>
+<ul>
+<li>使用 kubeadm 搭建的 Kubernetes 1.15.2 版本集群</li>
+<li>Helm v2.14.1 版本</li>
+<li>使用 NFS 作为集群存储后端</li>
+<li>使用到的安装脚本地址：https://github.com/kubesphere/ks-installer</li>
+</ul>
+<p>首先需要确保集群中有一个默认的 StorageClass 资源对象，关于 StorageClass 的使用可以查看前面的文章介绍：</p>
+<pre><code class="language-shell">apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: dynamic-data
+  annotations:
+    storageclass.kubernetes.io/is-default-class: &quot;true&quot;
+provisioner: fuseim.pri/ifs
+</code></pre>
+<p>其中 annotations 下面的 storageclass.kubernetes.io/is-default-class: “true” 是必须的：</p>
+<pre><code class="language-shell">$ kubectl get sc
+NAME                     PROVISIONER      AGE
+dynamic-data (default)   fuseim.pri/ifs   4h41m
+</code></pre>
+<h2 id="安装">安装</h2>
+<p>首先将上面安装仓库 Clone 到 Kubernetes 集群中的 master 节点上，因为我们需要使用到 master 节点上的一些证书文件。</p>
+<p>1.首先，在集群中创建名为 kubesphere-system 和 kubesphere-monitoring-system 的namespace：</p>
+<pre><code class="language-shell">$ cat &lt;&lt;EOF | kubectl create -f -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubesphere-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubesphere-monitoring-system
+EOF
+</code></pre>
+<p>2.创建集群ca证书secret</p>
+<blockquote>
+<p>注：按照当前集群 ca.crt 和 ca.key 证书路径创建（kubeadm 创建集群的证书路径一般为/etc/kubernetes/pki）</p>
+</blockquote>
+<pre><code class="language-shell">$ kubectl -n kubesphere-system create secret generic kubesphere-ca  \
+--from-file=ca.crt=/etc/kubernetes/pki/ca.crt  \
+--from-file=ca.key=/etc/kubernetes/pki/ca.key 
+</code></pre>
+<p>3.创建etcd证书secret</p>
+<blockquote>
+<p>注：以集群实际 etcd 证书位置创建；若 etcd 没有配置证书，则创建空secret</p>
+</blockquote>
+<pre><code class="language-shell">$ kubectl -n kubesphere-monitoring-system create secret generic kube-etcd-client-certs  \
+--from-file=etcd-client-ca.crt=/etc/kubernetes/pki/etcd/ca.crt  \
+--from-file=etcd-client.crt=/etc/kubernetes/pki/etcd/healthcheck-client.crt  \
+--from-file=etcd-client.key=/etc/kubernetes/pki/etcd/healthcheck-client.key
+</code></pre>
+<p>由于我这里使用的是 kubeadm 搭建的集群，所以我们可以查看 etcd 的资源清单文件：</p>
+<pre><code class="language-shell">$ cat /etc/kubernetes/manifests/etcd.yaml
+......
+livenessProbe:
+  exec:
+    command:
+    - /bin/sh
+    - -ec
+    - ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt
+        --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key
+        get foo
+......
+</code></pre>
+<p>从这里我们就可以获得 etcd 集群相关的证书。</p>
+<p>4.修改部署文件 由于 KubeSphere 部署过程中涉及到的组件非常多，所以安装过程中难免会有一些奇奇怪怪的问题，下面是我在安装过程中遇到的一些问题：</p>
+<p>问题1：openldap 这个组件启动报错，因为 ks-account 组件又是依赖 openldap 这个组件的，所以同样启动报错，在安装过程中 openldap 出现了类似如下错误信息。</p>
+<pre><code class="language-shell">......
+rm: cannot remove ‘/container/service/slapd/assets/config/bootstrap/ldif/readonly-user’: Directory not empty 
+rm: cannot remove ‘/container/service/slapd/assets/config/bootstrap/schema/mmc’: Directory not empty 
+rm: cannot remove ‘/container/service/slapd/assets/config/replication’: Directory not empty 
+rm: cannot remove ‘/container/service/slapd/assets/config/tls’: Directory not empty *** /container/run/startup/slapd 
+
+failed with status 1
+</code></pre>
+<p>解决方法：修改配置文件<code>roles/ks-core/prepare/templates/ks-account-init.yaml.j2</code>文件，在 openldap 这个 Deployment 下面容器中添加启动参数<code>--copy-service</code></p>
+<pre><code class="language-yaml">......
+image: {{ openldap_repo }}:{{ openldap_tag }}
+imagePullPolicy: IfNotPresent
+args:   # 添加该启动参数
+- --copy-service 
+name: openldap
+......
+</code></pre>
+<p>问题2：如果现有集群中已经安装有 metrics_server，需要在配置文件中将 metrics_server_enable 设置为 False</p>
+<p>问题3：在安装过程中卡死在<code>Waitting for ks-sonarqube port to become open</code>部分，节点上通过 NodePort 已经可以正常访问 sonarqube ，该问题没有解决，由于是一个不影响全局安装的一个操作，所以同样在配置文件中将 sonarqube_enable 设置为 False</p>
+<p>问题4：在安装过程中 istio 安装不上，由于我当前的集群资源不是很足，所以也临时取消掉 istio 的安装，后续在开启 istio 的支持。</p>
+<p>最终用于安装 KubeSphere 的配置文件如下所示：(deploy/kubesphere.yaml)</p>
+<pre><code class="language-yaml">---
+apiVersion: v1
+data:
+  ks-config.yaml: |
+    kube_apiserver_host: 10.151.30.11:6443
+    etcd_tls_enable: True
+    etcd_endpoint_ips: 10.151.30.11
+    disableMultiLogin: True
+    elk_prefix: logstash
+    metrics_server_enable: False
+    sonarqube_enable: False
+    istio_enable: False
+kind: ConfigMap
+metadata:
+  name: kubesphere-config
+  namespace: kubesphere-system
+......
+</code></pre>
+<p>只需要修改 ConfigMap 的值即可，其中 kube_apiserver_host 就是现有集群的 APIServer 地址，etcd_endpoint_ips 就是 etcd 的所在节点 IP，默认端口为 2379，如果你是集群模式 etcd，这里可以填写多个节点 IP，中间用<code>,</code>隔开，下面就是不需要安装的组件设置为 False。到这里执行安装命令即可：</p>
+<pre><code class="language-shell">$ kubectl apply -f deploy/kubesphere.yaml
+$ kubectl get pods -n kubesphere-system
+NAME                                     READY   STATUS      RESTARTS   AGE
+ks-account-575d4fd8f-r5476               1/1     Running     0          44m
+ks-apigateway-5c56f79976-jxmd4           1/1     Running     0          44m
+ks-apiserver-5d56bc8976-678hj            1/1     Running     0          41m
+ks-console-75b6cb84c-ldsn7               1/1     Running     0          42m
+ks-console-75b6cb84c-pzqcx               1/1     Running     0          42m
+ks-controller-manager-78bfd56fbf-dtcg2   1/1     Running     0          43m
+ks-docs-65bd89559b-58lpp                 1/1     Running     0          3h16m
+kubesphere-installer-x7q8z               0/1     Completed   0          45m
+openldap-5bd67c84c6-gw8f5                1/1     Running     0          114m
+redis-6cf6fc98b5-nsqfn                   1/1     Running     0          3h19m
+</code></pre>
+<p>在安装过程中可能会因为拉取镜像过慢导致安装校验失败，这种情况我们可以先手动在节点上拉取镜像，然后再重新创建一个新的用于安装的 Job 即可。通过如下命令可以查看部署过程中的完整日志：</p>
+<pre><code class="language-shell">$ kubectl logs -n kubesphere-system $(kubectl get pod -n kubesphere-system -l job-name=kubesphere-installer -o jsonpath='{.items[0].metadata.name}') -f
+</code></pre>
+<p>如果上面用于安装的 Job 是完成状态的话，证明 KubeSphere 已经安装成功了。</p>
+<p>最后，可以创建一个 Ingress 对象来访问 KubeSphere：(kubesphere-ingress.yaml)</p>
+<pre><code class="language-yaml">$ apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kubesphere
+  namespace: kubesphere-system
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - host: ks.qikqiak.com
+    http:
+      paths:
+      - path:
+        backend:
+          serviceName: ks-console
+          servicePort: 80
+</code></pre>
+<p>直接创建即可：</p>
+<pre><code class="language-shell">$ kubectl create -f kubesphere-ingress.yaml
+</code></pre>
+<p>最后做好域名解析，在浏览器中就可以访问了：<img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/kubesphere-login.png" alt="kubesphere login" loading="lazy"></p>
+<p>默认的登录信息为：</p>
+<ul>
+<li>用户名：admin</li>
+<li>密码：P@88w0rd</li>
+</ul>
+<p><img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/kubesphere-dashboard.jpg" alt="kubesphere dashboard" loading="lazy">kubesphere dashboard</p>
+<p>KubeSphere 中有一些自己的概念，需要我们去理解<img src="https://bxdc-static.oss-cn-beijing.aliyuncs.com/images/kubesphere-dashboard2.jpg" alt="kubesphere dashboard" loading="lazy"></p>
+<p>更多的信息可以查看官方文档：https://kubesphere.io/docs/</p>
+
+          
+          <p class="next-post">下一篇：
+            <a href="https://jwangkun.github.io/tgYRQAxUk/">
+              <span class="post-title">
+                在 Kubernetes 上搭建 EFK 日志收集系统&rarr;
+              </span>
+            </a>
+          </p>
+        
+        <div class="comment">
+          
+        </div>
+      </div>
+    </div>
+  </article>
+ <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <li class="list-inline-item">
+              <a href="https://jwangkun.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li>
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>John Wong&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://jwangkun.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));
+  var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?84ab85460bfbe79dbe5776a1df139a8f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+  </script>
+  
+<script type="text/javascript" src="https://v1.cnzz.com/z_stat.php?id=1279350888&web_id=1279350888"></script>
+
+  </body>
+</html>
+
